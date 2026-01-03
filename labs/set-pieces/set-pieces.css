@@ -1,3 +1,0 @@
-/* Mobile fix: ensure overlay buttons receive taps */
-.overlay{ z-index: 10; pointer-events: auto; }
-.overlay-card, .overlay-actions button{ pointer-events: auto; }
