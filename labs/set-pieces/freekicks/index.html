@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Football Lab • Free Kicks</title>
+  <link rel="stylesheet" href="../../../style.css?v=fk_autostart1" />
+  <link rel="stylesheet" href="freekicks.css?v=fk_autostart1" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <a href="../index.html" class="back-link" aria-label="Back to Set Pieces">←</a>
+      <img class="brand-logo" src="../../../assets/logo/football-lab-logo.png" alt="Football Lab logo" />
+      <div class="brand-text">
+        <div class="brand-title">FREE KICKS</div>
+        <div class="brand-sub">Side angle • Drag to aim • Release to shoot</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a class="btn btn-ghost" href="../index.html">Set Pieces</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card fk-shell" id="top">
+      <div class="fk-top">
+        <div class="fk-hud">
+          <div class="hud-item"><span class="hud-label">Level</span><span id="hudLevel" class="hud-value">1</span></div>
+          <div class="hud-item"><span class="hud-label">Attempts</span><span id="hudAttempts" class="hud-value">0/0</span></div>
+          <div class="hud-item"><span class="hud-label">Curve</span><span id="hudCurve" class="hud-value">0.00</span></div>
+        </div>
+        <div class="fk-actions">
+          <button id="btnRestart" class="btn btn-ghost" type="button">Restart</button>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="game" width="960" height="540"></canvas>
+
+        <!-- Start overlay (single button) -->
+        <div class="overlay" id="startOverlay">
+          <div class="overlay-card" role="dialog" aria-modal="true">
+            <div class="overlay-title">FREE KICKS</div>
+            <div class="overlay-text">Drag from the ball to aim + power. Release to shoot.</div>
+            <div class="overlay-actions">
+              <button id="startBtn" class="btn" type="button">Start</button>
+              <a class="btn btn-ghost" href="../index.html">Back</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toast-style message (no buttons) -->
+        <div class="toast" id="toast" hidden>
+          <div class="toast-card">
+            <div id="toastTitle" class="toast-title">LEVEL COMPLETE</div>
+            <div id="toastText" class="toast-text">Loading next…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fk-help">
+        <div class="tip"><b>Aim + Power:</b> drag from the ball (longer drag = more power).</div>
+        <div class="tip"><b>Curve:</b> after shooting, swipe left/right to add bend.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Hard refresh / cache-bust
+    document.getElementById('btnRestart').addEventListener('click', () => {
+      const u = new URL(location.href);
+      u.searchParams.set('v', String(Date.now()));
+      location.assign(u.toString());
+    });
+  </script>
+  <script src="game.js?v=fk_autostart1"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+/* Free Kicks lab (auto-start, no Next/Retry) */
+.fk-shell{ padding: 14px; }
+.fk-top{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; padding: 8px 8px 12px; }
+.fk-hud{ display:flex; gap:10px; flex-wrap:wrap; }
+.hud-item{
+  border:1px solid rgba(255,205,90,.16);
+  background: rgba(255,205,90,.06);
+  border-radius: 14px;
+  padding:10px 12px;
+  display:flex; gap:10px; align-items:baseline;
+}
+.hud-label{ font-size:12px; color: rgba(255,255,255,.7); font-weight:800; letter-spacing:.06em; }
+.hud-value{ font-size:14px; font-weight:1000; color: rgba(255,223,122,.98); }
+
+.canvas-wrap{
+  position:relative;
+  border-radius: 16px;
+  overflow:hidden;
+  border:1px solid rgba(255,205,90,.16);
+  background: radial-gradient(900px 420px at 50% 0%, rgba(242,193,79,.10), transparent 60%),
+              linear-gradient(180deg, rgba(7,9,11,.9), rgba(5,6,7,.9));
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+}
+canvas{ width:100%; height:auto; display:block; }
+
+/* Fullscreen overlay used ONLY for start */
+.overlay{
+  position:absolute; inset:0;
+  display:grid; place-items:center;
+  background: rgba(0,0,0,.58);
+  backdrop-filter: blur(8px);
+  z-index: 50;
+  pointer-events: auto;
+}
+.overlay-card{
+  width:min(560px, 94vw);
+  border:1px solid rgba(255,205,90,.22);
+  background: rgba(8,10,12,.92);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 30px 90px rgba(0,0,0,.6);
+  text-align:center;
+  pointer-events: auto;
+}
+.overlay-title{ font-weight:1000; letter-spacing:.08em; color: rgba(255,223,122,.98); }
+.overlay-text{ margin-top:10px; color: rgba(255,255,255,.76); line-height:1.5; }
+.overlay-actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:14px; }
+.overlay-actions .btn{ text-decoration:none; }
+
+/* Toast message (no buttons) */
+.toast{
+  position:absolute; inset:0;
+  display:grid; place-items:center;
+  background: rgba(0,0,0,.28);
+  backdrop-filter: blur(6px);
+  z-index: 40;
+  pointer-events:none;
+}
+.toast-card{
+  width:min(520px, 92vw);
+  border:1px solid rgba(255,205,90,.22);
+  background: rgba(8,10,12,.86);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 30px 90px rgba(0,0,0,.6);
+  text-align:center;
+}
+.toast-title{ font-weight:1000; letter-spacing:.08em; color: rgba(255,223,122,.98); }
+.toast-text{ margin-top:10px; color: rgba(255,255,255,.76); line-height:1.5; }
+
+.fk-help{ display:flex; gap:10px; flex-wrap:wrap; padding: 12px 8px 4px; }
+.tip{ color: rgba(255,255,255,.74); font-size: 13px; line-height: 1.45; }
+
+/* while start overlay is open, disable canvas interaction */
+body.start-open canvas{ pointer-events:none; }
