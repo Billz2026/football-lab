@@ -1,0 +1,26 @@
+/* Minimal, no overlays: guarantee canvas gets input */
+.fk-card{ position:relative; padding:12px; }
+#game{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:16px;
+  border:1px solid rgba(255,205,90,.18);
+  background: radial-gradient(900px 420px at 50% 0%, rgba(242,193,79,.10), transparent 60%),
+              linear-gradient(180deg, rgba(7,9,11,.95), rgba(5,6,7,.95));
+  touch-action:none; /* critical for mobile */
+  cursor: crosshair;
+}
+.fk-hint{
+  position:absolute;
+  left:18px;
+  bottom:18px;
+  padding:10px 12px;
+  border-radius:12px;
+  background: rgba(0,0,0,.35);
+  border:1px solid rgba(255,205,90,.14);
+  color: rgba(255,255,255,.72);
+  font-size: 13px;
+  backdrop-filter: blur(6px);
+  pointer-events:none; /* never block canvas */
+}
