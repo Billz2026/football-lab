@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Football Lab • Free Kicks</title>
+  <link rel="stylesheet" href="../../../style.css?v=sa_fix1">
+  <link rel="stylesheet" href="freekicks.css?v=sa_fix1">
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <a href="../index.html" class="back-link">←</a>
+      <img class="brand-logo" src="../../../assets/logo/football-lab-logo.png">
+      <div class="brand-text">
+        <div class="brand-title">FREE KICKS</div>
+        <div class="brand-sub">Side angle • Drag to aim • Release to shoot</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a class="btn btn-ghost" href="../index.html">Set Pieces</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card fk-shell">
+      <div class="canvas-wrap">
+        <canvas id="game" width="960" height="540"></canvas>
+
+        <div class="overlay" id="overlay" hidden>
+          <div class="overlay-card">
+            <div id="overlayTitle" class="overlay-title">LEVEL COMPLETE</div>
+            <div id="overlayText" class="overlay-text">Nice strike.</div>
+            <div class="overlay-actions">
+              <button id="nextBtn" class="btn">Next</button>
+              <button id="retryBtn" class="btn btn-ghost">Retry</button>
+              <a class="btn btn-ghost" href="../index.html">Menu</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js?v=sa_fix1"></script>
+</body>
+</html>
