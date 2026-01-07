@@ -1,0 +1,54 @@
+#game{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:18px;
+  border:1px solid rgba(255,205,90,.18);
+  background: radial-gradient(900px 420px at 50% 0%, rgba(242,193,79,.12), transparent 60%),
+              linear-gradient(180deg, rgba(7,9,11,.95), rgba(5,6,7,.95));
+  touch-action:none;
+  cursor:crosshair;
+}
+.fk-card{ position:relative; padding:12px; overflow:hidden; }
+.fk-hint{
+  position:absolute; left:18px; bottom:18px;
+  padding:10px 12px; border-radius:12px;
+  background: rgba(0,0,0,.35);
+  border:1px solid rgba(255,205,90,.14);
+  color: rgba(255,255,255,.72);
+  font-size: 13px;
+  backdrop-filter: blur(6px);
+  pointer-events:none;
+  max-width: 78%;
+}
+.hud{
+  position:absolute; top:18px; left:18px;
+  display:flex; gap:10px; flex-wrap:wrap;
+  pointer-events:none;
+}
+.pill{
+  padding:8px 10px;
+  border-radius:999px;
+  background: rgba(0,0,0,.35);
+  border:1px solid rgba(255,205,90,.14);
+  color: rgba(255,255,255,.8);
+  font-size: 12px;
+}
+.pill span{ color: rgba(255,223,122,.95); font-weight:800; margin-left:6px; }
+.toast{
+  position:absolute;
+  right:18px;
+  bottom:18px;
+  padding:10px 12px;
+  border-radius:12px;
+  background: rgba(0,0,0,.35);
+  border:1px solid rgba(255,205,90,.14);
+  color: rgba(255,255,255,.82);
+  font-size: 13px;
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events:none;
+}
+.toast.show{ opacity: 1; transform: translateY(0); }
