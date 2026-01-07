@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Football Lab • Free Kicks</title>
+  <link rel="stylesheet" href="../../../style.css?v=fk_v11" />
+  <link rel="stylesheet" href="freekicks-premium.css?v=fk_v11" />
+
+<style>
+  .shot-controls{display:flex; gap:10px; padding:10px 14px 0; justify-content:flex-start; flex-wrap:wrap}
+  .shot-btn{
+    appearance:none; border:1px solid rgba(255,205,90,.35);
+    background:rgba(0,0,0,.35); color:#f5f5f5;
+    padding:8px 12px; border-radius:999px; font-weight:700;
+    box-shadow: 0 6px 16px rgba(0,0,0,.35);
+  }
+  .shot-btn.active{background:rgba(255,205,90,.14); border-color:rgba(255,205,90,.75)}
+</style>
+
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <a href="../index.html" class="back-link" aria-label="Back">←</a>
+      <div class="brand-text">
+        <div class="brand-title">FREE KICKS
+      <div class="shot-controls" aria-label="Shot controls">
+        <button id="btnCurl" class="shot-btn active" type="button">Curl</button>
+        <button id="btnDip" class="shot-btn" type="button">Dip</button>
+        <button id="btnKnuckle" class="shot-btn" type="button">Knuckle</button>
+      </div>
+
+</div>
+        <div class="brand-sub">Centered view • Drag from the ball to aim • Release to shoot</div>
+      </div>
+    </div>
+    <a class="btn btn-ghost" href="../index.html">Set Pieces</a>
+  </header>
+
+  <main class="container">
+    <section class="card fk-card">
+      <canvas id="game" width="960" height="540"></canvas>
+
+      <div class="hud">
+        <div class="pill">Power <span id="pwr">0%</span></div>
+        <div class="pill">Curve <span id="cur">0%</span></div>
+        <div class="pill">Shots <span id="shots">0</span></div>
+        <div class="pill">Score <span id="score">0</span></div>
+        <div class="pill">Streak <span id="streak">0</span></div>
+      </div>
+
+      <div class="fk-hint" id="hint">Drag back from the ball to set power + direction. Release to shoot.</div>
+      <div class="toast" id="toast" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="game-v10.js?v=fk_v11"></script>
+</body>
+</html>
