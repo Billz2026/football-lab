@@ -1,0 +1,142 @@
+/* Football Lab – premium minimal UI (no external deps) */
+:root{
+  --bg:#0b1020;
+  --card:#0f1933;
+  --card2:#101d3f;
+  --text:#e8eeff;
+  --muted:#9fb0d7;
+  --line:rgba(255,255,255,.12);
+  --pill:#152650;
+  --pillOn:#1c3a87;
+  --shadow: 0 16px 50px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(68, 126, 255, .22), transparent 60%),
+    radial-gradient(900px 700px at 85% 15%, rgba(0, 255, 188, .12), transparent 55%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(255, 208, 64, .10), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+}
+
+.page{max-width:1100px;margin:0 auto;padding:18px 14px 24px}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 14px;
+  border:1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border-radius:18px;
+  box-shadow: var(--shadow);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.badge{
+  width:42px;height:42px;border-radius:14px;
+  display:grid;place-items:center;
+  background: linear-gradient(135deg, rgba(255, 208, 64, .92), rgba(255,255,255,.12));
+  color:#081022;font-weight:800;letter-spacing:.5px;
+}
+.titles .name{font-weight:800;font-size:15px;line-height:1.1}
+.titles .sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+.hud{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.score{
+  min-width:86px;
+  padding:10px 10px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background: rgba(10, 16, 33, .45);
+}
+.score .label{font-size:10px;color:var(--muted);letter-spacing:.12em}
+.score .value{font-size:16px;font-weight:800;margin-top:2px}
+
+.main{margin-top:14px}
+.gameCard{
+  border:1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border-radius:20px;
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+.canvasWrap{position:relative}
+canvas{
+  width:100%;
+  height:auto;
+  display:block;
+  background: radial-gradient(900px 600px at 50% 20%, rgba(255,255,255,.04), rgba(0,0,0,.0) 60%),
+              linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.0));
+}
+.overlay{
+  position:absolute;inset:0;
+  padding:14px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  pointer-events:none; /* let the canvas receive drags */
+}
+.hudOverlay button{pointer-events:auto}
+
+.modePills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{
+  border:1px solid var(--line);
+  background: rgba(21,38,80,.65);
+  color:var(--text);
+  padding:9px 12px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:12px;
+  cursor:pointer;
+  transition: transform .08s ease, background .12s ease, border-color .12s ease;
+}
+.pill:hover{transform: translateY(-1px)}
+.pill.on{
+  background: rgba(28,58,135,.85);
+  border-color: rgba(255,255,255,.22);
+}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.btn{
+  border:1px solid var(--line);
+  background: rgba(16,29,63,.62);
+  color:var(--text);
+  padding:9px 12px;
+  border-radius:14px;
+  font-weight:800;
+  font-size:12px;
+  cursor:pointer;
+  transition: transform .08s ease, background .12s ease, border-color .12s ease;
+}
+.btn:hover{transform: translateY(-1px)}
+.btn:active{transform: translateY(0px)}
+
+.tip{
+  align-self:flex-end;
+  max-width:330px;
+  border:1px solid var(--line);
+  background: rgba(10, 16, 33, .48);
+  border-radius:16px;
+  padding:10px 12px;
+}
+.tipTitle{font-weight:900;font-size:12px}
+.tipBody{margin-top:6px;font-size:12px;color:var(--muted);line-height:1.35}
+
+.footerRow{
+  display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:12px 14px;
+  border-top:1px solid var(--line);
+  background: rgba(5,8,16,.20);
+}
+.status{color:var(--text);font-weight:800;font-size:12px}
+.miniHelp{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:99px;background: rgba(255,208,64,.9);box-shadow:0 0 18px rgba(255,208,64,.35)}
+
+.foot{margin-top:12px;color:var(--muted);font-size:12px;text-align:center}
+
+@media (max-width:560px){
+  .tip{display:none}
+}
