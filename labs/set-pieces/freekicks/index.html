@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Football Lab – Free Kicks</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="gameFrame" id="frame">
+      <!-- Background image layer (drop your own image at ./assets/pitch.png) -->
+      <div class="bg" aria-hidden="true"></div>
+
+      <!-- Canvas layer for gameplay -->
+      <canvas id="game" width="1280" height="720"></canvas>
+
+      <!-- HUD layer -->
+      <div class="hud">
+        <div class="stage" id="stageText">STAGE 1</div>
+
+        <button class="hudBtn exit" id="btnExit" type="button">EXIT</button>
+
+        <div class="windBadge">
+          <div class="windArrow" id="windArrow"></div>
+          <div class="windText"><span class="windLabel">WIND</span> <span id="windVal">—</span></div>
+        </div>
+
+        <div class="scorePill">
+          <div class="scoreItem">
+            <div class="k">SCORE</div>
+            <div class="v" id="scoreVal">0</div>
+          </div>
+          <div class="sep"></div>
+          <div class="scoreItem">
+            <div class="k">STREAK</div>
+            <div class="v" id="streakVal">0</div>
+          </div>
+        </div>
+
+        <div class="powerUI" aria-hidden="true">
+          <div class="dial"></div>
+          <div class="ballIcon"></div>
+        </div>
+
+        <div class="toggles">
+          <button class="toggle" id="btnCurl" type="button">CURL</button>
+          <button class="toggle" id="btnDip" type="button">DIP</button>
+          <button class="toggle" id="btnKnuckle" type="button">KNUCKLE</button>
+          <button class="toggle ghost" id="btnReset" type="button">RESET</button>
+          <button class="toggle ghost" id="btnNewWind" type="button">NEW WIND</button>
+        </div>
+
+        <div class="hint" id="hintText">Drag from the ball to aim & power. Release to shoot.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./game.js" defer></script>
+</body>
+</html>
