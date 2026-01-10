@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Football Lab – Free Kicks</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="badge">FL</div>
+        <div class="titles">
+          <div class="name">Football Lab</div>
+          <div class="sub">Set Pieces • Free Kicks</div>
+        </div>
+      </div>
+
+      <div class="hud">
+        <div class="score">
+          <div class="label">SCORE</div>
+          <div id="scoreVal" class="value">0</div>
+        </div>
+        <div class="score">
+          <div class="label">STREAK</div>
+          <div id="streakVal" class="value">0</div>
+        </div>
+        <div class="score">
+          <div class="label">WIND</div>
+          <div id="windVal" class="value">—</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="gameCard">
+        <div class="canvasWrap">
+          <canvas id="game" width="1280" height="720" aria-label="Free kick canvas"></canvas>
+
+          <div class="overlay hudOverlay">
+            <div class="modePills" role="group" aria-label="Shot types">
+              <button id="btnCurl" class="pill" type="button">Curl</button>
+              <button id="btnDip" class="pill" type="button">Dip</button>
+              <button id="btnKnuckle" class="pill" type="button">Knuckle</button>
+            </div>
+
+            <div class="actions" role="group" aria-label="Actions">
+              <button id="btnReset" class="btn" type="button">Reset</button>
+              <button id="btnNewWind" class="btn" type="button">New Wind</button>
+            </div>
+
+            <div class="tip">
+              <div class="tipTitle">How to shoot</div>
+              <div class="tipBody">
+                Drag from the ball to aim & power. Release to shoot.<br/>
+                Toggle Curl / Dip / Knuckle to shape the strike.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footerRow">
+          <div class="status" id="statusText">Ready. Drag from the ball.</div>
+          <div class="miniHelp">
+            <span class="dot"></span> Aim line = direction • Length = power
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span>Tip: on mobile, drag with your finger. Works best in landscape.</span>
+    </footer>
+  </div>
+
+  <script src="./game.js" defer></script>
+</body>
+</html>
