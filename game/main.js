@@ -2,10 +2,10 @@ import {
   $, $$, formatScore, profile, state, elements, createShot, saveProfile, renderProfile,
   setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
   renderHud, showResult, stageConfig, strikeQualityLabel
-} from "./core.js";
-import { resolveShotPhysics } from "./physics.js";
-import { resizeCanvas, drawScene } from "./render.js";
-import { unlockAudio, playResultSound } from "./audio.js";
+} from "./core.js?v=4";
+import { resolveShotPhysics } from "./physics.js?v=4";
+import { resizeCanvas, drawScene } from "./render.js?v=4";
+import { unlockAudio, playResultSound } from "./audio.js?v=4";
 
 function startGame() {
   clearTimeout(state.resultTimeout);
