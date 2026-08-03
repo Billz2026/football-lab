@@ -18,7 +18,6 @@
           <small>ARCADE FOOTBALL</small>
         </span>
       </button>
-
       <div class="header-stats" aria-label="Saved player progress">
         <div><span>LEVEL</span><strong id="headerLevel">1</strong></div>
         <div><span>BEST</span><strong id="headerBest">0</strong></div>
@@ -32,14 +31,9 @@
             <div class="hero-light" aria-hidden="true"></div>
             <div class="eyebrow"><span></span> ORIGINAL ARCADE FOOTBALL</div>
             <h1 id="menuTitle">MASTER<br />THE STRIKE.</h1>
-            <p class="hero-copy">
-              Three inputs decide everything: power, placement and curve. Beat each stage, build a streak and chase your personal best.
-            </p>
+            <p class="hero-copy">Three inputs decide everything: power, placement and curve. Beat each stage, build a streak and chase your personal best.</p>
             <div class="hero-actions">
-              <button class="button button-primary button-large" id="playClassic" type="button">
-                <span>PLAY CLASSIC KICKS</span>
-                <b aria-hidden="true">→</b>
-              </button>
+              <button class="button button-primary button-large" id="playClassic" type="button"><span>PLAY CLASSIC KICKS</span><b aria-hidden="true">→</b></button>
               <button class="button button-secondary" id="howToPlay" type="button">HOW TO PLAY</button>
             </div>
             <div class="hero-meta">
@@ -51,13 +45,9 @@
 
           <aside class="player-panel panel" aria-label="Player profile">
             <div class="player-card-top">
-              <div>
-                <span class="section-label">PLAYER PROFILE</span>
-                <h2>THE PROSPECT</h2>
-              </div>
+              <div><span class="section-label">PLAYER PROFILE</span><h2>THE PROSPECT</h2></div>
               <span class="level-badge" id="profileLevel">LV. 1</span>
             </div>
-
             <div class="player-visual" aria-hidden="true">
               <div class="stadium-ring"></div>
               <div class="player-silhouette">
@@ -67,15 +57,10 @@
               </div>
               <div class="football"></div>
             </div>
-
             <div class="progress-block">
-              <div class="progress-copy">
-                <span>CAREER XP</span>
-                <strong id="xpCopy">0 / 1,000</strong>
-              </div>
+              <div class="progress-copy"><span>CAREER XP</span><strong id="xpCopy">0 / 1,000</strong></div>
               <div class="progress-track"><span id="xpBar"></span></div>
             </div>
-
             <div class="profile-records">
               <div><span>HIGH SCORE</span><strong id="profileBest">0</strong></div>
               <div><span>BEST STREAK</span><strong id="profileStreak">0</strong></div>
@@ -85,39 +70,21 @@
 
         <section class="modes-section" aria-labelledby="modesTitle">
           <div class="section-heading">
-            <div>
-              <span class="section-label">GAME MODES</span>
-              <h2 id="modesTitle">CHOOSE YOUR CHALLENGE</h2>
-            </div>
+            <div><span class="section-label">GAME MODES</span><h2 id="modesTitle">CHOOSE YOUR CHALLENGE</h2></div>
             <p>Classic Kicks is playable now. The other modes will use the same core shooting engine.</p>
           </div>
-
           <div class="mode-grid">
             <button class="mode-card mode-card-active" id="classicCard" type="button">
-              <span class="mode-number">01</span>
-              <span class="mode-status">PLAYABLE</span>
-              <span class="mode-icon" aria-hidden="true">◎</span>
-              <strong>CLASSIC KICKS</strong>
-              <small>Three-input free kicks, escalating stages and three lives.</small>
-              <span class="mode-cta">START RUN <b>→</b></span>
+              <span class="mode-number">01</span><span class="mode-status">PLAYABLE</span><span class="mode-icon" aria-hidden="true">◎</span>
+              <strong>CLASSIC KICKS</strong><small>Three-input free kicks, escalating stages and three lives.</small><span class="mode-cta">START RUN <b>→</b></span>
             </button>
-
             <button class="mode-card" data-preview="Road to Glory" type="button">
-              <span class="mode-number">02</span>
-              <span class="mode-status mode-status-muted">NEXT BUILD</span>
-              <span class="mode-icon" aria-hidden="true">◆</span>
-              <strong>ROAD TO GLORY</strong>
-              <small>Develop one player from the street cage to the world stage.</small>
-              <span class="mode-cta">VIEW PLAN <b>＋</b></span>
+              <span class="mode-number">02</span><span class="mode-status mode-status-muted">NEXT BUILD</span><span class="mode-icon" aria-hidden="true">◆</span>
+              <strong>ROAD TO GLORY</strong><small>Develop one player from the street cage to the world stage.</small><span class="mode-cta">VIEW PLAN <b>＋</b></span>
             </button>
-
             <button class="mode-card" data-preview="Score Attack" type="button">
-              <span class="mode-number">03</span>
-              <span class="mode-status mode-status-muted">PLANNED</span>
-              <span class="mode-icon" aria-hidden="true">↯</span>
-              <strong>SCORE ATTACK</strong>
-              <small>Sixty seconds, unlimited shots and a multiplier that punishes misses.</small>
-              <span class="mode-cta">VIEW PLAN <b>＋</b></span>
+              <span class="mode-number">03</span><span class="mode-status mode-status-muted">PLANNED</span><span class="mode-icon" aria-hidden="true">↯</span>
+              <strong>SCORE ATTACK</strong><small>Sixty seconds, unlimited shots and a multiplier that punishes misses.</small><span class="mode-cta">VIEW PLAN <b>＋</b></span>
             </button>
           </div>
         </section>
@@ -126,10 +93,7 @@
       <section class="screen screen-game" id="gameScreen" aria-label="Classic Kicks game">
         <div class="game-topbar panel">
           <button class="icon-button" id="exitGame" type="button" aria-label="Exit game">←</button>
-          <div class="stage-copy">
-            <span id="stageNumber">STAGE 01</span>
-            <strong id="stageName">THE OPENER</strong>
-          </div>
+          <div class="stage-copy"><span id="stageNumber">STAGE 01</span><strong id="stageName">THE OPENER</strong></div>
           <div class="game-stats">
             <div><span>SCORE</span><strong id="scoreValue">0</strong></div>
             <div><span>STREAK</span><strong id="streakValue">0</strong></div>
@@ -140,32 +104,22 @@
         <div class="game-layout">
           <div class="game-frame panel">
             <canvas id="gameCanvas" width="1200" height="720" aria-label="Arcade free-kick scene"></canvas>
-            <div class="wind-chip" aria-label="Wind strength">
-              <span id="windArrow">→</span>
-              <div><small>WIND</small><strong id="windValue">0.0</strong></div>
-            </div>
+            <div class="wind-chip" aria-label="Wind strength"><span id="windArrow">→</span><div><small>WIND</small><strong id="windValue">0.0</strong></div></div>
             <div class="result-banner" id="resultBanner" role="status" aria-live="polite"></div>
             <div class="canvas-prompt" id="canvasPrompt">PRESS START SHOT</div>
           </div>
 
           <aside class="control-panel panel">
-            <div class="control-heading">
-              <span class="section-label">SHOT CONTROL</span>
-              <h2 id="phaseTitle">READY</h2>
-              <p id="phaseHelp">Lock in power, placement and curve. Tap the pitch or use the button.</p>
-            </div>
-
+            <div class="control-heading"><span class="section-label">SHOT CONTROL</span><h2 id="phaseTitle">READY</h2><p id="phaseHelp">Lock in power, placement and curve. Tap the pitch or use the button.</p></div>
             <div class="shot-steps" aria-label="Shot setup progress">
               <div class="shot-step is-current" data-step="power"><span>1</span><div><strong>POWER</strong><small id="powerReadout">—</small></div></div>
               <div class="shot-step" data-step="aim"><span>2</span><div><strong>PLACEMENT</strong><small id="aimReadout">—</small></div></div>
               <div class="shot-step" data-step="curve"><span>3</span><div><strong>CURVE</strong><small id="curveReadout">—</small></div></div>
             </div>
-
             <div class="meter-wrap">
               <div class="meter-label"><span id="meterLabel">SHOT METER</span><strong id="meterNumber">0%</strong></div>
               <div class="meter"><span id="meterFill"></span><i id="meterMarker"></i></div>
             </div>
-
             <button class="button button-primary action-button" id="shotAction" type="button">START SHOT</button>
             <p class="input-note">Keyboard: press <kbd>SPACE</kbd> to lock each input.</p>
           </aside>
@@ -178,8 +132,7 @@
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-card panel">
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
-      <span class="section-label">HOW TO PLAY</span>
-      <h2 id="howTitle">THREE INPUTS. ONE SHOT.</h2>
+      <span class="section-label">HOW TO PLAY</span><h2 id="howTitle">THREE INPUTS. ONE SHOT.</h2>
       <ol>
         <li><span>1</span><div><strong>Power</strong><p>Stop the meter in the control zone. Too little drops short; too much can fly over.</p></div></li>
         <li><span>2</span><div><strong>Placement</strong><p>Lock the moving target inside the goal. Corners earn more points.</p></div></li>
@@ -193,32 +146,25 @@
     <div class="modal-backdrop" data-close-preview></div>
     <div class="modal-card panel">
       <button class="modal-close" type="button" data-close-preview aria-label="Close">×</button>
-      <span class="section-label">DEVELOPMENT ROADMAP</span>
-      <h2 id="previewTitle">MODE PREVIEW</h2>
-      <p id="previewCopy"></p>
-      <div class="roadmap-list" id="previewList"></div>
-      <button class="button button-secondary" type="button" data-close-preview>BACK TO MENU</button>
+      <span class="section-label">DEVELOPMENT ROADMAP</span><h2 id="previewTitle">MODE PREVIEW</h2><p id="previewCopy"></p>
+      <div class="roadmap-list" id="previewList"></div><button class="button button-secondary" type="button" data-close-preview>BACK TO MENU</button>
     </div>
   </div>
 
   <div class="modal" id="gameOverModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
     <div class="modal-backdrop"></div>
     <div class="modal-card game-over-card panel">
-      <span class="section-label">RUN COMPLETE</span>
-      <h2 id="gameOverTitle">FULL TIME</h2>
+      <span class="section-label">RUN COMPLETE</span><h2 id="gameOverTitle">FULL TIME</h2>
       <div class="final-score"><span>FINAL SCORE</span><strong id="finalScore">0</strong></div>
       <div class="game-over-stats">
         <div><span>STAGE REACHED</span><strong id="finalStage">1</strong></div>
         <div><span>BEST STREAK</span><strong id="finalStreak">0</strong></div>
         <div><span>PERSONAL BEST</span><strong id="finalBest">0</strong></div>
       </div>
-      <div class="modal-actions">
-        <button class="button button-primary" id="retryGame" type="button">PLAY AGAIN</button>
-        <button class="button button-secondary" id="returnMenu" type="button">MAIN MENU</button>
-      </div>
+      <div class="modal-actions"><button class="button button-primary" id="retryGame" type="button">PLAY AGAIN</button><button class="button button-secondary" id="returnMenu" type="button">MAIN MENU</button></div>
     </div>
   </div>
 
-  <script src="./app.js?v=4" defer></script>
+  <script src="./app.js?v=6" defer></script>
 </body>
 </html>
