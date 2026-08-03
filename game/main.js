@@ -171,7 +171,7 @@ function updateMeter(delta) {
   if (state.phase === "power") {
     state.meterValue = (Math.sin(state.meterClock * (3.35 + stage.aimSpeed * 0.18) - Math.PI / 2) + 1) / 2;
   } else if (state.phase === "aim") {
-    state.meterValue = (Math.sin(state.meterClock * 2.22 * stage.aimSpeed - Math.PI / 2) + 1) / 2;
+    state.meterValue = currentAimTarget().x;
   } else {
     state.meterValue = (Math.sin(state.meterClock * (2.78 + stage.aimSpeed * 0.20)) + 1) / 2;
   }
