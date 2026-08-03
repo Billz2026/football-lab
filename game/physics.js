@@ -1,7 +1,7 @@
 import {
   clamp, lerp, smoothStep, stageConfig, state, idealPower, strikeQuality,
   currentAimTarget
-} from "./core.js";
+} from "./core.js?v=4";
 
 export function goalRect() {
   return { x: 770, y: 185, w: 310, h: 205 };
@@ -286,7 +286,6 @@ function targetFromInputs() {
 
 export function resolveShotPhysics() {
   const shot = state.shot;
-  const goal = goalRect();
   const target = targetFromInputs();
   const directPath = buildTrajectory(target);
   const crossT = findWallCrossT(directPath);
