@@ -1,17 +1,23 @@
 import {
   clamp, lerp, smoothStep, stageConfig, state, idealPower, strikeQuality,
   currentAimTarget
-} from "./core.js?v=4";
+} from "./core.js?v=5";
 
 export function goalRect() {
   return { x: 770, y: 185, w: 310, h: 205 };
 }
 
 export function ballStart() {
+  const { ball } = stageConfig();
+  return { x: ball.x, y: ball.y };
+}
+
+export function keeperHome() {
   const stage = stageConfig();
+  const goal = goalRect();
   return {
-    x: 250 - stage.distance * 102 + stage.startOffset,
-    y: 570 + stage.distance * 38 + Math.abs(stage.startOffset) * 0.12
+    x: goal.x + goal.w * clamp(0.5 + stage.keeperBias, 0.28, 0.72),
+    y: goal.y + goal.h * 0.72
   };
 }
 
@@ -61,9 +67,10 @@ export function buildTrajectory(target) {
   const lineTwo = { x: lerp(start.x, target.x, 0.71), y: lerp(start.y, target.y, 0.71) };
 
   const heightDemand = clamp((0.56 - state.shot.actualY) * 150, -20, 78);
-  const arcHeight = 116 + stage.distance * 58 + power * 96 + heightDemand;
-  const curveAmplitude = spin * (74 + stage.distance * 108);
-  const windAmplitude = state.stageWind * (92 + stage.distance * 120);
+  const rangeFactor = clamp((stage.distanceYards - 18) / 17, 0, 1);
+  const arcHeight = 112 + rangeFactor * 52 + power * 96 + heightDemand;
+  const curveAmplitude = spin * (70 + rangeFactor * 64);
+  const windAmplitude = state.stageWind * (88 + rangeFactor * 72);
 
   return {
     p0: start,
@@ -80,16 +87,38 @@ export function buildTrajectory(target) {
   };
 }
 
+function wallGeometry() {
+  const stage = stageConfig();
+  const ball = ballStart();
+  const goal = goalRect();
+  const protectedPoint = {
+    x: goal.x + goal.w * stage.protectedGoalX,
+    y: goal.y + goal.h * 0.72
+  };
+  const dx = protectedPoint.x - ball.x;
+  const dy = protectedPoint.y - ball.y;
+  const length = Math.max(1, Math.hypot(dx, dy));
+  const forward = { x: dx / length, y: dy / length };
+  const perpendicular = { x: -forward.y, y: forward.x };
+  const centre = {
+    x: lerp(ball.x, protectedPoint.x, stage.wallT),
+    y: lerp(ball.y, protectedPoint.y, stage.wallT)
+  };
+  return { centre, forward, perpendicular, protectedPoint };
+}
+
 export function wallPlayers() {
   const stage = stageConfig();
-  const spacing = 35;
-  const centre = 600 + stage.wallOffset;
-  const start = centre - ((stage.wall - 1) * spacing) / 2;
-  return Array.from({ length: stage.wall }, (_, index) => ({
-    x: start + index * spacing,
-    y: 445 + Math.abs(index - (stage.wall - 1) / 2) * 1.5,
-    index
-  }));
+  const { centre, perpendicular } = wallGeometry();
+  const spacing = stage.distanceYards >= 30 ? 32 : 35;
+  return Array.from({ length: stage.wallPlayers }, (_, index) => {
+    const offset = (index - (stage.wallPlayers - 1) / 2) * spacing;
+    return {
+      x: centre.x + perpendicular.x * offset,
+      y: centre.y + perpendicular.y * offset,
+      index
+    };
+  });
 }
 
 export function wallJumpAt(renderT) {
@@ -98,21 +127,24 @@ export function wallJumpAt(renderT) {
   const tail = 0.13;
   if (renderT < centre - lead || renderT > centre + tail) return 0;
   const local = (renderT - (centre - lead)) / (lead + tail);
-  return Math.sin(clamp(local, 0, 1) * Math.PI) * (22 + stageConfig().wall * 0.75);
+  return Math.sin(clamp(local, 0, 1) * Math.PI) * (22 + stageConfig().wallPlayers * 0.75);
 }
 
-function wallCentreX() {
+function wallCentre() {
   const players = wallPlayers();
-  return players.reduce((sum, player) => sum + player.x, 0) / Math.max(1, players.length);
+  return players.reduce((sum, player) => ({ x: sum.x + player.x, y: sum.y + player.y }), { x: 0, y: 0 });
 }
 
 function findWallCrossT(path) {
-  const centre = wallCentreX();
+  const players = wallPlayers();
+  const total = wallCentre();
+  const centre = { x: total.x / Math.max(1, players.length), y: total.y / Math.max(1, players.length) };
   let bestT = 0.5;
   let bestDistance = Infinity;
   for (let step = 15; step <= 82; step += 1) {
     const t = step / 100;
-    const distance = Math.abs(cubicBezier(path, t).x - centre);
+    const point = cubicBezier(path, t);
+    const distance = Math.hypot(point.x - centre.x, point.y - centre.y);
     if (distance < bestDistance) {
       bestDistance = distance;
       bestT = t;
@@ -134,16 +166,16 @@ function circleCircleOverlap(point, radius, circle) {
 
 function findWallCollision(path, crossT) {
   const players = wallPlayers();
-  const startStep = Math.max(1, Math.floor((crossT - 0.12) * 240));
-  const endStep = Math.min(239, Math.ceil((crossT + 0.12) * 240));
+  const startStep = Math.max(1, Math.floor((crossT - 0.14) * 260));
+  const endStep = Math.min(259, Math.ceil((crossT + 0.14) * 260));
 
   for (let step = startStep; step <= endStep; step += 1) {
-    const t = step / 240;
+    const t = step / 260;
     const point = cubicBezier(path, t);
     const radius = lerp(15, 10, t);
     const jump = (() => {
       const local = (t - (crossT - 0.105)) / 0.235;
-      return local >= 0 && local <= 1 ? Math.sin(local * Math.PI) * (22 + stageConfig().wall * 0.75) : 0;
+      return local >= 0 && local <= 1 ? Math.sin(local * Math.PI) * (22 + stageConfig().wallPlayers * 0.75) : 0;
     })();
 
     for (const player of players) {
@@ -179,19 +211,19 @@ function findGoalFrameCollision(target) {
 function baseFlightDurationMs(power) {
   const stage = stageConfig();
   const speedFactor = smoothStep(clamp((power - 0.12) / 0.88, 0, 1));
-  return lerp(1120, 710, speedFactor) + stage.distance * 105;
+  const rangeTime = (stage.distanceYards - 20) * 8;
+  return lerp(1120, 710, speedFactor) + rangeTime;
 }
 
 function calculateKeeperPlan(target, flightDuration) {
   const stage = stageConfig();
   const goal = goalRect();
   const power = state.shot.power ?? idealPower();
-  const start = { x: goal.x + goal.w * 0.5, y: goal.y + goal.h * 0.58 };
+  const start = keeperHome();
   const dx = target.x - start.x;
   const dy = target.y - start.y;
   const flightSeconds = flightDuration / 1000;
 
-  // Curl delays the read slightly, while better keepers react sooner and travel faster.
   const reactionSeconds = lerp(0.34, 0.155, stage.keeper) + Math.abs(state.shot.curve ?? 0) * 0.028;
   const availableSeconds = Math.max(0, flightSeconds - reactionSeconds);
   const horizontalSpeed = lerp(190, 382, stage.keeper);
@@ -230,7 +262,14 @@ function reboundPath(point, type, collision = {}) {
   let end;
 
   if (type === "WALL") {
-    end = { x: point.x - (86 + power * 62), y: point.y + 92 + power * 28 };
+    const ball = ballStart();
+    const dx = ball.x - point.x;
+    const dy = ball.y - point.y;
+    const length = Math.max(1, Math.hypot(dx, dy));
+    end = {
+      x: point.x + (dx / length) * (90 + power * 62),
+      y: point.y + (dy / length) * (90 + power * 62) + 42
+    };
   } else if (type === "POST") {
     const direction = collision.side === "LEFT" ? -1 : 1;
     end = { x: point.x + direction * (105 + power * 60), y: point.y + 58 + power * 24 };
@@ -268,8 +307,9 @@ function targetFromInputs() {
   const power = clamp(shot.power ?? idealPower(), 0, 1);
   const quality = strikeQuality(power);
   const spin = signedPower(shot.curve ?? 0);
-  const curveDrift = spin * (0.052 + stage.distance * 0.085);
-  const windDrift = state.stageWind * (0.18 + stage.distance * 0.24);
+  const rangeFactor = clamp((stage.distanceYards - 18) / 17, 0, 1);
+  const curveDrift = spin * (0.052 + rangeFactor * 0.056);
+  const windDrift = state.stageWind * (0.18 + rangeFactor * 0.16);
   const underhitDrop = power < 0.18 ? smoothStep((0.18 - power) / 0.18) * 0.09 : 0;
   const overhitRise = power > 0.93 ? smoothStep((power - 0.93) / 0.07) * 0.07 : 0;
 
