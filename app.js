@@ -1,4 +1,7 @@
-import("./game/main-v5.js?v=5").catch((error) => {
+Promise.all([
+  import("./game/camera-v5.js?v=5"),
+  import("./game/main-v5.js?v=5")
+]).catch((error) => {
   console.error("Football Lab failed to start", error);
   const message = document.createElement("div");
   message.textContent = "The game failed to load. Refresh the page and try again.";
