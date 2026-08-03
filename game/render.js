@@ -1,9 +1,9 @@
 import {
   clamp, lerp, WORLD, state, elements, ctx, canvasView, currentAimTarget,
   easeOutCubic, easeInOutCubic, smoothStep
-} from "./core.js";
-import { goalRect, ballStart, cubicPoint, wallPlayers, wallJumpAt } from "./physics.js";
-import { playKickSound } from "./audio.js";
+} from "./core.js?v=4";
+import { goalRect, ballStart, cubicPoint, wallPlayers, wallJumpAt } from "./physics.js?v=4";
+import { playKickSound } from "./audio.js?v=4";
 
 export function resizeCanvas() {
   const rect = elements.canvas.getBoundingClientRect();
