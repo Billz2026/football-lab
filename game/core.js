@@ -2,18 +2,25 @@ export const $ = (selector, scope = document) => scope.querySelector(selector);
 export const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
 export const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 export const lerp = (a, b, t) => a + (b - a) * t;
+export const invLerp = (a, b, value) => clamp((value - a) / (b - a || 1), 0, 1);
+export const smoothStep = (value) => {
+  const t = clamp(value, 0, 1);
+  return t * t * (3 - 2 * t);
+};
 export const formatScore = (value) => Math.max(0, Math.round(value)).toLocaleString("en-GB");
 
 export const STORAGE_KEY = "footballLabArcadeProfileV2";
 export const WORLD = { width: 1200, height: 720 };
+
+// Each stage changes the mechanics rather than only increasing a hidden difficulty number.
 export const STAGES = [
-  { name: "THE OPENER", wall: 3, wind: 0.02, keeper: 0.22, distance: 0.18 },
-  { name: "AROUND THE WALL", wall: 4, wind: -0.04, keeper: 0.30, distance: 0.24 },
-  { name: "THE WIDE ANGLE", wall: 4, wind: 0.07, keeper: 0.38, distance: 0.30 },
-  { name: "HEAVY WEATHER", wall: 5, wind: -0.12, keeper: 0.46, distance: 0.34 },
-  { name: "TOP BINS ONLY", wall: 5, wind: 0.09, keeper: 0.54, distance: 0.38 },
-  { name: "THE SPECIALIST", wall: 6, wind: -0.14, keeper: 0.62, distance: 0.43 },
-  { name: "NIGHT FINAL", wall: 6, wind: 0.16, keeper: 0.70, distance: 0.48 }
+  { name: "THE OPENER", wall: 3, wind: 0.02, keeper: 0.18, distance: 0.18, startOffset: 0, wallOffset: 0, aimSpeed: 0.92 },
+  { name: "AROUND THE WALL", wall: 4, wind: -0.04, keeper: 0.26, distance: 0.24, startOffset: -28, wallOffset: 12, aimSpeed: 1.00 },
+  { name: "THE WIDE ANGLE", wall: 4, wind: 0.07, keeper: 0.34, distance: 0.30, startOffset: 44, wallOffset: -18, aimSpeed: 1.06 },
+  { name: "HEAVY WEATHER", wall: 5, wind: -0.12, keeper: 0.42, distance: 0.34, startOffset: -18, wallOffset: 8, aimSpeed: 1.10 },
+  { name: "TOP BINS ONLY", wall: 5, wind: 0.09, keeper: 0.50, distance: 0.38, startOffset: 26, wallOffset: -12, aimSpeed: 1.16 },
+  { name: "THE SPECIALIST", wall: 6, wind: -0.14, keeper: 0.59, distance: 0.43, startOffset: -34, wallOffset: 18, aimSpeed: 1.22 },
+  { name: "NIGHT FINAL", wall: 6, wind: 0.16, keeper: 0.68, distance: 0.48, startOffset: 34, wallOffset: -20, aimSpeed: 1.28 }
 ];
 
 function loadProfile() {
@@ -64,9 +71,25 @@ export const canvasView = { scale: 1, offsetX: 0, offsetY: 0, dpr: 1 };
 
 export function createShot() {
   return {
-    power: null, aimX: null, aimY: null, curve: null, actualX: null, actualY: null,
-    outcome: null, points: 0, topCorner: false, trajectory: null, keeperPlan: null,
-    collision: null, pathEndT: 1
+    power: null,
+    aimX: null,
+    aimY: null,
+    curve: null,
+    actualX: null,
+    actualY: null,
+    outcome: null,
+    points: 0,
+    topCorner: false,
+    trajectory: null,
+    keeperPlan: null,
+    collision: null,
+    pathEndT: 1,
+    strikeQuality: 0,
+    strikeLabel: "",
+    speedMps: 0,
+    wallCrossT: 0.5,
+    impactRenderT: null,
+    saveType: null
   };
 }
 state.shot = createShot();
@@ -97,16 +120,17 @@ export function stageConfig() {
   const base = STAGES[state.stage % STAGES.length];
   return {
     ...base,
-    keeper: clamp(base.keeper + cycle * 0.04, 0, 0.84),
-    wind: clamp(base.wind * (1 + cycle * 0.10), -0.22, 0.22),
-    distance: clamp(base.distance + cycle * 0.018, 0.18, 0.58)
+    keeper: clamp(base.keeper + cycle * 0.035, 0, 0.82),
+    wind: clamp(base.wind * (1 + cycle * 0.09), -0.22, 0.22),
+    distance: clamp(base.distance + cycle * 0.016, 0.18, 0.58),
+    aimSpeed: clamp(base.aimSpeed + cycle * 0.035, 0.9, 1.46)
   };
 }
 
 export function setStageWind() {
   const stage = stageConfig();
   const phase = (state.stage + 1) * 1.73 + state.misses * 0.91;
-  state.stageWind = clamp(stage.wind + Math.sin(phase) * 0.014, -0.24, 0.24);
+  state.stageWind = clamp(stage.wind + Math.sin(phase) * 0.012, -0.24, 0.24);
 }
 
 export function showScreen(name) {
@@ -139,12 +163,12 @@ export function setPhase(phase) {
   state.meterClock = 0;
   state.meterValue = phase === "curve" ? 0.5 : 0;
   const content = {
-    ready: ["READY", "Lock in power, horizontal placement and curve. Every result now comes from your inputs.", "START SHOT", "SHOT METER"],
-    power: ["SET POWER", "Aim for the bright control zone. Power also controls the shot height.", "LOCK POWER", "POWER"],
-    aim: ["PICK YOUR SIDE", "The marker sweeps left to right. Power has already set the shot height.", "LOCK PLACEMENT", "PLACEMENT"],
-    curve: ["ADD CURVE", "Bend around the wall and compensate for the wind. The flight visibly follows your choice.", "TAKE SHOT", "CURVE"],
-    shooting: ["WATCH THE FLIGHT", "The run-up, wall, goalkeeper and ball react to the same physical trajectory.", "SHOT IN PLAY", "LOCKED"],
-    result: ["SHOT COMPLETE", "The result is based on the visible path, not a hidden random roll.", "NEXT SHOT", "RESULT"]
+    ready: ["READY", "Lock in power, horizontal placement and curve. Every result comes from the visible flight path.", "START SHOT", "SHOT METER"],
+    power: ["SET POWER", "Power controls pace and height. The control zone gives the cleanest strike.", "LOCK POWER", "POWER"],
+    aim: ["PICK YOUR SIDE", "The marker sweeps across the goal. Power has already established the shot height.", "LOCK PLACEMENT", "PLACEMENT"],
+    curve: ["ADD CURVE", "Curl develops through the flight. Counter the wind rather than aiming blindly at the corner.", "TAKE SHOT", "CURVE"],
+    shooting: ["WATCH THE FLIGHT", "Ball speed, wall contact, goalkeeper reach and frame rebounds use one deterministic path.", "SHOT IN PLAY", "LOCKED"],
+    result: ["SHOT COMPLETE", "The outcome follows the same mechanics you can see on screen.", "NEXT SHOT", "RESULT"]
   }[phase];
   elements.phaseTitle.textContent = content[0];
   elements.phaseHelp.textContent = content[1];
@@ -156,19 +180,38 @@ export function setPhase(phase) {
 }
 
 export function idealPower() {
-  return clamp(0.67 + stageConfig().distance * 0.18, 0.69, 0.80);
+  return clamp(0.66 + stageConfig().distance * 0.22, 0.69, 0.79);
+}
+
+export function strikeQuality(power) {
+  const deviation = Math.abs(power - idealPower());
+  return 1 - smoothStep(invLerp(0.035, 0.31, deviation));
+}
+
+export function strikeQualityLabel(power) {
+  const quality = strikeQuality(power);
+  if (quality >= 0.90) return "PERFECT";
+  if (quality >= 0.68) return "CLEAN";
+  if (quality >= 0.38) return "RISKY";
+  return power < idealPower() ? "UNDERHIT" : "OVERHIT";
 }
 
 export function shotHeightFromPower(power) {
-  return clamp(0.42 - (power - idealPower()) * 0.68, 0.13, 0.76);
+  const ideal = idealPower();
+  const delta = clamp((power - ideal) / 0.34, -1.35, 1.15);
+  const linear = delta * 0.255;
+  const extreme = Math.sign(delta) * delta * delta * 0.055;
+  return clamp(0.47 - linear - extreme, 0.12, 0.83);
 }
 
 export function currentAimTarget() {
-  const sweep = (Math.sin(state.meterClock * 2.45 - Math.PI / 2) + 1) / 2;
-  const x = 0.07 + sweep * 0.86;
+  const speed = 2.22 * stageConfig().aimSpeed;
+  const sweep = (Math.sin(state.meterClock * speed - Math.PI / 2) + 1) / 2;
+  const eased = smoothStep(sweep);
+  const x = 0.065 + eased * 0.87;
   const y = shotHeightFromPower(state.shot.power ?? idealPower());
   const horizontal = x < 0.33 ? "LEFT" : x > 0.67 ? "RIGHT" : "CENTRE";
-  const vertical = y < 0.32 ? "HIGH" : y > 0.58 ? "LOW" : "MID";
+  const vertical = y < 0.31 ? "HIGH" : y > 0.59 ? "LOW" : "MID";
   return { x, y, label: `${vertical} ${horizontal}` };
 }
 
@@ -190,4 +233,3 @@ export function showResult(message, isMiss) {
 
 export function easeOutCubic(value) { return 1 - Math.pow(1 - value, 3); }
 export function easeInOutCubic(value) { return value < 0.5 ? 4 * value ** 3 : 1 - Math.pow(-2 * value + 2, 3) / 2; }
-export function smoothStep(value) { return value * value * (3 - 2 * value); }
