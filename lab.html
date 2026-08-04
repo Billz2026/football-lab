@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07110b" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Football Lab | Matchup Lab</title>
+  <link rel="stylesheet" href="./style.css?v=2" />
+  <link rel="stylesheet" href="./lab.css?v=1531" />
+</head>
+<body class="lab-page">
+  <div class="lab-shell">
+    <header class="lab-header panel">
+      <div>
+        <span class="section-label">DEVELOPMENT BUILD · V15.3B</span>
+        <h1>MATCHUP LAB</h1>
+        <p>Repeat one fixed free-kick scenario using the live shooting, wall and goalkeeper calculations. Lab attempts do not affect career progress.</p>
+      </div>
+      <a class="button button-secondary" href="./index.html">← PUBLIC GAME</a>
+    </header>
+
+    <main class="lab-layout">
+      <aside class="lab-controls panel" aria-label="Matchup controls">
+        <div class="lab-control-grid">
+          <label>SCENARIO<select id="labStage"></select></label>
+          <label>KICKER<select id="labKicker"></select></label>
+          <label>GOALKEEPER<select id="labKeeper"></select></label>
+          <label>WALL<select id="labWall"></select></label>
+          <label>DEFENSIVE TIER<select id="labTier"></select></label>
+          <label>WIND<select id="labWind"></select></label>
+        </div>
+        <div class="lab-actions">
+          <button class="button button-primary" id="labApply" type="button">APPLY MATCHUP</button>
+          <button class="button button-secondary" id="labReset" type="button">RESET RESULTS</button>
+          <button class="button button-secondary" id="labCopy" type="button">COPY RESULTS</button>
+        </div>
+        <div class="lab-matchup-summary" id="labMatchupSummary"></div>
+        <div class="lab-stats" aria-label="Matchup results">
+          <div><span>SHOTS</span><strong id="labShots">0</strong></div>
+          <div><span>GOAL RATE</span><strong id="labGoalRate">0%</strong></div>
+          <div><span>SAVES</span><strong id="labSaves">0</strong></div>
+          <div><span>WALL</span><strong id="labWallBlocks">0</strong></div>
+          <div><span>FRAME</span><strong id="labFrameHits">0</strong></div>
+          <div><span>MISSES</span><strong id="labMisses">0</strong></div>
+        </div>
+        <div class="lab-analysis">
+          <div><span>AVERAGE PACE</span><strong id="labAveragePace">—</strong></div>
+          <div><span>WALL CLEARANCE</span><strong id="labAverageClearance">—</strong></div>
+          <div><span>KEEPER MARGIN</span><strong id="labAverageMargin">—</strong></div>
+        </div>
+        <p class="lab-last" id="labLastResult">No shots recorded.</p>
+      </aside>
+
+      <section class="screen screen-game is-active lab-game" id="gameScreen" aria-label="Standalone matchup test">
+        <div class="game-topbar panel">
+          <button class="icon-button" id="exitGame" type="button" aria-label="Return to public game">←</button>
+          <div class="stage-copy"><span id="stageNumber">STAGE 01</span><strong id="stageName">THE OPENER</strong></div>
+          <div class="game-stats">
+            <div><span>MODE</span><strong>LAB</strong></div>
+            <div><span>SHOTS</span><strong id="scoreValue">0</strong></div>
+            <div><span>GOALS</span><strong id="streakValue">0</strong></div>
+            <div class="lab-hidden-stat"><span>LIVES</span><strong id="livesValue">● ● ● ● ●</strong></div>
+          </div>
+        </div>
+
+        <div class="game-layout">
+          <div class="game-frame panel">
+            <canvas id="gameCanvas" width="1200" height="720" aria-label="Arcade free-kick scene"></canvas>
+            <div class="wind-chip"><span id="windArrow">→</span><div><small>WIND</small><strong id="windValue">0.0 m/s</strong></div></div>
+            <div class="result-banner" id="resultBanner" role="status" aria-live="polite"></div>
+            <div class="canvas-prompt" id="canvasPrompt">PRESS START SHOT</div>
+          </div>
+
+          <aside class="control-panel panel">
+            <div class="control-heading"><span class="section-label">SHOT CONTROL</span><h2 id="phaseTitle">READY</h2><p id="phaseHelp">The selected matchup repeats after every attempt.</p></div>
+            <div class="shot-steps">
+              <div class="shot-step is-current" data-step="power"><span>1</span><div><strong>POWER</strong><small id="powerReadout">—</small></div></div>
+              <div class="shot-step" data-step="aim"><span>2</span><div><strong>PLACEMENT</strong><small id="aimReadout">—</small></div></div>
+              <div class="shot-step" data-step="curve"><span>3</span><div><strong>CURVE</strong><small id="curveReadout">—</small></div></div>
+            </div>
+            <div class="meter-wrap">
+              <div class="meter-label"><span id="meterLabel">SHOT METER</span><strong id="meterNumber">0%</strong></div>
+              <div class="meter"><span id="meterFill"></span><i id="meterMarker"></i></div>
+            </div>
+            <button class="button button-primary action-button" id="shotAction" type="button">START SHOT</button>
+            <p class="input-note">Press <kbd>SPACE</kbd> or click the pitch to lock each input.</p>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <section class="screen screen-menu" id="menuScreen" hidden></section>
+  <button id="playClassic" hidden></button><button id="classicCard" hidden></button><button id="howToPlay" hidden></button>
+  <button id="modalPlay" hidden></button><button id="brandButton" hidden></button><button id="retryGame" hidden></button><button id="returnMenu" hidden></button>
+  <div id="howModal"></div><div id="previewModal"></div><div id="gameOverModal"></div>
+  <span id="previewTitle"></span><span id="previewCopy"></span><span id="previewList"></span>
+  <span id="finalScore"></span><span id="finalStage"></span><span id="finalStreak"></span><span id="finalBest"></span><span id="gameOverTitle"></span>
+  <span id="headerLevel"></span><span id="profileLevel"></span><span id="headerBest"></span><span id="profileBest"></span><span id="profileStreak"></span><span id="xpCopy"></span><span id="xpBar"></span>
+
+  <script type="module" src="./lab-app.js?v=1531"></script>
+</body>
+</html>
