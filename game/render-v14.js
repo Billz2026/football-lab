@@ -83,13 +83,13 @@ function drawKeeperStageCard(time) {
   ctx.textAlign = "left";
   ctx.fillStyle = "rgba(235,243,232,.52)";
   ctx.font = "850 8px system-ui";
-  ctx.fillText(`OPPONENT · TIER ${keeper.tier}`, x + 90, y + 25);
+  ctx.fillText("OPPONENT · TIER " + keeper.tier, x + 90, y + 25);
   ctx.fillStyle = "#f7fbf5";
   ctx.font = "1000 22px system-ui";
   ctx.fillText(keeper.name, x + 90, y + 50);
   ctx.fillStyle = keeper.accent;
   ctx.font = "900 9px system-ui";
-  ctx.fillText(`${keeper.role} · ${keeper.trait}`, x + 90, y + 69);
+  ctx.fillText(keeper.role + " · " + keeper.trait, x + 90, y + 69);
   ctx.fillStyle = "rgba(235,243,232,.66)";
   ctx.font = "650 10px system-ui";
   ctx.fillText(keeper.traitCopy.slice(0, 75), x + 90, y + 88);
