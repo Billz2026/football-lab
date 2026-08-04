@@ -199,15 +199,16 @@ function updateMeter(delta) {
   if (!["power", "aim", "curve"].includes(state.phase)) return;
   const stage = stageConfig();
   const difficulty = difficultyForStage(state.stage, stage);
-  state.meterClock += delta;
 
   if (state.phase === "power") {
+    state.meterClock += delta;
     const speed = (3.35 + stage.aimSpeed * 0.18) * difficulty.meter.power;
     state.meterValue = (Math.sin(state.meterClock * speed - Math.PI / 2) + 1) / 2;
   } else if (state.phase === "aim") {
-    state.meterClock += delta * Math.max(0, difficulty.meter.aim - 1);
+    state.meterClock += delta * difficulty.meter.aim;
     state.meterValue = currentAimTarget().x;
   } else {
+    state.meterClock += delta;
     const speed = (2.78 + stage.aimSpeed * 0.2) * difficulty.meter.curve;
     state.meterValue = (Math.sin(state.meterClock * speed) + 1) / 2;
   }
