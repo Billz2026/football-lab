@@ -28,6 +28,11 @@ replaceRequired(
   '  ctx.fillText("TAP TO START", WORLD.width / 2, WORLD.height * 0.64);',
   '  ctx.fillText("TAP TO START", WORLD.width / 2, WORLD.height * 0.86);'
 );
+replaceRequired(
+  "stage reveal duration",
+  "  const exit = 1 - clamp((elapsed - 900) / 260, 0, 1);",
+  "  const exit = 1 - clamp((elapsed - 1150) / 300, 0, 1);"
+);
 
 const marker = "export function drawScene(time, finishAnimation) {";
 if (!source.includes(marker)) throw new Error("V14 presentation patch failed: drawScene marker missing");
@@ -54,7 +59,7 @@ function drawKeeperStageCard(time) {
   const keeper = keeperForStage(Math.max(0, (presentation.stageNumber || state.stage + 1) - 1));
   const elapsed = time - presentation.startedAt;
   const enter = clamp((elapsed - 120) / 260, 0, 1);
-  const exit = 1 - clamp((elapsed - 900) / 260, 0, 1);
+  const exit = 1 - clamp((elapsed - 1150) / 300, 0, 1);
   const alpha = Math.min(enter, exit);
   const width = 690;
   const height = 142;
