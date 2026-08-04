@@ -1,3 +1,15 @@
+function registerFootballLabServiceWorker() {
+  if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
+  navigator.serviceWorker.register("./sw.js", { scope: "./" })
+    .then((registration) => {
+      window.__footballLabServiceWorkerReady = Boolean(registration);
+    })
+    .catch((error) => console.info("Offline shell was not registered", error));
+}
+
+if (document.readyState === "complete") registerFootballLabServiceWorker();
+else window.addEventListener("load", registerFootballLabServiceWorker, { once: true });
+
 import("./game/main-v15-2.js?v=152")
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
