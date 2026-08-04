@@ -5,6 +5,7 @@ import("./game/main-v15-2.js?v=152")
   .then(() => import("./game/keepers-ui-v14.js?v=14"))
   .then(() => import("./game/walls-ui-v15.js?v=15"))
   .then(() => import("./game/run-rules-ui-v15-2.js?v=152"))
+  .then(() => import("./game/mobile-ui-v16.js?v=16"))
   .catch((error) => {
     console.error("Football Lab failed to start", error);
     const message = document.createElement("div");
