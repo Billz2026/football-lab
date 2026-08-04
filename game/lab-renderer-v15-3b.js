@@ -1,16 +1,11 @@
 import {
   clamp, lerp, WORLD, state, elements, ctx, canvasView, currentAimTarget
 } from "./core-v6.js?v=7";
-import {
-  GOAL, PITCH, buildCamera, ballWorld, keeperWorld, kickerWorld
-} from "./world-v7.js?v=7";
-import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=7";
+import { GOAL, ballWorld, keeperWorld, kickerWorld } from "./world-v7.js?v=7";
 import { activeCharacter } from "./characters-v13.js?v=13";
 import { buildWallLayout, keeperForStage, wallForStage } from "./lab-matchups-v15-3.js?v=153";
 
-const viewport = { width: WORLD.width, height: WORLD.height };
 const TAU = Math.PI * 2;
-let activeCamera = null;
 let lastFinishedId = null;
 
 export function resizeCanvas() {
@@ -25,8 +20,14 @@ export function resizeCanvas() {
 }
 
 function applyTransform() {
-  const { dpr, scale, offsetX, offsetY } = canvasView;
-  ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * offsetX, dpr * offsetY);
+  ctx.setTransform(
+    canvasView.dpr * canvasView.scale,
+    0,
+    0,
+    canvasView.dpr * canvasView.scale,
+    canvasView.dpr * canvasView.offsetX,
+    canvasView.dpr * canvasView.offsetY
+  );
 }
 
 function smooth(value) {
@@ -34,7 +35,7 @@ function smooth(value) {
   return t * t * (3 - 2 * t);
 }
 
-function animationProgress(time) {
+function progressAt(time) {
   const animation = state.animation;
   if (!animation) return { run: 0, flight: 0, settle: 0, complete: false };
   const elapsed = time - animation.startedAt;
@@ -64,311 +65,258 @@ function samplePath(path, progress) {
   };
 }
 
-function project(point) {
-  return projectWorld(point, activeCamera, viewport);
-}
-
-function line3d(a, b, stroke, width = 2, alpha = 1) {
-  const segment = projectSegment(a, b, activeCamera, viewport);
-  if (!segment) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.strokeStyle = stroke;
-  ctx.lineWidth = width;
-  ctx.beginPath();
-  ctx.moveTo(segment.a.x, segment.a.y);
-  ctx.lineTo(segment.b.x, segment.b.y);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function polygon3d(points, fill, stroke = null, width = 1) {
-  const projected = points.map(project);
-  if (projected.some((point) => !point.visible)) return;
-  ctx.beginPath();
-  ctx.moveTo(projected[0].x, projected[0].y);
-  projected.slice(1).forEach((point) => ctx.lineTo(point.x, point.y));
-  ctx.closePath();
-  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = width; ctx.stroke(); }
+function screenPoint(world) {
+  const ball = ballWorld(state.currentStage);
+  const depth = clamp(world.z / Math.max(1, ball.z), -0.12, 1.15);
+  const perspective = 0.58 + depth * 0.68;
+  return {
+    x: WORLD.width / 2 + world.x * 40 * perspective,
+    y: 242 + depth * 360 - world.y * 82 * perspective,
+    scale: perspective
+  };
 }
 
 function drawBackground() {
-  const gradient = ctx.createLinearGradient(0, 0, 0, WORLD.height);
-  gradient.addColorStop(0, "#06150d");
-  gradient.addColorStop(0.42, "#0a2115");
-  gradient.addColorStop(1, "#123b24");
-  ctx.fillStyle = gradient;
+  const sky = ctx.createLinearGradient(0, 0, 0, WORLD.height);
+  sky.addColorStop(0, "#06160d");
+  sky.addColorStop(0.42, "#0b2116");
+  sky.addColorStop(1, "#164b2c");
+  ctx.fillStyle = sky;
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
-
-  ctx.fillStyle = "rgba(1,6,3,.72)";
-  ctx.fillRect(0, 92, WORLD.width, 205);
-  for (let row = 0; row < 5; row += 1) {
-    for (let column = 0; column < 36; column += 1) {
-      ctx.fillStyle = `rgba(129,177,132,${0.09 + ((row + column) % 3) * 0.025})`;
+  ctx.fillStyle = "rgba(1,6,3,.74)";
+  ctx.fillRect(0, 85, WORLD.width, 180);
+  for (let row = 0; row < 4; row += 1) {
+    for (let column = 0; column < 34; column += 1) {
+      ctx.fillStyle = `rgba(126,172,130,${0.08 + ((row + column) % 3) * 0.025})`;
       ctx.beginPath();
-      ctx.arc(28 + column * 34 + (row % 2) * 8, 132 + row * 34, 3.2, 0, TAU);
+      ctx.arc(28 + column * 36 + (row % 2) * 9, 122 + row * 36, 3, 0, TAU);
       ctx.fill();
     }
   }
 }
 
 function drawPitch() {
-  polygon3d([
-    { x: -PITCH.halfWidth, y: 0, z: 0 },
-    { x: PITCH.halfWidth, y: 0, z: 0 },
-    { x: PITCH.halfWidth, y: 0, z: state.currentStage.distanceYards * 0.9144 + 15 },
-    { x: -PITCH.halfWidth, y: 0, z: state.currentStage.distanceYards * 0.9144 + 15 }
-  ], "#164b2c");
-
-  for (let z = 0; z < state.currentStage.distanceYards * 0.9144 + 15; z += 6) {
-    polygon3d([
-      { x: -PITCH.halfWidth, y: 0.003, z },
-      { x: PITCH.halfWidth, y: 0.003, z },
-      { x: PITCH.halfWidth, y: 0.003, z: z + 3 },
-      { x: -PITCH.halfWidth, y: 0.003, z: z + 3 }
-    ], "rgba(255,255,255,.025)");
+  ctx.fillStyle = "#174f2e";
+  ctx.beginPath();
+  ctx.moveTo(75, WORLD.height);
+  ctx.lineTo(WORLD.width - 75, WORLD.height);
+  ctx.lineTo(940, 250);
+  ctx.lineTo(260, 250);
+  ctx.closePath();
+  ctx.fill();
+  for (let index = 0; index < 7; index += 1) {
+    const top = 250 + index * 58;
+    ctx.fillStyle = index % 2 ? "rgba(255,255,255,.018)" : "rgba(0,0,0,.025)";
+    ctx.fillRect(80, top, WORLD.width - 160, 30);
   }
-
-  const marking = "rgba(225,242,222,.72)";
-  line3d({ x: -PITCH.penaltyHalfWidth, y: 0.02, z: 0 }, { x: -PITCH.penaltyHalfWidth, y: 0.02, z: PITCH.penaltyDepth }, marking, 2);
-  line3d({ x: PITCH.penaltyHalfWidth, y: 0.02, z: 0 }, { x: PITCH.penaltyHalfWidth, y: 0.02, z: PITCH.penaltyDepth }, marking, 2);
-  line3d({ x: -PITCH.penaltyHalfWidth, y: 0.02, z: PITCH.penaltyDepth }, { x: PITCH.penaltyHalfWidth, y: 0.02, z: PITCH.penaltyDepth }, marking, 2);
-  line3d({ x: -PITCH.sixYardHalfWidth, y: 0.02, z: 0 }, { x: -PITCH.sixYardHalfWidth, y: 0.02, z: PITCH.sixYardDepth }, marking, 1.6);
-  line3d({ x: PITCH.sixYardHalfWidth, y: 0.02, z: 0 }, { x: PITCH.sixYardHalfWidth, y: 0.02, z: PITCH.sixYardDepth }, marking, 1.6);
-  line3d({ x: -PITCH.sixYardHalfWidth, y: 0.02, z: PITCH.sixYardDepth }, { x: PITCH.sixYardHalfWidth, y: 0.02, z: PITCH.sixYardDepth }, marking, 1.6);
+  ctx.strokeStyle = "rgba(225,242,222,.65)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(270, 347);
+  ctx.lineTo(930, 347);
+  ctx.lineTo(1020, 535);
+  ctx.lineTo(180, 535);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(WORLD.width / 2, 540, 122, Math.PI, TAU);
+  ctx.stroke();
 }
 
 function drawGoal() {
-  const white = "rgba(244,250,241,.95)";
-  line3d({ x: -GOAL.halfWidth, y: 0, z: 0 }, { x: -GOAL.halfWidth, y: GOAL.height, z: 0 }, white, 5);
-  line3d({ x: GOAL.halfWidth, y: 0, z: 0 }, { x: GOAL.halfWidth, y: GOAL.height, z: 0 }, white, 5);
-  line3d({ x: -GOAL.halfWidth, y: GOAL.height, z: 0 }, { x: GOAL.halfWidth, y: GOAL.height, z: 0 }, white, 5);
-  line3d({ x: -GOAL.halfWidth, y: 0, z: 0 }, { x: -GOAL.halfWidth, y: 0, z: -GOAL.depth }, white, 2.5);
-  line3d({ x: GOAL.halfWidth, y: 0, z: 0 }, { x: GOAL.halfWidth, y: 0, z: -GOAL.depth }, white, 2.5);
-  line3d({ x: -GOAL.halfWidth, y: GOAL.height, z: 0 }, { x: -GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth }, white, 2.5);
-  line3d({ x: GOAL.halfWidth, y: GOAL.height, z: 0 }, { x: GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth }, white, 2.5);
-
-  for (let index = 1; index < 8; index += 1) {
-    const x = -GOAL.halfWidth + (GOAL.width * index) / 8;
-    line3d({ x, y: 0, z: 0 }, { x, y: GOAL.height, z: 0 }, "rgba(235,246,232,.24)", 1);
+  const left = 430;
+  const right = 770;
+  const top = 190;
+  const bottom = 350;
+  ctx.strokeStyle = "rgba(246,250,244,.96)";
+  ctx.lineWidth = 6;
+  ctx.strokeRect(left, top, right - left, bottom - top);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "rgba(236,246,233,.22)";
+  for (let x = left + 34; x < right; x += 34) {
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
   }
-  for (let index = 1; index < 5; index += 1) {
-    const y = (GOAL.height * index) / 5;
-    line3d({ x: -GOAL.halfWidth, y, z: 0 }, { x: GOAL.halfWidth, y, z: 0 }, "rgba(235,246,232,.24)", 1);
+  for (let y = top + 32; y < bottom; y += 32) {
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(right, y);
+    ctx.stroke();
   }
 }
 
-function drawActor(feet, height, palette, pose = {}) {
-  const measure = projectedHeight(feet, height, activeCamera, viewport);
-  if (!measure) return;
-  const { foot, head } = measure;
-  const scale = clamp(measure.height / 115, 0.35, 1.7);
-  const bodyTopY = head.y + 19 * scale;
-  const hipY = foot.y - 43 * scale;
-  const centreX = foot.x;
-  const lean = (pose.lean || 0) * 22 * scale;
-  const lift = (pose.lift || 0) * 40 * scale;
-  const yOffset = -lift;
-
+function drawActor(world, height, colours, pose = {}) {
+  const point = screenPoint(world);
+  const size = clamp(52 * point.scale * (height / 1.84), 28, 108);
+  const footY = point.y - (pose.lift || 0) * size;
+  const bodyHeight = size * 0.56;
+  const lean = (pose.lean || 0) * size * 0.35;
   ctx.save();
   ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.strokeStyle = palette.outline || "#07110b";
-  ctx.lineWidth = 8 * scale;
+  ctx.strokeStyle = colours.outline || "#07110b";
+  ctx.lineWidth = Math.max(4, size * 0.095);
   ctx.beginPath();
-  ctx.moveTo(centreX - 8 * scale, hipY + yOffset);
-  ctx.lineTo(centreX - 12 * scale - (pose.leftLeg || 0) * 12 * scale, foot.y + yOffset);
-  ctx.moveTo(centreX + 8 * scale, hipY + yOffset);
-  ctx.lineTo(centreX + 12 * scale + (pose.rightLeg || 0) * 12 * scale, foot.y + yOffset);
+  ctx.moveTo(point.x - size * 0.11, footY - bodyHeight * 0.06);
+  ctx.lineTo(point.x - size * 0.15 - (pose.leftLeg || 0) * size * 0.13, footY);
+  ctx.moveTo(point.x + size * 0.11, footY - bodyHeight * 0.06);
+  ctx.lineTo(point.x + size * 0.15 + (pose.rightLeg || 0) * size * 0.13, footY);
   ctx.stroke();
-
-  ctx.fillStyle = palette.shirt;
-  ctx.strokeStyle = palette.outline || "#07110b";
-  ctx.lineWidth = 3 * scale;
+  ctx.fillStyle = colours.shirt;
+  ctx.strokeStyle = colours.outline || "#07110b";
+  ctx.lineWidth = Math.max(2, size * 0.035);
   ctx.beginPath();
-  ctx.roundRect(centreX - 21 * scale + lean, bodyTopY + yOffset, 42 * scale, Math.max(35 * scale, hipY - bodyTopY), 10 * scale);
+  ctx.roundRect(point.x - size * 0.23 + lean, footY - bodyHeight, size * 0.46, bodyHeight * 0.78, size * 0.1);
   ctx.fill();
   ctx.stroke();
-
-  ctx.strokeStyle = palette.skin;
-  ctx.lineWidth = 8 * scale;
+  ctx.strokeStyle = colours.skin;
+  ctx.lineWidth = Math.max(4, size * 0.075);
   ctx.beginPath();
-  ctx.moveTo(centreX - 15 * scale + lean, bodyTopY + 13 * scale + yOffset);
-  ctx.lineTo(centreX - 29 * scale - (pose.armSpread || 0) * 10 * scale, hipY - 5 * scale + yOffset);
-  ctx.moveTo(centreX + 15 * scale + lean, bodyTopY + 13 * scale + yOffset);
-  ctx.lineTo(centreX + 29 * scale + (pose.armSpread || 0) * 10 * scale, hipY - 5 * scale + yOffset);
+  ctx.moveTo(point.x - size * 0.18 + lean, footY - bodyHeight * 0.78);
+  ctx.lineTo(point.x - size * (0.34 + (pose.armSpread || 0) * 0.12), footY - bodyHeight * 0.33);
+  ctx.moveTo(point.x + size * 0.18 + lean, footY - bodyHeight * 0.78);
+  ctx.lineTo(point.x + size * (0.34 + (pose.armSpread || 0) * 0.12), footY - bodyHeight * 0.33);
   ctx.stroke();
-
-  ctx.fillStyle = palette.skin;
-  ctx.strokeStyle = palette.outline || "#07110b";
-  ctx.lineWidth = 2.5 * scale;
+  ctx.fillStyle = colours.skin;
+  ctx.strokeStyle = colours.outline || "#07110b";
+  ctx.lineWidth = Math.max(2, size * 0.03);
   ctx.beginPath();
-  ctx.arc(centreX + lean * 0.5, head.y + 11 * scale + yOffset, 12 * scale, 0, TAU);
+  ctx.arc(point.x + lean * 0.4, footY - bodyHeight - size * 0.12, size * 0.13, 0, TAU);
   ctx.fill();
   ctx.stroke();
   ctx.restore();
 }
 
-function currentTargetX() {
+function targetX() {
   if (Number.isFinite(state.shot?.actualX)) return -GOAL.halfWidth + state.shot.actualX * GOAL.width;
   if (Number.isFinite(state.shot?.aimX)) return -GOAL.halfWidth + state.shot.aimX * GOAL.width;
   return state.currentStage.protectedGoalX || 0;
 }
 
-function wallLayout() {
+function activeWallLayout() {
   return buildWallLayout(state.currentStage, state.stage, {
-    targetX: currentTargetX(),
+    targetX: targetX(),
     curve: state.shot?.curve ?? 0
   });
 }
 
-function wallPassRatio(wall) {
-  const path = state.shot?.path;
-  if (!path?.length) return 0.48;
-  let closestIndex = 0;
-  let closestDistance = Infinity;
-  path.forEach((point, index) => {
-    const distance = Math.hypot(point.x - wall.centre.x, point.z - wall.centre.z);
-    if (distance < closestDistance) { closestDistance = distance; closestIndex = index; }
-  });
-  return closestIndex / Math.max(1, path.length - 1);
-}
-
 function drawWall(progress) {
-  const wall = wallLayout();
+  const wall = activeWallLayout();
   const profile = wallForStage(state.stage);
-  const pass = wallPassRatio(wall);
-  [...wall.players].sort((a, b) => b.z - a.z).forEach((player) => {
-    const timing = pass + (player.timingOffset || 0);
-    const jumpPulse = Math.max(0, Math.sin(clamp((progress.flight - timing + 0.1) / 0.24, 0, 1) * Math.PI));
+  wall.players.forEach((player) => {
+    const jumpCentre = 0.48 + (player.timingOffset || 0);
+    const jump = Math.max(0, Math.sin(clamp((progress.flight - jumpCentre + 0.13) / 0.26, 0, 1) * Math.PI));
     const hit = state.shot?.outcome === "WALL" && state.shot?.collision?.playerIndex === player.index;
-    const impact = hit ? smooth(progress.settle) : 0;
     drawActor(player, profile.playerHeight, {
       shirt: player.index % 2 ? profile.secondary : profile.accent,
       skin: "#c99774",
-      outline: "#0a120d"
+      outline: "#08120c"
     }, {
-      lift: jumpPulse * profile.modifiers.jumpMultiplier * (player.jumpMultiplier || 1) * 0.7,
-      lean: impact * (player.index % 2 ? -0.45 : 0.45),
-      armSpread: jumpPulse * 0.2 + impact * 0.5
+      lift: jump * profile.modifiers.jumpMultiplier * (player.jumpMultiplier || 1) * 0.42,
+      lean: hit ? smooth(progress.settle) * (player.index % 2 ? -0.45 : 0.45) : 0,
+      armSpread: jump * 0.18
     });
+  });
+}
+
+function drawKeeper(progress) {
+  const profile = keeperForStage(state.stage);
+  const plan = state.shot?.keeperPlan;
+  const base = plan?.start || keeperWorld(state.currentStage);
+  let position = base;
+  let dive = 0;
+  if (plan && progress.flight > 0) {
+    const reaction = clamp(plan.reaction / Math.max(plan.flightSeconds, 0.01), 0, 0.85);
+    dive = smooth((progress.flight - reaction) / Math.max(0.12, 1 - reaction));
+    position = {
+      x: lerp(base.x, plan.contact.x, dive * 0.78),
+      y: 0,
+      z: lerp(base.z, plan.contact.z, dive * 0.3)
+    };
+  }
+  drawActor(position, profile.visualHeight, {
+    shirt: profile.accent,
+    skin: "#c99774",
+    outline: "#07110b"
+  }, {
+    lean: plan ? Math.sign(plan.contact.x - base.x || 1) * dive * 0.7 : 0,
+    lift: Math.sin(dive * Math.PI) * 0.22,
+    armSpread: dive * 1.15,
+    leftLeg: -dive * 0.2,
+    rightLeg: dive * 0.2
   });
 }
 
 function drawKicker(progress) {
   const character = activeCharacter();
   const run = smooth(progress.run);
-  const feet = kickerWorld(state.currentStage, run);
-  const kickPhase = progress.flight > 0 ? Math.max(0, 1 - progress.flight * 4) : 0;
-  drawActor(feet, 1.82, {
+  const position = kickerWorld(state.currentStage, run);
+  const strike = progress.flight > 0 ? Math.max(0, 1 - progress.flight * 4) : 0;
+  drawActor(position, 1.82, {
     shirt: character.accent,
     skin: "#c99774",
     outline: "#07110b"
   }, {
-    lean: run * 0.13 + kickPhase * 0.12,
-    leftLeg: Math.sin(run * Math.PI * 4) * 0.35,
-    rightLeg: -Math.sin(run * Math.PI * 4) * 0.35 + kickPhase * 0.7,
+    lean: run * 0.12 + strike * 0.12,
+    leftLeg: Math.sin(run * Math.PI * 4) * 0.28,
+    rightLeg: -Math.sin(run * Math.PI * 4) * 0.28 + strike * 0.7,
     armSpread: run * 0.16
   });
 }
 
-function drawKeeper(progress) {
-  const profile = keeperForStage(state.stage);
-  const base = state.shot?.keeperPlan?.start || keeperWorld(state.currentStage);
-  const plan = state.shot?.keeperPlan;
-  let feet = base;
-  let dive = 0;
-  if (plan && progress.flight > 0) {
-    const reactionRatio = clamp(plan.reaction / Math.max(plan.flightSeconds, 0.01), 0, 0.85);
-    dive = smooth((progress.flight - reactionRatio) / Math.max(0.12, 1 - reactionRatio));
-    feet = {
-      x: lerp(base.x, plan.contact.x, dive * 0.76),
-      y: 0,
-      z: lerp(base.z, plan.contact.z, dive * 0.35)
-    };
-  }
-  drawActor(feet, profile.visualHeight, {
-    shirt: profile.accent,
-    skin: "#c99774",
-    outline: "#07110b"
-  }, {
-    lean: plan ? Math.sign(plan.contact.x - base.x || 1) * dive * 0.62 : 0,
-    lift: Math.sin(dive * Math.PI) * 0.34,
-    armSpread: dive * 0.9,
-    leftLeg: -dive * 0.25,
-    rightLeg: dive * 0.25
-  });
-}
-
 function drawBall(progress) {
-  const ball = progress.flight > 0 && state.shot?.path?.length
+  const world = progress.flight > 0 && state.shot?.path?.length
     ? samplePath(state.shot.path, progress.flight)
     : ballWorld(state.currentStage);
-  if (!ball) return;
-  const point = project(ball);
-  if (!point.visible) return;
-  const radius = clamp(point.scale * 0.11, 4, 14);
-  ctx.save();
-  ctx.shadowColor = "rgba(255,255,255,.35)";
-  ctx.shadowBlur = 10;
+  if (!world) return;
+  const point = screenPoint(world);
+  const radius = clamp(8 * point.scale, 5, 13);
   ctx.fillStyle = "#f7faf5";
   ctx.strokeStyle = "#0a100c";
-  ctx.lineWidth = Math.max(1.5, radius * 0.18);
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(point.x, point.y, radius, 0, TAU);
   ctx.fill();
   ctx.stroke();
   ctx.fillStyle = "#111814";
   ctx.beginPath();
-  ctx.arc(point.x + radius * 0.18, point.y - radius * 0.1, radius * 0.28, 0, TAU);
+  ctx.arc(point.x + radius * 0.18, point.y - radius * 0.12, radius * 0.28, 0, TAU);
   ctx.fill();
-  ctx.restore();
 }
 
 function drawAimMarker() {
   if (state.phase !== "aim") return;
   const target = currentAimTarget();
-  const world = {
-    x: -GOAL.halfWidth + target.x * GOAL.width,
-    y: GOAL.height * (1 - target.y),
-    z: GOAL.lineZ
-  };
-  const point = project(world);
-  if (!point.visible) return;
-  ctx.save();
+  const x = 430 + target.x * 340;
+  const y = 190 + target.y * 160;
   ctx.strokeStyle = activeCharacter().accent;
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.arc(point.x, point.y, 22, 0, TAU);
-  ctx.moveTo(point.x - 30, point.y);
-  ctx.lineTo(point.x + 30, point.y);
-  ctx.moveTo(point.x, point.y - 30);
-  ctx.lineTo(point.x, point.y + 30);
+  ctx.arc(x, y, 22, 0, TAU);
+  ctx.moveTo(x - 30, y);
+  ctx.lineTo(x + 30, y);
+  ctx.moveTo(x, y - 30);
+  ctx.lineTo(x, y + 30);
   ctx.stroke();
-  ctx.restore();
 }
 
-function drawLabels() {
+function drawMatchupLabel() {
   const keeper = keeperForStage(state.stage);
   const wall = wallForStage(state.stage);
-  ctx.save();
-  ctx.fillStyle = "rgba(2,8,4,.72)";
+  ctx.fillStyle = "rgba(2,8,4,.76)";
   ctx.beginPath();
-  ctx.roundRect(18, WORLD.height - 52, 500, 34, 10);
+  ctx.roundRect(18, WORLD.height - 50, 500, 32, 10);
   ctx.fill();
-  ctx.fillStyle = "rgba(240,247,237,.82)";
+  ctx.fillStyle = "rgba(240,247,237,.84)";
   ctx.font = "850 11px system-ui";
-  ctx.textAlign = "left";
-  ctx.fillText(`${activeCharacter().name} · ${keeper.nickname} · ${wall.nickname}`, 32, WORLD.height - 31);
-  ctx.restore();
+  ctx.fillText(`${activeCharacter().name} · ${keeper.nickname} · ${wall.nickname}`, 32, WORLD.height - 29);
 }
 
 export function drawScene(time, finishAnimation) {
   applyTransform();
   ctx.clearRect(0, 0, WORLD.width, WORLD.height);
-  activeCamera = buildCamera(state.currentStage);
-  const progress = animationProgress(time);
+  const progress = progressAt(time);
   drawBackground();
   drawPitch();
   drawGoal();
@@ -377,8 +325,7 @@ export function drawScene(time, finishAnimation) {
   drawKicker(progress);
   drawBall(progress);
   drawAimMarker();
-  drawLabels();
-
+  drawMatchupLabel();
   if (progress.complete && state.animation && state.animation.id !== lastFinishedId) {
     lastFinishedId = state.animation.id;
     queueMicrotask(() => finishAnimation(lastFinishedId));
