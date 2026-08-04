@@ -1,3 +1,15 @@
+function registerFootballLabServiceWorker() {
+  if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
+  navigator.serviceWorker.register("./sw.js", { scope: "./" })
+    .then((registration) => {
+      window.__footballLabServiceWorkerReady = Boolean(registration);
+    })
+    .catch((error) => console.info("Offline shell was not registered", error));
+}
+
+if (document.readyState === "complete") registerFootballLabServiceWorker();
+else window.addEventListener("load", registerFootballLabServiceWorker, { once: true });
+
 import("./game/main-v15-2.js?v=152")
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
@@ -6,6 +18,8 @@ import("./game/main-v15-2.js?v=152")
   .then(() => import("./game/walls-ui-v15.js?v=15"))
   .then(() => import("./game/run-rules-ui-v15-2.js?v=152"))
   .then(() => import("./game/mobile-ui-v16.js?v=16"))
+  .then(() => import("./game/mobile-shell-v16-1.js?v=161"))
+  .then(() => import("./game/mobile-shell-compact-v16-1.js?v=161"))
   .catch((error) => {
     console.error("Football Lab failed to start", error);
     const message = document.createElement("div");
