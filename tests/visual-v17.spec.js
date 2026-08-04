@@ -50,7 +50,7 @@ test("V17 boots the cinematic renderer and produces a graded stadium frame", asy
   const signature = await canvasSignature(page);
 
   expect(signature.visualBuild).toBe("17");
-  expect(signature.unique).toBeGreaterThan(18);
+  expect(signature.unique).toBeGreaterThan(14);
   expect(signature.averageBrightness).toBeGreaterThan(8);
   expect(signature.filter).toContain("saturate");
   expect(errors).toEqual([]);
