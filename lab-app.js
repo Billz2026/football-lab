@@ -1,4 +1,4 @@
-import("./game/lab-controller-v15-3b.js?v=1531").catch((error) => {
+import("./game/lab-controller-v15-3c.js?v=1532").catch((error) => {
   console.error("Standalone Matchup Lab failed to start", error);
   const message = document.createElement("div");
   message.className = "lab-startup-error";
