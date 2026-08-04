@@ -1,4 +1,4 @@
-import("./game/main-v9.js?v=9").catch((error) => {
+import("./game/main-v10.js?v=10").catch((error) => {
   console.error("Football Lab failed to start", error);
   const message = document.createElement("div");
   message.textContent = "The game failed to load. Refresh the page and try again.";
