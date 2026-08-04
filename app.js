@@ -10,7 +10,7 @@ function registerFootballLabServiceWorker() {
 if (document.readyState === "complete") registerFootballLabServiceWorker();
 else window.addEventListener("load", registerFootballLabServiceWorker, { once: true });
 
-import("./game/main-v15-2.js?v=152")
+import("./game/main-v17.js?v=17")
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
   .then(() => import("./game/characters-ui-v13.js?v=13"))
@@ -20,6 +20,7 @@ import("./game/main-v15-2.js?v=152")
   .then(() => import("./game/mobile-ui-v16.js?v=16"))
   .then(() => import("./game/mobile-shell-v16-1.js?v=161"))
   .then(() => import("./game/mobile-shell-compact-v16-1.js?v=161"))
+  .then(() => import("./game/visual-ui-v17.js?v=17"))
   .catch((error) => {
     console.error("Football Lab failed to start", error);
     const message = document.createElement("div");
