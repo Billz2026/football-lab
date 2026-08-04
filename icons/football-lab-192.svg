@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-label="Football Lab">
+  <defs>
+    <linearGradient id="bg" x1="24" y1="16" x2="168" y2="176" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#12281A"/>
+      <stop offset="1" stop-color="#020604"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(96 80) rotate(90) scale(92)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DAFE4D" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#DAFE4D" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="url(#bg)"/>
+  <rect width="192" height="192" rx="42" fill="url(#glow)"/>
+  <path d="M30 138C62 116 130 116 162 138" fill="none" stroke="#466B50" stroke-width="5" stroke-linecap="round"/>
+  <path d="M55 70h82v53H55z" fill="none" stroke="#F4F7F0" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M62 76v39m14-39v39m14-39v39m14-39v39m14-39v39m13-39v39M55 89h82m-82 13h82" stroke="#587061" stroke-width="2" opacity=".75"/>
+  <circle cx="96" cy="126" r="29" fill="#DAFE4D"/>
+  <path d="m96 106 12 9-5 15H89l-5-15 12-9Zm-25 11 13-2 5 15-10 10-12-8 4-15Zm50-2 13 2 4 15-12 8-10-10 5-15Zm-32 15h14l6 14-13 9-13-9 6-14Z" fill="#08110B"/>
+  <circle cx="96" cy="126" r="29" fill="none" stroke="#F4F7F0" stroke-opacity=".3" stroke-width="3"/>
+  <path d="M57 43h78" stroke="#DAFE4D" stroke-width="7" stroke-linecap="round"/>
+</svg>
