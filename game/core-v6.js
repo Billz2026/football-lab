@@ -1,4 +1,4 @@
-import { scenarioForStage } from "./world-v6.js?v=6";
+import { scenarioForStage } from "./world-v6.js?v=152";
 
 export const $ = (selector, scope = document) => scope.querySelector(selector);
 export const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
@@ -16,6 +16,8 @@ export const formatScore = (value) => Math.max(0, Math.round(value)).toLocaleStr
 
 export const WORLD = { width: 1200, height: 720 };
 export const STORAGE_KEY = "footballLabArcadeProfileV2";
+export const MAX_LIVES = 5;
+export const LIFE_STREAK_TARGET = 3;
 
 function loadProfile() {
   const fallback = { highScore: 0, bestStreak: 0, xp: 0 };
@@ -36,6 +38,8 @@ export const state = {
   bestRunStreak: 0,
   stage: 0,
   misses: 0,
+  maxLives: MAX_LIVES,
+  lifeStreakTarget: LIFE_STREAK_TARGET,
   meterClock: 0,
   meterValue: 0,
   lastTime: performance.now(),
@@ -78,7 +82,8 @@ export function createShot() {
   return {
     power: null, aimX: null, aimY: null, curve: null, actualX: null, actualY: null,
     outcome: null, points: 0, topCorner: false, path: [], impactIndex: null,
-    collision: null, keeperPlan: null, saveType: null, strikeQuality: 0, speedMps: 0
+    collision: null, keeperPlan: null, saveType: null, strikeQuality: 0, speedMps: 0,
+    lifeRestored: false
   };
 }
 state.shot = createShot();
@@ -107,7 +112,8 @@ export function renderProfile() {
 export function setStageWind() {
   const stage = stageConfig();
   const phase = (state.stage + 1) * 1.73 + state.misses * 0.91;
-  state.stageWind = clamp(stage.wind + Math.sin(phase) * 0.012, -0.24, 0.24);
+  const gust = Math.sin(phase) * (stage.windVariance || 0.015);
+  state.stageWind = clamp(stage.wind + gust, -0.36, 0.36);
 }
 
 export function showScreen(name) {
@@ -142,12 +148,12 @@ export function setPhase(phase) {
   state.meterValue = phase === "curve" ? 0.5 : 0;
   const stage = stageConfig();
   const content = {
-    ready: ["READY", `${stage.label}. The camera, wall and keeper now share one real perspective.`, "START SHOT", "SHOT METER"],
+    ready: ["READY", `${stage.label}. Five lives available; three consecutive goals restore one lost life.`, "START SHOT", "SHOT METER"],
     power: ["SET POWER", "Power controls pace and height. Stop inside the clean contact zone.", "LOCK POWER", "POWER"],
     aim: ["PICK YOUR SIDE", "The target sits on the real goal plane. Read the wall coverage before committing.", "LOCK PLACEMENT", "PLACEMENT"],
     curve: ["ADD CURVE", "Curl develops through the flight. Counter the wind and bend around the wall.", "TAKE SHOT", "CURVE"],
     shooting: ["WATCH THE FLIGHT", "The ball travels through the same world space as the wall, goal and goalkeeper.", "SHOT IN PLAY", "LOCKED"],
-    result: ["SHOT COMPLETE", "The next successful stage changes the real distance and angle.", "NEXT SHOT", "RESULT"]
+    result: ["SHOT COMPLETE", "Build a three-goal streak to recover one lost life.", "NEXT SHOT", "RESULT"]
   }[phase];
   elements.phaseTitle.textContent = content[0];
   elements.phaseHelp.textContent = content[1];
@@ -159,7 +165,7 @@ export function setPhase(phase) {
 }
 
 export function idealPower() {
-  return clamp(0.63 + (stageConfig().distanceYards - 18) * 0.0082, 0.66, 0.80);
+  return clamp(0.63 + (stageConfig().distanceYards - 18) * 0.0082, 0.66, 0.86);
 }
 
 export function strikeQuality(power) {
@@ -195,11 +201,14 @@ export function currentAimTarget() {
 
 export function renderHud() {
   const stage = stageConfig();
+  const maxLives = state.maxLives || MAX_LIVES;
+  const livesRemaining = Math.max(0, maxLives - state.misses);
   elements.stageNumber.textContent = `STAGE ${String(state.stage + 1).padStart(2, "0")} · ${stage.distanceYards} YDS`;
   elements.stageName.textContent = stage.name;
   elements.scoreValue.textContent = formatScore(state.score);
   elements.streakValue.textContent = String(state.streak);
-  elements.livesValue.textContent = [0, 1, 2].map((index) => index < 3 - state.misses ? "●" : "○").join(" ");
+  elements.livesValue.textContent = Array.from({ length: maxLives }, (_, index) => index < livesRemaining ? "●" : "○").join(" ");
+  elements.livesValue.title = `${livesRemaining} of ${maxLives} lives · ${Math.min(state.streak, LIFE_STREAK_TARGET)}/${LIFE_STREAK_TARGET} goals toward recovery`;
   elements.windArrow.textContent = state.stageWind < -0.015 ? "←" : state.stageWind > 0.015 ? "→" : "•";
   elements.windValue.textContent = `${Math.abs(state.stageWind * 10).toFixed(1)} m/s`;
 }
