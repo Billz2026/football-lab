@@ -44,15 +44,18 @@ test("phone portrait keeps the mobile HUD, control status and action button visi
   await expect(page.locator("#mobileGameHudV161")).toBeVisible();
   await expect(page.locator("#mobileRunStripV161")).toBeVisible();
   await expect(page.locator(".mobile-fullscreen-v161")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => Boolean(document.getElementById("mobileGameShellCompactStylesV161")?.sheet))).toBe(true);
 
   const metrics = await page.evaluate(() => {
     const rect = (selector) => document.querySelector(selector)?.getBoundingClientRect();
     const action = rect("#shotAction");
     const frame = rect(".game-frame");
+    const hud = rect("#mobileGameHudV161");
     return {
       viewportHeight: window.innerHeight,
       actionBottom: action ? action.bottom : null,
-      frameRatio: frame ? frame.height / frame.width : null
+      frameRatio: frame ? frame.height / frame.width : null,
+      hudRatio: frame && hud ? hud.height / frame.height : null
     };
   });
 
@@ -60,6 +63,8 @@ test("phone portrait keeps the mobile HUD, control status and action button visi
   expect(metrics.actionBottom).toBeLessThan(metrics.viewportHeight);
   expect(metrics.frameRatio).toBeGreaterThan(.56);
   expect(metrics.frameRatio).toBeLessThan(.65);
+  expect(metrics.hudRatio).not.toBeNull();
+  expect(metrics.hudRatio).toBeLessThan(.34);
 });
 
 test("PWA manifest and service worker are available", async ({ page, request }) => {
