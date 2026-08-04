@@ -1,5 +1,6 @@
 import("./game/main-v10.js?v=10")
   .then(() => import("./game/polish-v10-1.js?v=101"))
+  .then(() => import("./game/animation-v11.js?v=11"))
   .catch((error) => {
     console.error("Football Lab failed to start", error);
     const message = document.createElement("div");
