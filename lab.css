@@ -1,0 +1,28 @@
+.lab-page { min-height:100vh; background:#020704; color:#eef6eb; }
+.lab-shell { width:min(1880px,100%); margin:0 auto; padding:20px; }
+.lab-header { display:flex; justify-content:space-between; align-items:center; gap:24px; padding:22px 24px; margin-bottom:16px; }
+.lab-header h1 { margin:7px 0 6px; font:1000 clamp(30px,4vw,54px)/.9 system-ui; letter-spacing:-.045em; }
+.lab-header p { max-width:820px; margin:0; color:rgba(235,243,232,.62); font:650 13px/1.5 system-ui; }
+.lab-layout { display:grid; grid-template-columns:340px minmax(0,1fr); gap:16px; align-items:start; }
+.lab-controls { position:sticky; top:16px; padding:18px; max-height:calc(100vh - 32px); overflow:auto; }
+.lab-control-grid { display:grid; gap:10px; }
+.lab-control-grid label { display:grid; gap:7px; color:rgba(235,243,232,.5); font:850 8px/1 system-ui; letter-spacing:.09em; }
+.lab-control-grid select { width:100%; border:1px solid rgba(255,255,255,.11); border-radius:10px; padding:11px; background:#0c1911; color:#f5faf3; font:750 11px system-ui; }
+.lab-actions { display:grid; gap:8px; margin:15px 0; }
+.lab-actions .button { width:100%; }
+.lab-matchup-summary { min-height:78px; padding:12px; border:1px solid rgba(218,254,77,.14); border-radius:12px; background:rgba(218,254,77,.04); color:rgba(239,247,236,.72); font:700 10px/1.5 system-ui; }
+.lab-matchup-summary strong { display:block; margin-bottom:5px; color:#dafe4d; font:950 11px/1.2 system-ui; }
+.lab-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:12px; }
+.lab-stats div,.lab-analysis div { padding:10px; border:1px solid rgba(255,255,255,.07); border-radius:10px; background:rgba(255,255,255,.025); }
+.lab-stats span,.lab-analysis span { display:block; color:rgba(235,243,232,.42); font:800 7px/1 system-ui; letter-spacing:.07em; }
+.lab-stats strong { display:block; margin-top:6px; font:1000 17px/1 system-ui; }
+.lab-analysis { display:grid; gap:7px; margin-top:7px; }
+.lab-analysis strong { display:block; margin-top:6px; color:#dafe4d; font:900 11px/1.2 system-ui; }
+.lab-last { min-height:62px; margin:10px 0 0; padding:11px; border-radius:10px; background:rgba(0,0,0,.24); color:rgba(235,243,232,.62); font:700 9px/1.5 system-ui; }
+.lab-game { min-width:0; }
+.lab-game .game-layout { grid-template-columns:minmax(0,1fr) 330px; }
+.lab-hidden-stat { display:none !important; }
+body[data-lab-ready="true"] .lab-header::after { content:"READY"; color:#dafe4d; font:900 9px/1 system-ui; letter-spacing:.12em; }
+@media (max-width:1180px) { .lab-layout { grid-template-columns:1fr; } .lab-controls { position:static; max-height:none; } .lab-control-grid { grid-template-columns:repeat(3,1fr); } .lab-actions { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:850px) { .lab-shell { padding:8px; } .lab-header { align-items:flex-start; flex-direction:column; } .lab-control-grid { grid-template-columns:1fr 1fr; } .lab-actions { grid-template-columns:1fr; } .lab-game .game-layout { grid-template-columns:1fr; } }
+@media (max-width:520px) { .lab-control-grid { grid-template-columns:1fr; } }
