@@ -23,7 +23,13 @@ test("public Classic Kicks boots and starts a five-life run", async ({ page }) =
 test("standalone Matchup Lab boots and applies a late scenario", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/lab.html");
-  await expect(page.locator("body")).toHaveAttribute("data-lab-ready", "true", { timeout: 20000 });
+  await page.waitForTimeout(3000);
+  const startupError = await page.locator(".lab-startup-error").textContent().catch(() => null);
+  if (startupError || errors.length) {
+    console.log("LAB STARTUP ERROR:", startupError || "none");
+    console.log("LAB PAGE ERRORS:", errors);
+  }
+  await expect(page.locator("body")).toHaveAttribute("data-lab-ready", "true", { timeout: 17000 });
   await expect(page.locator("#gameCanvas")).toBeVisible();
   await page.locator("#labStage").selectOption("14");
   await page.locator("#labKeeper").selectOption("giant");
