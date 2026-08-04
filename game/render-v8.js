@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./render-v7.js?v=7";
+import { drawScene as drawBaseScene, resizeCanvas } from "./render-v11-2-base.js?v=112";
 import {
   clamp, lerp, WORLD, state, ctx, easeOutCubic
 } from "./core-v6.js?v=7";
@@ -31,7 +31,7 @@ function cameraForFrame(time) {
 
 function drawKeeperReach(time) {
   const plan = state.shot?.keeperPlan;
-  if (!state.animation || !plan) return;
+  if (!state.animation || !plan || state.shot?.outcome !== "SAVE") return;
 
   const progress = progressAt(time);
   const reactionFraction = clamp(plan.reaction / Math.max(0.01, plan.flightSeconds), 0.1, 0.72);
@@ -82,12 +82,12 @@ function drawKeeperReach(time) {
   ctx.stroke();
 
   const gloveRadius = clamp(handScreen.scale * 0.095, 2.8, 6.5);
-  ctx.fillStyle = plan.saved ? "#f4ffbf" : "rgba(244,255,191,.78)";
+  ctx.fillStyle = "#f4ffbf";
   ctx.beginPath();
   ctx.arc(handScreen.x, handScreen.y, gloveRadius, 0, Math.PI * 2);
   ctx.fill();
 
-  if (plan.saved && progress.flight > 0.78) {
+  if (progress.flight > 0.78) {
     const pulse = clamp((progress.flight - 0.78) / 0.18, 0, 1);
     ctx.strokeStyle = `rgba(218,254,77,${0.55 * (1 - pulse)})`;
     ctx.lineWidth = 1.8;
