@@ -18,6 +18,17 @@ function injectStyles() {
   document.head.appendChild(style);
 }
 
+function updateMenuCopy() {
+  const heroCopy = document.querySelector(".hero-copy");
+  if (heroCopy) heroCopy.textContent = "Choose a specialist, survive 15 handcrafted free-kick scenarios and recover lost lives by building three-goal streaks.";
+  const meta = document.querySelectorAll(".hero-meta span");
+  if (meta[1]) meta[1].innerHTML = "<b>15+</b> SCENARIOS";
+  const modeCopy = document.querySelector("#classicCard small");
+  if (modeCopy) modeCopy.textContent = "Five lives, streak recovery and escalating distance, wall, goalkeeper and wind challenges.";
+  const livesNode = document.getElementById("livesValue");
+  if (livesNode && !state.misses) livesNode.textContent = Array.from({ length: MAX_LIVES }, () => "●").join(" ");
+}
+
 function ensurePanel() {
   const control = document.querySelector(".control-panel");
   if (!control) return null;
@@ -47,9 +58,12 @@ function render() {
   copy.textContent = lives >= MAX_LIVES
     ? "LIVES FULL"
     : `${progress}/${LIFE_STREAK_TARGET} TO RESTORE`;
+  const livesNode = document.getElementById("livesValue");
+  if (livesNode) livesNode.title = `${lives} of ${MAX_LIVES} lives · ${progress}/${LIFE_STREAK_TARGET} goals toward recovery`;
 }
 
 injectStyles();
+updateMenuCopy();
 render();
 
 const streakNode = document.getElementById("streakValue");
