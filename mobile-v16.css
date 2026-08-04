@@ -1,0 +1,495 @@
+/* V16 responsive gameplay layer.
+   Loaded only by the public application and scoped to an active game run. */
+
+:root {
+  --game-viewport-height: 100dvh;
+  --game-safe-top: max(8px, env(safe-area-inset-top));
+  --game-safe-right: max(8px, env(safe-area-inset-right));
+  --game-safe-bottom: max(8px, env(safe-area-inset-bottom));
+  --game-safe-left: max(8px, env(safe-area-inset-left));
+}
+
+body.is-game-active {
+  min-height: var(--game-viewport-height);
+  background: #020604;
+  overscroll-behavior: none;
+}
+
+body.is-game-active .app-shell {
+  width: 100%;
+  max-width: none;
+}
+
+body.is-game-active .site-header {
+  display: none;
+}
+
+body.is-game-active main {
+  min-height: var(--game-viewport-height);
+  padding: var(--game-safe-top) var(--game-safe-right) var(--game-safe-bottom) var(--game-safe-left);
+}
+
+body.is-game-active #gameScreen.is-active {
+  animation: none;
+}
+
+body.is-game-active .game-topbar,
+body.is-game-active .game-frame,
+body.is-game-active .control-panel {
+  box-shadow: 0 14px 42px rgba(0, 0, 0, .34);
+}
+
+body.is-game-active .game-frame {
+  isolation: isolate;
+}
+
+body.is-game-active #gameCanvas {
+  image-rendering: auto;
+}
+
+/* Large foldables and compact tablets: keep the pitch and controls together. */
+@media (min-width: 721px) and (max-width: 1100px) {
+  body.is-game-active .game-topbar {
+    min-height: 58px;
+    margin-bottom: 10px;
+    padding: 8px 11px;
+    gap: 10px;
+    border-radius: 17px;
+  }
+
+  body.is-game-active .icon-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+  }
+
+  body.is-game-active .stage-copy {
+    min-width: 132px;
+  }
+
+  body.is-game-active .stage-copy strong {
+    font-size: 13px;
+  }
+
+  body.is-game-active .active-keeper-chip-v14 {
+    padding: 6px 8px;
+  }
+
+  body.is-game-active .game-stats div {
+    min-width: 70px;
+    padding: 3px 9px;
+  }
+
+  body.is-game-active .game-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(262px, 31vw, 320px);
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  body.is-game-active .game-frame,
+  body.is-game-active #gameCanvas {
+    min-height: 0;
+    max-height: none;
+  }
+
+  body.is-game-active .game-frame {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 3;
+    border-radius: 18px;
+  }
+
+  body.is-game-active #gameCanvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  body.is-game-active .wind-chip {
+    left: 11px;
+    top: 11px;
+    padding: 7px 9px;
+  }
+
+  body.is-game-active .canvas-prompt {
+    bottom: 11px;
+    padding: 7px 10px;
+  }
+
+  body.is-game-active .control-panel {
+    min-height: 0;
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  body.is-game-active .control-heading h2 {
+    margin-top: 5px;
+    font-size: 23px;
+  }
+
+  body.is-game-active .control-heading p {
+    min-height: 0;
+    margin: 8px 0 5px;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  body.is-game-active .run-rules-v152 {
+    margin: 7px 0 2px;
+    padding: 7px 8px;
+    gap: 6px 8px;
+  }
+
+  body.is-game-active .run-rules-v152 > strong {
+    font-size: 9px;
+  }
+
+  body.is-game-active .run-rules-v152 > span {
+    font-size: 7px;
+  }
+
+  body.is-game-active .active-wall-chip-v15 {
+    grid-template-columns: 29px 1fr;
+    gap: 8px;
+    margin: 7px 0 2px;
+    padding: 7px 8px;
+  }
+
+  body.is-game-active .active-wall-chip-v15 i {
+    width: 29px;
+    height: 29px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  body.is-game-active .active-wall-chip-v15 em {
+    display: none;
+  }
+
+  body.is-game-active .shot-steps {
+    gap: 5px;
+    margin-top: 7px;
+  }
+
+  body.is-game-active .shot-step {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  body.is-game-active .shot-step > span {
+    width: 24px;
+    height: 24px;
+  }
+
+  body.is-game-active .meter-wrap {
+    margin-top: 12px;
+  }
+
+  body.is-game-active .meter {
+    height: 16px;
+  }
+
+  body.is-game-active .action-button {
+    min-height: 49px;
+    margin-top: 13px;
+  }
+
+  body.is-game-active .input-note {
+    display: none;
+  }
+}
+
+/* Standard phones: an app-like compact stack that remains playable without scrolling. */
+@media (max-width: 720px) {
+  body.is-game-active main {
+    padding-top: var(--game-safe-top);
+  }
+
+  body.is-game-active .game-topbar {
+    min-height: 50px;
+    margin-bottom: 7px;
+    padding: 6px 7px;
+    gap: 6px;
+    border-radius: 14px;
+  }
+
+  body.is-game-active .icon-button {
+    width: 37px;
+    height: 37px;
+    border-radius: 10px;
+    font-size: 17px;
+  }
+
+  body.is-game-active .game-stats {
+    min-width: 0;
+  }
+
+  body.is-game-active .game-stats div {
+    min-width: 0;
+    padding: 2px 5px;
+  }
+
+  body.is-game-active .game-stats span {
+    font-size: 7px;
+  }
+
+  body.is-game-active .game-stats strong {
+    font-size: 12px;
+  }
+
+  body.is-game-active #livesValue {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  body.is-game-active .game-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  body.is-game-active .game-frame,
+  body.is-game-active #gameCanvas {
+    min-height: 0;
+    max-height: none;
+  }
+
+  body.is-game-active .game-frame {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 3;
+    border-radius: 15px;
+  }
+
+  body.is-game-active #gameCanvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  body.is-game-active .wind-chip {
+    left: 8px;
+    top: 8px;
+    gap: 6px;
+    padding: 5px 7px;
+    border-radius: 9px;
+  }
+
+  body.is-game-active .wind-chip > span {
+    font-size: 16px;
+  }
+
+  body.is-game-active .wind-chip small {
+    font-size: 6px;
+  }
+
+  body.is-game-active .wind-chip strong {
+    font-size: 9px;
+  }
+
+  body.is-game-active .canvas-prompt {
+    bottom: 7px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    font-size: 7px;
+  }
+
+  body.is-game-active .result-banner {
+    min-width: 150px;
+    padding: 10px 15px;
+    border-radius: 11px;
+  }
+
+  body.is-game-active .control-panel {
+    min-height: 0;
+    padding: 11px;
+    border-radius: 15px;
+  }
+
+  body.is-game-active .control-heading {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 6px;
+  }
+
+  body.is-game-active .control-heading .section-label {
+    grid-column: 1;
+  }
+
+  body.is-game-active .control-heading h2 {
+    grid-column: 1;
+    margin: 3px 0 0;
+    font-size: 20px;
+  }
+
+  body.is-game-active .control-heading p {
+    display: none;
+  }
+
+  body.is-game-active .run-rules-v152 {
+    grid-template-columns: auto 1fr;
+    gap: 5px 7px;
+    margin: 7px 0 0;
+    padding: 6px 7px;
+    border-radius: 9px;
+  }
+
+  body.is-game-active .run-rules-v152 > strong {
+    font-size: 8px;
+  }
+
+  body.is-game-active .run-rules-v152 > span {
+    font-size: 6px;
+    white-space: nowrap;
+  }
+
+  body.is-game-active .life-progress-v152 {
+    gap: 5px;
+  }
+
+  body.is-game-active .life-progress-v152 i {
+    width: 6px;
+    height: 6px;
+  }
+
+  body.is-game-active .life-progress-v152 small {
+    font-size: 6px;
+  }
+
+  body.is-game-active .active-wall-chip-v15 {
+    grid-template-columns: 27px 1fr;
+    gap: 7px;
+    margin: 6px 0 0;
+    padding: 6px 7px;
+    border-radius: 9px;
+  }
+
+  body.is-game-active .active-wall-chip-v15 i {
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  body.is-game-active .active-wall-chip-v15 span {
+    font-size: 6px;
+  }
+
+  body.is-game-active .active-wall-chip-v15 strong {
+    margin-top: 2px;
+    font-size: 8px;
+  }
+
+  body.is-game-active .active-wall-chip-v15 em {
+    display: none;
+  }
+
+  body.is-game-active .shot-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+    margin-top: 7px;
+  }
+
+  body.is-game-active .shot-step {
+    min-width: 0;
+    gap: 5px;
+    padding: 6px 5px;
+    border-radius: 9px;
+  }
+
+  body.is-game-active .shot-step > span {
+    width: 21px;
+    height: 21px;
+    border-radius: 6px;
+    font-size: 8px;
+  }
+
+  body.is-game-active .shot-step div {
+    min-width: 0;
+  }
+
+  body.is-game-active .shot-step strong {
+    font-size: 7px;
+    letter-spacing: .07em;
+  }
+
+  body.is-game-active .shot-step small {
+    max-width: 58px;
+    overflow: hidden;
+    font-size: 7px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.is-game-active .meter-wrap {
+    margin-top: 9px;
+  }
+
+  body.is-game-active .meter-label {
+    margin-bottom: 6px;
+    font-size: 7px;
+  }
+
+  body.is-game-active .meter {
+    height: 14px;
+    border-radius: 6px;
+  }
+
+  body.is-game-active .action-button {
+    min-height: 45px;
+    margin-top: 9px;
+    border-radius: 11px;
+  }
+
+  body.is-game-active .input-note {
+    display: none;
+  }
+}
+
+/* Short landscape phones use the foldable split layout. */
+@media (max-width: 900px) and (max-height: 600px) and (orientation: landscape) {
+  body.is-game-active .game-topbar {
+    min-height: 43px;
+    margin-bottom: 6px;
+  }
+
+  body.is-game-active .game-layout {
+    grid-template-columns: minmax(0, 1fr) clamp(235px, 34vw, 285px);
+    gap: 7px;
+  }
+
+  body.is-game-active .game-frame {
+    aspect-ratio: 5 / 3;
+  }
+
+  body.is-game-active .control-panel {
+    padding: 9px;
+  }
+
+  body.is-game-active .run-rules-v152,
+  body.is-game-active .active-wall-chip-v15 {
+    margin-top: 4px;
+    padding-block: 4px;
+  }
+
+  body.is-game-active .life-progress-v152,
+  body.is-game-active .active-wall-chip-v15 em,
+  body.is-game-active .input-note {
+    display: none;
+  }
+
+  body.is-game-active .shot-steps {
+    grid-template-columns: 1fr;
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  body.is-game-active .shot-step {
+    padding: 4px 6px;
+  }
+
+  body.is-game-active .meter-wrap,
+  body.is-game-active .action-button {
+    margin-top: 6px;
+  }
+}
