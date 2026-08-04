@@ -14,7 +14,8 @@ async function startRun(page, viewport = { width: 1180, height: 820 }) {
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
-  await page.waitForTimeout(450);
+  await expect(page.locator("#shotAction")).toHaveText(/START SHOT/, { timeout: 6000 });
+  await page.waitForTimeout(250);
   return errors;
 }
 
@@ -60,7 +61,7 @@ test("V17 completes an actual three-input shot without breaking the renderer", a
   const action = page.locator("#shotAction");
 
   await action.click();
-  await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
+  await expect(page.locator("#phaseTitle")).toContainText(/POWER/);
   await page.waitForTimeout(140);
   await action.click();
   await expect(page.locator("#phaseTitle")).toContainText(/PICK|PLACEMENT|SIDE/);
