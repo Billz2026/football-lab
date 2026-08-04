@@ -6,7 +6,7 @@ import { SCENARIOS } from "./world-v7.js?v=7";
 import { KICKERS, selectCharacter, activeCharacter, meterMultiplier } from "./characters-v13.js?v=13";
 import { GOALKEEPERS, WALLS, keeperForStage, wallForStage } from "./lab-matchups-v15-3.js?v=153";
 import { resolveShotPhysics } from "./physics-v15-3.js?v=153";
-import { resizeCanvas, drawScene } from "./render-v15-3.js?v=153";
+import { resizeCanvas, drawScene } from "./lab-renderer-v15-3b.js?v=1531";
 import { difficultyForStage } from "./difficulty-v9.js?v=9";
 
 const ui = {
