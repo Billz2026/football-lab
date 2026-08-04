@@ -14,9 +14,9 @@ replaceRequired(
   `import { resolveShotPhysics } from "${new URL("./physics-v13.js?v=13", import.meta.url).href}";`
 );
 replaceRequired(
-  "V11.4 renderer import",
+  "V13 renderer import",
   'import { resizeCanvas, drawScene } from "./render-v11-3.js?v=113";',
-  `import { resizeCanvas, drawScene } from "${new URL("./render-v11-4.js?v=114", import.meta.url).href}";`
+  `import { resizeCanvas, drawScene } from "${new URL("./render-v13.js?v=13", import.meta.url).href}";`
 );
 replaceRequired(
   "character meter import",
