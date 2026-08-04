@@ -1,0 +1,96 @@
+/* V17 visual vertical slice. Presentation only; gameplay geometry is unchanged. */
+
+body.visual-v17 {
+  --arena-glow: rgba(218, 254, 77, .22);
+  --arena-line: rgba(226, 255, 181, .24);
+}
+
+body.visual-v17.is-game-active {
+  background:
+    radial-gradient(circle at 50% -18%, rgba(218, 254, 77, .09), transparent 42%),
+    radial-gradient(circle at 8% 48%, rgba(28, 133, 75, .14), transparent 36%),
+    linear-gradient(180deg, #020604 0%, #010302 100%);
+}
+
+body.visual-v17 .game-frame {
+  border-color: var(--arena-line);
+  background: #031008;
+  box-shadow:
+    0 22px 68px rgba(0, 0, 0, .54),
+    0 0 0 1px rgba(218, 254, 77, .045),
+    0 0 46px rgba(79, 180, 100, .08);
+}
+
+body.visual-v17 .game-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), transparent 11%),
+    linear-gradient(90deg, rgba(218,254,77,.035), transparent 19%, transparent 81%, rgba(218,254,77,.035));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+  mix-blend-mode: screen;
+}
+
+body.visual-v17 #gameCanvas {
+  filter: saturate(1.12) contrast(1.055) brightness(.975);
+}
+
+body.visual-v17 .wind-chip,
+body.visual-v17 .canvas-prompt,
+body.visual-v17 .mobile-game-hud-v161,
+body.visual-v17 .mobile-run-strip-v161 {
+  backdrop-filter: blur(14px) saturate(1.18);
+}
+
+body.visual-v17 .canvas-prompt {
+  border-color: rgba(218,254,77,.16);
+  background: rgba(1, 6, 3, .62);
+  box-shadow: 0 10px 30px rgba(0,0,0,.26);
+}
+
+body.visual-v17 .result-banner {
+  border: 1px solid rgba(255,255,255,.28);
+  box-shadow:
+    0 20px 64px rgba(0,0,0,.46),
+    0 0 38px rgba(218,254,77,.22);
+  text-shadow: 0 1px 0 rgba(255,255,255,.22);
+}
+
+body.visual-v17 .control-panel {
+  border-color: rgba(218,254,77,.14);
+  background:
+    radial-gradient(circle at 85% 0%, rgba(218,254,77,.055), transparent 34%),
+    linear-gradient(155deg, rgba(13, 24, 16, .96), rgba(3, 8, 5, .97));
+}
+
+body.visual-v17 .meter {
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.025),
+    0 0 22px rgba(218,254,77,.045);
+}
+
+body.visual-v17 .action-button {
+  box-shadow:
+    0 16px 36px rgba(0,0,0,.26),
+    0 0 28px rgba(189,255,31,.08);
+}
+
+@media (max-width: 720px) {
+  body.visual-v17 #gameCanvas {
+    filter: saturate(1.08) contrast(1.04) brightness(.98);
+  }
+
+  body.visual-v17 .game-frame {
+    box-shadow:
+      0 13px 36px rgba(0,0,0,.48),
+      0 0 0 1px rgba(218,254,77,.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.visual-v17 #gameCanvas { filter: saturate(1.08) contrast(1.03); }
+}
