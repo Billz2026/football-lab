@@ -1,0 +1,119 @@
+/* Phone-only compression layered over the shared V16.1 shell. */
+@media (max-width: 720px) {
+  body.is-game-active .mobile-hud-top-v161 {
+    grid-template-columns: 32px minmax(56px, 1fr) minmax(58px, .9fr) minmax(54px, .8fr) minmax(50px, .75fr) 32px;
+    grid-template-areas: none;
+    gap: 3px;
+  }
+
+  body.is-game-active .mobile-exit-v161,
+  body.is-game-active .mobile-stage-v161,
+  body.is-game-active .mobile-fullscreen-v161,
+  body.is-game-active .mobile-score-v161,
+  body.is-game-active .mobile-lives-v161,
+  body.is-game-active .mobile-wind-v161 {
+    grid-area: auto;
+  }
+
+  body.is-game-active .mobile-stage-v161,
+  body.is-game-active .mobile-score-v161,
+  body.is-game-active .mobile-lives-v161,
+  body.is-game-active .mobile-wind-v161 {
+    min-height: 32px;
+    padding: 4px 6px;
+  }
+
+  body.is-game-active .mobile-stage-v161 strong,
+  body.is-game-active .mobile-lives-v161 > div,
+  body.is-game-active .mobile-wind-v161 small {
+    display: none;
+  }
+
+  body.is-game-active .mobile-stage-v161 {
+    place-content: center;
+  }
+
+  body.is-game-active .mobile-stage-v161 > span {
+    overflow: hidden;
+    font-size: 6px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.is-game-active .mobile-score-v161 {
+    justify-content: center;
+    gap: 5px;
+  }
+
+  body.is-game-active .mobile-score-v161 > span {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0;
+  }
+
+  body.is-game-active .mobile-score-v161 > span:first-child::before {
+    content: "S";
+  }
+
+  body.is-game-active .mobile-score-v161 > span:last-child::before {
+    content: "X";
+  }
+
+  body.is-game-active .mobile-score-v161 > span::before {
+    color: rgba(239, 247, 237, .5);
+    font-size: 6px;
+    font-weight: 900;
+  }
+
+  body.is-game-active .mobile-score-v161 strong {
+    font-size: 8px;
+  }
+
+  body.is-game-active .mobile-lives-v161 {
+    place-content: center;
+  }
+
+  body.is-game-active .mobile-lives-v161 > span {
+    font-size: 6px;
+    white-space: nowrap;
+  }
+
+  body.is-game-active .mobile-wind-v161 {
+    justify-content: center;
+    gap: 3px;
+  }
+
+  body.is-game-active .mobile-wind-v161 > span {
+    font-size: 12px;
+  }
+
+  body.is-game-active .mobile-wind-v161 strong {
+    font-size: 7px;
+  }
+
+  body.is-game-active .mobile-matchup-v161 {
+    gap: 3px;
+  }
+
+  body.is-game-active .mobile-matchup-chip-v161 {
+    min-height: 25px;
+    grid-template-columns: 19px minmax(0, 1fr);
+    gap: 4px;
+    padding: 3px 5px;
+  }
+
+  body.is-game-active .mobile-matchup-chip-v161 i {
+    width: 19px;
+    height: 19px;
+    font-size: 8px;
+  }
+
+  body.is-game-active .mobile-matchup-chip-v161 span {
+    display: none;
+  }
+
+  body.is-game-active .mobile-matchup-chip-v161 strong {
+    font-size: 6px;
+  }
+}
