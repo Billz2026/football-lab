@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./render-v8.js?v=8";
+import { drawScene as drawBaseScene, resizeCanvas } from "./render-v8.js?v=112";
 import { WORLD, state, ctx } from "./core-v6.js?v=7";
 
 export { resizeCanvas };
