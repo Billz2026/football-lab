@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./render-v11-3-base.js?v=113";
+import { drawScene as drawBaseScene, resizeCanvas } from "./render-v11-4-base.js?v=114";
 
 export { resizeCanvas };
 
