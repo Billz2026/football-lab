@@ -19,6 +19,16 @@ if (insertionIndex < 0) throw new Error("V15.3 main patch failed: loader inserti
 
 const labPatches = `
 replaceRequired(
+  "normal start exits lab",
+  'function startGame() {\\n  resetPresentation();',
+  'function startGame() {\\n  if (state.matchupLab?.active) {\\n    state.matchupLab = { active: false };\\n    window.dispatchEvent(new CustomEvent("footballlab:labchange", { detail: state.matchupLab }));\\n  }\\n  resetPresentation();'
+);
+replaceRequired(
+  "menu return exits lab",
+  'function returnToMenu() {\\n  resetPresentation();',
+  'function returnToMenu() {\\n  if (state.matchupLab?.active) {\\n    state.matchupLab = { active: false };\\n    window.dispatchEvent(new CustomEvent("footballlab:labchange", { detail: state.matchupLab }));\\n  }\\n  resetPresentation();'
+);
+replaceRequired(
   "lab scoring isolation",
   'function scoreShot(shot) {\\n  shot.lifeRestored = false;',
   'function scoreShot(shot) {\\n  if (state.matchupLab?.active) {\\n    shot.lifeRestored = false;\\n    state.pendingStageAdvance = false;\\n    if (shot.outcome === "GOAL") {\\n      state.streak += 1;\\n      state.bestRunStreak = Math.max(state.bestRunStreak, state.streak);\\n    } else {\\n      state.streak = 0;\\n    }\\n    shot.points = 0;\\n    return 0;\\n  }\\n  shot.lifeRestored = false;'
