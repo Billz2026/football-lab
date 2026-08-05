@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-async function openFirstKicker(page, viewport = { width: 884, height: 1100 }) {
+async function openHeroKicker(page, viewport = { width: 884, height: 1100 }) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setViewportSize(viewport);
-  await page.goto("/index.html?v=171");
-  await expect.poll(() => page.evaluate(() => window.__footballLabMainV171 === true), { timeout: 20000 }).toBe(true);
-  await expect.poll(() => page.evaluate(() => window.__footballLabRigV171 === true), { timeout: 20000 }).toBe(true);
+  await page.goto("/index.html?v=172");
+  await expect.poll(() => page.evaluate(() => window.__footballLabMainV172 === true), { timeout: 20000 }).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__footballLabHeroArtV172 === true), { timeout: 20000 }).toBe(true);
   await page.locator("#playClassic").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
@@ -17,7 +17,7 @@ async function openFirstKicker(page, viewport = { width: 884, height: 1100 }) {
   return errors;
 }
 
-async function measureKickerRig(page) {
+async function measureHeroLayers(page) {
   return page.evaluate(() => {
     const canvas = document.getElementById("gameCanvas");
     const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -27,25 +27,21 @@ async function measureKickerRig(page) {
     const sampleWidth = Math.floor(width / step);
     const sampleHeight = Math.floor(height / step);
     const mask = new Uint8Array(sampleWidth * sampleHeight);
-
     const lime = (r, g, b) => g > 135 && r > 70 && b < 165 && g > b * 1.22 && g > r * 0.82;
-    const skin = (r, g, b) => r > 90 && r < 235 && g > 45 && g < 185 && b > 25 && b < 155 && r > g * 1.12 && g > b * 1.08;
 
     for (let sy = Math.floor(sampleHeight * 0.46); sy < sampleHeight; sy += 1) {
       for (let sx = 0; sx < sampleWidth; sx += 1) {
-        const px = sx * step;
-        const py = sy * step;
-        const index = (py * width + px) * 4;
-        if (lime(pixels[index], pixels[index + 1], pixels[index + 2])) {
-          mask[sy * sampleWidth + sx] = 1;
-        }
+        const x = sx * step;
+        const y = sy * step;
+        const i = (y * width + x) * 4;
+        if (lime(pixels[i], pixels[i + 1], pixels[i + 2])) mask[sy * sampleWidth + sx] = 1;
       }
     }
 
     const visited = new Uint8Array(mask.length);
-    let largest = null;
     const queueX = new Int32Array(mask.length);
     const queueY = new Int32Array(mask.length);
+    let largest = null;
 
     for (let sy = Math.floor(sampleHeight * 0.46); sy < sampleHeight; sy += 1) {
       for (let sx = 0; sx < sampleWidth; sx += 1) {
@@ -53,15 +49,15 @@ async function measureKickerRig(page) {
         if (!mask[start] || visited[start]) continue;
         let head = 0;
         let tail = 0;
-        queueX[tail] = sx;
-        queueY[tail] = sy;
-        tail += 1;
-        visited[start] = 1;
         let area = 0;
         let minX = sx;
         let maxX = sx;
         let minY = sy;
         let maxY = sy;
+        queueX[tail] = sx;
+        queueY[tail] = sy;
+        tail += 1;
+        visited[start] = 1;
 
         while (head < tail) {
           const x = queueX[head];
@@ -88,70 +84,60 @@ async function measureKickerRig(page) {
       }
     }
 
-    if (!largest) return { error: "kicker shirt not found" };
+    if (!largest || largest.area < 20) return { error: "hero jersey not found", largest };
     const torso = {
       left: largest.minX * step,
       right: (largest.maxX + 1) * step,
       top: largest.minY * step,
-      bottom: (largest.maxY + 1) * step
+      bottom: (largest.maxY + 1) * step,
+      pixels: largest.area
     };
     torso.width = torso.right - torso.left;
     torso.height = torso.bottom - torso.top;
-    const centreX = (torso.left + torso.right) / 2;
-    const searchLeft = Math.max(0, Math.floor(centreX - torso.width * 0.34));
-    const searchRight = Math.min(width - 1, Math.ceil(centreX + torso.width * 0.34));
-    const searchTop = Math.max(0, Math.floor(torso.top - torso.height * 1.25));
-    const searchBottom = Math.max(searchTop, Math.floor(torso.top - 1));
-    let skinMinX = width;
-    let skinMaxX = -1;
-    let skinMinY = height;
-    let skinMaxY = -1;
-    let skinCount = 0;
 
-    for (let y = searchTop; y <= searchBottom; y += 1) {
-      for (let x = searchLeft; x <= searchRight; x += 1) {
-        const index = (y * width + x) * 4;
-        if (!skin(pixels[index], pixels[index + 1], pixels[index + 2])) continue;
-        skinCount += 1;
-        skinMinX = Math.min(skinMinX, x);
-        skinMaxX = Math.max(skinMaxX, x);
-        skinMinY = Math.min(skinMinY, y);
-        skinMaxY = Math.max(skinMaxY, y);
+    const centreX = (torso.left + torso.right) / 2;
+    const regionLeft = Math.max(0, Math.floor(centreX - torso.width * 1.45));
+    const regionRight = Math.min(width - 1, Math.ceil(centreX + torso.width * 1.45));
+    const regionTop = Math.max(0, Math.floor(torso.top - torso.height * 1.2));
+    const regionBottom = Math.min(height - 1, Math.ceil(torso.bottom + torso.height * 2.1));
+    const bootStart = torso.bottom + torso.height * 0.65;
+
+    let whiteBootPixels = 0;
+    let skinPixels = 0;
+    let navyPixels = 0;
+    let highlightPixels = 0;
+    for (let y = regionTop; y <= regionBottom; y += 1) {
+      for (let x = regionLeft; x <= regionRight; x += 1) {
+        const i = (y * width + x) * 4;
+        const r = pixels[i];
+        const g = pixels[i + 1];
+        const b = pixels[i + 2];
+        if (y > bootStart && r > 185 && g > 190 && b > 180 && Math.max(r, g, b) - Math.min(r, g, b) < 70) whiteBootPixels += 1;
+        if (r > 95 && r < 215 && g > 45 && g < 165 && b > 25 && b < 130 && r > g * 1.12) skinPixels += 1;
+        if (r < 52 && g < 68 && b < 90 && y > torso.top) navyPixels += 1;
+        if (r > 205 && g > 225 && b < 150 && y >= torso.top && y <= torso.bottom) highlightPixels += 1;
       }
     }
 
-    if (!skinCount) return { error: "kicker head not found", torso };
-    return {
-      torso,
-      head: {
-        left: skinMinX,
-        right: skinMaxX,
-        top: skinMinY,
-        bottom: skinMaxY,
-        width: skinMaxX - skinMinX + 1,
-        height: skinMaxY - skinMinY + 1,
-        pixels: skinCount
-      },
-      gap: torso.top - skinMaxY,
-      gapRatio: (torso.top - skinMaxY) / Math.max(1, torso.height)
-    };
+    return { torso, whiteBootPixels, skinPixels, navyPixels, highlightPixels };
   });
 }
 
-test("V17.1 keeps the kicker head attached to the torso on Fold layout", async ({ page }) => {
-  const errors = await openFirstKicker(page);
-  const rig = await measureKickerRig(page);
-
-  expect(rig.error).toBeUndefined();
-  expect(rig.torso.width).toBeGreaterThan(25);
-  expect(rig.head.pixels).toBeGreaterThan(20);
-  expect(rig.head.width).toBeLessThan(rig.torso.width * 0.9);
-  expect(rig.gapRatio).toBeLessThan(0.25);
+test("V17.2 renders the layered hero kit on the Fold viewport", async ({ page }) => {
+  const errors = await openHeroKicker(page);
+  const layers = await measureHeroLayers(page);
+  expect(layers.error).toBeUndefined();
+  expect(layers.torso.width).toBeGreaterThan(25);
+  expect(layers.torso.pixels).toBeGreaterThan(35);
+  expect(layers.whiteBootPixels).toBeGreaterThan(8);
+  expect(layers.skinPixels).toBeGreaterThan(45);
+  expect(layers.navyPixels).toBeGreaterThan(90);
+  expect(layers.highlightPixels).toBeGreaterThan(10);
   expect(errors).toEqual([]);
 });
 
-test("V17.1 completes a shot with the repaired shared rig", async ({ page }) => {
-  const errors = await openFirstKicker(page, { width: 1180, height: 820 });
+test("V17.2 hero remains attached through a complete shot", async ({ page }) => {
+  const errors = await openHeroKicker(page, { width: 1180, height: 820 });
   const action = page.locator("#shotAction");
   await action.click();
   await page.waitForTimeout(120);
@@ -162,6 +148,7 @@ test("V17.1 completes a shot with the repaired shared rig", async ({ page }) => 
   await action.click();
   await expect(page.locator("#phaseTitle")).toContainText(/WATCH|FLIGHT/);
   await page.waitForTimeout(1800);
-  await expect.poll(() => page.evaluate(() => window.__footballLabRigV171 === true)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__footballLabRendererV172 === true)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__footballLabHeroArtV172 === true)).toBe(true);
   expect(errors).toEqual([]);
 });
