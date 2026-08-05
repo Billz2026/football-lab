@@ -1,6 +1,6 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=211", {
+  navigator.serviceWorker.register("./sw.js?v=221", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -29,7 +29,7 @@ import("./game/main-v18.js?v=19")
   .then(() => import("./game/visual-ui-v17.js?v=17"))
   .then(() => import("./game/input-precision-ui-v18.js?v=18"))
   .then(() => import("./game/progression-v20.js?v=20"))
-  .then(() => import("./game/clarity-v21.js?v=21"))
+  .then(() => import("./game/clarity-v22.js?v=22"))
   .catch((error) => {
     window.__footballLabStartupError = error?.stack || error?.message || String(error);
     console.error("Football Lab failed to start", error);
