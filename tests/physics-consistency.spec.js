@@ -43,7 +43,9 @@ test("V19 resamples uneven paths by world distance and remaps impact timing", as
       primaryDistance: normalised.primaryDistance,
       impactProgress: normalised.impactProgress,
       impactIndex: normalised.impactIndex,
-      maximumDeviationRatio
+      impactPoint: normalised.path[normalised.impactIndex],
+      maximumDeviationRatio,
+      sectionDeviationRatio: normalised.spacing.maximumDeviationRatio
     };
   });
 
@@ -60,7 +62,9 @@ test("V19 resamples uneven paths by world distance and remaps impact timing", as
   expect(result.primaryDistance).toBeCloseTo(4, 6);
   expect(result.impactProgress).toBeCloseTo(4 / 7, 6);
   expect(result.impactIndex).toBe(Math.round((4 / 7) * 95));
-  expect(result.maximumDeviationRatio).toBeLessThan(0.001);
+  expect(result.impactPoint).toEqual({ x: 4, y: 0, z: 0 });
+  expect(result.maximumDeviationRatio).toBeLessThan(0.02);
+  expect(result.sectionDeviationRatio).toBeLessThan(0.001);
 });
 
 test("V19 produces deterministic finite trajectories for identical live inputs", async ({ page }) => {
@@ -109,7 +113,12 @@ test("V19 produces deterministic finite trajectories for identical live inputs",
         primaryDistance: shot.primaryDistanceMetres,
         continuationDistance: shot.continuationDistanceMetres,
         impactProgress: shot.impactProgress,
+        impactPoint: Number.isInteger(shot.impactIndex)
+          ? shot.path[shot.impactIndex]
+          : null,
         spacingDeviationRatio: shot.diagnostics.pathSpacingDeviationRatio,
+        primarySpacingDeviationRatio: shot.diagnostics.primarySpacingDeviationRatio,
+        continuationSpacingDeviationRatio: shot.diagnostics.continuationSpacingDeviationRatio,
         flightDuration: result.flightDuration
       };
     }
@@ -124,11 +133,14 @@ test("V19 produces deterministic finite trajectories for identical live inputs",
   expect(comparison.first.distance).toBeGreaterThan(0);
   expect(comparison.first.primaryDistance).toBeGreaterThan(0);
   expect(comparison.first.continuationDistance).toBeGreaterThanOrEqual(0);
-  expect(comparison.first.spacingDeviationRatio).toBeLessThan(0.35);
+  expect(comparison.first.spacingDeviationRatio).toBeLessThan(0.12);
+  expect(comparison.first.primarySpacingDeviationRatio).toBeLessThan(0.12);
+  expect(comparison.first.continuationSpacingDeviationRatio).toBeLessThan(0.12);
   expect(comparison.first.flightDuration).toBeGreaterThanOrEqual(650);
   expect(comparison.first.flightDuration).toBeLessThanOrEqual(1840);
   if (comparison.first.impactProgress != null) {
     expect(comparison.first.impactProgress).toBeGreaterThanOrEqual(0);
     expect(comparison.first.impactProgress).toBeLessThanOrEqual(1);
+    expect(comparison.first.impactPoint).not.toBeNull();
   }
 });
