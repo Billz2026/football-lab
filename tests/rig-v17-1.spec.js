@@ -28,7 +28,7 @@ async function measureKickerRig(page) {
     const sampleHeight = Math.floor(height / step);
     const mask = new Uint8Array(sampleWidth * sampleHeight);
 
-    const lime = (r, g, b) => g > 175 && r > 120 && b < 145 && g > b * 1.65;
+    const lime = (r, g, b) => g > 135 && r > 70 && b < 165 && g > b * 1.22 && g > r * 0.82;
     const skin = (r, g, b) => r > 90 && r < 235 && g > 45 && g < 185 && b > 25 && b < 155 && r > g * 1.12 && g > b * 1.08;
 
     for (let sy = Math.floor(sampleHeight * 0.46); sy < sampleHeight; sy += 1) {
