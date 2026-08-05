@@ -15,6 +15,12 @@ const renderReplacement = `new URL("${new URL("./render-v17-3-1.js?v=1731", impo
 patchRequired("V17.3.1 renderer URL", renderNeedle, renderReplacement);
 
 patchRequired(
+  "V19 physics URL",
+  'new URL("./physics-v15.js?v=15", import.meta.url).href',
+  'new URL("./physics-v19.js?v=19", import.meta.url).href'
+);
+
+patchRequired(
   "stage intro duration",
   "setTimeout(prepareNextShot, 1850)",
   "setTimeout(prepareNextShot, 700)"
@@ -71,7 +77,7 @@ source = source.replace(flowMarker, `${flowPatch}${flowMarker}`);
 source = source.replace(/new URL\("(\.\/[^"\n]+)", import\.meta\.url\)/g, (_, specifier) => {
   return `new URL("${new URL(specifier, sourceUrl).href}")`;
 });
-source += "\n//# sourceURL=football-lab-main-v18-generated.js\n";
+source += "\n//# sourceURL=football-lab-main-v19-generated.js\n";
 
 const moduleUrl = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
 try {
@@ -83,6 +89,7 @@ try {
   window.__footballLabMainV1731 = true;
   window.__footballLabMainV174 = true;
   window.__footballLabMainV18 = true;
+  window.__footballLabMainV19 = true;
   window.__footballLabFastFlowV174 = {
     stageIntroMs: 700,
     breakdownMs: 650,
@@ -96,6 +103,11 @@ try {
     pointerDownActivation: true,
     clickDeduplicationMs: 450,
     powerPerfectWindow: 0.07
+  };
+  window.__footballLabPhysicsRouteV19 = {
+    module: "physics-v19",
+    worldDistanceResampling: true,
+    distanceTimedFlight: true
   };
 } finally {
   URL.revokeObjectURL(moduleUrl);
