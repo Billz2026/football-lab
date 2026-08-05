@@ -1,8 +1,12 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js", { scope: "./" })
-    .then((registration) => {
+  navigator.serviceWorker.register("./sw.js?v=201", {
+    scope: "./",
+    updateViaCache: "none"
+  })
+    .then(async (registration) => {
       window.__footballLabServiceWorkerReady = Boolean(registration);
+      await registration.update();
     })
     .catch((error) => console.info("Offline shell was not registered", error));
 }
