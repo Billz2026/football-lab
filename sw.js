@@ -1,4 +1,4 @@
-const CACHE_NAME = "football-lab-shell-v1731";
+const CACHE_NAME = "football-lab-shell-v174";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -20,11 +20,18 @@ const CORE_ASSETS = [
   "./icons/football-lab-512.svg?v=161"
 ];
 
+async function refreshCoreCache() {
+  const cache = await caches.open(CACHE_NAME);
+  await Promise.all(CORE_ASSETS.map(async (url) => {
+    const response = await fetch(url, { cache: "reload" });
+    if (!response.ok) throw new Error(`Unable to cache ${url} (${response.status})`);
+    await cache.put(url, response);
+  }));
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(CORE_ASSETS))
-      .then(() => self.skipWaiting())
+    refreshCoreCache().then(() => self.skipWaiting())
   );
 });
 
