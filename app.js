@@ -10,7 +10,7 @@ function registerFootballLabServiceWorker() {
 if (document.readyState === "complete") registerFootballLabServiceWorker();
 else window.addEventListener("load", registerFootballLabServiceWorker, { once: true });
 
-import("./game/main-v17.js?v=17")
+import("./game/main-v17-1.js?v=171")
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
   .then(() => import("./game/characters-ui-v13.js?v=13"))
