@@ -49,12 +49,12 @@ test("V17.3.1 uses a landing recovery step before neutral", async ({ page }) => 
   await lockShotInputs(page);
 
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabMotionSnapshotV173?.phase),
+    () => page.evaluate(() => Boolean(window.__footballLabRecoverySeenV1731)),
     { timeout: 9000 }
-  ).toMatch(/recovery-step|recovery-neutral/);
+  ).toBe(true);
 
-  const snapshot = await page.evaluate(() => window.__footballLabMotionSnapshotV173);
-  expect(snapshot.phase).toMatch(/recovery-step|recovery-neutral/);
-  expect(snapshot.bodyRotation).toBeGreaterThanOrEqual(0);
+  const recovery = await page.evaluate(() => window.__footballLabRecoverySeenV1731);
+  expect(recovery.phase).toMatch(/recovery-step|recovery-neutral/);
+  expect(recovery.bodyRotation).toBeGreaterThanOrEqual(0);
   expect(errors).toEqual([]);
 });
