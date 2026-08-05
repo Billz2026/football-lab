@@ -12,7 +12,7 @@ else window.addEventListener("load", registerFootballLabServiceWorker, { once: t
 
 window.__footballLabStartupError = null;
 
-import("./game/main-v18.js?v=18")
+import("./game/main-v18.js?v=19")
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
   .then(() => import("./game/characters-ui-v13.js?v=13"))
