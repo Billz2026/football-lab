@@ -43,4 +43,12 @@ try {
 }
 
 window.__footballLabHeroV1731 = true;
-export const drawHeroKicker = generated.drawHeroKicker;
+window.__footballLabRecoverySeenV1731 = null;
+
+export function drawHeroKicker(time) {
+  generated.drawHeroKicker(time);
+  const snapshot = window.__footballLabMotionSnapshotV173;
+  if (snapshot && /recovery-step|recovery-neutral/.test(snapshot.phase || "")) {
+    window.__footballLabRecoverySeenV1731 = { ...snapshot, seenAt: time };
+  }
+}
