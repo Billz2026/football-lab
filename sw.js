@@ -1,4 +1,4 @@
-const CACHE_NAME = "football-lab-shell-v19";
+const CACHE_NAME = "football-lab-shell-v20";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -11,6 +11,8 @@ const CORE_ASSETS = [
   "./game/main-v18.js?v=19",
   "./game/physics-v19.js?v=19",
   "./game/input-precision-ui-v18.js?v=18",
+  "./game/progression-v20.js?v=20",
+  "./game/progression-v20.css?v=20",
   "./game/render-v17-3-1.js?v=1731",
   "./game/hero-kicker-v17-3-1.js?v=1731",
   "./game/render-v17-v1731.js?v=1731",
