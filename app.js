@@ -12,7 +12,7 @@ else window.addEventListener("load", registerFootballLabServiceWorker, { once: t
 
 window.__footballLabStartupError = null;
 
-import("./game/main-v17-3-1.js?v=1731")
+import("./game/main-v18.js?v=18")
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
   .then(() => import("./game/characters-ui-v13.js?v=13"))
@@ -23,6 +23,7 @@ import("./game/main-v17-3-1.js?v=1731")
   .then(() => import("./game/mobile-shell-v16-1.js?v=161"))
   .then(() => import("./game/mobile-shell-compact-v16-1.js?v=161"))
   .then(() => import("./game/visual-ui-v17.js?v=17"))
+  .then(() => import("./game/input-precision-ui-v18.js?v=18"))
   .catch((error) => {
     window.__footballLabStartupError = error?.stack || error?.message || String(error);
     console.error("Football Lab failed to start", error);

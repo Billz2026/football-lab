@@ -25,33 +25,67 @@ async function canvasSignature(page) {
     const context = canvas.getContext("2d", { willReadFrequently: true });
     const columns = 12;
     const rows = 8;
-    const samples = [];
+    const sampleCount = columns * rows;
+    const quantised = [];
+    const luminance = [];
     let brightness = 0;
+    let opaqueSamples = 0;
+
     for (let row = 0; row < rows; row += 1) {
       for (let column = 0; column < columns; column += 1) {
         const x = Math.min(canvas.width - 1, Math.round((column + .5) * canvas.width / columns));
         const y = Math.min(canvas.height - 1, Math.round((row + .5) * canvas.height / rows));
         const pixel = context.getImageData(x, y, 1, 1).data;
-        samples.push(`${Math.round(pixel[0] / 16)}-${Math.round(pixel[1] / 16)}-${Math.round(pixel[2] / 16)}`);
-        brightness += pixel[0] + pixel[1] + pixel[2];
+        const average = (pixel[0] + pixel[1] + pixel[2]) / 3;
+        quantised.push(`${Math.round(pixel[0] / 16)}-${Math.round(pixel[1] / 16)}-${Math.round(pixel[2] / 16)}`);
+        luminance.push(average);
+        brightness += average;
+        if (pixel[3] > 250) opaqueSamples += 1;
       }
     }
+
+    const averageBrightness = brightness / sampleCount;
+    const minimumBrightness = Math.min(...luminance);
+    const maximumBrightness = Math.max(...luminance);
+    const variance = luminance.reduce((sum, value) => sum + ((value - averageBrightness) ** 2), 0) / sampleCount;
+
     return {
-      unique: new Set(samples).size,
-      averageBrightness: brightness / (columns * rows * 3),
+      unique: new Set(quantised).size,
+      averageBrightness,
+      brightnessRange: maximumBrightness - minimumBrightness,
+      brightnessDeviation: Math.sqrt(variance),
+      opaqueSamples,
+      sampleCount,
+      opaqueCoverage: opaqueSamples / sampleCount,
       filter: getComputedStyle(canvas).filter,
-      visualBuild: document.documentElement.dataset.visualBuild
+      visualBuild: document.documentElement.dataset.visualBuild,
+      renderedAt: window.__footballLabVisibleKickersV1731?.time || 0,
+      visibleKickers: window.__footballLabVisibleKickersV1731?.total ?? 0
     };
   });
 }
 
+async function waitForFreshCanvas(page) {
+  const initial = await canvasSignature(page);
+  await expect.poll(
+    async () => (await canvasSignature(page)).renderedAt,
+    { timeout: 2500, intervals: [80, 120, 180, 250] }
+  ).toBeGreaterThan(initial.renderedAt);
+  return canvasSignature(page);
+}
+
 test("V17 boots the cinematic renderer and produces a graded stadium frame", async ({ page }) => {
   const errors = await startRun(page);
-  const signature = await canvasSignature(page);
+  const signature = await waitForFreshCanvas(page);
 
   expect(signature.visualBuild).toBe("17");
-  expect(signature.unique).toBeGreaterThan(14);
+  expect(signature.renderedAt).toBeGreaterThan(0);
+  expect(signature.visibleKickers).toBe(1);
+  expect(signature.opaqueCoverage).toBeGreaterThanOrEqual(0.7);
+  expect(signature.unique).toBeGreaterThan(8);
   expect(signature.averageBrightness).toBeGreaterThan(8);
+  expect(signature.brightnessRange).toBeGreaterThan(20);
+  expect(signature.brightnessDeviation).toBeGreaterThan(4);
   expect(signature.filter).toContain("saturate");
   expect(errors).toEqual([]);
 });
