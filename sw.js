@@ -1,4 +1,4 @@
-const CACHE_NAME = "football-lab-shell-v20";
+const CACHE_NAME = "football-lab-shell-v20-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
