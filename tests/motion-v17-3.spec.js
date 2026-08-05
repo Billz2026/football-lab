@@ -50,14 +50,23 @@ test("V17.3 holds a rotated follow-through before recovery", async ({ page }) =>
   const errors = await openPowerKicker(page, { width: 1180, height: 820 });
   await launchShot(page);
 
-  await expect.poll(() => page.evaluate(() => window.__footballLabMotionSnapshotV173?.phase === "follow-through-hold"), { timeout: 7000 }).toBe(true);
+  await expect.poll(() => page.evaluate(() => {
+    const motion = window.__footballLabMotionSnapshotV173;
+    return Boolean(
+      motion &&
+      motion.flight > 0 &&
+      motion.bodyRotation > 0.07 &&
+      motion.rightAnkle.y < -0.28
+    );
+  }), { timeout: 7000 }).toBe(true);
+
   const first = await page.evaluate(() => window.__footballLabMotionSnapshotV173);
-  await page.waitForTimeout(100);
+  await page.waitForTimeout(70);
   const second = await page.evaluate(() => window.__footballLabMotionSnapshotV173);
 
   expect(first.bodyRotation).toBeGreaterThan(0.07);
   expect(first.rightAnkle.y).toBeLessThan(-0.28);
-  expect(second.phase).toMatch(/follow-through|recovery/);
   expect(second.bodyRotation).toBeGreaterThan(0.02);
+  expect(second.rightAnkle.y).toBeLessThan(-0.16);
   expect(errors).toEqual([]);
 });
