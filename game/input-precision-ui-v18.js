@@ -103,7 +103,9 @@ hint.setAttribute("aria-live", "polite");
 meter.after(hint);
 
 let previousPhase = state.phase;
+let lastGuideKey = "";
 let lockTimer = null;
+let guideWrites = 0;
 
 function flashLockedMarker() {
   clearTimeout(lockTimer);
@@ -113,25 +115,52 @@ function flashLockedMarker() {
   lockTimer = setTimeout(() => meter.classList.remove("is-precision-locked-v18"), 180);
 }
 
-function renderGuide() {
-  const phase = state.phase;
-  meter.dataset.precisionPhase = phase;
-
+function guideForPhase(phase) {
   if (phase === "power") {
     const centre = idealPower();
-    zone.style.left = `${Math.max(0, centre - 0.035) * 100}%`;
-    zone.style.width = "7%";
-    hint.innerHTML = "<span>UNDERHIT</span><strong>PERFECT CONTACT ZONE</strong><span>OVERHIT</span>";
-  } else if (phase === "aim") {
-    zone.style.width = "0";
-    hint.innerHTML = "<span>LEFT</span><strong>GOAL THIRDS</strong><span>RIGHT</span>";
-  } else if (phase === "curve") {
-    zone.style.left = "44%";
-    zone.style.width = "12%";
-    hint.innerHTML = "<span>LEFT BEND</span><strong>STRAIGHT</strong><span>RIGHT BEND</span>";
-  } else {
-    zone.style.width = "0";
-    hint.innerHTML = "<span>LOCK EACH INPUT</span><strong>INPUT PRECISION</strong><span>3 STEPS</span>";
+    return {
+      key: `${phase}:${centre.toFixed(4)}`,
+      left: `${Math.max(0, centre - 0.035) * 100}%`,
+      width: "7%",
+      copy: "<span>UNDERHIT</span><strong>PERFECT CONTACT ZONE</strong><span>OVERHIT</span>"
+    };
+  }
+  if (phase === "aim") {
+    return {
+      key: phase,
+      left: "0",
+      width: "0",
+      copy: "<span>LEFT</span><strong>GOAL THIRDS</strong><span>RIGHT</span>"
+    };
+  }
+  if (phase === "curve") {
+    return {
+      key: phase,
+      left: "44%",
+      width: "12%",
+      copy: "<span>LEFT BEND</span><strong>STRAIGHT</strong><span>RIGHT BEND</span>"
+    };
+  }
+  return {
+    key: phase,
+    left: "0",
+    width: "0",
+    copy: "<span>LOCK EACH INPUT</span><strong>INPUT PRECISION</strong><span>3 STEPS</span>"
+  };
+}
+
+function renderGuide() {
+  const phase = state.phase;
+  const guide = guideForPhase(phase);
+
+  if (guide.key !== lastGuideKey) {
+    meter.dataset.precisionPhase = phase;
+    zone.style.left = guide.left;
+    zone.style.width = guide.width;
+    hint.innerHTML = guide.copy;
+    guideWrites += 1;
+    window.__footballLabPrecisionUiV18.guideWrites = guideWrites;
+    lastGuideKey = guide.key;
   }
 
   if (["power", "aim", "curve"].includes(previousPhase) && previousPhase !== phase) {
@@ -144,7 +173,9 @@ function renderGuide() {
 window.__footballLabPrecisionUiV18 = {
   powerWindowPercent: 7,
   aimThirdsVisible: true,
-  curveNeutralWindowPercent: 12
+  curveNeutralWindowPercent: 12,
+  phaseDrivenDomWrites: true,
+  guideWrites
 };
 
 requestAnimationFrame(renderGuide);
