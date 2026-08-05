@@ -24,6 +24,7 @@ import("./game/main-v18.js?v=19")
   .then(() => import("./game/mobile-shell-compact-v16-1.js?v=161"))
   .then(() => import("./game/visual-ui-v17.js?v=17"))
   .then(() => import("./game/input-precision-ui-v18.js?v=18"))
+  .then(() => import("./game/progression-v20.js?v=20"))
   .catch((error) => {
     window.__footballLabStartupError = error?.stack || error?.message || String(error);
     console.error("Football Lab failed to start", error);
