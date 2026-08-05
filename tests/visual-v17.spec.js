@@ -40,19 +40,62 @@ async function canvasSignature(page) {
       unique: new Set(samples).size,
       averageBrightness: brightness / (columns * rows * 3),
       filter: getComputedStyle(canvas).filter,
-      visualBuild: document.documentElement.dataset.visualBuild
+      visualBuild: document.documentElement.dataset.visualBuild,
+      renderedAt: window.__footballLabVisibleKickersV1731?.time || 0
     };
   });
 }
 
+async function waitForGradedCanvas(page) {
+  let best = await canvasSignature(page);
+  const firstRenderedAt = best.renderedAt;
+
+  await expect.poll(async () => {
+    const current = await canvasSignature(page);
+    if (
+      current.unique > best.unique
+      || (current.unique === best.unique && current.averageBrightness > best.averageBrightness)
+    ) {
+      best = current;
+    }
+    return {
+      unique: best.unique,
+      freshFrame: current.renderedAt > firstRenderedAt
+    };
+  }, {
+    timeout: 2500,
+    intervals: [80, 120, 180, 250]
+  }).toMatchObject({
+    unique: expect.any(Number),
+    freshFrame: true
+  });
+
+  await expect.poll(async () => {
+    const current = await canvasSignature(page);
+    if (
+      current.unique > best.unique
+      || (current.unique === best.unique && current.averageBrightness > best.averageBrightness)
+    ) {
+      best = current;
+    }
+    return best.unique;
+  }, {
+    timeout: 2500,
+    intervals: [80, 120, 180, 250]
+  }).toBeGreaterThan(14);
+
+  return best;
+}
+
 test("V17 boots the cinematic renderer and produces a graded stadium frame", async ({ page }) => {
   const errors = await startRun(page);
-  const signature = await canvasSignature(page);
+  const signature = await waitForGradedCanvas(page);
 
   expect(signature.visualBuild).toBe("17");
   expect(signature.unique).toBeGreaterThan(14);
   expect(signature.averageBrightness).toBeGreaterThan(8);
   expect(signature.filter).toContain("saturate");
+  expect(signature.renderedAt).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
 
