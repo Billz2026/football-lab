@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./render-v17-v1731.js?v=1731";
+import { drawScene as drawBaseScene, resizeCanvas } from "./render-v22.js?v=22";
 import { drawHeroKicker } from "./hero-kicker-v17-3-1.js?v=1731";
 import { activeCharacter } from "./characters-v13.js?v=13";
 
@@ -25,3 +25,4 @@ window.__footballLabRigV171 = true;
 window.__footballLabRendererV172 = true;
 window.__footballLabRendererV173 = true;
 window.__footballLabRendererV1731 = true;
+window.__footballLabRendererV22Route = true;
