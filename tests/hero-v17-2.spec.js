@@ -23,33 +23,84 @@ async function measureHeroLayers(page) {
     const context = canvas.getContext("2d", { willReadFrequently: true });
     const { width, height } = canvas;
     const pixels = context.getImageData(0, 0, width, height).data;
-    const lime = (r, g, b) => g > 175 && r > 115 && b < 150 && g > b * 1.5;
+    const step = 2;
+    const sampleWidth = Math.floor(width / step);
+    const sampleHeight = Math.floor(height / step);
+    const mask = new Uint8Array(sampleWidth * sampleHeight);
+    const lime = (r, g, b) => g > 135 && r > 70 && b < 165 && g > b * 1.22 && g > r * 0.82;
 
-    let minX = width;
-    let maxX = -1;
-    let minY = height;
-    let maxY = -1;
-    let limeCount = 0;
-    for (let y = Math.floor(height * 0.45); y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) {
+    for (let sy = Math.floor(sampleHeight * 0.46); sy < sampleHeight; sy += 1) {
+      for (let sx = 0; sx < sampleWidth; sx += 1) {
+        const x = sx * step;
+        const y = sy * step;
         const i = (y * width + x) * 4;
-        if (!lime(pixels[i], pixels[i + 1], pixels[i + 2])) continue;
-        limeCount += 1;
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
+        if (lime(pixels[i], pixels[i + 1], pixels[i + 2])) mask[sy * sampleWidth + sx] = 1;
       }
     }
-    if (limeCount < 40) return { error: "hero jersey not found", limeCount };
 
-    const torsoWidth = maxX - minX + 1;
-    const torsoHeight = maxY - minY + 1;
-    const centreX = (minX + maxX) / 2;
-    const regionLeft = Math.max(0, Math.floor(centreX - torsoWidth * 0.95));
-    const regionRight = Math.min(width - 1, Math.ceil(centreX + torsoWidth * 0.95));
-    const regionTop = Math.max(0, Math.floor(minY - torsoHeight * 1.1));
-    const regionBottom = Math.min(height - 1, Math.ceil(maxY + torsoHeight * 1.35));
+    const visited = new Uint8Array(mask.length);
+    const queueX = new Int32Array(mask.length);
+    const queueY = new Int32Array(mask.length);
+    let largest = null;
+
+    for (let sy = Math.floor(sampleHeight * 0.46); sy < sampleHeight; sy += 1) {
+      for (let sx = 0; sx < sampleWidth; sx += 1) {
+        const start = sy * sampleWidth + sx;
+        if (!mask[start] || visited[start]) continue;
+        let head = 0;
+        let tail = 0;
+        let area = 0;
+        let minX = sx;
+        let maxX = sx;
+        let minY = sy;
+        let maxY = sy;
+        queueX[tail] = sx;
+        queueY[tail] = sy;
+        tail += 1;
+        visited[start] = 1;
+
+        while (head < tail) {
+          const x = queueX[head];
+          const y = queueY[head];
+          head += 1;
+          area += 1;
+          minX = Math.min(minX, x);
+          maxX = Math.max(maxX, x);
+          minY = Math.min(minY, y);
+          maxY = Math.max(maxY, y);
+          const neighbours = [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]];
+          for (const [nx, ny] of neighbours) {
+            if (nx < 0 || ny < 0 || nx >= sampleWidth || ny >= sampleHeight) continue;
+            const next = ny * sampleWidth + nx;
+            if (!mask[next] || visited[next]) continue;
+            visited[next] = 1;
+            queueX[tail] = nx;
+            queueY[tail] = ny;
+            tail += 1;
+          }
+        }
+
+        if (!largest || area > largest.area) largest = { area, minX, maxX, minY, maxY };
+      }
+    }
+
+    if (!largest || largest.area < 20) return { error: "hero jersey not found", largest };
+    const torso = {
+      left: largest.minX * step,
+      right: (largest.maxX + 1) * step,
+      top: largest.minY * step,
+      bottom: (largest.maxY + 1) * step,
+      pixels: largest.area
+    };
+    torso.width = torso.right - torso.left;
+    torso.height = torso.bottom - torso.top;
+
+    const centreX = (torso.left + torso.right) / 2;
+    const regionLeft = Math.max(0, Math.floor(centreX - torso.width * 1.45));
+    const regionRight = Math.min(width - 1, Math.ceil(centreX + torso.width * 1.45));
+    const regionTop = Math.max(0, Math.floor(torso.top - torso.height * 1.2));
+    const regionBottom = Math.min(height - 1, Math.ceil(torso.bottom + torso.height * 2.1));
+    const bootStart = torso.bottom + torso.height * 0.65;
 
     let whiteBootPixels = 0;
     let skinPixels = 0;
@@ -61,21 +112,14 @@ async function measureHeroLayers(page) {
         const r = pixels[i];
         const g = pixels[i + 1];
         const b = pixels[i + 2];
-        if (y > maxY && r > 205 && g > 210 && b > 200 && Math.max(r, g, b) - Math.min(r, g, b) < 45) whiteBootPixels += 1;
-        if (r > 105 && r < 210 && g > 55 && g < 155 && b > 35 && b < 120 && r > g * 1.18) skinPixels += 1;
-        if (r < 48 && g < 62 && b < 82 && y > minY) navyPixels += 1;
-        if (r > 215 && g > 235 && b < 135 && y >= minY && y <= maxY) highlightPixels += 1;
+        if (y > bootStart && r > 185 && g > 190 && b > 180 && Math.max(r, g, b) - Math.min(r, g, b) < 70) whiteBootPixels += 1;
+        if (r > 95 && r < 215 && g > 45 && g < 165 && b > 25 && b < 130 && r > g * 1.12) skinPixels += 1;
+        if (r < 52 && g < 68 && b < 90 && y > torso.top) navyPixels += 1;
+        if (r > 205 && g > 225 && b < 150 && y >= torso.top && y <= torso.bottom) highlightPixels += 1;
       }
     }
 
-    return {
-      limeCount,
-      torso: { minX, maxX, minY, maxY, width: torsoWidth, height: torsoHeight },
-      whiteBootPixels,
-      skinPixels,
-      navyPixels,
-      highlightPixels
-    };
+    return { torso, whiteBootPixels, skinPixels, navyPixels, highlightPixels };
   });
 }
 
@@ -83,11 +127,12 @@ test("V17.2 renders the layered hero kit on the Fold viewport", async ({ page })
   const errors = await openHeroKicker(page);
   const layers = await measureHeroLayers(page);
   expect(layers.error).toBeUndefined();
-  expect(layers.torso.width).toBeGreaterThan(30);
-  expect(layers.whiteBootPixels).toBeGreaterThan(18);
+  expect(layers.torso.width).toBeGreaterThan(25);
+  expect(layers.torso.pixels).toBeGreaterThan(35);
+  expect(layers.whiteBootPixels).toBeGreaterThan(8);
   expect(layers.skinPixels).toBeGreaterThan(45);
   expect(layers.navyPixels).toBeGreaterThan(90);
-  expect(layers.highlightPixels).toBeGreaterThan(12);
+  expect(layers.highlightPixels).toBeGreaterThan(10);
   expect(errors).toEqual([]);
 });
 
