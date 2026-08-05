@@ -56,6 +56,71 @@ function spacingStats(path) {
   };
 }
 
+function resampleSection(path, sampleCount) {
+  const count = Math.max(2, Math.round(sampleCount));
+  const cumulative = cumulativeDistances(path);
+  const totalDistance = cumulative[cumulative.length - 1];
+  if (totalDistance <= EPSILON) {
+    return Array.from({ length: count }, (_, index) => ({
+      ...(index === count - 1 ? path[path.length - 1] : path[0])
+    }));
+  }
+
+  const result = [];
+  let upperIndex = 1;
+  for (let index = 0; index < count; index += 1) {
+    if (index === 0) {
+      result.push({ ...path[0] });
+      continue;
+    }
+    if (index === count - 1) {
+      result.push({ ...path[path.length - 1] });
+      continue;
+    }
+
+    const targetDistance = totalDistance * (index / (count - 1));
+    while (
+      upperIndex < cumulative.length - 1
+      && cumulative[upperIndex] < targetDistance
+    ) {
+      upperIndex += 1;
+    }
+    const lowerIndex = Math.max(0, upperIndex - 1);
+    const segmentDistance = cumulative[upperIndex] - cumulative[lowerIndex];
+    const amount = segmentDistance > EPSILON
+      ? clamp((targetDistance - cumulative[lowerIndex]) / segmentDistance, 0, 1)
+      : 0;
+    result.push(interpolatePoint(path[lowerIndex], path[upperIndex], amount));
+  }
+  return result;
+}
+
+function mergeSpacingStats(primaryPath, continuationPath) {
+  const primary = spacingStats(primaryPath);
+  const continuation = continuationPath.length > 1
+    ? spacingStats(continuationPath)
+    : { mean: 0, maximumDeviationRatio: 0 };
+  const primaryIntervals = Math.max(0, primaryPath.length - 1);
+  const continuationIntervals = Math.max(0, continuationPath.length - 1);
+  const intervalCount = primaryIntervals + continuationIntervals;
+  const mean = intervalCount > 0
+    ? (
+      primary.mean * primaryIntervals
+      + continuation.mean * continuationIntervals
+    ) / intervalCount
+    : 0;
+
+  return {
+    mean,
+    maximumDeviationRatio: Math.max(
+      primary.maximumDeviationRatio,
+      continuation.maximumDeviationRatio
+    ),
+    primary,
+    continuation
+  };
+}
+
 export function normalisePathByDistance(path, impactIndex = null) {
   if (!Array.isArray(path) || path.length < 2) {
     return {
@@ -65,7 +130,7 @@ export function normalisePathByDistance(path, impactIndex = null) {
       totalDistance: 0,
       primaryDistance: 0,
       continuationDistance: 0,
-      spacing: { mean: 0, maximumDeviationRatio: 0 }
+      spacing: mergeSpacingStats(Array.isArray(path) ? path : [], [])
     };
   }
   if (!path.every(isFinitePoint)) {
@@ -82,7 +147,7 @@ export function normalisePathByDistance(path, impactIndex = null) {
       totalDistance,
       primaryDistance: totalDistance,
       continuationDistance: 0,
-      spacing: spacingStats(path)
+      spacing: mergeSpacingStats(path, [])
     };
   }
 
@@ -92,6 +157,7 @@ export function normalisePathByDistance(path, impactIndex = null) {
   const primaryDistance = originalImpactIndex == null
     ? totalDistance
     : cumulative[originalImpactIndex];
+  const continuationDistance = Math.max(0, totalDistance - primaryDistance);
   const impactProgress = originalImpactIndex == null
     ? null
     : clamp(primaryDistance / totalDistance, 0, 1);
@@ -99,28 +165,48 @@ export function normalisePathByDistance(path, impactIndex = null) {
     MAX_PATH_SAMPLES,
     Math.max(MIN_PATH_SAMPLES, path.length)
   );
-  const result = [];
-  let upperIndex = 1;
 
-  for (let index = 0; index < sampleCount; index += 1) {
-    const targetDistance = totalDistance * (index / (sampleCount - 1));
-    while (
-      upperIndex < cumulative.length - 1
-      && cumulative[upperIndex] < targetDistance
-    ) {
-      upperIndex += 1;
-    }
-    const lowerIndex = Math.max(0, upperIndex - 1);
-    const segmentDistance = cumulative[upperIndex] - cumulative[lowerIndex];
-    const amount = segmentDistance > EPSILON
-      ? clamp((targetDistance - cumulative[lowerIndex]) / segmentDistance, 0, 1)
-      : 0;
-    result.push(interpolatePoint(path[lowerIndex], path[upperIndex], amount));
+  const hasImpactBoundary = originalImpactIndex != null
+    && originalImpactIndex > 0
+    && originalImpactIndex < path.length - 1
+    && primaryDistance > EPSILON
+    && continuationDistance > EPSILON;
+
+  let result;
+  let remappedImpactIndex;
+  let primaryResult;
+  let continuationResult;
+
+  if (hasImpactBoundary) {
+    const totalIntervals = sampleCount - 1;
+    const primaryIntervals = Math.round(clamp(
+      totalIntervals * impactProgress,
+      1,
+      totalIntervals - 1
+    ));
+    const continuationIntervals = totalIntervals - primaryIntervals;
+    primaryResult = resampleSection(
+      path.slice(0, originalImpactIndex + 1),
+      primaryIntervals + 1
+    );
+    continuationResult = resampleSection(
+      path.slice(originalImpactIndex),
+      continuationIntervals + 1
+    );
+    result = primaryResult.concat(continuationResult.slice(1));
+    remappedImpactIndex = primaryResult.length - 1;
+  } else {
+    result = resampleSection(path, sampleCount);
+    remappedImpactIndex = impactProgress == null
+      ? null
+      : Math.round(impactProgress * (result.length - 1));
+    primaryResult = remappedImpactIndex == null
+      ? result
+      : result.slice(0, remappedImpactIndex + 1);
+    continuationResult = remappedImpactIndex == null
+      ? []
+      : result.slice(remappedImpactIndex);
   }
-
-  const remappedImpactIndex = impactProgress == null
-    ? null
-    : Math.round(impactProgress * (result.length - 1));
 
   return {
     path: result,
@@ -128,8 +214,8 @@ export function normalisePathByDistance(path, impactIndex = null) {
     impactProgress,
     totalDistance,
     primaryDistance,
-    continuationDistance: Math.max(0, totalDistance - primaryDistance),
-    spacing: spacingStats(result)
+    continuationDistance,
+    spacing: mergeSpacingStats(primaryResult, continuationResult)
   };
 }
 
@@ -176,6 +262,12 @@ export function resolveShotPhysics() {
         : Number(pathMetrics.impactProgress.toFixed(4)),
       pathSpacingMetres: Number(pathMetrics.spacing.mean.toFixed(4)),
       pathSpacingDeviationRatio: Number(pathMetrics.spacing.maximumDeviationRatio.toFixed(4)),
+      primarySpacingDeviationRatio: Number(
+        pathMetrics.spacing.primary.maximumDeviationRatio.toFixed(4)
+      ),
+      continuationSpacingDeviationRatio: Number(
+        pathMetrics.spacing.continuation.maximumDeviationRatio.toFixed(4)
+      ),
       distanceTimedFlightMs: flightDuration
     });
   }
