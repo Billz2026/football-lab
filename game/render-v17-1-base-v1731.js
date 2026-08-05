@@ -35,10 +35,26 @@ for (const [before, after] of replacements) {
 const marker = 'loaderSource = loaderSource.replace(insertionPoint, identityPatch + rigPatch + insertionPoint);';
 if (!source.includes(marker)) throw new Error("V17.3.1 single-kicker insertion marker missing");
 
-const singleKickerInjection = String.raw`
-const singleKickerPatch = \
-\`\n// The finished hero rig replaces, rather than overlays, the temporary base kicker.\nreplaceRequired(\n  "single hero renderer",\n  '  drawKicker(time);',\n  '  const heroSelected = activeCharacter().id === "dax-ryder";\\n  window.__footballLabBaseKickerSuppressedV1731 = heroSelected;\\n  if (!heroSelected) drawKicker(time);'\n);\n\`;
-loaderSource = loaderSource.replace(insertionPoint, identityPatch + rigPatch + singleKickerPatch + insertionPoint);`;
+const baseKickerNeedle = "  drawKicker(time);";
+const heroOnlyReplacement = [
+  '  const heroSelected = activeCharacter().id === "dax-ryder";',
+  "  window.__footballLabBaseKickerSuppressedV1731 = heroSelected;",
+  "  if (!heroSelected) drawKicker(time);"
+].join("\n");
+const patchProgram = [
+  "",
+  "// The finished hero rig replaces, rather than overlays, the temporary base kicker.",
+  "replaceRequired(",
+  '  "single hero renderer",',
+  `  ${JSON.stringify(baseKickerNeedle)},`,
+  `  ${JSON.stringify(heroOnlyReplacement)}`,
+  ");",
+  ""
+].join("\n");
+const singleKickerInjection = [
+  `const singleKickerPatch = ${JSON.stringify(patchProgram)};`,
+  "loaderSource = loaderSource.replace(insertionPoint, identityPatch + rigPatch + singleKickerPatch + insertionPoint);"
+].join("\n");
 
 source = source.replace(marker, singleKickerInjection);
 source += "\n//# sourceURL=football-lab-render-v17-1-base-v1731-generated.js\n";
