@@ -10,7 +10,9 @@ function registerFootballLabServiceWorker() {
 if (document.readyState === "complete") registerFootballLabServiceWorker();
 else window.addEventListener("load", registerFootballLabServiceWorker, { once: true });
 
-import("./game/main-v17.js?v=17")
+window.__footballLabStartupError = null;
+
+import("./game/main-v17-1.js?v=171")
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
   .then(() => import("./game/characters-ui-v13.js?v=13"))
@@ -22,8 +24,10 @@ import("./game/main-v17.js?v=17")
   .then(() => import("./game/mobile-shell-compact-v16-1.js?v=161"))
   .then(() => import("./game/visual-ui-v17.js?v=17"))
   .catch((error) => {
+    window.__footballLabStartupError = error?.stack || error?.message || String(error);
     console.error("Football Lab failed to start", error);
     const message = document.createElement("div");
+    message.className = "football-lab-startup-error";
     message.textContent = `The game failed to load: ${error?.message || "unknown startup error"}.`;
     Object.assign(message.style, {
       position: "fixed",
