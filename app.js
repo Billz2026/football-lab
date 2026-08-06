@@ -18,7 +18,13 @@ else window.addEventListener("load", registerFootballLabServiceWorker, { once: t
 
 window.__footballLabStartupError = null;
 
-import("./game/runtime-v23-main.js?v=23")
+const runtimeCaptureMode = new URLSearchParams(location.search).get("runtime-capture") === "v23";
+const runtimeEntry = runtimeCaptureMode
+  ? "./game/main-v18.js?v=19"
+  : "./game/runtime-v23-main.js?v=23";
+window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
+
+import(runtimeEntry)
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
   .then(() => import("./game/characters-ui-v13.js?v=13"))
