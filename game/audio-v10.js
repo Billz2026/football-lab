@@ -1,7 +1,21 @@
 import { state } from "./core-v6.js?v=7";
 
+const SETTINGS_KEY = "footballLabSettingsV22";
+
+function soundEnabled() {
+  try {
+    return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}").sound !== false;
+  } catch {
+    return true;
+  }
+}
+
 function ensureAudioContext() {
-  if (state.audioContext) return state.audioContext;
+  if (!soundEnabled()) return null;
+  if (state.audioContext) {
+    if (state.audioContext.state === "suspended") state.audioContext.resume().catch(() => {});
+    return state.audioContext;
+  }
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextClass) return null;
   state.audioContext = new AudioContextClass();
