@@ -18,7 +18,9 @@ else window.addEventListener("load", registerFootballLabServiceWorker, { once: t
 
 window.__footballLabStartupError = null;
 
-const runtimeCaptureMode = new URLSearchParams(location.search).get("runtime-capture") === "v23";
+const localCaptureHost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+const runtimeCaptureMode = localCaptureHost
+  && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
   ? "./game/main-v18.js?v=19"
   : "./game/runtime-v23-main.js?v=23";
