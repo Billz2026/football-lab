@@ -8,13 +8,22 @@ on:
       - scripts/verify-runtime-v23.mjs
       - .github/workflows/v23-runtime-capture.yml
       - package.json
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/capture-runtime-v23.mjs
+      - scripts/verify-runtime-v23.mjs
+      - .github/workflows/v23-runtime-capture.yml
+      - package.json
+      - game/runtime-v23-*.js
+      - game/runtime-v23-manifest.json
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: football-lab-v23-runtime-capture
+  group: football-lab-v23-runtime-capture-${{ github.event_name }}
   cancel-in-progress: false
 
 jobs:
@@ -39,6 +48,7 @@ jobs:
       - name: Verify static runtime
         run: npm run verify:runtime:v23
       - name: Commit generated runtime
+        if: github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
