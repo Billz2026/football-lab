@@ -1,3 +1,3 @@
 # V23 Runtime Refactor
 
-This branch captures the current browser-generated gameplay and renderer modules into static ES modules before switching the public entry point. The production route remains unchanged until generated output passes verification and browser regression tests.
+The current verified browser-generated gameplay and renderer modules have been captured as static ES modules. Normal startup now uses `game/runtime-v23-main.js`; the legacy chain is available only through the explicit `?runtime-capture=v23` development route so the frozen runtime remains reproducible and auditable.
