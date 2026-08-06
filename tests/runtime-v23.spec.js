@@ -62,6 +62,9 @@ test("V23 boots from static modules without browser-time source execution", asyn
 test("V23 static runtime preserves the playable five-life flow", async ({ page }) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    localStorage.setItem("footballLabTutorialV22", "complete");
+  });
 
   await page.goto("/index.html");
   await page.waitForFunction(() => window.__footballLabReleaseV23?.build === "23.0.0", null, {
@@ -73,11 +76,14 @@ test("V23 static runtime preserves the playable five-life flow", async ({ page }
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
   await expect(page.locator("#livesValue")).toContainText("● ● ● ● ●");
+  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 5000 });
 
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("SET POWER", { timeout: 5000 });
+  await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
+  await page.waitForTimeout(90);
   await page.locator("#shotAction").click();
   await expect(page.locator("#phaseTitle")).toHaveText("PICK YOUR SIDE");
+  await page.waitForTimeout(90);
   await page.locator("#shotAction").click();
   await expect(page.locator("#phaseTitle")).toHaveText("ADD CURVE");
 
