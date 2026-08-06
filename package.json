@@ -4,6 +4,8 @@
   "type": "module",
   "version": "22.0.0",
   "scripts": {
+    "build:runtime:v23": "node scripts/capture-runtime-v23.mjs",
+    "verify:runtime:v23": "node scripts/verify-runtime-v23.mjs",
     "test:browser": "playwright test"
   },
   "devDependencies": {
