@@ -1,0 +1,85 @@
+name: Capture V23 static runtime
+
+on:
+  push:
+    branches: [agent/runtime-refactor-v23]
+    paths:
+      - app.js
+      - game/main-v18.js
+      - game/main-v15-2.js
+      - game/main-v11-3.js
+      - game/physics-v15.js
+      - game/physics-v19.js
+      - game/render-v17-3-1.js
+      - game/render-v17-v1731.js
+      - game/render-v15-v1731.js
+      - game/render-v17-1-base-v1731.js
+      - game/hero-kicker-v17-3-1.js
+      - game/release-v23.js
+      - scripts/capture-runtime-v23.mjs
+      - scripts/verify-runtime-v23.mjs
+      - .github/workflows/v23-runtime-capture.yml
+      - package.json
+  pull_request:
+    branches: [main]
+    paths:
+      - app.js
+      - game/main-v18.js
+      - game/main-v15-2.js
+      - game/main-v11-3.js
+      - game/physics-v15.js
+      - game/physics-v19.js
+      - game/render-v17-3-1.js
+      - game/render-v17-v1731.js
+      - game/render-v15-v1731.js
+      - game/render-v17-1-base-v1731.js
+      - game/hero-kicker-v17-3-1.js
+      - game/release-v23.js
+      - scripts/capture-runtime-v23.mjs
+      - scripts/verify-runtime-v23.mjs
+      - .github/workflows/v23-runtime-capture.yml
+      - package.json
+      - game/runtime-v23-*.js
+      - game/runtime-v23-manifest.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-lab-v23-runtime-capture-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Capture current runtime
+        run: npm run build:runtime:v23
+      - name: Verify static runtime
+        run: npm run verify:runtime:v23
+      - name: Commit generated runtime
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/runtime-v23-*.js game/runtime-v23-manifest.json
+          if git diff --cached --quiet; then
+            echo "Static runtime is already current."
+            exit 0
+          fi
+          git commit -m "Generate V23 static runtime"
+          git push

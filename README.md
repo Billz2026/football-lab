@@ -6,7 +6,7 @@ Football Lab is a browser-based arcade free-kick game hosted on GitHub Pages. Pl
 
 - Game: `https://billz2026.github.io/football-lab/index.html`
 - Entry point: `/index.html`
-- Current product layer: V22
+- Current product layer: V23
 
 ## Run locally
 
@@ -25,20 +25,34 @@ npm install
 npm run test:browser
 ```
 
+## Static runtime
+
+V23 boots from `game/runtime-v23-main.js`. The gameplay, physics and renderer modules are normal static ES modules; the public route no longer downloads JavaScript as text or executes generated Blob modules.
+
+The frozen runtime can be regenerated from the last verified legacy chain with:
+
+```bash
+npm run build:runtime:v23
+npm run verify:runtime:v23
+```
+
+The build command uses the explicit `?runtime-capture=v23` development route. Normal visitors never use that route. Generated files and their source mapping are recorded in `game/runtime-v23-manifest.json`.
+
 ## Deployment
 
 GitHub Pages deploys from the repository's `main` branch and root directory. Static assets are cached by `sw.js`; production updates should rotate the cache name and update the application version together.
 
 ## Release checklist
 
-- Run the Playwright browser suite.
+- Run the runtime verification and Playwright browser suite.
 - Test 320px, 390px, tablet and desktop layouts.
 - Complete one full run with mouse, touch and keyboard.
 - Verify sound, haptics, reduced motion and high-contrast settings.
 - Verify the first-run tutorial and score sharing.
 - Test an offline reload after one online visit.
 - Confirm no stale service worker remains after deployment.
+- Confirm the public route creates zero JavaScript Blob URLs and does not request legacy generator modules.
 
 ## Architecture note
 
-The tuned game currently includes historical version adapters. New product features should be added as isolated ES modules rather than additional source-text rewrite layers. A future structural refactor should preserve the verified physics and scoring behaviour while consolidating the runtime into a normal build pipeline.
+Historical source-generator files remain temporarily as the auditable input for the V23 capture command and as a rollback reference. They are not part of normal production startup. Future product work should extend the static runtime through ordinary ES modules rather than adding source-text replacement layers.

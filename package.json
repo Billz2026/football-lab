@@ -2,8 +2,10 @@
   "name": "football-lab",
   "private": true,
   "type": "module",
-  "version": "22.0.0",
+  "version": "23.0.0",
   "scripts": {
+    "build:runtime:v23": "node scripts/run-capture-runtime-v23.mjs",
+    "verify:runtime:v23": "node scripts/verify-runtime-v23.mjs",
     "test:browser": "playwright test"
   },
   "devDependencies": {
