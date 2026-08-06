@@ -4,6 +4,18 @@ on:
   push:
     branches: [agent/runtime-refactor-v23]
     paths:
+      - app.js
+      - game/main-v18.js
+      - game/main-v15-2.js
+      - game/main-v11-3.js
+      - game/physics-v15.js
+      - game/physics-v19.js
+      - game/render-v17-3-1.js
+      - game/render-v17-v1731.js
+      - game/render-v15-v1731.js
+      - game/render-v17-1-base-v1731.js
+      - game/hero-kicker-v17-3-1.js
+      - game/release-v23.js
       - scripts/capture-runtime-v23.mjs
       - scripts/verify-runtime-v23.mjs
       - .github/workflows/v23-runtime-capture.yml
@@ -11,6 +23,18 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - app.js
+      - game/main-v18.js
+      - game/main-v15-2.js
+      - game/main-v11-3.js
+      - game/physics-v15.js
+      - game/physics-v19.js
+      - game/render-v17-3-1.js
+      - game/render-v17-v1731.js
+      - game/render-v15-v1731.js
+      - game/render-v17-1-base-v1731.js
+      - game/hero-kicker-v17-3-1.js
+      - game/release-v23.js
       - scripts/capture-runtime-v23.mjs
       - scripts/verify-runtime-v23.mjs
       - .github/workflows/v23-runtime-capture.yml
