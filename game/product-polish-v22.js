@@ -23,7 +23,8 @@ const settings = readSettings();
 let lastDialogOpener = null;
 let tutorialTarget = null;
 let pausedPhase = null;
-let controllerReloading = false;
+let updateReloadRequested = false;
+const dialogOpeners = new WeakMap();
 const nativeVibrate = navigator.vibrate?.bind(navigator);
 
 function saveSettings() {
@@ -208,9 +209,17 @@ function bindAccessibility() {
       const target = record.target;
       if (!(target instanceof HTMLElement) || record.attributeName !== "class") continue;
       if (!target.matches("[role='dialog'], .kicker-select-shell")) continue;
-      if (!target.classList.contains("is-open")) continue;
-      const first = focusables(target)[0];
-      requestAnimationFrame(() => first?.focus());
+      if (target.classList.contains("is-open")) {
+        if (!dialogOpeners.has(target) && document.activeElement instanceof HTMLElement) {
+          dialogOpeners.set(target, document.activeElement);
+        }
+        const first = focusables(target)[0];
+        requestAnimationFrame(() => first?.focus());
+      } else {
+        const opener = dialogOpeners.get(target);
+        dialogOpeners.delete(target);
+        if (opener?.isConnected) requestAnimationFrame(() => opener.focus());
+      }
     }
   });
 
@@ -441,6 +450,7 @@ function showPauseOverlay() {
   const overlay = document.querySelector("#pauseOverlayV22");
   overlay?.classList.add("is-visible");
   overlay?.setAttribute("aria-hidden", "false");
+  overlay?.querySelector("[role='dialog']")?.classList.add("is-open");
   requestAnimationFrame(() => overlay?.querySelector("#resumeGameV22")?.focus());
 }
 
@@ -453,6 +463,7 @@ function resumeFromPause() {
   const overlay = document.querySelector("#pauseOverlayV22");
   overlay?.classList.remove("is-visible");
   overlay?.setAttribute("aria-hidden", "true");
+  overlay?.querySelector("[role='dialog']")?.classList.remove("is-open");
 }
 
 function bindVisibilityPause() {
@@ -471,7 +482,10 @@ function attachServiceWorker(registration) {
     if (!worker) return;
     toast("A new Football Lab build is ready.", {
       label: "RELOAD",
-      handler: () => worker.postMessage({ type: "SKIP_WAITING" })
+      handler: () => {
+        updateReloadRequested = true;
+        worker.postMessage({ type: "SKIP_WAITING" });
+      }
     });
   };
 
@@ -490,8 +504,8 @@ function bindServiceWorkerUpdates() {
   }
   window.addEventListener("footballlab:swready", (event) => attachServiceWorker(event.detail?.registration));
   navigator.serviceWorker?.addEventListener("controllerchange", () => {
-    if (controllerReloading) return;
-    controllerReloading = true;
+    if (!updateReloadRequested) return;
+    updateReloadRequested = false;
     location.reload();
   });
 }
