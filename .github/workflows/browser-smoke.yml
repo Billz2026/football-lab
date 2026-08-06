@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          npx playwright test --reporter=line,html 2>&1 | tee playwright-output.txt
+          npx playwright test --max-failures=1 --reporter=line,html 2>&1 | tee playwright-output.txt
       - name: Upload browser test diagnostics
         if: always()
         uses: actions/upload-artifact@v4
