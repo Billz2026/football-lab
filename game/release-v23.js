@@ -59,17 +59,10 @@ function trackRecovery(time) {
 }
 requestAnimationFrame(trackRecovery);
 
-function renderBuildNumber() {
-  const badge = document.querySelector(".build-badge-v22");
-  if (badge) {
-    badge.textContent = "V23";
-    badge.title = `Football Lab build ${BUILD}`;
-  }
-  const version = document.querySelector(".settings-version-v22 strong");
-  if (version) version.textContent = BUILD;
+const badge = document.querySelector(".build-badge-v22");
+if (badge) {
+  badge.textContent = "V23";
+  badge.title = `Football Lab build ${BUILD}`;
 }
-
-renderBuildNumber();
-const buildObserver = new MutationObserver(renderBuildNumber);
-buildObserver.observe(document.body, { childList: true, subtree: true });
-setTimeout(() => buildObserver.disconnect(), 5000);
+const version = document.querySelector(".settings-version-v22 strong");
+if (version) version.textContent = BUILD;
