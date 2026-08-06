@@ -39,7 +39,7 @@ import(runtimeEntry)
   .then(() => import("./game/progression-v20.js?v=20"))
   .then(() => import("./game/clarity-v21.js?v=21"))
   .then(() => import("./game/product-polish-v22.js?v=22"))
-  .then(() => import("./game/runtime-v23-compat.js?v=23"))
+  .then(() => import("./game/release-v23.js?v=23"))
   .catch((error) => {
     window.__footballLabStartupError = error?.stack || error?.message || String(error);
     console.error("Football Lab failed to start", error);
