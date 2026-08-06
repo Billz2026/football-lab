@@ -64,6 +64,10 @@ function stackUrls(stack) {
   return matches.map((value) => value.replace(/:\d+:\d+$/, ''));
 }
 
+function sourceUrlNames(source) {
+  return [...String(source || '').matchAll(/^\/\/# sourceURL=([^\s]+)$/gm)].map((match) => match[1]);
+}
+
 function sourceSpecifiers(source) {
   const values = new Set();
   const patterns = [
@@ -206,12 +210,21 @@ async function buildStaticRuntime({ httpModules, blobs }) {
 
   const children = new Map();
   const allNodeIds = new Set([...httpModules.keys(), ...blobs.keys()]);
+  const sourceNameParents = new Map();
+  for (const [blobUrl, record] of blobs) {
+    for (const name of sourceUrlNames(record.source)) sourceNameParents.set(name, blobUrl);
+  }
 
   for (const [blobUrl, record] of blobs) {
     const candidates = stackUrls(record.stack).filter((url) => url !== blobUrl);
+    const namedParent = [...sourceNameParents.entries()]
+      .find(([name, candidate]) => candidate !== blobUrl && String(record.stack || '').includes(name))?.[1];
     const parent = candidates.find((url) => allNodeIds.has(url))
-      || candidates.find((url) => url.startsWith(`${ORIGIN}/game/`));
-    if (!parent) throw new Error(`Unable to identify generator for captured blob ${blobUrl}`);
+      || candidates.find((url) => url.startsWith(`${ORIGIN}/game/`))
+      || namedParent;
+    if (!parent) {
+      throw new Error(`Unable to identify generator for captured blob ${blobUrl}. Stack: ${record.stack}`);
+    }
     const childList = children.get(parent) || [];
     childList.push(blobUrl);
     children.set(parent, childList);
