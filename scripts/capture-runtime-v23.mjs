@@ -188,7 +188,11 @@ async function captureRuntime() {
       });
 
       await page.goto(ENTRY_URL, { waitUntil: 'networkidle' });
-      await page.waitForFunction(() => window.__footballLabMainV19 === true, null, { timeout: 30000 });
+      await page.waitForFunction(() => (
+        window.__footballLabRuntimeCaptureMode === true
+        && document.querySelector('#kickerSelectV13')
+        && !window.__footballLabStartupError
+      ), null, { timeout: 30000 });
       await page.waitForTimeout(1200);
 
       const startupError = await page.evaluate(() => window.__footballLabStartupError);
