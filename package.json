@@ -2,7 +2,7 @@
   "name": "football-lab",
   "private": true,
   "type": "module",
-  "version": "15.3.1",
+  "version": "22.0.0",
   "scripts": {
     "test:browser": "playwright test"
   },

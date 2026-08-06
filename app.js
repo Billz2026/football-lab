@@ -1,11 +1,13 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=211", {
+  navigator.serviceWorker.register("./sw.js?v=22", {
     scope: "./",
     updateViaCache: "none"
   })
     .then(async (registration) => {
-      window.__footballLabServiceWorkerReady = Boolean(registration);
+      window.__footballLabServiceWorkerReady = true;
+      window.__footballLabServiceWorkerRegistration = registration;
+      window.dispatchEvent(new CustomEvent("footballlab:swready", { detail: { registration } }));
       await registration.update();
     })
     .catch((error) => console.info("Offline shell was not registered", error));
@@ -30,11 +32,13 @@ import("./game/main-v18.js?v=19")
   .then(() => import("./game/input-precision-ui-v18.js?v=18"))
   .then(() => import("./game/progression-v20.js?v=20"))
   .then(() => import("./game/clarity-v21.js?v=21"))
+  .then(() => import("./game/product-polish-v22.js?v=22"))
   .catch((error) => {
     window.__footballLabStartupError = error?.stack || error?.message || String(error);
     console.error("Football Lab failed to start", error);
     const message = document.createElement("div");
     message.className = "football-lab-startup-error";
+    message.setAttribute("role", "alert");
     message.textContent = `The game failed to load: ${error?.message || "unknown startup error"}.`;
     Object.assign(message.style, {
       position: "fixed",

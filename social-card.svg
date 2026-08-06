@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Football Lab — Master the Strike</title>
+  <desc id="desc">A dark green arcade football graphic with a fluorescent lime football and Football Lab branding.</desc>
+  <defs>
+    <radialGradient id="glow" cx="75%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#dafe4d" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#020604" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#07110b"/>
+      <stop offset="1" stop-color="#010302"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <g opacity=".18" stroke="#dafe4d" fill="none">
+    <path d="M780 90h320v450H780z"/>
+    <path d="M780 315h320"/>
+    <circle cx="940" cy="315" r="98"/>
+  </g>
+  <g transform="translate(932 292)">
+    <circle r="118" fill="#edf7e9"/>
+    <path d="M0-45 43-14 27 37h-54l-16-51z" fill="#132019"/>
+    <path d="M0-118v73m104-34-61 65m22 99-38-48m-92 48 38-48m-142-116 126 65" stroke="#132019" stroke-width="16" fill="none"/>
+  </g>
+  <text x="82" y="155" fill="#dafe4d" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="800" letter-spacing="8">ORIGINAL ARCADE FOOTBALL</text>
+  <text x="76" y="310" fill="#f4f7f0" font-family="Arial,Helvetica,sans-serif" font-size="112" font-weight="900" letter-spacing="-7">FOOTBALL</text>
+  <text x="76" y="414" fill="#f4f7f0" font-family="Arial,Helvetica,sans-serif" font-size="112" font-weight="900" letter-spacing="-7">LAB</text>
+  <text x="82" y="500" fill="#aab5aa" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="600">POWER. PLACEMENT. CURVE.</text>
+  <rect x="82" y="535" width="360" height="8" rx="4" fill="#dafe4d"/>
+</svg>
