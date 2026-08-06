@@ -27,6 +27,9 @@ const runtimeEntry = runtimeCaptureMode
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 import(runtimeEntry)
+  .then(() => {
+    if (runtimeCaptureMode) window.__footballLabMainV19 = true;
+  })
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
   .then(() => import("./game/characters-ui-v13.js?v=13"))
