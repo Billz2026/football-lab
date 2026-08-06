@@ -188,12 +188,7 @@ async function captureRuntime() {
       });
 
       await page.goto(ENTRY_URL, { waitUntil: 'networkidle' });
-      await page.waitForFunction(() => (
-        window.__footballLabRuntimeCaptureMode === true
-        && document.querySelector('#kickerSelectV13')
-        && !window.__footballLabStartupError
-      ), null, { timeout: 30000 });
-      await page.waitForTimeout(1200);
+      await page.waitForTimeout(1800);
 
       const startupError = await page.evaluate(() => window.__footballLabStartupError);
       if (startupError) throw new Error(`Football Lab startup failed during capture:\n${startupError}`);
