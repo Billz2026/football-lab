@@ -1,6 +1,6 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=22", {
+  navigator.serviceWorker.register("./sw.js?v=23", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -18,7 +18,7 @@ else window.addEventListener("load", registerFootballLabServiceWorker, { once: t
 
 window.__footballLabStartupError = null;
 
-import("./game/main-v18.js?v=19")
+import("./game/runtime-v23-main.js?v=23")
   .then(() => import("./game/polish-v10-2.js?v=114"))
   .then(() => import("./game/polish-v11-4.js?v=114"))
   .then(() => import("./game/characters-ui-v13.js?v=13"))
@@ -33,6 +33,7 @@ import("./game/main-v18.js?v=19")
   .then(() => import("./game/progression-v20.js?v=20"))
   .then(() => import("./game/clarity-v21.js?v=21"))
   .then(() => import("./game/product-polish-v22.js?v=22"))
+  .then(() => import("./game/runtime-v23-compat.js?v=23"))
   .catch((error) => {
     window.__footballLabStartupError = error?.stack || error?.message || String(error);
     console.error("Football Lab failed to start", error);
