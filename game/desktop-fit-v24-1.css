@@ -1,4 +1,4 @@
-/* Phase 1.1 desktop correction: keep the game world at its native 5:3 ratio and use desktop width, not page height, for the compact shot HUD. */
+/* Phase 1.2 final desktop polish: centre the pitch + controls as one unit, preserve the native 5:3 game world and keep duplicated run rules compact. */
 
 @media (min-width: 1180px) {
   html[data-football-lab-ui="immersive-v24"] body.is-game-active main {
@@ -16,17 +16,18 @@
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) 278px !important;
     gap: 14px !important;
-    margin-top: 0 !important;
-    align-items: start !important;
+    width: min(100%, calc((100dvh - 132px) * 1.6666667 + 292px));
+    margin: 0 auto !important;
+    align-items: stretch !important;
   }
 
   html[data-football-lab-ui="immersive-v24"] .screen-game .game-frame {
-    width: min(100%, calc((100dvh - 132px) * 1.6666667)) !important;
+    width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: calc(100dvh - 132px) !important;
     aspect-ratio: 5 / 3;
-    justify-self: center;
+    justify-self: stretch;
     border-radius: 22px;
   }
 
@@ -67,11 +68,46 @@
     display: none;
   }
 
+  html[data-football-lab-ui="immersive-v24"] .screen-game .run-rules-v152 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(218, 254, 77, .032);
+  }
+
+  html[data-football-lab-ui="immersive-v24"] .screen-game .run-rules-v152 > strong {
+    display: none;
+  }
+
+  html[data-football-lab-ui="immersive-v24"] .screen-game .run-rules-v152 > span {
+    font-size: 8px;
+    line-height: 1.35;
+    text-align: left;
+    letter-spacing: .025em;
+  }
+
+  html[data-football-lab-ui="immersive-v24"] .screen-game .life-progress-v152 {
+    grid-column: auto;
+    gap: 6px;
+  }
+
+  html[data-football-lab-ui="immersive-v24"] .screen-game .life-progress-v152 i {
+    width: 6px;
+    height: 6px;
+  }
+
+  html[data-football-lab-ui="immersive-v24"] .screen-game .life-progress-v152 small {
+    font-size: 7px;
+  }
+
   html[data-football-lab-ui="immersive-v24"] .screen-game .shot-steps {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 7px;
-    margin: 14px 0 0;
+    margin: 12px 0 0;
   }
 
   html[data-football-lab-ui="immersive-v24"] .screen-game .shot-step {
@@ -101,8 +137,11 @@
 }
 
 @media (min-width: 1180px) and (max-height: 760px) {
+  html[data-football-lab-ui="immersive-v24"] .screen-game .game-layout {
+    width: min(100%, calc((100dvh - 116px) * 1.6666667 + 292px));
+  }
+
   html[data-football-lab-ui="immersive-v24"] .screen-game .game-frame {
-    width: min(100%, calc((100dvh - 116px) * 1.6666667)) !important;
     max-height: calc(100dvh - 116px) !important;
   }
 
@@ -111,8 +150,14 @@
     padding: 12px !important;
   }
 
+  html[data-football-lab-ui="immersive-v24"] .screen-game .run-rules-v152 {
+    margin-top: 7px;
+    padding: 6px 8px;
+    gap: 4px;
+  }
+
   html[data-football-lab-ui="immersive-v24"] .screen-game .shot-steps {
-    margin-top: 10px;
+    margin-top: 8px;
     gap: 5px;
   }
 
