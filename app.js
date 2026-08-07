@@ -1,6 +1,6 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=23", {
+  navigator.serviceWorker.register("./sw.js?v=24", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -47,7 +47,8 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/progression-v20.js?v=20"))
       .then(() => import("./game/clarity-v21.js?v=21"))
       .then(() => import("./game/product-polish-v22.js?v=22"))
-      .then(() => import("./game/release-v23.js?v=23"));
+      .then(() => import("./game/release-v23.js?v=23"))
+      .then(() => import("./game/immersive-ui-v24.js?v=24"));
 
 bootPromise.catch((error) => {
   window.__footballLabStartupError = error?.stack || error?.message || String(error);
