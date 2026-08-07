@@ -1,12 +1,17 @@
-const IMMERSIVE_BUILD = "24";
+const IMMERSIVE_BUILD = "24.1";
 
-function loadImmersiveStyles() {
-  if (document.querySelector('link[data-football-lab-immersive="v24"]')) return;
+function appendStylesheet(href, marker, value) {
+  if (document.querySelector(`link[${marker}="${value}"]`)) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = `./game/immersive-ui-v24.css?v=${IMMERSIVE_BUILD}`;
-  link.dataset.footballLabImmersive = "v24";
+  link.href = href;
+  link.setAttribute(marker, value);
   document.head.appendChild(link);
+}
+
+function loadImmersiveStyles() {
+  appendStylesheet(`./game/immersive-ui-v24.css?v=${IMMERSIVE_BUILD}`, "data-football-lab-immersive", "v24");
+  appendStylesheet(`./game/desktop-fit-v24-1.css?v=${IMMERSIVE_BUILD}`, "data-football-lab-desktop-fit", "v24.1");
 }
 
 function polishProductionMenu() {

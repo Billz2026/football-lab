@@ -1,4 +1,4 @@
-const CACHE_NAME = "football-lab-shell-v24";
+const CACHE_NAME = "football-lab-shell-v25";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -12,7 +12,8 @@ const CORE_ASSETS = [
   "./game/runtime-v23-main.js?v=23",
   "./game/release-v23.js?v=23",
   "./game/immersive-ui-v24.js?v=24",
-  "./game/immersive-ui-v24.css?v=24",
+  "./game/immersive-ui-v24.css?v=24.1",
+  "./game/desktop-fit-v24-1.css?v=24.1",
   "./game/runtime-v23-bridge-physics-v19-f1d39f9409.js",
   "./game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js",
   "./game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js",
@@ -60,7 +61,9 @@ async function refreshCoreCache() {
 }
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(refreshCoreCache());
+  event.waitUntil(
+    refreshCoreCache().then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
