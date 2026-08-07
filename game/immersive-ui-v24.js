@@ -1,4 +1,4 @@
-const IMMERSIVE_BUILD = "24.1";
+const IMMERSIVE_BUILD = "24.2";
 
 function appendStylesheet(href, marker, value) {
   if (document.querySelector(`link[${marker}="${value}"]`)) return;
@@ -11,7 +11,7 @@ function appendStylesheet(href, marker, value) {
 
 function loadImmersiveStyles() {
   appendStylesheet(`./game/immersive-ui-v24.css?v=${IMMERSIVE_BUILD}`, "data-football-lab-immersive", "v24");
-  appendStylesheet(`./game/desktop-fit-v24-1.css?v=${IMMERSIVE_BUILD}`, "data-football-lab-desktop-fit", "v24.1");
+  appendStylesheet(`./game/desktop-fit-v24-1.css?v=${IMMERSIVE_BUILD}`, "data-football-lab-desktop-fit", "v24.2");
 }
 
 function polishProductionMenu() {
