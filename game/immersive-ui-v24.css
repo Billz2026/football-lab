@@ -1,0 +1,298 @@
+/* Football Lab Phase 1: immersive gameplay layout and production-facing menu polish. */
+
+.build-badge-v22,
+.settings-version-v22 {
+  display: none !important;
+}
+
+.modes-section .section-heading {
+  align-items: end;
+}
+
+.modes-section .section-heading p {
+  max-width: 620px;
+}
+
+.mode-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.mode-card-active {
+  min-height: 220px !important;
+  opacity: 1 !important;
+}
+
+.screen-game.is-active {
+  display: block;
+}
+
+.screen-game .game-topbar {
+  min-height: 70px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(12, 22, 15, .95), rgba(5, 11, 7, .95));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .28);
+}
+
+.screen-game .game-layout {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+  margin-top: 12px;
+}
+
+.screen-game .game-frame {
+  position: relative;
+  min-height: clamp(540px, 72vh, 820px) !important;
+  max-height: none !important;
+  overflow: hidden;
+  border-radius: 26px;
+  border-color: rgba(255, 255, 255, .11);
+  background: #030705;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .46);
+}
+
+.screen-game #gameCanvas {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: clamp(540px, 72vh, 820px) !important;
+  max-height: none !important;
+  display: block;
+}
+
+.screen-game .wind-chip {
+  top: 14px;
+  left: 14px;
+  backdrop-filter: blur(12px);
+  background: rgba(4, 10, 6, .78);
+  border-color: rgba(255, 255, 255, .12);
+}
+
+.screen-game .canvas-prompt {
+  bottom: 18px;
+  padding: 8px 12px;
+  border: 1px solid rgba(218, 254, 77, .18);
+  border-radius: 999px;
+  background: rgba(3, 8, 5, .72);
+  backdrop-filter: blur(10px);
+}
+
+.screen-game .control-panel {
+  min-height: 0 !important;
+  padding: 14px 16px !important;
+  display: grid !important;
+  grid-template-columns: minmax(155px, .65fr) minmax(420px, 2.25fr) minmax(180px, .7fr);
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "heading steps action"
+    "heading meter action";
+  gap: 9px 14px;
+  align-items: center;
+  border-radius: 20px;
+  border-color: rgba(255, 255, 255, .1);
+  background:
+    linear-gradient(180deg, rgba(13, 23, 16, .96), rgba(5, 11, 7, .97)),
+    radial-gradient(circle at 58% 50%, rgba(218, 254, 77, .045), transparent 42%);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, .32);
+}
+
+.screen-game .control-heading {
+  grid-area: heading;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 14px;
+  border-right: 1px solid rgba(255, 255, 255, .07);
+}
+
+.screen-game .control-heading .section-label {
+  font-size: 8px;
+  letter-spacing: .19em;
+}
+
+.screen-game .control-heading h2 {
+  margin-top: 5px;
+  font-size: clamp(18px, 2vw, 25px);
+}
+
+.screen-game .control-heading p {
+  min-height: 0;
+  margin: 7px 0 0;
+  font-size: 10px;
+  line-height: 1.45;
+  color: rgba(244, 247, 240, .5);
+}
+
+.screen-game .shot-steps {
+  grid-area: steps;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+}
+
+.screen-game .shot-step {
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.screen-game .shot-step > span {
+  width: 25px;
+  height: 25px;
+  border-radius: 7px;
+}
+
+.screen-game .shot-step strong,
+.screen-game .shot-step small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screen-game .meter-wrap {
+  grid-area: meter;
+  margin: 0;
+}
+
+.screen-game .meter-label {
+  margin-bottom: 6px;
+}
+
+.screen-game .meter {
+  height: 16px;
+  border-radius: 8px;
+}
+
+.screen-game .action-button {
+  grid-area: action;
+  width: 100%;
+  height: 100%;
+  min-height: 78px;
+  margin: 0 !important;
+  border-radius: 14px;
+  font-size: 11px;
+  box-shadow: 0 14px 34px rgba(189, 255, 31, .12);
+}
+
+.screen-game .input-note {
+  display: none;
+}
+
+.screen-game .result-banner {
+  max-width: min(620px, calc(100% - 36px));
+}
+
+@media (min-width: 1180px) {
+  body.is-game-active .site-header {
+    min-height: 70px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  body.is-game-active main {
+    padding-bottom: 24px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .screen-game .game-frame,
+  .screen-game #gameCanvas {
+    min-height: clamp(500px, 64vh, 700px) !important;
+  }
+
+  .screen-game .control-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(170px, .34fr);
+    grid-template-areas:
+      "steps action"
+      "meter action";
+  }
+
+  .screen-game .control-heading {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  body.is-game-active main {
+    padding-inline: 8px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .screen-game .game-topbar {
+    min-height: 58px;
+    padding: 8px;
+    border-radius: 14px;
+  }
+
+  .screen-game .game-layout {
+    gap: 8px !important;
+    margin-top: 8px;
+  }
+
+  .screen-game .game-frame,
+  .screen-game #gameCanvas {
+    min-height: clamp(390px, 55dvh, 560px) !important;
+    border-radius: 18px;
+  }
+
+  .screen-game .control-panel {
+    padding: 9px !important;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "steps"
+      "meter"
+      "action";
+    gap: 8px;
+    border-radius: 16px;
+  }
+
+  .screen-game .shot-steps {
+    gap: 5px;
+  }
+
+  .screen-game .shot-step {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .screen-game .shot-step > span {
+    width: 22px;
+    height: 22px;
+  }
+
+  .screen-game .shot-step strong,
+  .screen-game .shot-step small {
+    font-size: 8px !important;
+  }
+
+  .screen-game .meter-label {
+    font-size: 8px !important;
+  }
+
+  .screen-game .action-button {
+    min-height: 52px;
+  }
+
+  .screen-game .wind-chip {
+    top: 8px;
+    left: 8px;
+  }
+
+  .screen-game .canvas-prompt {
+    bottom: 9px;
+  }
+}
+
+@media (max-width: 430px) {
+  .screen-game .game-frame,
+  .screen-game #gameCanvas {
+    min-height: 50dvh !important;
+  }
+
+  .screen-game .shot-step small {
+    display: none;
+  }
+}
