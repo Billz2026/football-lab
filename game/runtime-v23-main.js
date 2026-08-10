@@ -344,7 +344,7 @@ function takeShot() {
 function scoreShot(shot) {
   shot.lifeRestored = false;
   if (shot.outcome !== "GOAL") {
-    state.misses = Math.min(MAX_LIVES, state.misses + 1);
+    state.misses += 1;
     state.streak = 0;
     state.pendingStageAdvance = false;
     return 0;
@@ -352,13 +352,6 @@ function scoreShot(shot) {
 
   state.streak += 1;
   state.bestRunStreak = Math.max(state.bestRunStreak, state.streak);
-  if (state.streak % LIFE_STREAK_TARGET === 0 && state.misses > 0) {
-    state.misses -= 1;
-    shot.lifeRestored = true;
-    window.dispatchEvent(new CustomEvent("footballlab:liferestored", {
-      detail: { lives: MAX_LIVES - state.misses, streak: state.streak }
-    }));
-  }
   const strikeBonus = shot.strikeQuality >= 0.9 ? 350 : shot.strikeQuality >= 0.68 ? 175 : 0;
   const distanceBonus = Math.max(0, state.currentStage.distanceYards - 20) * 34;
   const points = 1000
@@ -376,7 +369,6 @@ function scoreShot(shot) {
 
 function resultBannerForShot(shot, points) {
   if (shot.outcome === "GOAL") {
-    if (shot.lifeRestored) return `LIFE RESTORED · +${formatScore(points)}`;
     if (shot.topCorner) return `TOP CORNER +${formatScore(points)}`;
     if (shot.strikeQuality >= 0.9) return `PERFECT STRIKE +${formatScore(points)}`;
     return `GOAL +${formatScore(points)}`;
@@ -413,7 +405,7 @@ function finishPrimaryShot(animationId) {
     breakdown: buildBreakdown(shot)
   };
 
-  const replayable = Boolean(shot.topCorner || shot.lifeRestored || ["POST", "BAR"].includes(shot.outcome));
+  const replayable = Boolean(shot.topCorner || ["POST", "BAR"].includes(shot.outcome));
   if (replayable) startReplay();
   else showBreakdown();
 }
@@ -483,10 +475,6 @@ function showBreakdown() {
 function continueAfterBreakdown() {
   if (state.presentation?.phase !== "breakdown") return;
   clearPresentationTimers();
-  if (state.misses >= MAX_LIVES) {
-    endRun();
-    return;
-  }
   if (state.pendingStageAdvance) {
     state.stage += 1;
     syncStage();
@@ -519,7 +507,6 @@ function finishAnimation(animationId) {
 }
 
 function prepareNextShot() {
-  if (state.misses >= MAX_LIVES) return;
   resetPresentation();
   state.shot = createShot();
   syncStage();
@@ -615,7 +602,11 @@ function openModePreview(name) {
 
 [
   [elements.playClassic, startGame], [elements.classicCard, startGame], [elements.modalPlay, startGame], [elements.retryGame, startGame],
-  [elements.returnMenu, returnToMenu], [elements.exitGame, returnToMenu], [elements.brandButton, returnToMenu],
+  [elements.returnMenu, returnToMenu],
+  [elements.exitGame, () => window.dispatchEvent(new CustomEvent("footballlab:openfinish"))],
+  [elements.brandButton, () => state.screen === "game"
+    ? window.dispatchEvent(new CustomEvent("footballlab:openfinish"))
+    : returnToMenu()],
   [elements.howToPlay, () => openModal(elements.howModal)]
 ].forEach(([element, handler]) => element.addEventListener("click", handler));
 
@@ -640,6 +631,13 @@ elements.canvas.addEventListener("pointerdown", (event) => {
 }, { passive: false });
 elements.canvas.style.touchAction = "manipulation";
 elements.shotAction.style.touchAction = "manipulation";
+
+window.addEventListener("footballlab:submitrun", () => {
+  if (state.screen !== "game" || elements.gameOverModal.classList.contains("is-open")) return;
+  setPhase("ready");
+  endRun();
+  window.dispatchEvent(new CustomEvent("footballlab:runsubmitted"));
+});
 
 $$('[data-preview]').forEach((button) => button.addEventListener("click", () => openModePreview(button.dataset.preview)));
 $$('[data-close-modal]').forEach((button) => button.addEventListener("click", () => closeModal(elements.howModal)));
