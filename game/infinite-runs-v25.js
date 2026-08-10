@@ -2,6 +2,7 @@ import { formatScore, profile, state } from "./core-v6.js?v=7";
 
 const BUILD = "25.0.0";
 let pausedPhase = null;
+let finishRequested = false;
 
 function injectStyles() {
   if (document.getElementById("infiniteRunsStylesV25")) return;
@@ -172,15 +173,25 @@ function finishIsAvailable() {
 function syncFinishButton() {
   const button = document.getElementById("finishRunV25");
   if (!button) return;
-  const available = finishIsAvailable();
-  button.disabled = !available;
-  button.title = available
+  const runOpen = state.screen === "game"
+    && !document.getElementById("gameOverModal")?.classList.contains("is-open");
+  button.disabled = !runOpen;
+  button.textContent = finishRequested ? "FINISHING AFTER THIS SHOT…" : "FINISH & SUBMIT RUN";
+  button.title = finishIsAvailable()
     ? "Submit your current score and finish the run"
-    : "Finish is available between completed shots";
+    : "Your finish request will open safely after the current shot";
+
+  if (finishRequested && finishIsAvailable()) openFinishDialog();
 }
 
 function openFinishDialog() {
-  if (!finishIsAvailable()) return;
+  if (state.screen !== "game") return;
+  if (!finishIsAvailable()) {
+    finishRequested = true;
+    syncFinishButton();
+    return;
+  }
+  finishRequested = false;
   const modal = document.getElementById("finishRunModalV25");
   if (!modal) return;
   document.getElementById("finishScoreV25").textContent = formatScore(state.score);
@@ -193,6 +204,7 @@ function openFinishDialog() {
 }
 
 function closeFinishDialog() {
+  finishRequested = false;
   const modal = document.getElementById("finishRunModalV25");
   if (!modal?.classList.contains("is-open")) return;
   modal.classList.remove("is-open");
@@ -207,6 +219,7 @@ function closeFinishDialog() {
 }
 
 function submitRun() {
+  finishRequested = false;
   const modal = document.getElementById("finishRunModalV25");
   modal?.classList.remove("is-open");
   modal?.setAttribute("aria-hidden", "true");
