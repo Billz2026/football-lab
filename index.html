@@ -60,7 +60,7 @@
             <div class="hero-light" aria-hidden="true"></div>
             <div class="eyebrow"><span></span> ORIGINAL ARCADE FOOTBALL</div>
             <h1 id="menuTitle">MASTER<br />THE STRIKE.</h1>
-            <p class="hero-copy">Three inputs decide everything: power, placement and curve. Beat each stage, build a streak and chase your personal best.</p>
+            <p class="hero-copy">Three inputs decide everything: power, placement and curve. Progress at your own pace, build a streak and submit the run when you are ready.</p>
             <div class="hero-actions">
               <button class="button button-primary button-large" id="playClassic" type="button"><span>PLAY CLASSIC KICKS</span><b aria-hidden="true">→</b></button>
               <button class="button button-secondary" id="howToPlay" type="button">HOW TO PLAY</button>
@@ -105,7 +105,7 @@
           <div class="mode-grid">
             <button class="mode-card mode-card-active" id="classicCard" type="button">
               <span class="mode-number">01</span><span class="mode-status">PLAYABLE</span><span class="mode-icon" aria-hidden="true">◎</span>
-              <strong>CLASSIC KICKS</strong><small>Choose a specialist, master three inputs and survive escalating stages.</small><span class="mode-cta">SELECT KICKER <b>→</b></span>
+              <strong>CLASSIC KICKS</strong><small>Choose a specialist, master three inputs and progress through escalating stages with no lives or time pressure.</small><span class="mode-cta">SELECT KICKER <b>→</b></span>
             </button>
             <button class="mode-card" data-preview="Road to Glory" type="button">
               <span class="mode-number">02</span><span class="mode-status mode-status-muted">NEXT BUILD</span><span class="mode-icon" aria-hidden="true">◆</span>
@@ -121,12 +121,12 @@
 
       <section class="screen screen-game" id="gameScreen" aria-label="Classic Kicks game">
         <div class="game-topbar panel">
-          <button class="icon-button" id="exitGame" type="button" aria-label="Exit game">←</button>
+          <button class="icon-button" id="exitGame" type="button" aria-label="Finish and submit run" title="Finish and submit run">←</button>
           <div class="stage-copy"><span id="stageNumber">STAGE 01</span><strong id="stageName">THE OPENER</strong></div>
           <div class="game-stats">
             <div><span>SCORE</span><strong id="scoreValue">0</strong></div>
             <div><span>STREAK</span><strong id="streakValue">0</strong></div>
-            <div><span>LIVES</span><strong id="livesValue">● ● ● ● ●</strong></div>
+            <div><span>PERSONAL BEST</span><strong id="livesValue">0</strong></div>
           </div>
         </div>
 
@@ -183,7 +183,7 @@
   <div class="modal" id="gameOverModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
     <div class="modal-backdrop"></div>
     <div class="modal-card game-over-card panel">
-      <span class="section-label">RUN COMPLETE</span><h2 id="gameOverTitle">FULL TIME</h2>
+      <span class="section-label">RUN SUBMITTED</span><h2 id="gameOverTitle">FULL TIME</h2>
       <div class="final-score"><span>FINAL SCORE</span><strong id="finalScore">0</strong></div>
       <div class="game-over-stats">
         <div><span>STAGE REACHED</span><strong id="finalStage">1</strong></div>
@@ -194,6 +194,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=23" defer></script>
+  <script src="./app.js?v=25" defer></script>
 </body>
 </html>
