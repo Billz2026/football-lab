@@ -46,7 +46,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/progression-v20.js?v=20"))
       .then(() => import("./game/clarity-v21.js?v=21"))
       .then(() => import("./game/product-polish-v22.js?v=22"))
-      .then(() => import("./game/release-v23.js?v=23"))
+      .then(() => import("./game/release-v23.js?v=25"))
       .then(() => import("./game/immersive-ui-v24.js?v=24"))
       .then(() => import("./game/infinite-runs-v25.js?v=25"));
 
