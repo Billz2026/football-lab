@@ -1,16 +1,16 @@
-const CACHE_NAME = "football-lab-shell-v26";
+const CACHE_NAME = "football-lab-shell-v27";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=23",
+  "./app.js?v=25",
   "./manifest.webmanifest?v=23",
   "./mobile-v16.css?v=16",
   "./mobile-shell-v16-1.css?v=161",
   "./visual-v17.css?v=17",
-  "./game/runtime-v23-main.js?v=23",
-  "./game/release-v23.js?v=23",
+  "./game/runtime-v23-main.js?v=25",
+  "./game/release-v23.js?v=25",
   "./game/immersive-ui-v24.js?v=24",
   "./game/immersive-ui-v24.css?v=24.2",
   "./game/desktop-fit-v24-1.css?v=24.2",
@@ -36,7 +36,6 @@ const CORE_ASSETS = [
   "./game/characters-ui-v13.js?v=13",
   "./game/keepers-ui-v14.js?v=14",
   "./game/walls-ui-v15.js?v=15",
-  "./game/run-rules-ui-v15-2.js?v=152",
   "./game/mobile-ui-v16.js?v=16",
   "./game/mobile-shell-v16-1.js?v=161",
   "./game/mobile-shell-compact-v16-1.js?v=161",
@@ -46,6 +45,7 @@ const CORE_ASSETS = [
   "./game/progression-v20.css?v=20",
   "./game/clarity-v21.js?v=21",
   "./game/product-polish-v22.js?v=22",
+  "./game/infinite-runs-v25.js?v=25",
   "./icons/football-lab-192.svg?v=161",
   "./icons/football-lab-512.svg?v=161",
   "./social-card.svg"
