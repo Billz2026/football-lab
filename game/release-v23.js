@@ -1,4 +1,4 @@
-const BUILD = "23.0.0";
+const BUILD = "25.0.0";
 
 Object.assign(window, {
   __footballLabMainV17: true,
@@ -19,7 +19,7 @@ window.__footballLabFastFlowV174 = Object.freeze({
   stageIntroMs: 700,
   breakdownMs: 650,
   replayMs: 751,
-  replayPolicy: "top-corner-life-restored-or-frame"
+  replayPolicy: "top-corner-or-frame"
 });
 
 window.__footballLabInputPrecisionV18 = Object.freeze({
@@ -37,7 +37,7 @@ window.__footballLabPhysicsRouteV19 = Object.freeze({
   distanceTimedFlight: true
 });
 
-window.__footballLabReleaseV23 = Object.freeze({
+window.__footballLabReleaseV25 = Object.freeze({
   build: BUILD,
   runtime: "static-es-modules",
   legacySourceExecution: false
@@ -61,7 +61,7 @@ requestAnimationFrame(trackRecovery);
 
 const badge = document.querySelector(".build-badge-v22");
 if (badge) {
-  badge.textContent = "V23";
+  badge.textContent = "V25";
   badge.title = `Football Lab build ${BUILD}`;
 }
 const version = document.querySelector(".settings-version-v22 strong");
