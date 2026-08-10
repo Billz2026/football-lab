@@ -1,7 +1,7 @@
 {
   "name": "Football Lab — Arcade Free Kicks",
   "short_name": "Football Lab",
-  "description": "A polished arcade free-kick game built around power, placement, curve, specialist kickers and escalating defensive matchups.",
+  "description": "A polished unlimited-run arcade free-kick game built around power, placement, curve, specialist kickers and escalating defensive matchups.",
   "id": "./index.html",
   "start_url": "./index.html?source=pwa",
   "scope": "./",
