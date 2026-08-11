@@ -83,6 +83,13 @@ const recover = {
 };
 const neutral = { ...idle, phase: "recovery-neutral", crouch: .034, lean: 0, rotate: .004 };
 
+const VISUALS = Object.freeze({
+  "dax-ryder": Object.freeze({ height: 1.93, skin: "#9b6749", skinLight: "#bb7d59", skinDark: "#70442f", shorts: "#111722", shortsLight: "#263140", sock: "#17202c", hair: "#101712" }),
+  "leo-vale": Object.freeze({ height: 1.88, skin: "#b97955", skinLight: "#d69770", skinDark: "#7e4c36", shorts: "#0b1e28", shortsLight: "#183c4d", sock: "#102934", hair: "#18130f" }),
+  "zion-arc": Object.freeze({ height: 1.9, skin: "#c38a68", skinLight: "#dda381", skinDark: "#895a43", shorts: "#24131f", shortsLight: "#4a263d", sock: "#2c1826", hair: "#2a1711" }),
+  "kai-mori": Object.freeze({ height: 1.92, skin: "#70462f", skinLight: "#936247", skinDark: "#4b2c20", shorts: "#171429", shortsLight: "#312957", sock: "#201b38", hair: "#080b09" })
+});
+
 function blend(a, b, t, phase = b.phase) {
   const j = (key) => mix(a[key], b[key], t);
   return {
@@ -137,6 +144,63 @@ function travel(p) {
   if (!state.animation) return 0;
   if (p.replay) return 1;
   return easeInOutCubic(clamp(p.run / .72, 0, 1));
+}
+
+function copyPose(base) {
+  const pose = { ...base };
+  for (const key of ["lk", "rk", "la", "ra", "lt", "rt", "le", "re", "lh", "rh"]) {
+    if (base[key]) pose[key] = { ...base[key] };
+  }
+  return pose;
+}
+
+function specialistPose(base, character, p) {
+  const pose = copyPose(base);
+  if (!state.animation || p.replay) return pose;
+  const load = smooth(clamp((p.run - .5) / .5, 0, 1));
+  const release = smooth(clamp(p.flight / .28, 0, 1));
+
+  if (character.id === "dax-ryder") {
+    pose.crouch *= 1.12;
+    pose.lean *= 1.15;
+    pose.rotate *= 1.18;
+    pose.shoulder *= 1.12;
+    if (p.flight > 0 && p.flight < .34) {
+      pose.ra.x -= .045 * release;
+      pose.ra.y -= .025 * release;
+      pose.rt.x -= .06 * release;
+      pose.chestX += .018 * release;
+    }
+  } else if (character.id === "leo-vale") {
+    pose.crouch *= .88;
+    pose.lean *= .82;
+    pose.rotate *= .72;
+    pose.shoulder *= .78;
+    pose.pelvisX *= .78;
+    pose.lh.x *= .9;
+    pose.rh.x *= .9;
+  } else if (character.id === "zion-arc") {
+    const bend = clamp(state.shot?.curve || 0, -1, 1);
+    const whip = load * (.55 + Math.abs(bend) * .45);
+    pose.rotate += bend * .082 * whip;
+    pose.chestX += bend * .035 * whip;
+    pose.shoulder += bend * .045 * whip;
+    pose.lh.x -= .035 * whip;
+    pose.rh.x += .055 * whip;
+    if (p.flight > 0 && p.flight < .38) pose.rt.x -= bend * .065 * release;
+  } else if (character.id === "kai-mori") {
+    pose.crouch *= .92;
+    pose.lean *= .88;
+    pose.rotate *= .84;
+    pose.shoulder *= .72;
+    pose.pelvisX *= .82;
+    pose.chestX *= .82;
+    if (p.flight > .25) {
+      pose.lh.x = lerp(pose.lh.x, -.275, release);
+      pose.rh.x = lerp(pose.rh.x, .315, release);
+    }
+  }
+  return pose;
 }
 
 function tapered(a, b, wa, wb, c1, c2 = c1) {
@@ -207,9 +271,10 @@ function impactFx(time, p, camera) {
 }
 
 function draw(world, pose, time, character, p) {
-  const camera = frameCamera(time), projection = projectedHeight(world, 1.9, camera, VIEW); if (!projection) return;
-  const h = projection.height, foot = projection.foot, skin = "#9b6749", skinLight = "#bb7d59", skinDark = "#70442f";
-  const shirt = character.accent, shorts = "#111722", shortsLight = "#263140", sock = "#17202c", hair = "#101712";
+  const visual = VISUALS[character.id] || VISUALS["dax-ryder"];
+  const camera = frameCamera(time), projection = projectedHeight(world, visual.height, camera, VIEW); if (!projection) return;
+  const h = projection.height, foot = projection.foot, skin = visual.skin, skinLight = visual.skinLight, skinDark = visual.skinDark;
+  const shirt = character.accent, shorts = visual.shorts, shortsLight = visual.shortsLight, sock = visual.sock, hair = visual.hair;
   ctx.save(); ctx.translate(foot.x, foot.y); ctx.rotate(pose.rotate || 0);
   const pelvis = P(pose.pelvisX * h, -.35 * h + pose.crouch * h * .08), chest = P(pose.chestX * h, -.665 * h + pose.crouch * h * .09);
   const headR = h * .069, head = P(chest.x, chest.y - h * .146), sh = h * .122, hip = h * .073, tilt = pose.shoulder * h;
@@ -239,12 +304,13 @@ function draw(world, pose, time, character, p) {
 }
 
 export function drawHeroKicker(time) {
-  const character = activeCharacter(); if (character.id !== "dax-ryder") return;
+  const character = activeCharacter();
   if (["stage", "breakdown"].includes(state.presentation?.phase)) return;
   const p = progress(time), world = kickerWorld(state.currentStage, travel(p));
-  window.__footballLabHeroFrameV1731 = { time, character: character.id, active: true };
-  transform(); draw(world, currentPose(p, time), time, character, p);
+  const pose = specialistPose(currentPose(p, time), character, p);
+  window.__footballLabHeroFrameV30 = { time, character: character.id, style: character.role, active: true };
+  transform(); draw(world, pose, time, character, p);
 }
 
-window.__footballLabHeroArtV172 = true;
-window.__footballLabMotionV173 = true;
+window.__footballLabHeroArtV30 = true;
+window.__footballLabMotionV30 = true;
