@@ -298,9 +298,15 @@ function takeShot() {
   clearResultBanner();
   const { flightDuration, diagnostics } = resolveShotPhysics();
   recordDiagnostics(diagnostics);
-  const runUpDuration = 560;
-  const contactHoldDuration = 64;
-  const settleDuration = settleDurationForShot(state.shot);
+  const character = activeCharacter();
+  const motionProfile = ({
+    "dax-ryder": { runUpDuration: 640, contactHoldDuration: 76, settleBonus: 45, style: "power" },
+    "leo-vale": { runUpDuration: 720, contactHoldDuration: 72, settleBonus: 70, style: "precision" },
+    "zion-arc": { runUpDuration: 680, contactHoldDuration: 74, settleBonus: 60, style: "curve" },
+    "kai-mori": { runUpDuration: 760, contactHoldDuration: 78, settleBonus: 85, style: "composure" }
+  })[character.id] || { runUpDuration: 700, contactHoldDuration: 74, settleBonus: 60, style: "balanced" };
+  const { runUpDuration, contactHoldDuration } = motionProfile;
+  const settleDuration = settleDurationForShot(state.shot) + motionProfile.settleBonus;
   const startedAt = performance.now();
   const impactRatio = impactRatioForShot(state.shot);
   const impactDelayMs = runUpDuration + contactHoldDuration + flightDuration * impactRatio;
@@ -336,7 +342,9 @@ function takeShot() {
     settleDuration,
     totalDuration: runUpDuration + contactHoldDuration + flightDuration + settleDuration,
     impactPlayed: false,
-    isReplay: false
+    isReplay: false,
+    motionStyle: motionProfile.style,
+    characterId: character.id
   };
   state.finishedAnimationId = null;
 }
