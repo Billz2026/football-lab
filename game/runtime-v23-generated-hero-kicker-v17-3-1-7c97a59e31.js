@@ -36,11 +36,11 @@ function progress(time) {
 function frameCamera(time) {
   const camera = buildCamera(state.currentStage);
   const p = progress(time);
-  if (p.flight > 0) {
-    const follow = easeOutCubic(p.flight) * 0.42;
+  if (p.flight > 0 && !document.documentElement.classList.contains("reduced-motion-v22")) {
+    const follow = easeOutCubic(p.flight);
     camera.position.z -= follow;
-    camera.position.y -= follow * 0.05;
-    camera.target.y += follow * 0.06;
+    camera.position.y -= follow * 0.08;
+    camera.target.y += follow * 0.08;
   }
   return camera;
 }
@@ -198,6 +198,39 @@ function specialistPose(base, character, p) {
     if (p.flight > .25) {
       pose.lh.x = lerp(pose.lh.x, -.275, release);
       pose.rh.x = lerp(pose.rh.x, .315, release);
+    }
+  }
+
+  if (p.settle > 0) {
+    const reaction = smooth(Math.sin(clamp(p.settle, 0, 1) * Math.PI));
+    if (state.shot?.outcome === "GOAL") {
+      pose.phase = "goal-reaction";
+      pose.crouch -= reaction * .018;
+      pose.lean = lerp(pose.lean, -.02, reaction);
+      if (character.id === "dax-ryder") {
+        pose.rh = mix(pose.rh, P(.22, -.82), reaction);
+        pose.re = mix(pose.re, P(.16, -.69), reaction);
+        pose.lh = mix(pose.lh, P(-.34, -.42), reaction);
+      } else if (character.id === "leo-vale") {
+        pose.lh = mix(pose.lh, P(-.42, -.53), reaction);
+        pose.rh = mix(pose.rh, P(.42, -.53), reaction);
+        pose.rotate *= .25;
+      } else if (character.id === "zion-arc") {
+        pose.lh = mix(pose.lh, P(-.55, -.58), reaction);
+        pose.rh = mix(pose.rh, P(.55, -.58), reaction);
+        pose.le = mix(pose.le, P(-.36, -.6), reaction);
+        pose.re = mix(pose.re, P(.36, -.6), reaction);
+      } else {
+        pose.rh = mix(pose.rh, P(.18, -.6), reaction);
+        pose.lh = mix(pose.lh, P(-.18, -.6), reaction);
+        pose.crouch += reaction * .012;
+      }
+    } else {
+      pose.phase = state.shot?.outcome === "SAVE" ? "save-reaction" : "miss-reaction";
+      pose.lean = lerp(pose.lean, .04, reaction);
+      pose.lh = mix(pose.lh, P(-.2, -.3), reaction);
+      pose.rh = mix(pose.rh, P(.2, -.3), reaction);
+      pose.rotate *= 1 - reaction * .6;
     }
   }
   return pose;

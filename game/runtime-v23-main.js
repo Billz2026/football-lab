@@ -4,8 +4,8 @@ import {
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
 } from "./core-v6.js?v=31";
 import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=31";
-import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=31";
-import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v10.js?v=31";
+import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=32";
+import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=32";
 import { difficultyForStage } from "./difficulty-v9.js?v=31";
 import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=31";
 import { keeperForStage } from "./keepers-v14.js?v=31";
@@ -15,6 +15,7 @@ state.debugDiagnostics = false;
 state.presentation = null;
 state.presentationTimeout = null;
 state.impactTimer = null;
+state.contactHapticTimer = null;
 state.pendingStageAdvance = false;
 state.actionLockedUntil = 0;
 window.__footballLabDiagnostics = window.__footballLabDiagnostics || [];
@@ -25,8 +26,10 @@ let suppressActionClickUntil = 0;
 function clearPresentationTimers() {
   clearTimeout(state.presentationTimeout);
   clearTimeout(state.impactTimer);
+  clearTimeout(state.contactHapticTimer);
   state.presentationTimeout = null;
   state.impactTimer = null;
+  state.contactHapticTimer = null;
 }
 
 function clearResultBanner() {
@@ -207,6 +210,10 @@ function handlePresentationAction() {
     prepareNextShot();
     return true;
   }
+  if (phase === "chapter-complete") {
+    advanceAfterChapter();
+    return true;
+  }
   return false;
 }
 
@@ -325,6 +332,7 @@ function takeShot() {
   };
 
   playImpactSound(state.shot.outcome, impactDelayMs / 1000);
+  state.contactHapticTimer = setTimeout(() => vibrate(12), runUpDuration + contactHoldDuration);
   state.impactTimer = setTimeout(() => {
     const patterns = {
       GOAL: 35,
@@ -405,7 +413,7 @@ function finishPrimaryShot(animationId) {
   renderHud();
   showResult(resultBannerForShot(shot, points), miss);
   setPhase("result");
-  playOutcomeSound(shot.outcome, { topCorner: shot.topCorner });
+  playOutcomeSound(shot.outcome, { topCorner: shot.topCorner, saveType: shot.saveType });
 
   state.presentation = {
     ...state.presentation,
@@ -417,7 +425,7 @@ function finishPrimaryShot(animationId) {
     breakdown: buildBreakdown(shot)
   };
 
-  const replayable = Boolean(shot.topCorner || ["POST", "BAR"].includes(shot.outcome));
+  const replayable = Boolean(shot.outcome === "GOAL" && (shot.topCorner || shot.strikeQuality >= 0.9));
   if (replayable) startReplay();
   else showBreakdown();
 }
@@ -451,9 +459,9 @@ function startReplay() {
     startedAt,
     runUpDuration: 1,
     contactHoldDuration: 0,
-    flightDuration: 680,
-    settleDuration: 70,
-    totalDuration: 751,
+    flightDuration: 820,
+    settleDuration: 90,
+    totalDuration: 911,
     impactPlayed: true,
     isReplay: true
   };
@@ -484,34 +492,63 @@ function showBreakdown() {
   state.presentationTimeout = setTimeout(continueAfterBreakdown, 650);
 }
 
+function beginNextStage() {
+  state.stage += 1;
+  syncStage();
+  const { keeper, wall } = announceMatchupChange();
+  renderHud();
+  const difficulty = difficultyForStage(state.stage, stageConfig());
+  state.presentation = {
+    phase: "stage",
+    startedAt: performance.now(),
+    skippable: true,
+    stageNumber: state.stage + 1,
+    distanceYards: state.currentStage.distanceYards,
+    stageName: state.currentStage.name,
+    chapterNumber: state.currentStage.chapterNumber,
+    chapterName: state.currentStage.chapterName,
+    venue: state.currentStage.venue,
+    weather: state.currentStage.weather,
+    challenge: difficulty.challenge,
+    keeperId: keeper.id,
+    wallId: wall.id
+  };
+  elements.shotAction.textContent = "START NEXT STAGE";
+  playStageSound();
+  vibrate([12, 28, 12]);
+  state.presentationTimeout = setTimeout(prepareNextShot, 1100);
+}
+
+function showChapterComplete() {
+  clearPresentationTimers();
+  state.presentation = {
+    phase: "chapter-complete",
+    startedAt: performance.now(),
+    skippable: true,
+    chapterNumber: state.currentStage.chapterNumber,
+    chapterName: state.currentStage.chapterName,
+    venue: state.currentStage.venue,
+    scoreLabel: `${formatScore(state.score)} PTS`
+  };
+  elements.shotAction.textContent = "CONTINUE JOURNEY";
+  playStageSound({ chapterComplete: true });
+  vibrate([18, 35, 18, 45, 24]);
+  state.presentationTimeout = setTimeout(advanceAfterChapter, 1650);
+}
+
+function advanceAfterChapter() {
+  if (state.presentation?.phase !== "chapter-complete") return;
+  clearPresentationTimers();
+  beginNextStage();
+}
+
 function continueAfterBreakdown() {
   if (state.presentation?.phase !== "breakdown") return;
   clearPresentationTimers();
   if (state.pendingStageAdvance) {
-    state.stage += 1;
-    syncStage();
-    const { keeper, wall } = announceMatchupChange();
-    renderHud();
-    const difficulty = difficultyForStage(state.stage, stageConfig());
-    state.presentation = {
-      phase: "stage",
-      startedAt: performance.now(),
-      skippable: true,
-      stageNumber: state.stage + 1,
-      distanceYards: state.currentStage.distanceYards,
-      stageName: state.currentStage.name,
-      chapterNumber: state.currentStage.chapterNumber,
-      chapterName: state.currentStage.chapterName,
-      venue: state.currentStage.venue,
-      weather: state.currentStage.weather,
-      challenge: difficulty.challenge,
-      keeperId: keeper.id,
-      wallId: wall.id
-    };
-    elements.shotAction.textContent = "START NEXT STAGE";
-    playStageSound();
-    vibrate([12, 28, 12]);
-    state.presentationTimeout = setTimeout(prepareNextShot, 1100);
+    const completedStage = state.stage + 1;
+    if (completedStage <= 30 && completedStage % 5 === 0) showChapterComplete();
+    else beginNextStage();
     return;
   }
   prepareNextShot();

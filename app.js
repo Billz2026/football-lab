@@ -1,6 +1,6 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=31", {
+  navigator.serviceWorker.register("./sw.js?v=32", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -23,7 +23,7 @@ const runtimeCaptureMode = localCaptureHost
   && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
   ? "./game/main-v18.js?v=31"
-  : "./game/runtime-v23-main.js?v=31";
+  : "./game/runtime-v23-main.js?v=32";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 const runtimePromise = import(runtimeEntry);

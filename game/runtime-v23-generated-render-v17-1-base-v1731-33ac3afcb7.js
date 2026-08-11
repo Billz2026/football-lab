@@ -77,22 +77,39 @@ function progressAt(time) {
 function cameraForFrame(time) {
   const camera = buildCamera(state.currentStage);
   const progress = progressAt(time);
-  if (state.animation && progress.motionFlight > 0) {
-    const follow = easeOutCubic(progress.motionFlight) * 0.42;
+  const reducedMotion = document.documentElement.classList.contains("reduced-motion-v22");
+  if (state.animation && progress.motionFlight > 0 && !reducedMotion) {
+    const follow = easeOutCubic(progress.motionFlight);
+    const ball = sampleShotPath(state.shot?.path, progress.motionFlight);
     camera.position.z -= follow;
-    camera.position.y -= follow * 0.05;
-    camera.target.y += follow * 0.06;
+    camera.position.y -= follow * 0.08;
+    camera.target.y += follow * 0.08;
+    if (ball) {
+      camera.target.x = lerp(camera.target.x, ball.x, follow * 0.24);
+      camera.target.y = lerp(camera.target.y, ball.y, follow * 0.2);
+    }
   }
+  window.__footballLabCameraV32 = {
+    ballFollow: Boolean(state.animation && progress.motionFlight > 0 && !reducedMotion),
+    reducedMotion,
+    flight: progress.motionFlight
+  };
   return camera;
 }
 
 function applyCameraFeedback(time) {
-  if (!state.animation || state.animation.isReplay) return;
+  if (!state.animation || state.animation.isReplay || document.documentElement.classList.contains("reduced-motion-v22")) return;
   const progress = progressAt(time);
   const contact = clamp(progress.flight / 0.075, 0, 1);
-  if (contact <= 0 || contact >= 1) return;
-  const strength = Math.sin(contact * Math.PI) * 1.85;
-  ctx.translate(Math.sin(time * 0.13) * strength, Math.cos(time * 0.17) * strength * 0.45);
+  const impact = impactRatio();
+  const outcomeWindow = clamp((progress.motionFlight - impact) / 0.095, 0, 1);
+  const contactStrength = contact > 0 && contact < 1 ? Math.sin(contact * Math.PI) * 1.9 : 0;
+  const impactStrength = outcomeWindow > 0 && outcomeWindow < 1
+    ? Math.sin(outcomeWindow * Math.PI) * ({ GOAL: 2.6, SAVE: 2.2, POST: 3.2, BAR: 3.2, WALL: 2.5 }[state.shot?.outcome] || 0.9)
+    : 0;
+  const strength = contactStrength + impactStrength;
+  if (strength <= 0) return;
+  ctx.translate(Math.sin(time * 0.17) * strength, Math.cos(time * 0.21) * strength * 0.48);
 }
 
 function lineWorld(a, b, width = 1.6, colour = "rgba(235,255,232,.68)") {
@@ -266,9 +283,20 @@ function drawGoal(time) {
   const frame = "rgba(247,255,244,.96)";
   const net = "rgba(238,255,236,.19)";
   const progress = progressAt(time);
-  const ripple = state.animation && state.shot.outcome === "GOAL" && progress.motionFlight > 0.88
-    ? Math.sin(clamp((progress.motionFlight - 0.88) / 0.12, 0, 1) * Math.PI) * 0.2
+  const impact = impactRatio();
+  const ripplePhase = state.animation && state.shot.outcome === "GOAL"
+    ? clamp((progress.motionFlight - impact) / Math.max(0.045, 1 - impact), 0, 1)
     : 0;
+  const rippleEnergy = ripplePhase > 0
+    ? Math.sin(ripplePhase * Math.PI) * (0.42 + clamp((state.shot.speedMps || 0) / 42, 0, 1) * 0.24)
+    : 0;
+  const impactX = Number.isFinite(state.shot?.actualX) ? lerp(left, right, state.shot.actualX) : 0;
+  const impactY = Number.isFinite(state.shot?.actualY) ? GOAL.height * (1 - state.shot.actualY) : GOAL.height * 0.5;
+  const localRipple = (x, y) => {
+    const xFalloff = Math.max(0, 1 - Math.abs(x - impactX) / (GOAL.width * 0.55));
+    const yFalloff = Math.max(0, 1 - Math.abs(y - impactY) / (GOAL.height * 0.72));
+    return rippleEnergy * xFalloff * yFalloff;
+  };
 
   lineWorld({ x: left, y: 0, z: 0 }, { x: left, y: GOAL.height, z: 0 }, 3.4, frame);
   lineWorld({ x: right, y: 0, z: 0 }, { x: right, y: GOAL.height, z: 0 }, 3.4, frame);
@@ -279,12 +307,21 @@ function drawGoal(time) {
 
   for (let i = 0; i <= 10; i += 1) {
     const x = lerp(left, right, i / 10);
-    lineWorld({ x, y: 0.04, z: backZ - ripple }, { x, y: GOAL.height, z: 0 }, 0.75, net);
+    const ripple = localRipple(x, impactY);
+    lineWorld({ x, y: 0.04, z: backZ - ripple * 0.42 }, { x, y: GOAL.height, z: -ripple }, 0.75, net);
   }
   for (let i = 1; i < 7; i += 1) {
     const y = (GOAL.height * i) / 7;
+    const ripple = localRipple(impactX, y);
     lineWorld({ x: left, y, z: 0 }, { x: right, y, z: backZ - ripple }, 0.75, net);
   }
+  window.__footballLabNetV32 = {
+    localised: true,
+    active: rippleEnergy > 0,
+    impactX,
+    impactY,
+    energy: rippleEnergy
+  };
 }
 
 function drawSimplePerson(world, options = {}) {
@@ -683,19 +720,20 @@ function wallPose(progress, index, count, hit) {
     ? state.shot.collision.index / Math.max(1, state.shot.path.length - 1)
     : passRatio;
   const hitReact = hit ? pulse01((flight - hitRatio) / 0.32) : 0;
+  const passReact = pulse01((flight - passRatio) / 0.26) * (hit ? 0 : 1);
   const direction = index < centreIndex ? -1 : 1;
 
   return {
     crouch: 0.025 + anticipation * 0.13 + landing * 0.105,
     lift: Math.max(0, jump) * 0.118 * modifiers.jumpMultiplier * jumpPattern,
-    rotation: hitReact * direction * 0.28,
-    chestX: hitReact * direction * 0.08,
+    rotation: hitReact * direction * 0.34 + passReact * direction * 0.055,
+    chestX: hitReact * direction * 0.1 + passReact * direction * 0.018,
     leftKnee: { x: -0.1 - hitReact * direction * 0.025, y: -0.15 + landing * 0.035 },
     rightKnee: { x: 0.1 - hitReact * direction * 0.025, y: -0.15 + landing * 0.035 },
     leftAnkle: { x: -0.13, y: -0.005 + landing * 0.01 },
     rightAnkle: { x: 0.13, y: -0.005 + landing * 0.01 },
-    leftHand: { x: -0.09 - hitReact * 0.14, y: -0.42 + anticipation * 0.055 + hitReact * 0.035 },
-    rightHand: { x: 0.09 + hitReact * 0.14, y: -0.42 + anticipation * 0.055 - hitReact * 0.02 }
+    leftHand: { x: -0.09 - hitReact * 0.16 - passReact * 0.035, y: -0.42 + anticipation * 0.055 + hitReact * 0.04 },
+    rightHand: { x: 0.09 + hitReact * 0.16 + passReact * 0.035, y: -0.42 + anticipation * 0.055 - hitReact * 0.025 }
   };
 }
 
@@ -743,6 +781,11 @@ function keeperState(progress, time) {
   const contactPoint = impactRatio();
   const land = smooth01((flight - Math.min(0.9, contactPoint + 0.01)) / 0.16);
   const recovery = smooth01(progress.settle);
+  const saveContact = state.shot?.outcome === "SAVE"
+    ? smooth01((flight - Math.max(0.1, contactPoint - 0.025)) / 0.055)
+    : 0;
+  const catchHold = state.shot?.saveType === "CATCH" ? smooth01((saveContact - 0.08) / 0.72) : 0;
+  const parryFollow = state.shot?.saveType === "PARRY" ? pulse01((flight - contactPoint) / 0.22) : 0;
 
   const world = {
     x: lerp(idle.x + adjustmentStep, plan.contact.x - direction * 0.08, launch),
@@ -765,6 +808,19 @@ function keeperState(progress, time) {
   const absoluteLeftHand = direction > 0 ? trailHand : leadHand;
   const absoluteRightHand = direction > 0 ? leadHand : trailHand;
 
+  if (catchHold > 0) {
+    const chestTarget = { x: world.x + direction * 0.035, y: world.y + 1.05, z: world.z };
+    for (const hand of [absoluteLeftHand, absoluteRightHand]) {
+      hand.x = lerp(hand.x, chestTarget.x, catchHold * 0.72);
+      hand.y = lerp(hand.y, chestTarget.y, catchHold * 0.72);
+      hand.z = lerp(hand.z, chestTarget.z, catchHold * 0.72);
+    }
+  } else if (parryFollow > 0) {
+    const lead = direction > 0 ? absoluteRightHand : absoluteLeftHand;
+    lead.x += direction * parryFollow * 0.22;
+    lead.y += parryFollow * 0.06;
+  }
+
   const launchRotation = direction * lerp(0, 1.08, launch);
   const finalRotation = direction * lerp(1.08, 0.7, recovery);
   const rotation = land > 0 ? lerp(launchRotation, finalRotation, Math.max(land, recovery)) : launchRotation;
@@ -772,7 +828,7 @@ function keeperState(progress, time) {
   return {
     world,
     pose: {
-      crouch: 0.08 + coil * 0.16 + land * 0.16 + recovery * 0.05,
+      crouch: 0.08 + coil * 0.16 + land * 0.16 + recovery * 0.05 + catchHold * 0.035,
       rotation,
       torsoLean: direction * launch * 0.12,
       chestX: direction * launch * 0.045,
@@ -795,7 +851,9 @@ function keeperState(progress, time) {
       absoluteLeftHand,
       absoluteRightHand,
       glove: "#f7ffd2",
-      gloveScale: 1.68
+      gloveScale: state.shot?.saveType === "CATCH" ? 1.78 : 1.68,
+      saveMotion: state.shot?.saveType || null,
+      recovery
     }
   };
 }
@@ -845,6 +903,12 @@ function drawWall(time) {
       wallProfile.playerHeight * heightPattern[player.index % heightPattern.length]
     );
   }
+  window.__footballLabWallMotionV32 = {
+    profile: wallProfile.id,
+    reactive: true,
+    jumping: Boolean(state.animation && progress.motionFlight > 0),
+    hitPlayer: state.shot?.collision?.playerIndex ?? null
+  };
 }
 
 function drawKeeperContactPulse(time) {
@@ -881,6 +945,13 @@ function drawKeeper(time) {
     keeperProfile.visualHeight * 1.08
   );
   drawKeeperContactPulse(time);
+  window.__footballLabKeeperMotionV32 = {
+    profile: keeperProfile.id,
+    motion: state.shot?.outcome === "SAVE" ? state.shot.saveType : state.animation ? "DIVE" : "READY",
+    airborne: keeper.world.y > 0.02,
+    recovering: Boolean(progress.settle > 0),
+    outcome: state.shot?.outcome || null
+  };
 }
 
 function drawKicker(time) {
@@ -1049,15 +1120,25 @@ function drawBall(time, finishShot) {
 
 function drawTrail(progress) {
   ctx.save();
-  for (let i = 1; i <= 7; i += 1) {
-    const world = sampleShotPath(state.shot.path, clamp(progress - i * 0.019, 0, 1));
+  const speed = clamp((state.shot?.speedMps || 24) / 38, 0.55, 1.25);
+  const curve = Math.abs(state.shot?.curve || 0);
+  const trailCount = 8 + Math.round(speed * 5);
+  for (let i = 1; i <= trailCount; i += 1) {
+    const world = sampleShotPath(state.shot.path, clamp(progress - i * (0.012 + speed * 0.006), 0, 1));
     if (!world) continue;
     const projected = projectWorld(world, activeCamera, viewport);
     if (!projected.visible) continue;
-    ctx.fillStyle = `rgba(218,254,77,${(1 - i / 8) * 0.15})`;
+    ctx.fillStyle = `rgba(218,254,77,${(1 - i / (trailCount + 1)) * (0.1 + speed * 0.08)})`;
     ctx.beginPath();
     ctx.arc(projected.x, projected.y, clamp(projected.scale * 0.06, 1.7, 6), 0, TAU);
     ctx.fill();
+    if (curve > 0.2 && i % 2 === 0) {
+      ctx.strokeStyle = `rgba(239,255,220,${(1 - i / trailCount) * 0.16})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(projected.x, projected.y, clamp(projected.scale * 0.09, 3, 9), progress * TAU * 5 + i, progress * TAU * 5 + i + Math.PI * 0.9);
+      ctx.stroke();
+    }
   }
   ctx.restore();
 }
