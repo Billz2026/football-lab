@@ -8,10 +8,9 @@ export function drawScene(time, finishShot) {
   drawBaseScene(time, finishShot);
   drawHeroKicker(time);
 
-  const heroSelected = activeCharacter().id === "dax-ryder";
-  const baseVisible = heroSelected ? 0 : 1;
-  const heroVisible = heroSelected ? 1 : 0;
-  window.__footballLabVisibleKickersV1731 = {
+  const baseVisible = 0;
+  const heroVisible = 1;
+  window.__footballLabVisibleKickersV30 = {
     base: baseVisible,
     hero: heroVisible,
     total: baseVisible + heroVisible,
