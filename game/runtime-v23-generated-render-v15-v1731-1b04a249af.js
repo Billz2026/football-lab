@@ -1,8 +1,8 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=32";
-import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=31";
-import { activeCharacter } from "./characters-v13.js?v=31";
-import { keeperForStage } from "./keepers-v14.js?v=31";
-import { wallForStage } from "./walls-v15.js?v=31";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=32.2";
+import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=32.2";
+import { activeCharacter } from "./characters-v13.js?v=32.2";
+import { keeperForStage } from "./keepers-v14.js?v=32.2";
+import { wallForStage } from "./walls-v15.js?v=32.2";
 
 export { resizeCanvas };
 

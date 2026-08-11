@@ -2,14 +2,14 @@ import {
   $, $$, formatScore, profile, state, elements, createShot, saveProfile, renderProfile,
   setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
-} from "./core-v6.js?v=31";
-import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=31";
-import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=32";
-import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=32";
-import { difficultyForStage } from "./difficulty-v9.js?v=31";
-import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=31";
-import { keeperForStage } from "./keepers-v14.js?v=31";
-import { wallForStage } from "./walls-v15.js?v=31";
+} from "./core-v6.js?v=32.2";
+import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.2";
+import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=32.2";
+import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=32.2";
+import { difficultyForStage } from "./difficulty-v9.js?v=32.2";
+import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.2";
+import { keeperForStage } from "./keepers-v14.js?v=32.2";
+import { wallForStage } from "./walls-v15.js?v=32.2";
 
 state.debugDiagnostics = false;
 state.presentation = null;
@@ -270,9 +270,14 @@ function handleAction(inputTime = performance.now()) {
 
   if (state.phase === "aim") {
     const target = currentAimTarget();
-    Object.assign(state.shot, { aimX: target.x, aimY: target.y });
+    Object.assign(state.shot, {
+      aimX: target.x,
+      aimY: target.y,
+      curve: Math.max(-1, Math.min(1, state.shot.previewCurve || 0))
+    });
     elements.aimReadout.textContent = target.label;
-    setPhase("curve");
+    elements.curveReadout.textContent = curveLabel(state.shot);
+    takeShot();
     return;
   }
 
@@ -690,6 +695,12 @@ elements.canvas.addEventListener("pointerdown", (event) => {
 }, { passive: false });
 elements.canvas.style.touchAction = "manipulation";
 elements.shotAction.style.touchAction = "manipulation";
+
+window.addEventListener("footballlab:takeplannedshot", () => {
+  if (state.screen !== "game" || state.phase !== "aim" || state.animation) return;
+  suppressActionClickUntil = 0;
+  handleAction(performance.now());
+});
 
 window.addEventListener("footballlab:submitrun", () => {
   if (state.screen !== "game" || elements.gameOverModal.classList.contains("is-open")) return;

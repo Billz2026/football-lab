@@ -1,7 +1,7 @@
-import { clamp, state } from "./core-v6.js?v=31";
-import { GOALKEEPERS, keeperById, keeperForStage as stageKeeperForStage } from "./keepers-v14.js?v=31";
-import { WALLS, wallById, wallForStage as stageWallForStage, buildWallLayout as stageBuildWallLayout } from "./walls-v15.js?v=31";
-import { buildWall as buildBaseWall } from "./world-v7.js?v=31";
+import { clamp, state } from "./core-v6.js?v=32.2";
+import { GOALKEEPERS, keeperById, keeperForStage as stageKeeperForStage } from "./keepers-v14.js?v=32.2";
+import { WALLS, wallById, wallForStage as stageWallForStage, buildWallLayout as stageBuildWallLayout } from "./walls-v15.js?v=32.2";
+import { buildWall as buildBaseWall } from "./world-v7.js?v=32.2";
 
 export { GOALKEEPERS, WALLS };
 

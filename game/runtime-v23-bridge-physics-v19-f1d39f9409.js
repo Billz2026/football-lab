@@ -1,8 +1,8 @@
-import { clamp, lerp, state } from "./core-v6.js?v=31";
+import { clamp, createShot, lerp, state } from "./core-v6.js?v=32.2";
 import {
   resolveShotPhysics as resolveBaseShotPhysics,
   sampleShotPath as sampleBaseShotPath
-} from "./runtime-v23-generated-physics-v15-9cf6fe15a3.js?v=31";
+} from "./runtime-v23-generated-physics-v15-9cf6fe15a3.js?v=32.2";
 
 const EPSILON = 1e-7;
 const MIN_PATH_SAMPLES = 96;
@@ -286,6 +286,41 @@ export function resolveShotPhysics() {
 
 export function sampleShotPath(path, progress) {
   return sampleBaseShotPath(path, progress);
+}
+
+export function previewShotPhysics(inputs = {}) {
+  const originalShot = state.shot;
+  const originalKeeperId = state.keeperId;
+  const originalWallId = state.wallId;
+  const previewShot = {
+    ...createShot(),
+    power: Number(inputs.power),
+    aimX: Number(inputs.aimX),
+    aimY: Number(inputs.aimY),
+    previewAimX: Number(inputs.aimX),
+    previewAimY: Number(inputs.aimY),
+    curve: clamp(Number(inputs.curve) || 0, -1, 1)
+  };
+
+  state.shot = previewShot;
+  try {
+    const result = resolveBaseShotPhysics();
+    return {
+      outcome: previewShot.outcome,
+      path: previewShot.path.map((point) => ({ ...point })),
+      collision: previewShot.collision
+        ? { ...previewShot.collision, point: { ...previewShot.collision.point } }
+        : null,
+      diagnostics: previewShot.diagnostics
+        ? structuredClone(previewShot.diagnostics)
+        : null,
+      target: result.target ? { ...result.target } : null
+    };
+  } finally {
+    state.shot = originalShot;
+    state.keeperId = originalKeeperId;
+    state.wallId = originalWallId;
+  }
 }
 
 window.__footballLabPhysicsConsistencyV19 = {

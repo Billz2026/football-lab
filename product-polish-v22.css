@@ -160,7 +160,7 @@
   color: #f4f7f0;
   background: rgba(4,10,6,.97);
   box-shadow: 0 24px 72px rgba(0,0,0,.58);
-  pointer-events: auto;
+  pointer-events: none;
 }
 .tutorial-card-v22 > span { color: #dafe4d; font: 900 8px/1 system-ui; letter-spacing: .15em; }
 .tutorial-card-v22 strong { display: block; margin-top: 7px; font-size: 18px; }
@@ -173,6 +173,7 @@
   font: 900 8px/1 system-ui;
   letter-spacing: .1em;
   cursor: pointer;
+  pointer-events: auto;
 }
 .tutorial-target-v22 {
   position: relative;

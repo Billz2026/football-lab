@@ -2,11 +2,11 @@ import {
   $, $$, formatScore, profile, state, elements, createShot, saveProfile, renderProfile,
   setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage
-} from "./core-v6.js?v=31";
+} from "./core-v6.js?v=32.2";
 import { resolveShotPhysics } from "./physics-v9.js?v=9";
 import { resizeCanvas, drawScene } from "./render-v10.js?v=10";
 import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v10.js?v=10";
-import { difficultyForStage } from "./difficulty-v9.js?v=31";
+import { difficultyForStage } from "./difficulty-v9.js?v=32.2";
 
 state.debugDiagnostics = false;
 state.presentation = null;

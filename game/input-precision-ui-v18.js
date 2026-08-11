@@ -1,4 +1,4 @@
-import { state, idealPower } from "./core-v6.js?v=31";
+import { state, idealPower } from "./core-v6.js?v=32.2";
 
 const meter = document.querySelector(".meter");
 const meterWrap = document.querySelector(".meter-wrap");
@@ -145,7 +145,7 @@ function guideForPhase(phase) {
     key: phase,
     left: "0",
     width: "0",
-    copy: "<span>LOCK EACH INPUT</span><strong>INPUT PRECISION</strong><span>3 STEPS</span>"
+    copy: "<span>LOCK POWER</span><strong>INPUT PRECISION</strong><span>2 STEPS</span>"
   };
 }
 

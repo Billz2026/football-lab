@@ -10,7 +10,7 @@ import {
   keeperWorld,
   kickerWorld as kickerBaseWorld,
   supportingPlayers
-} from "./world-v6.js?v=31";
+} from "./world-v6.js?v=32.2";
 
 export { METRES_PER_YARD, GOAL, PITCH, SCENARIOS, scenarioForStage, ballWorld, keeperWorld, supportingPlayers };
 

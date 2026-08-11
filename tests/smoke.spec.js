@@ -31,12 +31,12 @@ test("a complete shot can be played before the run is voluntarily submitted", as
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 3000 });
 
-  for (const expectedPhase of ["SET POWER", "PLACE YOUR SHOT", "ADD CURVE"]) {
+  for (const expectedPhase of ["SET POWER", "AIM SHOT"]) {
     await page.locator("#shotAction").click();
     await expect(page.locator("#phaseTitle")).toHaveText(expectedPhase);
     await page.waitForTimeout(90);
   }
-  await page.locator("#shotAction").click();
+  await page.locator("#aimTakeShotV322").click();
   await expect(page.locator("#phaseTitle")).toHaveText("WATCH THE FLIGHT");
   await expect(page.locator("#shotAction")).toHaveText(/START SHOT|START NEXT STAGE/, { timeout: 7000 });
 

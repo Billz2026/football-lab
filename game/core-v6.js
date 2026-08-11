@@ -1,4 +1,4 @@
-import { scenarioForStage } from "./world-v6.js?v=31";
+import { scenarioForStage } from "./world-v6.js?v=32.2";
 
 export const $ = (selector, scope = document) => scope.querySelector(selector);
 export const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
@@ -18,7 +18,7 @@ export const WORLD = { width: 1200, height: 720 };
 export const STORAGE_KEY = "footballLabArcadeProfileV2";
 export const MAX_LIVES = 5;
 export const LIFE_STREAK_TARGET = 3;
-export const AIM_BOUNDS = Object.freeze({ minX: -0.22, maxX: 1.22, minY: -0.2, maxY: 1.08 });
+export const AIM_BOUNDS = Object.freeze({ minX: -0.35, maxX: 1.35, minY: -0.3, maxY: 1.15 });
 
 function loadProfile() {
   const fallback = { highScore: 0, bestStreak: 0, xp: 0 };
@@ -82,7 +82,7 @@ export function syncStage() {
 export function createShot() {
   return {
     power: null, aimX: null, aimY: null, curve: null, actualX: null, actualY: null,
-    previewAimX: 0.5, previewAimY: 0.27,
+    previewAimX: 0.5, previewAimY: 0.27, previewCurve: 0,
     outcome: null, points: 0, topCorner: false, path: [], impactIndex: null,
     collision: null, keeperPlan: null, saveType: null, strikeQuality: 0, speedMps: 0,
     lifeRestored: false
@@ -152,7 +152,7 @@ export function setPhase(phase) {
   const content = {
     ready: ["READY", `${stage.chapterName} · ${stage.label}. Misses reset the streak, never your stage.`, "START SHOT", "SHOT METER"],
     power: ["SET POWER", "Power controls pace and contact quality. Placement controls the shot height.", "LOCK POWER", "POWER"],
-    aim: ["PLACE YOUR SHOT", "Drag anywhere on the goal view or target pad—including outside the posts—to choose the exact line.", "LOCK PLACEMENT", "2D PLACEMENT"],
+    aim: ["AIM SHOT", "Drag the finish target, then choose an over-wall or around-wall route. Every angle remains available.", "TAKE FREE KICK", "TARGET + BEND"],
     curve: ["ADD CURVE", "Curl develops progressively. Aim outside the wall, then bend the ball back toward goal.", "TAKE SHOT", "CURVE"],
     shooting: ["WATCH THE FLIGHT", "The ball travels through the same world space as the wall, goal and goalkeeper.", "SHOT IN PLAY", "LOCKED"],
     result: ["SHOT COMPLETE", "A goal advances the stage. A miss lets you retry without losing progress.", "NEXT SHOT", "RESULT"]

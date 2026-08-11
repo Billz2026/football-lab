@@ -6,11 +6,11 @@ import {
   canvasView,
   currentAimTarget,
   easeOutCubic
-} from "./core-v6.js?v=31";
-import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=31";
-import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=31";
-import { sampleShotPath } from "./physics-v7.js?v=31";
-import { keeperForStage } from "./keepers-v14.js?v=31";
+} from "./core-v6.js?v=32.2";
+import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.2";
+import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=32.2";
+import { sampleShotPath } from "./physics-v7.js?v=32.2";
+import { keeperForStage } from "./keepers-v14.js?v=32.2";
 
 const viewport = { width: WORLD.width, height: WORLD.height };
 const TAU = Math.PI * 2;

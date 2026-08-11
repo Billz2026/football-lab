@@ -52,21 +52,16 @@ test("V21 aim marker is prominent and confirms the locked target", async ({ page
   await page.locator("#shotAction").click();
   await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("PLACE YOUR SHOT");
+  await expect(page.locator("#phaseTitle")).toHaveText("AIM SHOT");
+  await expect(page.locator("#aimPlannerV322")).toBeVisible();
 
-  const aimFrame = await expect.poll(
-    () => page.evaluate(() => window.__footballLabClarityFrameV21 || null),
-    { timeout: 3000 }
-  ).toMatchObject({ targetVisible: true, boardMuted: true });
-
-  const targetRadius = await page.evaluate(() => window.__footballLabClarityFrameV21.targetRadius);
-  expect(targetRadius).toBeGreaterThanOrEqual(15);
-  expect(targetRadius).toBeLessThanOrEqual(24);
-
-  await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("ADD CURVE");
+  const marker = await page.locator("#aimTargetV322").boundingBox();
+  expect(marker.width).toBeGreaterThanOrEqual(40);
+  expect(marker.height).toBeGreaterThanOrEqual(40);
+  await expect(page.locator("[data-aim-route='over']")).toHaveClass(/is-active/);
+  await expect(page.locator("#aimBendLabelV322")).toContainText("STRAIGHT");
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabClarityFrameV21?.lockFlash),
+    () => page.evaluate(() => window.__footballLabAimFrameV322?.active),
     { timeout: 1000 }
   ).toBe(true);
 });

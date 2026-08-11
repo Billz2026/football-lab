@@ -15,8 +15,8 @@ replaceRequired(
 );
 replaceRequired(
   "character presentation import",
-  'import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=31";',
-  `import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=31";\nimport { activeCharacter } from "${new URL("./characters-v13.js?v=31", import.meta.url).href}";`
+  'import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=32.2";',
+  `import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=32.2";\nimport { activeCharacter } from "${new URL("./characters-v13.js?v=32.2", import.meta.url).href}";`
 );
 replaceRequired(
   "goal colour",

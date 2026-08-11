@@ -5,8 +5,8 @@ let loaderSource = await response.text();
 
 loaderSource = loaderSource
   .replaceAll("./render-v9-v15.js?v=15", "./render-v9-v15-3.js?v=153")
-  .replaceAll("./keepers-v14.js?v=31", "./lab-matchups-v15-3.js?v=153")
-  .replaceAll("./walls-v15.js?v=31", "./lab-matchups-v15-3.js?v=153");
+  .replaceAll("./keepers-v14.js?v=32.2", "./lab-matchups-v15-3.js?v=153")
+  .replaceAll("./walls-v15.js?v=32.2", "./lab-matchups-v15-3.js?v=153");
 
 loaderSource = loaderSource.replace(
   /new URL\("(\.\/[^"\n]+)"\s*,\s*import\.meta\.url\)/g,

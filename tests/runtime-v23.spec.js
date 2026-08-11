@@ -82,10 +82,9 @@ test("V23 static runtime preserves the playable five-life flow", async ({ page }
   await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
   await page.waitForTimeout(90);
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("PLACE YOUR SHOT");
+  await expect(page.locator("#phaseTitle")).toHaveText("AIM SHOT");
   await page.waitForTimeout(90);
-  await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("ADD CURVE");
+  await expect(page.locator("#aimPlannerV322")).toBeVisible();
 
   const contracts = await page.evaluate(() => ({
     main: window.__footballLabMainV19,

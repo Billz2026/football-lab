@@ -1,4 +1,4 @@
-import { state, elements } from "./core-v6.js?v=31";
+import { state, elements } from "./core-v6.js?v=32.2";
 
 const BUILD = "22.0.0";
 const SETTINGS_KEY = "footballLabSettingsV22";
@@ -331,7 +331,7 @@ function injectTutorial() {
 const tutorialSteps = {
   ready: {
     title: "Start your run",
-    copy: "Press START SHOT. The next three taps lock power, placement and curve.",
+    copy: "Press START SHOT. First lock clean power, then aim and shape the route on one clear screen.",
     target: () => elements.shotAction
   },
   power: {
@@ -339,11 +339,7 @@ const tutorialSteps = {
     copy: "Tap when the white marker reaches the bright contact zone. Power sets pace and contact quality; you choose the height next.",
     target: () => document.querySelector(".meter-wrap")
   },
-  aim: {
-    title: "Place it anywhere",
-    copy: "Drag on the goal view or 2D pad. Aim outside the posts to create an around-wall curl, or choose any height directly.",
-    target: () => document.querySelector("#freeAimPadV321") || document.querySelector(".game-frame")
-  },
+  aim: null,
   curve: {
     title: "Shape the strike",
     copy: "Use the live direction meter. If you aimed outside a post, apply the opposite bend to curl the ball back in.",
@@ -408,7 +404,9 @@ function watchTutorial() {
     }
     if (state.phase !== previousPhase) {
       previousPhase = state.phase;
-      renderTutorialStep(tutorialSteps[state.phase]);
+      const step = tutorialSteps[state.phase];
+      if (step) renderTutorialStep(step);
+      else hideTutorial();
     } else if (tutorialTarget) {
       positionTutorial(tutorialTarget);
     }

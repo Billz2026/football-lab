@@ -37,7 +37,7 @@ function polishProductionMenu() {
     const description = classic.querySelector("small");
     const cta = classic.querySelector(".mode-cta");
     if (status) status.textContent = "PLAY NOW";
-    if (description) description.textContent = "Choose a specialist, master three inputs and survive escalating free-kick stages.";
+    if (description) description.textContent = "Choose a specialist, lock power, then aim and bend on one complete route screen.";
     if (cta) cta.innerHTML = "CHOOSE KICKER <b>→</b>";
   }
 }

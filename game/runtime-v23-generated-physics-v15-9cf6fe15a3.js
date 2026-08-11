@@ -1,11 +1,11 @@
 import {
   clamp, lerp, smoothStep, state, stageConfig, idealPower, strikeQuality, strikeQualityLabel
-} from "./core-v6.js?v=31";
-import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=31";
-import { difficultyForStage } from "./difficulty-v9.js?v=31";
-import { activeCharacter, characterPhysics } from "./characters-v13.js?v=31";
-import { keeperForStage } from "./keepers-v14.js?v=31";
-import { wallForStage, buildWallLayout } from "./walls-v15.js?v=31";
+} from "./core-v6.js?v=32.2";
+import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=32.2";
+import { difficultyForStage } from "./difficulty-v9.js?v=32.2";
+import { activeCharacter, characterPhysics } from "./characters-v13.js?v=32.2";
+import { keeperForStage } from "./keepers-v14.js?v=32.2";
+import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.2";
 
 const BALL_RADIUS = 0.11;
 const SAMPLE_COUNT = 220;
@@ -30,24 +30,25 @@ function buildDirectPath(inputResult, profile) {
   const quality = state.shot.strikeQuality ?? strikeQuality(power);
   const distance = start.z;
   const requestedHeight = Math.max(0, target.y - 1.05);
+  const highRouteIntent = clamp((target.y - 0.55) / (GOAL.height - 0.55), 0, 1);
   const poorContactLift = (1 - quality) * 0.07;
   const arcHeight = clamp(
-    0.75 + distance * 0.018 + requestedHeight * 0.15 + poorContactLift,
-    0.88,
-    1.58
+    0.72 + distance * (0.02 + highRouteIntent * 0.03) + requestedHeight * 0.2 + poorContactLift,
+    0.95,
+    3
   );
 
   return Array.from({ length: SAMPLE_COUNT + 1 }, (_, index) => {
     const t = index / SAMPLE_COUNT;
     const lineX = lerp(start.x, selected.x, t);
     const lineY = lerp(start.y, target.y, t);
-    const curveProgress = Math.pow(t, 1.72);
+    const curveEnvelope = Math.sin(Math.PI * t) * (1.55 - 0.55 * t);
     const windProgress = Math.pow(t, 1.48);
     const contactProgress = Math.pow(t, 1.18);
     const lift = arcHeight * 4 * t * (1 - t);
     return {
       x: lineX
-        + inputResult.curveMetres * curveProgress
+        + inputResult.curveMetres * curveEnvelope
         + inputResult.windMetres * windProgress
         + inputResult.drift.x * contactProgress,
       y: Math.max(0.03, lineY + lift),
@@ -73,14 +74,14 @@ function targetFromInputs(profile) {
 
   const selectedX = -GOAL.halfWidth + shot.aimX * GOAL.width;
   const selectedY = GOAL.height * (1 - shot.aimY);
-  const finalCurve = curve * (0.55 + stage.distanceYards * 0.028);
+  const routeBend = curve * (0.68 + stage.distanceYards * 0.034);
   const finalWind = state.stageWind * (0.21 + stage.distanceYards * 0.006);
   const underhitDrop = power < 0.28 ? smoothStep((0.28 - power) / 0.28) * 0.08 : 0;
   const overhitRise = power > 0.94 ? smoothStep((power - 0.94) / 0.06) * 0.04 : 0;
 
   const contactError = profile.contactError * modifiers.contactError;
   const powerDrift = powerDelta * 0.13 * contactError;
-  const curveDrift = deterministicSide * excessiveCurve * (0.42 + controlPenalty * 0.45) * contactError;
+  const curveDrift = deterministicSide * excessiveCurve * controlPenalty * 0.87 * contactError;
   const qualityDrift = deterministicSide * controlPenalty * 0.17 * contactError;
   const horizontalDriftMetres = powerDrift + curveDrift + qualityDrift;
   const verticalContactDrift = excessiveCurve * controlPenalty * 0.13;
@@ -89,7 +90,6 @@ function targetFromInputs(profile) {
   shot.strikeQuality = quality;
   shot.speedMps = lerp(15.5, 36.5, smoothStep(power)) * lerp(0.86, 1, quality) * modifiers.shotSpeed;
   shot.actualX = shot.aimX
-    + finalCurve / GOAL.width
     + finalWind / GOAL.width
     + horizontalDriftMetres / GOAL.width;
   shot.actualY = shot.aimY + underhitDrop - overhitRise + verticalContactDrift / GOAL.height;
@@ -103,7 +103,7 @@ function targetFromInputs(profile) {
   return {
     target,
     selected: { x: selectedX, y: selectedY },
-    curveMetres: finalCurve,
+    curveMetres: routeBend,
     windMetres: finalWind,
     drift: { x: horizontalDriftMetres, y: verticalDriftMetres },
     excessiveCurve

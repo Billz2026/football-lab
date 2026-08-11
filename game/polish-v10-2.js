@@ -1,4 +1,4 @@
-import { state, elements } from "./core-v6.js?v=31";
+import { state, elements } from "./core-v6.js?v=32.2";
 
 const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
 let lastPresentationPhase = null;

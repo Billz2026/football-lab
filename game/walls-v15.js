@@ -1,6 +1,6 @@
-import { clamp, state } from "./core-v6.js?v=31";
-import { buildWall as buildBaseWall } from "./world-v7.js?v=31";
-import { scenarioForStage } from "./world-v6.js?v=31";
+import { clamp, state } from "./core-v6.js?v=32.2";
+import { buildWall as buildBaseWall } from "./world-v7.js?v=32.2";
+import { scenarioForStage } from "./world-v6.js?v=32.2";
 
 const STANDARD_WALL = Object.freeze({
   id: "academy-line",

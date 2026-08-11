@@ -1,9 +1,9 @@
 import {
   state, elements, createShot, syncStage, setStageWind, setPhase, showScreen,
   renderHud, closeModal, MAX_LIVES
-} from "./core-v6.js?v=31";
-import { SCENARIOS } from "./world-v7.js?v=31";
-import { KICKERS, selectCharacter, activeCharacter } from "./characters-v13.js?v=31";
+} from "./core-v6.js?v=32.2";
+import { SCENARIOS } from "./world-v7.js?v=32.2";
+import { KICKERS, selectCharacter, activeCharacter } from "./characters-v13.js?v=32.2";
 import { GOALKEEPERS, WALLS, keeperForStage, wallForStage } from "./lab-matchups-v15-3.js?v=153";
 
 const UNLOCK_KEY = "footballLabMatchupLabUnlockedV153";

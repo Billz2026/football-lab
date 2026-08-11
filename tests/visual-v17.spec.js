@@ -90,7 +90,7 @@ test("V17 boots the cinematic renderer and produces a graded stadium frame", asy
   expect(errors).toEqual([]);
 });
 
-test("V17 completes an actual three-input shot without breaking the renderer", async ({ page }) => {
+test("V17 completes the two-step Build 32.2 shot without breaking the renderer", async ({ page }) => {
   const errors = await startRun(page);
   const action = page.locator("#shotAction");
 
@@ -98,12 +98,9 @@ test("V17 completes an actual three-input shot without breaking the renderer", a
   await expect(page.locator("#phaseTitle")).toContainText(/POWER/);
   await page.waitForTimeout(140);
   await action.click();
-  await expect(page.locator("#phaseTitle")).toContainText(/PICK|PLACEMENT|SIDE/);
+  await expect(page.locator("#phaseTitle")).toContainText(/AIM SHOT/);
   await page.waitForTimeout(130);
-  await action.click();
-  await expect(page.locator("#phaseTitle")).toContainText(/ADD|CURVE|BEND/);
-  await page.waitForTimeout(130);
-  await action.click();
+  await page.locator("#aimTakeShotV322").click();
   await expect(page.locator("#phaseTitle")).toContainText(/WATCH|FLIGHT/);
   await page.waitForTimeout(1800);
 

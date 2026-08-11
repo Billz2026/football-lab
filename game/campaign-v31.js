@@ -1,5 +1,5 @@
-import { state } from "./core-v6.js?v=31";
-import { CHAPTERS, SCENARIOS } from "./world-v6.js?v=31";
+import { state } from "./core-v6.js?v=32.2";
+import { CHAPTERS, SCENARIOS } from "./world-v6.js?v=32.2";
 
 const BUILD = "31.0.0";
 
@@ -7,7 +7,7 @@ function loadStyles() {
   if (document.querySelector('link[data-football-lab-campaign="v31"]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "./game/campaign-v31.css?v=31";
+  link.href = "./game/campaign-v31.css?v=32.2";
   link.dataset.footballLabCampaign = "v31";
   document.head.appendChild(link);
 }

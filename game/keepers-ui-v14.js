@@ -1,5 +1,5 @@
-import { state } from "./core-v6.js?v=31";
-import { keeperForStage } from "./keepers-v14.js?v=31";
+import { state } from "./core-v6.js?v=32.2";
+import { keeperForStage } from "./keepers-v14.js?v=32.2";
 
 function injectStyles() {
   if (document.getElementById("keeperStylesV14")) return;
