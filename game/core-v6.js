@@ -1,4 +1,4 @@
-import { scenarioForStage } from "./world-v6.js?v=32.2";
+import { scenarioForStage } from "./world-v6.js?v=32.3";
 
 export const $ = (selector, scope = document) => scope.querySelector(selector);
 export const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];

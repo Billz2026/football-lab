@@ -2,14 +2,14 @@ import {
   $, $$, formatScore, profile, state, elements, createShot, saveProfile, renderProfile,
   setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
-} from "./core-v6.js?v=32.2";
-import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.2";
-import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=32.2";
-import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=32.2";
-import { difficultyForStage } from "./difficulty-v9.js?v=32.2";
-import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.2";
-import { keeperForStage } from "./keepers-v14.js?v=32.2";
-import { wallForStage } from "./walls-v15.js?v=32.2";
+} from "./core-v6.js?v=32.3";
+import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.3";
+import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=32.3";
+import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=32.3";
+import { difficultyForStage } from "./difficulty-v9.js?v=32.3";
+import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.3";
+import { keeperForStage } from "./keepers-v14.js?v=32.3";
+import { wallForStage } from "./walls-v15.js?v=32.3";
 
 state.debugDiagnostics = false;
 state.presentation = null;
@@ -436,7 +436,11 @@ function finishPrimaryShot(animationId) {
     breakdown: buildBreakdown(shot)
   };
 
-  const replayable = Boolean(shot.outcome === "GOAL" && (shot.topCorner || shot.strikeQuality >= 0.9));
+  const replayable = Boolean(shot.outcome === "GOAL" && (
+    shot.topCorner
+    || shot.strikeQuality >= 0.9
+    || (Math.abs(shot.curve || 0) >= 0.68 && shot.diagnostics?.wallLane === "AROUND")
+  ));
   if (replayable) startReplay();
   else showBreakdown();
 }

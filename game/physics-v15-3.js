@@ -4,8 +4,8 @@ if (!response.ok) throw new Error(`Unable to load V15 physics loader (${response
 let loaderSource = await response.text();
 
 loaderSource = loaderSource
-  .replaceAll("./keepers-v14.js?v=32.2", "./lab-matchups-v15-3.js?v=153")
-  .replaceAll("./walls-v15.js?v=32.2", "./lab-matchups-v15-3.js?v=153");
+  .replaceAll("./keepers-v14.js?v=32.3", "./lab-matchups-v15-3.js?v=153")
+  .replaceAll("./walls-v15.js?v=32.3", "./lab-matchups-v15-3.js?v=153");
 
 loaderSource = loaderSource.replace(
   /new URL\("(\.\/[^"\n]+)"\s*,\s*import\.meta\.url\)/g,

@@ -1,4 +1,4 @@
-import { state, elements } from "./core-v6.js?v=32.2";
+import { state, elements } from "./core-v6.js?v=32.3";
 
 const BUILD = "22.0.0";
 const SETTINGS_KEY = "footballLabSettingsV22";

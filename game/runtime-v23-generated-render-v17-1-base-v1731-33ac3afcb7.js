@@ -1,17 +1,17 @@
 import {
   clamp, lerp, WORLD, state, elements, ctx, canvasView,
   currentAimTarget, easeInOutCubic, easeOutCubic
-} from "./core-v6.js?v=32.2";
+} from "./core-v6.js?v=32.3";
 import {
   GOAL, PITCH, buildCamera, ballWorld, buildWall, keeperWorld,
   kickerWorld, supportingPlayers
-} from "./world-v7.js?v=32.2";
-import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=32.2";
-import { sampleShotPath } from "./physics-v7.js?v=32.2";
-import { playKickSound } from "./audio-v6.js?v=32.2";
-import { activeCharacter } from "./characters-v13.js?v=32.2";
-import { keeperForStage } from "./keepers-v14.js?v=32.2";
-import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.2";
+} from "./world-v7.js?v=32.3";
+import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=32.3";
+import { sampleShotPath } from "./physics-v7.js?v=32.3";
+import { playKickSound } from "./audio-v6.js?v=32.3";
+import { activeCharacter } from "./characters-v13.js?v=32.3";
+import { keeperForStage } from "./keepers-v14.js?v=32.3";
+import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.3";
 
 let activeCamera;
 const viewport = { width: WORLD.width, height: WORLD.height };
@@ -81,16 +81,19 @@ function cameraForFrame(time) {
   if (state.animation && progress.motionFlight > 0 && !reducedMotion) {
     const follow = easeOutCubic(progress.motionFlight);
     const ball = sampleShotPath(state.shot?.path, progress.motionFlight);
-    camera.position.z -= follow;
-    camera.position.y -= follow * 0.08;
-    camera.target.y += follow * 0.08;
+    camera.position.z -= follow * (progress.replay ? 4.6 : 3.3);
+    camera.position.y += follow * 0.2;
+    camera.fovY = lerp(camera.fovY, progress.replay ? 28.5 : 31.5, follow * 0.72);
     if (ball) {
-      camera.target.x = lerp(camera.target.x, ball.x, follow * 0.24);
-      camera.target.y = lerp(camera.target.y, ball.y, follow * 0.2);
+      camera.target.x = lerp(camera.target.x, ball.x, follow * 0.68);
+      camera.target.y = lerp(camera.target.y, ball.y, follow * 0.56);
+      camera.target.z = lerp(camera.target.z, ball.z, follow * (1 - progress.motionFlight) * 0.42);
     }
   }
   window.__footballLabCameraV32 = {
     ballFollow: Boolean(state.animation && progress.motionFlight > 0 && !reducedMotion),
+    closeFollow: true,
+    fovY: camera.fovY,
     reducedMotion,
     flight: progress.motionFlight
   };
@@ -1122,15 +1125,15 @@ function drawTrail(progress) {
   ctx.save();
   const speed = clamp((state.shot?.speedMps || 24) / 38, 0.55, 1.25);
   const curve = Math.abs(state.shot?.curve || 0);
-  const trailCount = 8 + Math.round(speed * 5);
+  const trailCount = 12 + Math.round(speed * 7);
   for (let i = 1; i <= trailCount; i += 1) {
-    const world = sampleShotPath(state.shot.path, clamp(progress - i * (0.012 + speed * 0.006), 0, 1));
+    const world = sampleShotPath(state.shot.path, clamp(progress - i * (0.009 + speed * 0.0045), 0, 1));
     if (!world) continue;
     const projected = projectWorld(world, activeCamera, viewport);
     if (!projected.visible) continue;
-    ctx.fillStyle = `rgba(218,254,77,${(1 - i / (trailCount + 1)) * (0.1 + speed * 0.08)})`;
+    ctx.fillStyle = `rgba(218,254,77,${(1 - i / (trailCount + 1)) * (0.15 + speed * 0.1)})`;
     ctx.beginPath();
-    ctx.arc(projected.x, projected.y, clamp(projected.scale * 0.06, 1.7, 6), 0, TAU);
+    ctx.arc(projected.x, projected.y, clamp(projected.scale * 0.072, 2.1, 7), 0, TAU);
     ctx.fill();
     if (curve > 0.2 && i % 2 === 0) {
       ctx.strokeStyle = `rgba(239,255,220,${(1 - i / trailCount) * 0.16})`;

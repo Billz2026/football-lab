@@ -1,5 +1,5 @@
-import { clamp, state } from "./core-v6.js?v=32.2";
-import { scenarioForStage } from "./world-v6.js?v=32.2";
+import { clamp, state } from "./core-v6.js?v=32.3";
+import { scenarioForStage } from "./world-v6.js?v=32.3";
 
 const STANDARD_KEEPER = Object.freeze({
   id: "academy",

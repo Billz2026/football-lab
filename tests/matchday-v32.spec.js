@@ -35,6 +35,9 @@ test("V32 exposes the complete Matchday Impact contract", async ({ page }) => {
   expect(contract.layeredAudio).toBe(true);
   expect(contract.specialistReactions).toBe(true);
   expect(contract.chapterMoments).toBe(true);
+  expect(contract.closeBallFollow).toBe(true);
+  expect(contract.outcomeCallouts).toBe(true);
+  expect(contract.readableFlightTiming).toBe(true);
   expect(contract.reducedMotionAware).toBe(true);
   expect(await page.evaluate(() => window.__footballLabAudioV32)).toEqual({
     layered: true,
@@ -59,6 +62,7 @@ test("V32 completes a real shot with ball-follow presentation and no runtime err
     () => page.evaluate(() => window.__footballLabCameraV32?.ballFollow),
     { timeout: 4000 }
   ).toBe(true);
+  expect(await page.evaluate(() => window.__footballLabCameraV32?.closeFollow)).toBe(true);
   await expect(page.locator("#shotAction")).toHaveText(/START SHOT|START NEXT STAGE/, { timeout: 8000 });
   expect(await page.evaluate(() => window.__footballLabWallMotionV32?.reactive)).toBe(true);
   expect(await page.evaluate(() => window.__footballLabNetV32?.localised)).toBe(true);
@@ -70,7 +74,7 @@ test("V32 renders catch recovery and chapter-complete presentation states", asyn
   await startMatch(page);
 
   await page.evaluate(async () => {
-    const { state } = await import("/game/core-v6.js?v=32.2");
+    const { state } = await import("/game/core-v6.js?v=32.3");
     const startedAt = performance.now() - 1150;
     state.shot = {
       ...state.shot,
@@ -109,7 +113,7 @@ test("V32 renders catch recovery and chapter-complete presentation states", asyn
   ).toBe("CATCH");
 
   await page.evaluate(async () => {
-    const { state } = await import("/game/core-v6.js?v=32.2");
+    const { state } = await import("/game/core-v6.js?v=32.3");
     state.animation = null;
     state.presentation = {
       phase: "chapter-complete",

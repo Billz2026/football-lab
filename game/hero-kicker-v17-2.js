@@ -1,9 +1,9 @@
 import {
   clamp, lerp, WORLD, state, ctx, canvasView, easeInOutCubic, easeOutCubic
-} from "./core-v6.js?v=32.2";
-import { buildCamera, kickerWorld } from "./world-v7.js?v=32.2";
-import { projectedHeight } from "./projection-v6.js?v=32.2";
-import { activeCharacter } from "./characters-v13.js?v=32.2";
+} from "./core-v6.js?v=32.3";
+import { buildCamera, kickerWorld } from "./world-v7.js?v=32.3";
+import { projectedHeight } from "./projection-v6.js?v=32.3";
+import { activeCharacter } from "./characters-v13.js?v=32.3";
 
 const viewport = { width: WORLD.width, height: WORLD.height };
 const TAU = Math.PI * 2;

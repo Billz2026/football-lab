@@ -1,8 +1,8 @@
 import {
   clamp, lerp, WORLD, state, ctx, elements, easeOutCubic
-} from "./core-v6.js?v=32.2";
-import { buildCamera, keeperWorld } from "./world-v7.js?v=32.2";
-import { projectWorld } from "./projection-v6.js?v=32.2";
+} from "./core-v6.js?v=32.3";
+import { buildCamera, keeperWorld } from "./world-v7.js?v=32.3";
+import { projectWorld } from "./projection-v6.js?v=32.3";
 
 const viewport = { width: WORLD.width, height: WORLD.height };
 const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;

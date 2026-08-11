@@ -1,8 +1,8 @@
-import { clamp, createShot, lerp, state } from "./core-v6.js?v=32.2";
+import { clamp, createShot, lerp, state } from "./core-v6.js?v=32.3";
 import {
   resolveShotPhysics as resolveBaseShotPhysics,
   sampleShotPath as sampleBaseShotPath
-} from "./runtime-v23-generated-physics-v15-9cf6fe15a3.js?v=32.2";
+} from "./runtime-v23-generated-physics-v15-9cf6fe15a3.js?v=32.3";
 
 const EPSILON = 1e-7;
 const MIN_PATH_SAMPLES = 96;
@@ -221,14 +221,14 @@ export function normalisePathByDistance(path, impactIndex = null) {
 
 function durationFromDistance(shot, pathMetrics) {
   const speed = Math.max(15, Number(shot.speedMps) || 15);
-  const primaryMs = clamp(pathMetrics.primaryDistance / speed * 1000, 650, 1380);
+  const primaryMs = clamp(pathMetrics.primaryDistance / speed * 1180, 820, 1680);
   if (pathMetrics.continuationDistance <= 0.01) return Math.round(primaryMs + 100);
 
   const continuationSpeed = Math.max(8, speed * 0.42);
   const continuationMs = clamp(
     pathMetrics.continuationDistance / continuationSpeed * 1000,
-    120,
-    460
+    160,
+    540
   );
   return Math.round(primaryMs + continuationMs);
 }
@@ -311,6 +311,7 @@ export function previewShotPhysics(inputs = {}) {
       collision: previewShot.collision
         ? { ...previewShot.collision, point: { ...previewShot.collision.point } }
         : null,
+      impactIndex: Number.isInteger(previewShot.impactIndex) ? previewShot.impactIndex : null,
       diagnostics: previewShot.diagnostics
         ? structuredClone(previewShot.diagnostics)
         : null,

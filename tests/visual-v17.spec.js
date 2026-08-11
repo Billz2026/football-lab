@@ -90,7 +90,7 @@ test("V17 boots the cinematic renderer and produces a graded stadium frame", asy
   expect(errors).toEqual([]);
 });
 
-test("V17 completes the two-step Build 32.2 shot without breaking the renderer", async ({ page }) => {
+test("V17 completes the two-step Build 32.3 shot without breaking the renderer", async ({ page }) => {
   const errors = await startRun(page);
   const action = page.locator("#shotAction");
 

@@ -1,8 +1,8 @@
-import { clamp, easeOutCubic, WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.2";
-import { buildCamera } from "./world-v7.js?v=32.2";
-import { projectWorld } from "./projection-v6.js?v=32.2";
-import { sampleShotPath } from "./physics-v7.js?v=32.2";
-import { activeCharacter } from "./characters-v13.js?v=32.2";
+import { clamp, easeOutCubic, WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.3";
+import { buildCamera } from "./world-v7.js?v=32.3";
+import { projectWorld } from "./projection-v6.js?v=32.3";
+import { sampleShotPath } from "./physics-v7.js?v=32.3";
+import { activeCharacter } from "./characters-v13.js?v=32.3";
 
 const VIEW = { width: WORLD.width, height: WORLD.height };
 const TAU = Math.PI * 2;
@@ -56,12 +56,13 @@ function cameraForFrame(progress) {
   if (progress.flight > 0) {
     const follow = easeOutCubic(progress.flight);
     const ball = sampleShotPath(state.shot?.path, progress.flight);
-    camera.position.z -= follow;
-    camera.position.y -= follow * 0.08;
-    camera.target.y += follow * 0.08;
+    camera.position.z -= follow * (progress.replay ? 4.6 : 3.3);
+    camera.position.y += follow * 0.2;
+    camera.fovY = camera.fovY + (progress.replay ? 28.5 - camera.fovY : 31.5 - camera.fovY) * follow * 0.72;
     if (ball) {
-      camera.target.x += (ball.x - camera.target.x) * follow * 0.24;
-      camera.target.y += (ball.y - camera.target.y) * follow * 0.2;
+      camera.target.x += (ball.x - camera.target.x) * follow * 0.68;
+      camera.target.y += (ball.y - camera.target.y) * follow * 0.56;
+      camera.target.z += (ball.z - camera.target.z) * follow * (1 - progress.flight) * 0.42;
     }
   }
   return camera;
@@ -158,6 +159,45 @@ function drawVelocityChip(progress) {
   ctx.restore();
 }
 
+function drawOutcomeCallout(progress) {
+  if (!state.animation || progress.replay) return;
+  const ratio = impactRatio();
+  const reveal = clamp((progress.flight - Math.max(0, ratio - 0.02)) / 0.13, 0, 1);
+  const hold = 1 - clamp((progress.flight - ratio - 0.18) / 0.2, 0, 1);
+  const alpha = smooth(reveal) * hold;
+  if (alpha <= 0.02) return;
+  const impact = impactPoint(progress);
+  if (!impact?.visible) return;
+  const outcome = state.shot?.outcome;
+  const label = ({
+    GOAL: "GOAL · NET HIT",
+    SAVE: state.shot?.saveType === "CATCH" ? "KEEPER CATCH" : "KEEPER PARRY",
+    WALL: "WALL BLOCK",
+    POST: "OFF THE POST",
+    BAR: "OFF THE BAR",
+    MISS: "WIDE"
+  })[outcome] || outcome;
+  const colour = outcomeColour();
+  ctx.save();
+  ctx.font = "950 10px system-ui";
+  const width = Math.max(108, ctx.measureText(label).width + 34);
+  const x = clamp(impact.x - width / 2, 18, WORLD.width - width - 18);
+  const y = clamp(impact.y - 72, 72, WORLD.height - 80);
+
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = "rgba(1,7,4,.9)";
+  ctx.strokeStyle = `rgba(${colour},.78)`;
+  ctx.lineWidth = 1.5;
+  roundedRect(x, y, width, 31, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = `rgb(${colour})`;
+  ctx.textAlign = "center";
+  ctx.font = "950 10px system-ui";
+  ctx.fillText(label, x + width / 2, y + 20);
+  ctx.restore();
+}
+
 function drawChapterComplete(time) {
   const presentation = state.presentation;
   if (presentation?.phase !== "chapter-complete") return;
@@ -204,6 +244,7 @@ export function drawMatchdayImpact(time) {
   const progress = progressAt(time);
   drawCrowdSurge(time, progress);
   drawImpactParticles(time, progress);
+  drawOutcomeCallout(progress);
   drawVelocityChip(progress);
   drawChapterComplete(time);
   window.__footballLabMatchdayFrameV32 = {
@@ -226,5 +267,8 @@ window.__footballLabMatchdayV32 = Object.freeze({
   layeredAudio: true,
   specialistReactions: true,
   chapterMoments: true,
+  closeBallFollow: true,
+  outcomeCallouts: true,
+  readableFlightTiming: true,
   reducedMotionAware: true
 });

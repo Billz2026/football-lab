@@ -5,7 +5,7 @@ async function openAimPlanner(page) {
   await expect.poll(
     () => page.evaluate(() => window.__footballLabAimingV322?.build),
     { timeout: 15000 }
-  ).toBe("32.2.0");
+  ).toBe("32.3.0");
   expect(await page.evaluate(() => window.__footballLabStartupError)).toBeNull();
 
   await page.locator("#playClassic").click();
@@ -21,12 +21,12 @@ async function openAimPlanner(page) {
   await expect(page.locator("#aimPlannerV322")).toBeVisible();
 }
 
-test("Build 32.2 presents one obvious direct aiming flow", async ({ page }) => {
+test("Build 32.3 presents one obvious direct aiming flow", async ({ page }) => {
   await openAimPlanner(page);
 
   const contract = await page.evaluate(() => window.__footballLabAimingV322);
   expect(contract).toMatchObject({
-    build: "32.2.0",
+    build: "32.3.0",
     directGoalAim: true,
     targetMeansFinish: true,
     curveChangesRouteOnly: true,
@@ -36,9 +36,9 @@ test("Build 32.2 presents one obvious direct aiming flow", async ({ page }) => {
     bounds: { minX: -0.35, maxX: 1.35, minY: -0.3, maxY: 1.15 }
   });
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabReleaseV322?.build),
+    () => page.evaluate(() => window.__footballLabReleaseV323?.build),
     { timeout: 5000 }
-  ).toBe("32.2.0");
+  ).toBe("32.3.0");
 
   await expect(page.locator("#aimTakeShotV322")).toContainText("TAKE FREE KICK");
   await expect(page.locator("[data-aim-route='over']")).toBeVisible();
@@ -51,6 +51,21 @@ test("Build 32.2 presents one obvious direct aiming flow", async ({ page }) => {
   expect(frame.route).toBe("over");
   expect(frame.outcome).not.toBe("WALL");
   expect(frame.wallLane).toBe("OVER");
+  expect(frame.prediction).toMatch(/ON TARGET|CROSSBAR RISK|POST RISK/);
+  await expect(page.locator("#aimVerdictV322")).toBeVisible();
+  await expect(page.locator("#finishRunV25")).toBeHidden();
+  await expect(page.locator("#exitGame")).toBeHidden();
+});
+
+test("planner warns about the frame before the kick", async ({ page }) => {
+  await openAimPlanner(page);
+  await page.evaluate(() => {
+    window.__footballLabAimingV323.setCurve(0);
+    window.__footballLabAimingV323.setTarget(0.5, 0.02);
+  });
+  await expect(page.locator("#aimFrameStatusV322")).toHaveText("CROSSBAR RISK");
+  await expect(page.locator("#aimVerdictV322")).toHaveClass(/is-frame/);
+  await expect(page.locator("#aimPathLineV322")).toHaveAttribute("data-prediction", "frame");
 });
 
 test("target remains the intended finish while bend changes the flight route", async ({ page }) => {
@@ -58,11 +73,11 @@ test("target remains the intended finish while bend changes the flight route", a
   await expect.poll(
     () => page.evaluate(() => window.__footballLabAimingV322?.build),
     { timeout: 15000 }
-  ).toBe("32.2.0");
+  ).toBe("32.3.0");
 
   const result = await page.evaluate(async () => {
-    const core = await import("/game/core-v6.js?v=32.2");
-    const physics = await import("/game/runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.2");
+    const core = await import("/game/core-v6.js?v=32.3");
+    const physics = await import("/game/runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.3");
     core.state.stage = 0;
     core.syncStage();
     core.state.stageWind = 0;
@@ -112,10 +127,10 @@ test("all 30 campaign stages keep an overhead and lateral wall solution", async 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabAimingV322?.build),
     { timeout: 15000 }
-  ).toBe("32.2.0");
+  ).toBe("32.3.0");
 
   const stages = await page.evaluate(async () => {
-    const core = await import("/game/core-v6.js?v=32.2");
+    const core = await import("/game/core-v6.js?v=32.3");
     core.state.screen = "game";
     core.state.phase = "aim";
     core.state.stageWind = 0;
@@ -187,21 +202,21 @@ test("phone planner is full-screen, touchable and keeps the action visible", asy
   expect(targetLabelBox.x + targetLabelBox.width).toBeLessThanOrEqual(390);
 });
 
-test("every active module URL is cache-busted as Build 32.2", async ({ page }) => {
+test("every active module URL is cache-busted as Build 32.3", async ({ page }) => {
   const responses = [];
   page.on("response", (response) => {
     const url = response.url();
-    if (url.includes("/game/") && url.endsWith(".js?v=32.2")) responses.push(url);
+    if (url.includes("/game/") && url.endsWith(".js?v=32.3")) responses.push(url);
   });
   await page.goto("/index.html?test=cache-v32-2");
   await expect.poll(
     () => page.evaluate(() => window.__footballLabAimingV322?.build),
     { timeout: 15000 }
-  ).toBe("32.2.0");
+  ).toBe("32.3.0");
   expect(await page.evaluate(() => window.__footballLabStartupError)).toBeNull();
   expect(responses.length).toBeGreaterThan(15);
   const stale = await page.evaluate(() => performance.getEntriesByType("resource")
     .map((entry) => entry.name)
-    .filter((url) => /\/game\/.*\.js\?v=(31|32|32\.1)$/.test(url)));
+    .filter((url) => /\/game\/.*\.js\?v=(31|32|32\.1|32\.2)$/.test(url)));
   expect(stale).toEqual([]);
 });

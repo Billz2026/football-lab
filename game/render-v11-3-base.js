@@ -1,12 +1,12 @@
 import {
   clamp, lerp, WORLD, state, elements, ctx, canvasView,
   currentAimTarget, easeInOutCubic, easeOutCubic
-} from "./core-v6.js?v=32.2";
+} from "./core-v6.js?v=32.3";
 import {
   GOAL, PITCH, buildCamera, ballWorld, buildWall, keeperWorld,
   kickerWorld, supportingPlayers
-} from "./world-v7.js?v=32.2";
-import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=32.2";
+} from "./world-v7.js?v=32.3";
+import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=32.3";
 import { sampleShotPath } from "./physics-v7.js?v=7";
 import { playKickSound } from "./audio-v6.js?v=7";
 

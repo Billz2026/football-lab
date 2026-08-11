@@ -1,5 +1,5 @@
-import { state } from "./core-v6.js?v=32.2";
-import { KICKERS, activeCharacter, characterById, selectCharacter } from "./characters-v13.js?v=32.2";
+import { state } from "./core-v6.js?v=32.3";
+import { KICKERS, activeCharacter, characterById, selectCharacter } from "./characters-v13.js?v=32.3";
 
 let selectedCandidateId = activeCharacter().id;
 let pendingStartTarget = null;

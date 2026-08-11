@@ -1,11 +1,11 @@
 import {
   clamp, lerp, smoothStep, state, stageConfig, idealPower, strikeQuality, strikeQualityLabel
-} from "./core-v6.js?v=32.2";
-import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=32.2";
-import { difficultyForStage } from "./difficulty-v9.js?v=32.2";
-import { activeCharacter, characterPhysics } from "./characters-v13.js?v=32.2";
-import { keeperForStage } from "./keepers-v14.js?v=32.2";
-import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.2";
+} from "./core-v6.js?v=32.3";
+import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=32.3";
+import { difficultyForStage } from "./difficulty-v9.js?v=32.3";
+import { activeCharacter, characterPhysics } from "./characters-v13.js?v=32.3";
+import { keeperForStage } from "./keepers-v14.js?v=32.3";
+import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.3";
 
 const BALL_RADIUS = 0.11;
 const SAMPLE_COUNT = 220;
@@ -42,7 +42,9 @@ function buildDirectPath(inputResult, profile) {
     const t = index / SAMPLE_COUNT;
     const lineX = lerp(start.x, selected.x, t);
     const lineY = lerp(start.y, target.y, t);
-    const curveEnvelope = Math.sin(Math.PI * t) * (1.55 - 0.55 * t);
+    // Bend develops after contact, reaches its useful movement before the wall,
+    // then returns smoothly to the chosen finish instead of drawing a huge loop.
+    const curveEnvelope = Math.pow(Math.sin(Math.PI * t), 1.12) * (1.12 - 0.12 * t);
     const windProgress = Math.pow(t, 1.48);
     const contactProgress = Math.pow(t, 1.18);
     const lift = arcHeight * 4 * t * (1 - t);
@@ -74,7 +76,7 @@ function targetFromInputs(profile) {
 
   const selectedX = -GOAL.halfWidth + shot.aimX * GOAL.width;
   const selectedY = GOAL.height * (1 - shot.aimY);
-  const routeBend = curve * (0.68 + stage.distanceYards * 0.034);
+  const routeBend = curve * (0.66 + stage.distanceYards * 0.055);
   const finalWind = state.stageWind * (0.21 + stage.distanceYards * 0.006);
   const underhitDrop = power < 0.28 ? smoothStep((0.28 - power) / 0.28) * 0.08 : 0;
   const overhitRise = power > 0.94 ? smoothStep((power - 0.94) / 0.06) * 0.04 : 0;

@@ -6,17 +6,17 @@ import {
   elements,
   idealPower,
   state
-} from "./core-v6.js?v=32.2";
-import { previewShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.2";
-import { GOAL, ballWorld, keeperWorld } from "./world-v7.js?v=32.2";
-import { buildWallLayout, wallForStage } from "./walls-v15.js?v=32.2";
+} from "./core-v6.js?v=32.3";
+import { previewShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.3";
+import { GOAL, ballWorld, keeperWorld } from "./world-v7.js?v=32.3";
+import { buildWallLayout, wallForStage } from "./walls-v15.js?v=32.3";
 
-const BUILD = "32.2.0";
+const BUILD = "32.3.0";
 const VIEWBOX = Object.freeze({ width: 1000, height: 620 });
 const gameFrame = document.querySelector(".game-frame");
 
 if (!gameFrame || !elements.canvas || !elements.shotAction) {
-  throw new Error("Build 32.2 could not initialise the shot planner.");
+  throw new Error("Build 32.3 could not initialise the shot planner.");
 }
 
 const planner = document.createElement("section");
@@ -27,9 +27,9 @@ planner.innerHTML = `
   <div class="aim-planner-shell-v322">
     <header class="aim-planner-header-v322">
       <div>
-        <span class="aim-kicker-v322">SHOT CONTROL · TARGET + BEND</span>
-        <h2>AIM SHOT</h2>
-        <p>Drag the target to where the ball should finish. Choose how it travels past the wall.</p>
+        <span class="aim-kicker-v322">FREE-KICK VIEW · TARGET + BEND</span>
+        <h2>CHOOSE YOUR TARGET</h2>
+        <p>Tap the goal or the space around it. The coloured flight line predicts the real shot.</p>
       </div>
       <div class="aim-free-badge-v322"><i></i> FULL AIM RANGE</div>
     </header>
@@ -42,7 +42,9 @@ planner.innerHTML = `
 
     <div class="aim-surface-v322" id="aimSurfaceV322" role="application" tabindex="0" aria-label="Goal aiming view. Drag anywhere to choose the final target.">
       <div class="aim-sky-v322" aria-hidden="true"></div>
-      <div class="aim-goal-v322" aria-hidden="true"><i></i></div>
+      <div class="aim-stands-v322" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="aim-pitch-v322" aria-hidden="true"></div>
+      <div class="aim-goal-v322" aria-hidden="true"><i></i><b></b></div>
       <div class="aim-wall-v322" id="aimWallV322" aria-hidden="true"></div>
       <i class="aim-keeper-v322" id="aimKeeperV322" aria-hidden="true"></i>
       <svg class="aim-path-v322" id="aimPathV322" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">
@@ -54,17 +56,19 @@ planner.innerHTML = `
       <button class="aim-target-v322" id="aimTargetV322" type="button" aria-label="Drag shot target">
         <i></i><span id="aimTargetLabelV322">HIGH CENTRE</span>
       </button>
+      <div class="aim-verdict-v322 is-checking" id="aimVerdictV322" aria-live="polite">
+        <span>SHOT PREDICTION</span><strong>CHECKING ROUTE…</strong><small>Move the target to update</small>
+      </div>
       <div class="aim-surface-hint-v322"><strong>DRAG TARGET</strong><span>Every point inside and outside the goal is available</span></div>
     </div>
 
     <div class="aim-feedback-v322">
-      <div class="aim-status-v322" id="aimWallStatusV322"><span>WALL ROUTE</span><strong>CHECKING…</strong><small id="aimClearanceV322">—</small></div>
-      <div><span>FINAL TARGET</span><strong id="aimFinalTargetV322">HIGH CENTRE</strong><small id="aimFrameStatusV322">ON TARGET</small></div>
-      <div><span>WIND EFFECT</span><strong id="aimWindV322">CALM</strong><small>shown on final dot</small></div>
+      <div class="aim-frame-card-v322" id="aimFrameCardV322"><span>SHOT RESULT</span><strong id="aimFrameStatusV322">ON TARGET</strong><small id="aimFinalTargetV322">HIGH CENTRE</small></div>
+      <div class="aim-status-v322" id="aimWallStatusV322"><span>ROUTE PAST WALL</span><strong>CHECKING…</strong><small id="aimClearanceV322">—</small></div>
     </div>
 
     <div class="aim-bend-v322">
-      <div class="aim-bend-heading-v322"><span>BALL ROUTE</span><strong id="aimBendLabelV322">STRAIGHT</strong></div>
+      <div class="aim-bend-heading-v322"><span>BALL ROUTE · <b id="aimWindV322">CALM WIND</b></span><strong id="aimBendLabelV322">STRAIGHT</strong></div>
       <button type="button" class="aim-bend-nudge-v322" data-curve-nudge="-0.08" aria-label="Add more left bend">−</button>
       <input id="aimCurveV322" type="range" min="-100" max="100" step="1" value="0" aria-label="Ball bend. Left to right." />
       <button type="button" class="aim-bend-nudge-v322" data-curve-nudge="0.08" aria-label="Add more right bend">+</button>
@@ -98,6 +102,8 @@ const finishMarker = planner.querySelector("#aimFinishV322");
 const wallLayer = planner.querySelector("#aimWallV322");
 const keeper = planner.querySelector("#aimKeeperV322");
 const wallStatus = planner.querySelector("#aimWallStatusV322");
+const frameCard = planner.querySelector("#aimFrameCardV322");
+const verdict = planner.querySelector("#aimVerdictV322");
 const clearanceLabel = planner.querySelector("#aimClearanceV322");
 const finalTargetLabel = planner.querySelector("#aimFinalTargetV322");
 const frameStatus = planner.querySelector("#aimFrameStatusV322");
@@ -232,6 +238,7 @@ function renderWall() {
   const feetY = worldToView({ x: 0, y: 0 }).y;
   wallLayer.replaceChildren(...layout.players.map((player) => {
     const body = document.createElement("i");
+    body.innerHTML = "<b></b><span></span><em></em>";
     const head = worldToView({ x: player.x, y: profile.playerHeight });
     const feet = worldToView({ x: player.x, y: 0 });
     body.style.left = `${feet.x * 100}%`;
@@ -246,17 +253,61 @@ function renderWall() {
   keeper.style.left = `${keeperFeet.x * 100}%`;
   keeper.style.top = `${keeperHead.y * 100}%`;
   keeper.style.height = `${Math.max(7, (keeperFeet.y - keeperHead.y) * 100)}%`;
+  if (!keeper.firstElementChild) keeper.innerHTML = "<b></b><span></span><em></em>";
+}
+
+function predictionFor(preview) {
+  const final = preview.diagnostics?.finalTarget;
+  if (preview.outcome === "WALL") {
+    return { key: "wall", label: "WALL BLOCKED", detail: "Move the target or change the bend" };
+  }
+  if (!final) return { key: "wide", label: "WIDE", detail: "No valid finish point" };
+
+  const postGap = GOAL.halfWidth - Math.abs(final.x);
+  const barGap = GOAL.height - final.y;
+  const insideWidth = Math.abs(final.x) < GOAL.halfWidth;
+  const insideHeight = final.y > 0 && final.y < GOAL.height;
+  if (preview.outcome === "BAR" || (insideWidth && barGap >= 0 && barGap < 0.24)) {
+    return { key: "frame", label: "CROSSBAR RISK", detail: "Aim slightly lower" };
+  }
+  if (preview.outcome === "POST" || (insideHeight && postGap >= 0 && postGap < 0.24)) {
+    return { key: "frame", label: "POST RISK", detail: "Aim slightly inside the post" };
+  }
+  if (!insideWidth || !insideHeight || preview.outcome === "MISS") {
+    return { key: "wide", label: "WIDE", detail: "Target finishes outside the goal" };
+  }
+  return {
+    key: "target",
+    label: "ON TARGET",
+    detail: preview.outcome === "SAVE" ? "Keeper can reach this finish" : "Clear route into the goal"
+  };
 }
 
 function renderPath(preview) {
-  const samples = preview.path.filter((_, index) => index % 4 === 0 || index === preview.path.length - 1);
-  const points = samples.map((point) => {
-    const view = worldToView(point);
+  const primaryPath = Number.isInteger(preview.impactIndex)
+    ? preview.path.slice(0, preview.impactIndex + 1)
+    : preview.path;
+  const samples = primaryPath.filter((_, index) => index % 4 === 0 || index === primaryPath.length - 1);
+  const final = preview.diagnostics?.finalTarget;
+  const finishView = final ? worldToView({ ...final, z: GOAL.lineZ }) : { x: 0.5, y: 0.5 };
+  const points = samples.map((point, index) => {
+    const progress = Number.isFinite(point.t)
+      ? clamp(point.t, 0, 1)
+      : index / Math.max(1, samples.length - 1);
+    const worldView = worldToView(point);
+    // The stadium planner is a perspective view, not a technical elevation plot.
+    // Keep the true lateral route while compressing height into a readable broadcast arc.
+    const view = {
+      x: worldView.x,
+      y: clamp(0.92 + (finishView.y - 0.92) * progress - Math.sin(Math.PI * progress) * 0.14, 0.04, 0.97)
+    };
     return `${(view.x * VIEWBOX.width).toFixed(1)},${(view.y * VIEWBOX.height).toFixed(1)}`;
   });
   const pathData = points.length ? `M ${points.join(" L ")}` : "";
   pathLine.setAttribute("d", pathData);
   pathShadow.setAttribute("d", pathData);
+  const prediction = predictionFor(preview);
+  pathLine.dataset.prediction = prediction.key;
   pathLine.classList.toggle("is-blocked", preview.outcome === "WALL");
 
   if (preview.outcome === "WALL" && preview.collision?.point) {
@@ -268,9 +319,8 @@ function renderPath(preview) {
     impactMarker.classList.remove("is-visible");
   }
 
-  const finish = preview.path[preview.path.length - 1];
-  if (finish) {
-    const view = worldToView(finish);
+  if (final) {
+    const view = worldToView({ ...final, z: GOAL.lineZ });
     finishMarker.style.left = `${view.x * 100}%`;
     finishMarker.style.top = `${view.y * 100}%`;
   }
@@ -296,19 +346,17 @@ function renderFeedback(preview) {
   targetLabel.textContent = label;
   elements.aimReadout.textContent = label;
 
-  const final = diagnostics.finalTarget;
-  const onTarget = final
-    && final.x > -GOAL.halfWidth + 0.11
-    && final.x < GOAL.halfWidth - 0.11
-    && final.y > 0.08
-    && final.y < GOAL.height - 0.08;
-  frameStatus.textContent = onTarget ? "ON TARGET" : "FINISHES OFF TARGET";
-  frameStatus.classList.toggle("is-warning", !onTarget);
+  const prediction = predictionFor(preview);
+  frameStatus.textContent = prediction.label;
+  frameCard.dataset.prediction = prediction.key;
+  verdict.className = `aim-verdict-v322 is-${prediction.key}`;
+  verdict.querySelector("strong").textContent = prediction.label;
+  verdict.querySelector("small").textContent = prediction.detail;
 
   const wind = Number(diagnostics.windMetres) || 0;
   windLabel.textContent = Math.abs(wind) < 0.03
-    ? "CALM"
-    : `${wind < 0 ? "LEFT" : "RIGHT"} ${Math.abs(wind).toFixed(2)} m`;
+    ? "CALM WIND"
+    : `${wind < 0 ? "LEFT" : "RIGHT"} WIND ${Math.abs(wind).toFixed(2)} m`;
 
   const curve = state.shot?.previewCurve || 0;
   bendLabel.textContent = bendText(curve);
@@ -339,8 +387,10 @@ function renderPlanner() {
     outcome: currentPreview.outcome,
     wallLane: currentPreview.diagnostics?.wallLane,
     wallClearance: currentPreview.diagnostics?.wallClearanceMetres,
-    finalTarget: currentPreview.diagnostics?.finalTarget
+    finalTarget: currentPreview.diagnostics?.finalTarget,
+    prediction: predictionFor(currentPreview).label
   };
+  window.__footballLabAimFrameV323 = window.__footballLabAimFrameV322;
 }
 
 function targetFromPointer(event) {
@@ -422,7 +472,7 @@ function activatePlanner() {
   planner.setAttribute("aria-hidden", "false");
   document.documentElement.dataset.aimPlannerV322 = "active";
   elements.phaseTitle.textContent = "AIM SHOT";
-  elements.phaseHelp.textContent = "Drag the finish target, choose over or around the wall, then take the free kick.";
+  elements.phaseHelp.textContent = "Tap the goal, check the coloured prediction, then shape the bend and shoot.";
   elements.shotAction.textContent = "TAKE FREE KICK";
   elements.canvasPrompt.textContent = "AIM SHOT · DRAG TARGET";
   document.querySelector('.shot-step[data-step="aim"]')?.classList.add("is-current");
@@ -455,7 +505,7 @@ document.documentElement.dataset.aimPlannerV322 = "inactive";
 deactivatePlanner();
 requestAnimationFrame(syncPhase);
 
-window.__footballLabAimingV322 = Object.freeze({
+const aimingContract = Object.freeze({
   build: BUILD,
   directGoalAim: true,
   targetMeansFinish: true,
@@ -468,3 +518,5 @@ window.__footballLabAimingV322 = Object.freeze({
   setCurve(value) { setCurve(value, "api"); },
   chooseRoute
 });
+window.__footballLabAimingV322 = aimingContract;
+window.__footballLabAimingV323 = aimingContract;

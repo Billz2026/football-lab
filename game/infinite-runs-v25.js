@@ -1,4 +1,4 @@
-import { formatScore, profile, state } from "./core-v6.js?v=32.2";
+import { formatScore, profile, state } from "./core-v6.js?v=32.3";
 
 const BUILD = "25.0.0";
 let pausedPhase = null;
@@ -166,7 +166,7 @@ function finishIsAvailable() {
   return state.screen === "game"
     && !state.animation
     && !state.presentation
-    && ["ready", "power", "aim", "curve"].includes(state.phase)
+    && ["ready", "result"].includes(state.phase)
     && !document.getElementById("gameOverModal")?.classList.contains("is-open");
 }
 
@@ -175,13 +175,22 @@ function syncFinishButton() {
   if (!button) return;
   const runOpen = state.screen === "game"
     && !document.getElementById("gameOverModal")?.classList.contains("is-open");
-  button.disabled = !runOpen;
+  const shotInProgress = runOpen && !["ready", "result"].includes(state.phase);
+  button.hidden = shotInProgress;
+  button.disabled = !runOpen || shotInProgress;
   button.textContent = finishRequested ? "FINISHING AFTER THIS SHOT…" : "FINISH & SUBMIT RUN";
   button.title = finishIsAvailable()
     ? "Submit your current score and finish the run"
     : "Your finish request will open safely after the current shot";
 
   if (finishRequested && finishIsAvailable()) openFinishDialog();
+
+  const exit = document.getElementById("exitGame");
+  if (exit) {
+    exit.hidden = shotInProgress;
+    exit.disabled = shotInProgress;
+    exit.setAttribute("aria-hidden", shotInProgress ? "true" : "false");
+  }
 }
 
 function openFinishDialog() {

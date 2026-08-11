@@ -71,7 +71,7 @@ test("V19 produces deterministic finite trajectories for identical live inputs",
   await waitForPhysics(page);
 
   const comparison = await page.evaluate(async () => {
-    const core = await import("/game/core-v6.js?v=32.2");
+    const core = await import("/game/core-v6.js?v=32.3");
     const physics = await import("/game/physics-v19.js?v=19");
 
     function simulate() {
