@@ -1,5 +1,5 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js";
-import { drawHeroKicker } from "./runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=30";
+import { drawHeroKicker } from "./runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js?v=30";
 import { activeCharacter } from "./characters-v13.js?v=13";
 
 export { resizeCanvas };
