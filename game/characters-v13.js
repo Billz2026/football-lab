@@ -5,7 +5,7 @@ const CHARACTER_STORAGE_KEY = "footballLabSelectedKickerV13";
 export const KICKERS = Object.freeze([
   Object.freeze({
     id: "dax-ryder",
-    name: "DAX RYDER",
+    name: "VIKTOR KANE",
     nickname: "THE HAMMER",
     role: "POWER KICKER",
     number: 10,
@@ -27,7 +27,7 @@ export const KICKERS = Object.freeze([
   }),
   Object.freeze({
     id: "leo-vale",
-    name: "LEO VALE",
+    name: "BRUNO SILVA",
     nickname: "THE MAESTRO",
     role: "PRECISION SPECIALIST",
     number: 8,
@@ -49,8 +49,8 @@ export const KICKERS = Object.freeze([
   }),
   Object.freeze({
     id: "zion-arc",
-    name: "ZION ARC",
-    nickname: "THE BENDER",
+    name: "DAVE BECKETT",
+    nickname: "THE WHIP",
     role: "CURVE MASTER",
     number: 11,
     icon: "↝",
@@ -71,8 +71,8 @@ export const KICKERS = Object.freeze([
   }),
   Object.freeze({
     id: "kai-mori",
-    name: "KAI MORI",
-    nickname: "ICE",
+    name: "WAYNE REDMAN",
+    nickname: "THE ICEMAN",
     role: "COMPOSURE PLAYER",
     number: 7,
     icon: "◆",
