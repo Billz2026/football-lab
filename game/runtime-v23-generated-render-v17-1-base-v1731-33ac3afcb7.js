@@ -1,17 +1,17 @@
 import {
   clamp, lerp, WORLD, state, elements, ctx, canvasView,
   currentAimTarget, easeInOutCubic, easeOutCubic
-} from "./core-v6.js?v=7";
+} from "./core-v6.js?v=31";
 import {
   GOAL, PITCH, buildCamera, ballWorld, buildWall, keeperWorld,
   kickerWorld, supportingPlayers
-} from "./world-v7.js?v=7";
-import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=7";
-import { sampleShotPath } from "./physics-v7.js?v=7";
-import { playKickSound } from "./audio-v6.js?v=7";
-import { activeCharacter } from "./characters-v13.js?v=13";
-import { keeperForStage } from "./keepers-v14.js?v=14";
-import { wallForStage, buildWallLayout } from "./walls-v15.js?v=15";
+} from "./world-v7.js?v=31";
+import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=31";
+import { sampleShotPath } from "./physics-v7.js?v=31";
+import { playKickSound } from "./audio-v6.js?v=31";
+import { activeCharacter } from "./characters-v13.js?v=31";
+import { keeperForStage } from "./keepers-v14.js?v=31";
+import { wallForStage, buildWallLayout } from "./walls-v15.js?v=31";
 
 let activeCamera;
 const viewport = { width: WORLD.width, height: WORLD.height };
@@ -127,35 +127,75 @@ function roundedRect(x, y, width, height, radius) {
   ctx.closePath();
 }
 
+const VENUE_THEMES = Object.freeze({
+  academy: Object.freeze({ sky: ["#173929", "#2f6946", "#8aac6b"], stand: ["#0c1711", "#19281e"], crowd: "220,244,207", glow: "210,249,153", rows: 3, roof: false, lights: false }),
+  city: Object.freeze({ sky: ["#1b2432", "#654a45", "#c27a51"], stand: ["#080d12", "#18212a"], crowd: "255,220,178", glow: "255,167,94", rows: 5, roof: true, lights: true }),
+  night: Object.freeze({ sky: ["#020714", "#071527", "#142b3f"], stand: ["#010409", "#08111a"], crowd: "202,228,255", glow: "102,181,255", rows: 6, roof: true, lights: true }),
+  storm: Object.freeze({ sky: ["#081016", "#172832", "#334750"], stand: ["#03070a", "#0d171b"], crowd: "187,216,220", glow: "151,208,220", rows: 6, roof: true, lights: true }),
+  world: Object.freeze({ sky: ["#080516", "#15102b", "#2b2040"], stand: ["#020205", "#0e0b16"], crowd: "255,233,174", glow: "242,201,102", rows: 7, roof: true, lights: true }),
+  summit: Object.freeze({ sky: ["#03070d", "#101d28", "#29404a"], stand: ["#010304", "#091014"], crowd: "228,245,247", glow: "194,236,239", rows: 7, roof: true, lights: true })
+});
+
 function drawBackground() {
+  const theme = VENUE_THEMES[state.currentStage.environment] || VENUE_THEMES.academy;
   const sky = ctx.createLinearGradient(0, 0, 0, 360);
-  sky.addColorStop(0, "#06150f");
-  sky.addColorStop(0.72, "#0a281a");
-  sky.addColorStop(1, "#12321f");
+  sky.addColorStop(0, theme.sky[0]);
+  sky.addColorStop(0.68, theme.sky[1]);
+  sky.addColorStop(1, theme.sky[2]);
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
 
   const stand = ctx.createLinearGradient(0, 112, 0, 350);
-  stand.addColorStop(0, "rgba(1,4,2,.92)");
-  stand.addColorStop(1, "rgba(5,12,8,.7)");
+  stand.addColorStop(0, theme.stand[0]);
+  stand.addColorStop(1, theme.stand[1]);
   ctx.fillStyle = stand;
   ctx.fillRect(0, 112, WORLD.width, 244);
 
-  for (let row = 0; row < 5; row += 1) {
+  if (theme.roof) {
+    ctx.fillStyle = "rgba(0,0,0,.72)";
+    ctx.fillRect(0, 96, WORLD.width, 22);
+    ctx.fillStyle = `rgba(${theme.glow},.16)`;
+    ctx.fillRect(0, 116, WORLD.width, 2);
+  }
+
+  for (let row = 0; row < theme.rows; row += 1) {
     for (let x = 10 + row * 13; x < WORLD.width; x += 22) {
-      const alpha = 0.065 + ((x + row * 23) % 70) / 1100;
-      ctx.fillStyle = `rgba(228,255,205,${alpha})`;
+      const alpha = 0.055 + ((x + row * 23) % 70) / 940;
+      ctx.fillStyle = `rgba(${theme.crowd},${alpha})`;
       ctx.beginPath();
       ctx.arc(x, 150 + row * 37 + Math.sin(x * 0.1) * 2, 3, 0, TAU);
       ctx.fill();
     }
   }
 
+  if (theme.lights) {
+    for (const x of [80, WORLD.width - 80]) {
+      ctx.fillStyle = "rgba(4,7,8,.9)";
+      ctx.fillRect(x - 4, 18, 8, 118);
+      const light = ctx.createRadialGradient(x, 28, 2, x, 28, 125);
+      light.addColorStop(0, `rgba(${theme.glow},.38)`);
+      light.addColorStop(1, `rgba(${theme.glow},0)`);
+      ctx.fillStyle = light;
+      ctx.fillRect(x - 130, -80, 260, 250);
+      ctx.fillStyle = `rgba(${theme.glow},.72)`;
+      ctx.fillRect(x - 28, 18, 56, 13);
+    }
+  }
+
   const glow = ctx.createRadialGradient(610, 190, 0, 610, 190, 470);
-  glow.addColorStop(0, "rgba(218,254,77,.11)");
-  glow.addColorStop(1, "rgba(218,254,77,0)");
+  glow.addColorStop(0, `rgba(${theme.glow},.12)`);
+  glow.addColorStop(1, `rgba(${theme.glow},0)`);
   ctx.fillStyle = glow;
   ctx.fillRect(80, 0, 1050, 430);
+
+  ctx.fillStyle = "rgba(1,5,3,.72)";
+  ctx.fillRect(442, 123, 316, 36);
+  ctx.strokeStyle = `rgba(${theme.glow},.32)`;
+  ctx.strokeRect(442.5, 123.5, 315, 35);
+  ctx.fillStyle = `rgba(${theme.glow},.78)`;
+  ctx.font = "900 10px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText(state.currentStage.venue || "FOOTBALL LAB", 600, 146);
 }
 
 function drawPitch() {

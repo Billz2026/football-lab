@@ -20,8 +20,8 @@ replaceRequired(
 );
 replaceRequired(
   "character meter import",
-  'import { difficultyForStage } from "./difficulty-v9.js?v=9";',
-  `import { difficultyForStage } from "./difficulty-v9.js?v=9";\nimport { activeCharacter, meterMultiplier } from "${new URL("./characters-v13.js?v=13", import.meta.url).href}";`
+  'import { difficultyForStage } from "./difficulty-v9.js?v=31";',
+  `import { difficultyForStage } from "./difficulty-v9.js?v=31";\nimport { activeCharacter, meterMultiplier } from "${new URL("./characters-v13.js?v=31", import.meta.url).href}";`
 );
 
 replaceRequired(

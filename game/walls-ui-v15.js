@@ -1,5 +1,5 @@
-import { state } from "./core-v6.js?v=7";
-import { wallForStage } from "./walls-v15.js?v=15";
+import { state } from "./core-v6.js?v=31";
+import { wallForStage } from "./walls-v15.js?v=31";
 
 function injectStyles() {
   if (document.getElementById("wallStylesV15")) return;

@@ -4,8 +4,8 @@ if (!response.ok) throw new Error(`Unable to load V11.4 renderer loader (${respo
 let loaderSource = await response.text();
 
 const baseRendererUrl = new URL("./render-v11-3-base.js?v=113", import.meta.url).href;
-const characterModuleUrl = new URL("./characters-v13.js?v=13", import.meta.url).href;
-const keeperModuleUrl = new URL("./keepers-v14.js?v=14", import.meta.url).href;
+const characterModuleUrl = new URL("./characters-v13.js?v=31", import.meta.url).href;
+const keeperModuleUrl = new URL("./keepers-v14.js?v=31", import.meta.url).href;
 
 const oldSourceUrl = 'const sourceUrl = new URL("./render-v11-3-base.js?v=113", import.meta.url);';
 const newSourceUrl = `const sourceUrl = new URL("${baseRendererUrl}");`;

@@ -6,7 +6,7 @@ function collectRuntimeErrors(page) {
   return errors;
 }
 
-test("public Classic Kicks boots and starts a five-life run", async ({ page }) => {
+test("public Classic Kicks boots and starts an unlimited run", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/index.html");
   await expect(page.locator("#kickerSelectV13")).toHaveCount(1, { timeout: 15000 });
@@ -15,8 +15,36 @@ test("public Classic Kicks boots and starts a five-life run", async ({ page }) =
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
-  await expect(page.locator("#livesValue")).toContainText("● ● ● ● ●");
+  await expect(page.locator("#livesValue")).toHaveText(/0|[1-9][0-9,]*/);
+  await expect(page.locator("#finishRunV25")).toHaveText("FINISH & SUBMIT RUN");
+  await expect(page.locator("body")).not.toContainText("Five lives available");
   await expect(page.getByText("failed to load", { exact: false })).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("a complete shot can be played before the run is voluntarily submitted", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/index.html");
+  await expect(page.locator("#kickerSelectV13")).toHaveCount(1, { timeout: 15000 });
+  await page.locator("#playClassic").click();
+  await page.locator(".kicker-card").first().click();
+  await page.locator("#kickerConfirmV13").click();
+  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 3000 });
+
+  for (const expectedPhase of ["SET POWER", "PICK YOUR SIDE", "ADD CURVE"]) {
+    await page.locator("#shotAction").click();
+    await expect(page.locator("#phaseTitle")).toHaveText(expectedPhase);
+    await page.waitForTimeout(90);
+  }
+  await page.locator("#shotAction").click();
+  await expect(page.locator("#phaseTitle")).toHaveText("WATCH THE FLIGHT");
+  await expect(page.locator("#shotAction")).toHaveText(/START SHOT|START NEXT STAGE/, { timeout: 7000 });
+
+  await page.locator("#finishRunV25").click();
+  await expect(page.locator("#finishRunModalV25")).toHaveClass(/is-open/);
+  await page.locator("#confirmFinishV25").click();
+  await expect(page.locator("#gameOverModal")).toHaveClass(/is-open/);
+  await expect(page.locator("#gameOverTitle")).toHaveText(/FULL TIME|NEW PERSONAL BEST/);
   expect(errors).toEqual([]);
 });
 

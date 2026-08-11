@@ -1,11 +1,11 @@
 import {
   clamp, lerp, WORLD, state, elements, ctx, canvasView,
   easeInOutCubic, easeOutCubic
-} from "./core-v6.js?v=7";
+} from "./core-v6.js?v=31";
 import {
   buildCamera, ballWorld, buildWall, keeperWorld, kickerWorld
-} from "./world-v7.js?v=7";
-import { projectWorld, projectedHeight } from "./projection-v6.js?v=7";
+} from "./world-v7.js?v=31";
+import { projectWorld, projectedHeight } from "./projection-v6.js?v=31";
 
 const viewport = { width: WORLD.width, height: WORLD.height };
 const TAU = Math.PI * 2;

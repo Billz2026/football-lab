@@ -14,16 +14,16 @@ const replacements = [
     `new URL("${absolute("./render-v9-v17-3-1.js?v=1731")}").href`
   ],
   [
-    'new URL("./characters-v13.js?v=13", import.meta.url).href',
-    `new URL("${absolute("./characters-v13.js?v=13")}").href`
+    'new URL("./characters-v13.js?v=31", import.meta.url).href',
+    `new URL("${absolute("./characters-v13.js?v=31")}").href`
   ],
   [
-    'new URL("./keepers-v14.js?v=14", import.meta.url).href',
-    `new URL("${absolute("./keepers-v14.js?v=14")}").href`
+    'new URL("./keepers-v14.js?v=31", import.meta.url).href',
+    `new URL("${absolute("./keepers-v14.js?v=31")}").href`
   ],
   [
-    'new URL("./walls-v15.js?v=15", import.meta.url).href',
-    `new URL("${absolute("./walls-v15.js?v=15")}").href`
+    'new URL("./walls-v15.js?v=31", import.meta.url).href',
+    `new URL("${absolute("./walls-v15.js?v=31")}").href`
   ]
 ];
 

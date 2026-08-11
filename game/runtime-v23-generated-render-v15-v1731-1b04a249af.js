@@ -1,8 +1,8 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=30";
-import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=7";
-import { activeCharacter } from "./characters-v13.js?v=13";
-import { keeperForStage } from "./keepers-v14.js?v=14";
-import { wallForStage } from "./walls-v15.js?v=15";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=31";
+import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=31";
+import { activeCharacter } from "./characters-v13.js?v=31";
+import { keeperForStage } from "./keepers-v14.js?v=31";
+import { wallForStage } from "./walls-v15.js?v=31";
 
 export { resizeCanvas };
 
@@ -170,14 +170,17 @@ function drawStageTransition(time) {
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
   ctx.textAlign = "center";
   ctx.fillStyle = "#dafe4d";
-  ctx.font = "900 13px system-ui";
+  ctx.font = "900 11px system-ui";
+  ctx.fillText(`CHAPTER ${presentation.chapterNumber || 1} · ${presentation.chapterName || "CLASSIC KICKS"}`, WORLD.width / 2, WORLD.height * 0.33);
+  ctx.fillStyle = "rgba(239,247,236,.68)";
+  ctx.font = "900 12px system-ui";
   ctx.fillText(`STAGE ${String(presentation.stageNumber).padStart(2, "0")} · ${presentation.distanceYards} YDS`, WORLD.width / 2, WORLD.height * 0.39);
   ctx.fillStyle = "#f7fbf5";
   ctx.font = "1000 44px system-ui";
   ctx.fillText(presentation.stageName, WORLD.width / 2, WORLD.height * 0.49);
-  ctx.fillStyle = "rgba(239,247,236,.7)";
-  ctx.font = "800 15px system-ui";
-  ctx.fillText(presentation.challenge, WORLD.width / 2, WORLD.height * 0.56);
+  ctx.fillStyle = "#dafe4d";
+  ctx.font = "900 12px system-ui";
+  ctx.fillText(`${presentation.venue || "FOOTBALL LAB"} · ${presentation.weather || "MATCH CONDITIONS"}`, WORLD.width / 2, WORLD.height * 0.56);
   ctx.fillStyle = "rgba(218,254,77,.72)";
   ctx.font = "800 10px system-ui";
   ctx.fillText("TAP TO START", WORLD.width / 2, WORLD.height * 0.88);

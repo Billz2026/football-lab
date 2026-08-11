@@ -1,6 +1,6 @@
-import { state, MAX_LIVES, LIFE_STREAK_TARGET } from "./core-v6.js?v=7";
-import { keeperForStage } from "./keepers-v14.js?v=14";
-import { wallForStage } from "./walls-v15.js?v=15";
+import { state, MAX_LIVES, LIFE_STREAK_TARGET } from "./core-v6.js?v=31";
+import { keeperForStage } from "./keepers-v14.js?v=31";
+import { wallForStage } from "./walls-v15.js?v=31";
 
 const STYLE_ID = "mobileGameShellStylesV161";
 const HUD_ID = "mobileGameHudV161";

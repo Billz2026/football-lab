@@ -1,4 +1,4 @@
-import { scenarioForStage } from "./world-v6.js?v=152";
+import { scenarioForStage } from "./world-v6.js?v=31";
 
 export const $ = (selector, scope = document) => scope.querySelector(selector);
 export const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
@@ -148,12 +148,12 @@ export function setPhase(phase) {
   state.meterValue = phase === "curve" ? 0.5 : 0;
   const stage = stageConfig();
   const content = {
-    ready: ["READY", `${stage.label}. Five lives available; three consecutive goals restore one lost life.`, "START SHOT", "SHOT METER"],
+    ready: ["READY", `${stage.chapterName} · ${stage.label}. Misses reset the streak, never your stage.`, "START SHOT", "SHOT METER"],
     power: ["SET POWER", "Power controls pace and height. Stop inside the clean contact zone.", "LOCK POWER", "POWER"],
     aim: ["PICK YOUR SIDE", "The target sits on the real goal plane. Read the wall coverage before committing.", "LOCK PLACEMENT", "PLACEMENT"],
     curve: ["ADD CURVE", "Curl develops through the flight. Counter the wind and bend around the wall.", "TAKE SHOT", "CURVE"],
     shooting: ["WATCH THE FLIGHT", "The ball travels through the same world space as the wall, goal and goalkeeper.", "SHOT IN PLAY", "LOCKED"],
-    result: ["SHOT COMPLETE", "Build a three-goal streak to recover one lost life.", "NEXT SHOT", "RESULT"]
+    result: ["SHOT COMPLETE", "A goal advances the stage. A miss lets you retry without losing progress.", "NEXT SHOT", "RESULT"]
   }[phase];
   elements.phaseTitle.textContent = content[0];
   elements.phaseHelp.textContent = content[1];
@@ -203,7 +203,8 @@ export function renderHud() {
   const stage = stageConfig();
   const maxLives = state.maxLives || MAX_LIVES;
   const livesRemaining = Math.max(0, maxLives - state.misses);
-  elements.stageNumber.textContent = `STAGE ${String(state.stage + 1).padStart(2, "0")} · ${stage.distanceYards} YDS`;
+  const stageContext = stage.cycle > 0 ? `MASTERY ${stage.cycle + 1}` : `CH ${stage.chapterNumber}`;
+  elements.stageNumber.textContent = `${stageContext} · STAGE ${String(state.stage + 1).padStart(2, "0")} · ${stage.distanceYards} YDS`;
   elements.stageName.textContent = stage.name;
   elements.scoreValue.textContent = formatScore(state.score);
   elements.streakValue.textContent = String(state.streak);

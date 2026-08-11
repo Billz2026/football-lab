@@ -1,4 +1,4 @@
-import { state } from "./core-v6.js?v=6";
+import { state } from "./core-v6.js?v=31";
 
 function ensureAudioContext() {
   if (state.audioContext) return state.audioContext;

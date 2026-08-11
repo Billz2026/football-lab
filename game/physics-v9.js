@@ -1,8 +1,8 @@
 import {
   clamp, lerp, smoothStep, state, stageConfig, idealPower, strikeQuality, strikeQualityLabel
-} from "./core-v6.js?v=7";
-import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=7";
-import { difficultyForStage } from "./difficulty-v9.js?v=9";
+} from "./core-v6.js?v=31";
+import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=31";
+import { difficultyForStage } from "./difficulty-v9.js?v=31";
 
 const BALL_RADIUS = 0.11;
 const SAMPLE_COUNT = 220;

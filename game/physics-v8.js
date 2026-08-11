@@ -1,7 +1,7 @@
 import {
   clamp, lerp, smoothStep, state, stageConfig, idealPower, strikeQuality
-} from "./core-v6.js?v=7";
-import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=7";
+} from "./core-v6.js?v=31";
+import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=31";
 
 const BALL_RADIUS = 0.11;
 const SAMPLE_COUNT = 210;

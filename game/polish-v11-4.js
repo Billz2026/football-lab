@@ -1,4 +1,4 @@
-import { elements } from "./core-v6.js?v=7";
+import { elements } from "./core-v6.js?v=31";
 
 const banner = elements.resultBanner;
 

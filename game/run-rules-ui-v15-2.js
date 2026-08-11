@@ -1,4 +1,4 @@
-import { state, MAX_LIVES, LIFE_STREAK_TARGET } from "./core-v6.js?v=7";
+import { state, MAX_LIVES, LIFE_STREAK_TARGET } from "./core-v6.js?v=31";
 
 function injectStyles() {
   if (document.getElementById("runRulesStylesV152")) return;

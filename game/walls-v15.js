@@ -1,5 +1,6 @@
-import { clamp, state } from "./core-v6.js?v=7";
-import { buildWall as buildBaseWall } from "./world-v7.js?v=7";
+import { clamp, state } from "./core-v6.js?v=31";
+import { buildWall as buildBaseWall } from "./world-v7.js?v=31";
+import { scenarioForStage } from "./world-v6.js?v=31";
 
 const STANDARD_WALL = Object.freeze({
   id: "academy-line",
@@ -168,8 +169,10 @@ export const WALLS = Object.freeze([
 const ROTATION = WALLS;
 const BY_ID = new Map([STANDARD_WALL, ...WALLS].map((wall) => [wall.id, wall]));
 
-function scaledWall(base, stageIndex) {
-  const cycle = stageIndex < 6 ? 0 : Math.floor((stageIndex - 6) / ROTATION.length) + 1;
+function scaledWall(base, stageIndex, requestedTier = null) {
+  const cycle = requestedTier == null
+    ? (stageIndex < 6 ? 0 : Math.floor((stageIndex - 6) / ROTATION.length) + 1)
+    : Math.max(0, Number(requestedTier) - 1);
   if (cycle <= 0) return { ...base, tier: 1, stageIndex };
   const modifiers = base.modifiers;
   return {
@@ -188,9 +191,10 @@ function scaledWall(base, stageIndex) {
 
 export function wallForStage(stageIndex = state.stage) {
   const index = Math.max(0, Number(stageIndex) || 0);
-  if (index < 2) return scaledWall(STANDARD_WALL, index);
-  const wall = ROTATION[(index - 2) % ROTATION.length];
-  return scaledWall(wall, index);
+  const scenario = scenarioForStage(index);
+  const wall = BY_ID.get(scenario.wallId)
+    || (index < 2 ? STANDARD_WALL : ROTATION[(index - 2) % ROTATION.length]);
+  return scaledWall(wall, index, scenario.wallTier);
 }
 
 export function wallById(id) {

@@ -1,8 +1,8 @@
-import { clamp, lerp, state } from "./core-v6.js?v=7";
+import { clamp, lerp, state } from "./core-v6.js?v=31";
 import {
   resolveShotPhysics as resolveBaseShotPhysics,
   sampleShotPath as sampleBaseShotPath
-} from "./runtime-v23-generated-physics-v15-9cf6fe15a3.js";
+} from "./runtime-v23-generated-physics-v15-9cf6fe15a3.js?v=31";
 
 const EPSILON = 1e-7;
 const MIN_PATH_SAMPLES = 96;

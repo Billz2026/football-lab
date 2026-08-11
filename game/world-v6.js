@@ -18,247 +18,120 @@ export const PITCH = Object.freeze({
   arcRadius: 9.15
 });
 
-export const SCENARIOS = Object.freeze([
-  {
-    id: "left20",
-    name: "THE OPENER",
-    label: "20 YARDS · LEFT CHANNEL",
-    distanceYards: 20,
-    ballX: -2.7,
-    wallPlayers: 4,
-    protectedGoalX: -1.65,
-    keeperX: 0.72,
-    wind: 0.02,
-    windVariance: 0.012,
-    keeper: 0.18,
-    aimSpeed: 0.92,
-    camera: { sideOffset: -0.65, backDistance: 9.0, height: 2.8, fovY: 42, targetHeight: 1.0 }
-  },
-  {
-    id: "central20",
-    name: "CENTRAL TEST",
-    label: "20 YARDS · CENTRAL",
-    distanceYards: 20,
-    ballX: 0,
-    wallPlayers: 4,
-    protectedGoalX: -1.45,
-    keeperX: 0.86,
-    wind: -0.035,
-    windVariance: 0.014,
-    keeper: 0.24,
-    aimSpeed: 0.98,
-    camera: { sideOffset: -0.8, backDistance: 9.0, height: 2.8, fovY: 42, targetHeight: 1.02 }
-  },
-  {
-    id: "right22",
-    name: "RIGHT CHANNEL",
-    label: "22 YARDS · RIGHT CHANNEL",
-    distanceYards: 22,
-    ballX: 3.2,
-    wallPlayers: 4,
-    protectedGoalX: 1.75,
-    keeperX: -0.76,
-    wind: 0.055,
-    windVariance: 0.016,
-    keeper: 0.29,
-    aimSpeed: 1.03,
-    camera: { sideOffset: 0.68, backDistance: 9.1, height: 2.82, fovY: 42, targetHeight: 1.02 }
-  },
-  {
-    id: "central24",
-    name: "FIVE-MAN TEST",
-    label: "24 YARDS · CENTRAL · 5-MAN WALL",
-    distanceYards: 24,
-    ballX: -0.45,
-    wallPlayers: 5,
-    protectedGoalX: -1.3,
-    keeperX: 0.74,
-    wind: -0.07,
-    windVariance: 0.018,
-    keeper: 0.35,
-    aimSpeed: 1.08,
-    camera: { sideOffset: -0.72, backDistance: 9.35, height: 2.88, fovY: 42, targetHeight: 1.04 }
-  },
-  {
-    id: "left26",
-    name: "BEND THE LINE",
-    label: "26 YARDS · LEFT CHANNEL",
-    distanceYards: 26,
-    ballX: -4.8,
-    wallPlayers: 5,
-    protectedGoalX: -2.0,
-    keeperX: 0.92,
-    wind: 0.095,
-    windVariance: 0.022,
-    keeper: 0.4,
-    aimSpeed: 1.12,
-    camera: { sideOffset: -0.55, backDistance: 9.6, height: 2.94, fovY: 43, targetHeight: 1.06 }
-  },
-  {
-    id: "right27",
-    name: "REVERSE BEND",
-    label: "27 YARDS · RIGHT CHANNEL",
-    distanceYards: 27,
-    ballX: 5.2,
-    wallPlayers: 5,
-    protectedGoalX: 2.05,
-    keeperX: -0.94,
-    wind: -0.11,
-    windVariance: 0.024,
-    keeper: 0.45,
-    aimSpeed: 1.16,
-    camera: { sideOffset: 0.55, backDistance: 9.7, height: 2.96, fovY: 43, targetHeight: 1.07 }
-  },
-  {
-    id: "central30wind",
-    name: "CROSSWIND",
-    label: "30 YARDS · CENTRAL · CROSSWIND",
-    distanceYards: 30,
-    ballX: 0.75,
-    wallPlayers: 5,
-    protectedGoalX: -1.1,
-    keeperX: 0.62,
-    wind: 0.16,
-    windVariance: 0.03,
-    keeper: 0.5,
-    aimSpeed: 1.2,
-    camera: { sideOffset: -0.58, backDistance: 10.0, height: 3.0, fovY: 42, targetHeight: 1.08 }
-  },
-  {
-    id: "wideLeft31",
-    name: "WIDE LEFT",
-    label: "31 YARDS · WIDE LEFT",
-    distanceYards: 31,
-    ballX: -7.4,
-    wallPlayers: 5,
-    protectedGoalX: -2.35,
-    keeperX: 1.0,
-    wind: -0.14,
-    windVariance: 0.03,
-    keeper: 0.54,
-    aimSpeed: 1.23,
-    camera: { sideOffset: -0.42, backDistance: 10.1, height: 3.02, fovY: 44, targetHeight: 1.09 }
-  },
-  {
-    id: "wideRight32",
-    name: "WIDE RIGHT",
-    label: "32 YARDS · WIDE RIGHT",
-    distanceYards: 32,
-    ballX: 7.8,
-    wallPlayers: 5,
-    protectedGoalX: 2.4,
-    keeperX: -1.02,
-    wind: 0.18,
-    windVariance: 0.032,
-    keeper: 0.58,
-    aimSpeed: 1.27,
-    camera: { sideOffset: 0.42, backDistance: 10.2, height: 3.05, fovY: 44, targetHeight: 1.1 }
-  },
-  {
-    id: "central34six",
-    name: "THE SIX",
-    label: "34 YARDS · CENTRAL · 6-MAN WALL",
-    distanceYards: 34,
-    ballX: -0.8,
-    wallPlayers: 6,
-    protectedGoalX: -1.25,
-    keeperX: 0.7,
-    wind: -0.19,
-    windVariance: 0.034,
-    keeper: 0.62,
-    aimSpeed: 1.31,
-    camera: { sideOffset: -0.68, backDistance: 10.45, height: 3.1, fovY: 41, targetHeight: 1.11 }
-  },
-  {
-    id: "left36long",
-    name: "LONG LEFT",
-    label: "36 YARDS · LEFT OF CENTRE",
-    distanceYards: 36,
-    ballX: -3.8,
-    wallPlayers: 5,
-    protectedGoalX: -1.8,
-    keeperX: 0.9,
-    wind: 0.21,
-    windVariance: 0.036,
-    keeper: 0.66,
-    aimSpeed: 1.35,
-    camera: { sideOffset: -0.58, backDistance: 10.7, height: 3.14, fovY: 41, targetHeight: 1.12 }
-  },
-  {
-    id: "right38long",
-    name: "LONG RIGHT",
-    label: "38 YARDS · RIGHT OF CENTRE",
-    distanceYards: 38,
-    ballX: 4.2,
-    wallPlayers: 6,
-    protectedGoalX: 1.9,
-    keeperX: -0.92,
-    wind: -0.22,
-    windVariance: 0.038,
-    keeper: 0.7,
-    aimSpeed: 1.39,
-    camera: { sideOffset: 0.58, backDistance: 10.9, height: 3.18, fovY: 41, targetHeight: 1.13 }
-  },
-  {
-    id: "central40gale",
-    name: "THE GALE",
-    label: "40 YARDS · CENTRAL · HEAVY WIND",
-    distanceYards: 40,
-    ballX: 0.35,
-    wallPlayers: 6,
-    protectedGoalX: -1.15,
-    keeperX: 0.64,
-    wind: 0.27,
-    windVariance: 0.045,
-    keeper: 0.74,
-    aimSpeed: 1.43,
-    camera: { sideOffset: -0.64, backDistance: 11.15, height: 3.22, fovY: 40, targetHeight: 1.14 }
-  },
-  {
-    id: "wideLeft42",
-    name: "FORTY-TWO WIDE",
-    label: "42 YARDS · WIDE LEFT · 6-MAN WALL",
-    distanceYards: 42,
-    ballX: -8.2,
-    wallPlayers: 6,
-    protectedGoalX: -2.45,
-    keeperX: 1.05,
-    wind: -0.25,
-    windVariance: 0.044,
-    keeper: 0.78,
-    aimSpeed: 1.47,
-    camera: { sideOffset: -0.38, backDistance: 11.35, height: 3.28, fovY: 42, targetHeight: 1.15 }
-  },
-  {
-    id: "central45final",
-    name: "THE DISTANCE KING",
-    label: "45 YARDS · CENTRAL · 6-MAN WALL",
-    distanceYards: 45,
-    ballX: -1.1,
-    wallPlayers: 6,
-    protectedGoalX: -1.2,
-    keeperX: 0.68,
-    wind: 0.3,
-    windVariance: 0.05,
-    keeper: 0.82,
-    aimSpeed: 1.52,
-    camera: { sideOffset: -0.7, backDistance: 11.7, height: 3.35, fovY: 39, targetHeight: 1.17 }
-  }
+export const CHAPTERS = Object.freeze([
+  Object.freeze({ number: 1, name: "FIRST TOUCH", venue: "FOUNDATION GROUND", environment: "academy", weather: "CLEAR MORNING", weatherId: "clear", weatherSeverity: 0.02 }),
+  Object.freeze({ number: 2, name: "CITY LIGHTS", venue: "BOROUGH ARENA", environment: "city", weather: "EVENING BREEZE", weatherId: "breeze", weatherSeverity: 0.12 }),
+  Object.freeze({ number: 3, name: "NIGHT SHIFT", venue: "CONTINENTAL PARK", environment: "night", weather: "COOL NIGHT", weatherId: "night", weatherSeverity: 0.08 }),
+  Object.freeze({ number: 4, name: "STORM CIRCUIT", venue: "TEMPEST STADIUM", environment: "storm", weather: "DRIVING RAIN", weatherId: "rain", weatherSeverity: 0.48 }),
+  Object.freeze({ number: 5, name: "WORLD STAGE", venue: "CROWN ARENA", environment: "world", weather: "PRIME-TIME LIGHTS", weatherId: "spotlight", weatherSeverity: 0.16 }),
+  Object.freeze({ number: 6, name: "LEGENDS SUMMIT", venue: "SUMMIT BOWL", environment: "summit", weather: "COLD HIGH WIND", weatherId: "haze", weatherSeverity: 0.34 })
 ]);
+
+const STAGE_BLUEPRINTS = Object.freeze([
+  ["left20", "THE FIRST STRIKE", 19, -2.2, 3, -1.35, 0.62, 0.015, 0.010, 0.16, 0.90, "academy", "academy-line"],
+  ["central20", "FIND THE CORNER", 20, 0, 4, -1.15, 0.72, -0.025, 0.012, 0.20, 0.94, "academy", "academy-line"],
+  ["right22", "OPEN YOUR BODY", 21, 2.8, 4, 1.45, -0.68, 0.038, 0.014, 0.24, 0.98, "reflex", "academy-line"],
+  ["central24", "OVER THE LINE", 22, -0.3, 4, -1.25, 0.72, -0.048, 0.015, 0.28, 1.02, "reflex", "compact"],
+  ["left26", "FOUNDATION FINAL", 24, -4.2, 4, -1.85, 0.84, 0.065, 0.018, 0.32, 1.06, "giant", "compact"],
+
+  ["right27", "STREETLIGHT BEND", 23, 4.5, 4, 1.85, -0.82, -0.075, 0.020, 0.34, 1.08, "giant", "compact"],
+  ["central30wind", "TRAFFIC WIND", 25, 0.5, 4, -1.05, 0.60, 0.095, 0.022, 0.38, 1.11, "reader", "leaping"],
+  ["wideLeft31", "BOROUGH ANGLE", 26, -6.2, 5, -2.15, 0.94, -0.105, 0.024, 0.41, 1.14, "reader", "leaping"],
+  ["wideRight32", "NEON REVERSE", 28, 6.4, 5, 2.20, -0.96, 0.125, 0.025, 0.44, 1.17, "aggressive", "reading"],
+  ["central34six", "CITY FINAL", 30, -0.5, 5, -1.20, 0.68, -0.14, 0.028, 0.47, 1.20, "aggressive", "reading"],
+
+  ["left36long", "THE AWAY END", 27, -3.7, 5, -1.75, 0.86, 0.13, 0.026, 0.48, 1.21, "reflex", "reading"],
+  ["right38long", "EUROPEAN NIGHT", 29, 4.0, 5, 1.80, -0.88, -0.145, 0.028, 0.51, 1.24, "giant", "staggered"],
+  ["central40gale", "UNDER THE LIGHTS", 31, 0.4, 5, -1.05, 0.62, 0.16, 0.030, 0.54, 1.27, "reader", "staggered"],
+  ["wideLeft42", "SILENT CROWD", 33, -7.2, 5, -2.35, 0.98, -0.175, 0.032, 0.57, 1.30, "aggressive", "compact"],
+  ["central45final", "CONTINENTAL FINAL", 35, -0.8, 6, -1.20, 0.68, 0.19, 0.034, 0.60, 1.33, "reader", "leaping"],
+
+  ["storm-left", "RAIN CHANNEL", 30, -5.0, 5, -1.95, 0.90, -0.18, 0.040, 0.60, 1.33, "giant", "leaping"],
+  ["storm-centre", "SLICK SURFACE", 32, 0.2, 5, -1.10, 0.64, 0.20, 0.042, 0.63, 1.36, "reflex", "reading"],
+  ["storm-right", "AGAINST THE GUST", 34, 5.7, 6, 2.10, -0.94, -0.225, 0.045, 0.66, 1.39, "reader", "staggered"],
+  ["storm-wide", "EYE OF THE STORM", 36, -7.7, 6, -2.42, 1.02, 0.245, 0.048, 0.69, 1.42, "aggressive", "staggered"],
+  ["storm-final", "TEMPEST FINAL", 38, 0.9, 6, 1.18, -0.70, -0.265, 0.050, 0.72, 1.45, "giant", "compact"],
+
+  ["world-open", "THE WORLD STAGE", 34, -2.0, 5, -1.55, 0.78, 0.15, 0.032, 0.70, 1.43, "reflex", "reading"],
+  ["world-left", "CROWN LEFT", 36, -5.4, 6, -2.05, 0.92, -0.18, 0.035, 0.73, 1.46, "giant", "staggered"],
+  ["world-right", "CROWN RIGHT", 38, 5.8, 6, 2.12, -0.94, 0.205, 0.038, 0.76, 1.49, "reader", "compact"],
+  ["world-pressure", "PRIME TIME", 40, 0.4, 6, -1.12, 0.66, -0.225, 0.040, 0.79, 1.52, "aggressive", "leaping"],
+  ["world-final", "WORLD FINAL", 42, -0.7, 6, -1.18, 0.68, 0.245, 0.042, 0.82, 1.55, "reader", "staggered"],
+
+  ["legend-angle", "LEGENDS ANGLE", 37, -7.6, 6, -2.42, 1.02, -0.22, 0.042, 0.80, 1.54, "reflex", "staggered"],
+  ["legend-power", "THUNDER STRIKE", 39, 2.8, 6, 1.65, -0.82, 0.245, 0.044, 0.82, 1.57, "giant", "leaping"],
+  ["legend-whip", "IMPOSSIBLE BEND", 41, -5.8, 6, -2.18, 0.96, -0.27, 0.047, 0.84, 1.60, "reader", "reading"],
+  ["legend-ice", "LAST MINUTE", 43, 0.8, 6, 1.15, -0.70, 0.285, 0.050, 0.86, 1.63, "aggressive", "compact"],
+  ["legend-final", "THE SUMMIT", 45, -0.6, 6, -1.20, 0.68, -0.30, 0.052, 0.88, 1.66, "reader", "staggered"]
+]);
+
+function cameraFor(distanceYards, ballX, stageIndex) {
+  const side = Math.abs(ballX) < 0.8 ? -0.68 : Math.sign(ballX) * 0.5;
+  const progress = stageIndex / Math.max(1, STAGE_BLUEPRINTS.length - 1);
+  return Object.freeze({
+    sideOffset: side,
+    backDistance: 8.9 + distanceYards * 0.062,
+    height: 2.78 + progress * 0.56,
+    fovY: Math.abs(ballX) > 6 ? 43 : distanceYards > 39 ? 40 : 42,
+    targetHeight: 1.0 + progress * 0.16
+  });
+}
+
+export const SCENARIOS = Object.freeze(STAGE_BLUEPRINTS.map((blueprint, stageIndex) => {
+  const [
+    id, name, distanceYards, ballX, wallPlayers, protectedGoalX, keeperX,
+    wind, windVariance, keeper, aimSpeed, keeperId, wallId
+  ] = blueprint;
+  const chapterIndex = Math.floor(stageIndex / 5);
+  const chapter = CHAPTERS[chapterIndex];
+  const channel = ballX < -4.5 ? "WIDE LEFT" : ballX < -1.2 ? "LEFT CHANNEL" : ballX > 4.5 ? "WIDE RIGHT" : ballX > 1.2 ? "RIGHT CHANNEL" : "CENTRAL";
+  return Object.freeze({
+    id,
+    name,
+    label: `${distanceYards} YARDS · ${channel}${wallPlayers >= 6 ? " · 6-MAN WALL" : ""}`,
+    distanceYards,
+    ballX,
+    wallPlayers,
+    protectedGoalX,
+    keeperX,
+    wind,
+    windVariance,
+    keeper,
+    aimSpeed,
+    keeperId,
+    wallId,
+    keeperTier: chapterIndex + 1,
+    wallTier: chapterIndex + 1,
+    chapterNumber: chapter.number,
+    chapterName: chapter.name,
+    chapterStage: (stageIndex % 5) + 1,
+    totalCampaignStages: STAGE_BLUEPRINTS.length,
+    venue: chapter.venue,
+    environment: chapter.environment,
+    weather: chapter.weather,
+    weatherId: chapter.weatherId,
+    weatherSeverity: chapter.weatherSeverity,
+    difficulty: stageIndex / Math.max(1, STAGE_BLUEPRINTS.length - 1),
+    camera: cameraFor(distanceYards, ballX, stageIndex)
+  });
+}));
 
 export function scenarioForStage(stageIndex) {
   const index = Math.max(0, Number(stageIndex) || 0);
   const cycle = Math.floor(index / SCENARIOS.length);
   const base = SCENARIOS[index % SCENARIOS.length];
-  const cycleWind = base.wind * (1 + cycle * 0.075);
+  const cycleWind = base.wind * (1 + cycle * 0.06);
   return {
     ...base,
     cycle,
-    wallPlayers: Math.min(6, base.wallPlayers + (cycle >= 2 ? 1 : 0)),
-    keeper: Math.min(0.88, base.keeper + cycle * 0.025),
-    aimSpeed: Math.min(1.68, base.aimSpeed + cycle * 0.028),
+    chapterCycle: cycle,
+    wallPlayers: Math.min(6, base.wallPlayers + (cycle >= 1 ? 1 : 0)),
+    keeper: Math.min(0.92, base.keeper + cycle * 0.018),
+    aimSpeed: Math.min(1.72, base.aimSpeed + cycle * 0.022),
     wind: Math.max(-0.32, Math.min(0.32, cycleWind)),
-    windVariance: Math.min(0.065, (base.windVariance || 0.015) + cycle * 0.004)
+    windVariance: Math.min(0.065, (base.windVariance || 0.015) + cycle * 0.003),
+    keeperTier: base.keeperTier + cycle,
+    wallTier: base.wallTier + cycle
   };
 }
 

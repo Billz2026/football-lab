@@ -1,4 +1,4 @@
-import { clamp, state } from "./core-v6.js?v=7";
+import { clamp, state } from "./core-v6.js?v=31";
 
 const CHARACTER_STORAGE_KEY = "footballLabSelectedKickerV13";
 

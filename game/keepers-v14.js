@@ -1,4 +1,5 @@
-import { clamp, state } from "./core-v6.js?v=7";
+import { clamp, state } from "./core-v6.js?v=31";
+import { scenarioForStage } from "./world-v6.js?v=31";
 
 const STANDARD_KEEPER = Object.freeze({
   id: "academy",
@@ -162,8 +163,10 @@ export const GOALKEEPERS = Object.freeze([
 const ROTATION = GOALKEEPERS;
 const BY_ID = new Map([STANDARD_KEEPER, ...GOALKEEPERS].map((keeper) => [keeper.id, keeper]));
 
-function scaledKeeper(base, stageIndex) {
-  const cycle = stageIndex < 6 ? 0 : Math.floor((stageIndex - 6) / ROTATION.length) + 1;
+function scaledKeeper(base, stageIndex, requestedTier = null) {
+  const cycle = requestedTier == null
+    ? (stageIndex < 6 ? 0 : Math.floor((stageIndex - 6) / ROTATION.length) + 1)
+    : Math.max(0, Number(requestedTier) - 1);
   if (cycle <= 0) return { ...base, tier: 1, stageIndex };
   const modifiers = base.modifiers;
   return {
@@ -183,9 +186,10 @@ function scaledKeeper(base, stageIndex) {
 
 export function keeperForStage(stageIndex = state.stage) {
   const index = Math.max(0, Number(stageIndex) || 0);
-  if (index < 2) return scaledKeeper(STANDARD_KEEPER, index);
-  const keeper = ROTATION[(index - 2) % ROTATION.length];
-  return scaledKeeper(keeper, index);
+  const scenario = scenarioForStage(index);
+  const keeper = BY_ID.get(scenario.keeperId)
+    || (index < 2 ? STANDARD_KEEPER : ROTATION[(index - 2) % ROTATION.length]);
+  return scaledKeeper(keeper, index, scenario.keeperTier);
 }
 
 export function keeperById(id) {

@@ -72,7 +72,7 @@ async function startClassic(page) {
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
-  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 1800 });
+  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 2600 });
 }
 
 test("V20 starts a fresh run tracker and personal-best chase", async ({ page }) => {

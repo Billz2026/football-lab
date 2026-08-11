@@ -1,4 +1,4 @@
-import { state, idealPower } from "./core-v6.js?v=7";
+import { state, idealPower } from "./core-v6.js?v=31";
 
 const meter = document.querySelector(".meter");
 const meterWrap = document.querySelector(".meter-wrap");

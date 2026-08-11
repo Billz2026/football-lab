@@ -1,5 +1,5 @@
-import { state } from "./core-v6.js?v=7";
-import { KICKERS, activeCharacter, characterById, selectCharacter } from "./characters-v13.js?v=13";
+import { state } from "./core-v6.js?v=31";
+import { KICKERS, activeCharacter, characterById, selectCharacter } from "./characters-v13.js?v=31";
 
 let selectedCandidateId = activeCharacter().id;
 let pendingStartTarget = null;
@@ -82,8 +82,8 @@ function injectStyles() {
     .character-change-v13 { margin-top:10px; width:100%; border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:10px; background:rgba(255,255,255,.035); color:#eff6ed; font:850 9px/1 system-ui; letter-spacing:.08em; cursor:pointer; }
     .active-kicker-chip-v13 { display:flex; align-items:center; gap:8px; margin-left:auto; padding:7px 10px; border-radius:10px; border:1px solid color-mix(in srgb,var(--active-kicker-accent) 26%,transparent); background:color-mix(in srgb,var(--active-kicker-accent) 7%,rgba(0,0,0,.15)); }
     .active-kicker-chip-v13 i { width:8px; height:8px; border-radius:50%; background:var(--active-kicker-accent); box-shadow:0 0 12px var(--active-kicker-accent); }
-    .active-kicker-chip-v13 span { color:rgba(235,243,232,.5); font:800 8px/1 system-ui; letter-spacing:.08em; }
-    .active-kicker-chip-v13 strong { color:#f6fbf4; font:900 9px/1 system-ui; }
+    .active-kicker-chip-v13 span { display:block; color:rgba(235,243,232,.5); font:800 8px/1 system-ui; letter-spacing:.08em; }
+    .active-kicker-chip-v13 strong { display:block; margin-top:3px; color:#f6fbf4; font:900 9px/1 system-ui; }
     @media (max-width:980px) { .kicker-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width:620px) { .kicker-select-shell { padding:8px; } .kicker-select-panel { padding:17px; max-height:96vh; } .kicker-grid { grid-template-columns:1fr; } .kicker-select-footer { align-items:stretch; flex-direction:column; } .kicker-confirm { width:100%; min-width:0; } }
   `;

@@ -10,8 +10,8 @@ function replaceRequired(label, before, after) {
 
 replaceRequired(
   "run rule constants",
-  "  renderHud, showResult, stageConfig, strikeQualityLabel, syncStage\n} from \"./core-v6.js?v=7\";",
-  "  renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET\n} from \"./core-v6.js?v=7\";"
+  "  renderHud, showResult, stageConfig, strikeQualityLabel, syncStage\n} from \"./core-v6.js?v=31\";",
+  "  renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET\n} from \"./core-v6.js?v=31\";"
 );
 replaceRequired(
   "V15 physics import",
@@ -25,8 +25,8 @@ replaceRequired(
 );
 replaceRequired(
   "matchup imports",
-  'import { difficultyForStage } from "./difficulty-v9.js?v=9";',
-  `import { difficultyForStage } from "./difficulty-v9.js?v=9";\nimport { activeCharacter, meterMultiplier } from "${new URL("./characters-v13.js?v=13", import.meta.url).href}";\nimport { keeperForStage } from "${new URL("./keepers-v14.js?v=14", import.meta.url).href}";\nimport { wallForStage } from "${new URL("./walls-v15.js?v=15", import.meta.url).href}";`
+  'import { difficultyForStage } from "./difficulty-v9.js?v=31";',
+  `import { difficultyForStage } from "./difficulty-v9.js?v=31";\nimport { activeCharacter, meterMultiplier } from "${new URL("./characters-v13.js?v=31", import.meta.url).href}";\nimport { keeperForStage } from "${new URL("./keepers-v14.js?v=31", import.meta.url).href}";\nimport { wallForStage } from "${new URL("./walls-v15.js?v=31", import.meta.url).href}";`
 );
 
 const startMarker = "function startGame() {";

@@ -1,4 +1,4 @@
-import { formatScore, profile, state } from "./core-v6.js?v=7";
+import { formatScore, profile, state } from "./core-v6.js?v=31";
 
 const BUILD = "25.0.0";
 let pausedPhase = null;

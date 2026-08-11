@@ -92,25 +92,34 @@ const BASE_PROFILES = Object.freeze({
 });
 
 const FALLBACK = BASE_PROFILES.central24;
-const HANDCRAFTED_STAGE_COUNT = 15;
+const HANDCRAFTED_STAGE_COUNT = 30;
 
 export function difficultyForStage(stageIndex, scenario) {
   const base = BASE_PROFILES[scenario.id] || FALLBACK;
   const cycle = Math.floor(stageIndex / HANDCRAFTED_STAGE_COUNT);
-  const cyclePressure = Math.min(0.14, cycle * 0.025);
-  const meterPressure = Math.min(0.16, cycle * 0.03);
+  const progress = Math.max(0, Math.min(1, Number(scenario.difficulty) || 0));
+  const weatherPressure = Math.max(0, Math.min(0.6, Number(scenario.weatherSeverity) || 0));
+  const wallPressure = Math.max(0, (Number(scenario.wallPlayers) || 4) - 3) * 0.012;
+  const cyclePressure = Math.min(0.12, cycle * 0.02);
+  const meterPressure = Math.min(0.14, cycle * 0.025);
 
   return {
     ...base,
     id: scenario.id,
     stageIndex,
     cycle,
-    keeperBoost: base.keeperBoost + cyclePressure,
-    contactError: base.contactError + cycle * 0.055,
+    challenge: `${scenario.chapterName || "CLASSIC KICKS"} · ${scenario.weather || base.challenge}`,
+    keeperBoost: 0.005 + progress * 0.19 + cyclePressure,
+    reactionBoost: 0.002 + progress * 0.03,
+    reachX: 0.98 + progress * 0.12,
+    reachY: 0.98 + progress * 0.105,
+    wallRadius: 0.325 + wallPressure + progress * 0.03,
+    wallJump: 0.295 + progress * 0.095,
+    contactError: 0.70 + progress * 0.42 + weatherPressure * 0.07 + cycle * 0.05,
     meter: {
-      power: base.meter.power + meterPressure,
-      aim: base.meter.aim + meterPressure,
-      curve: base.meter.curve + meterPressure
+      power: 0.9 + progress * 0.25 + weatherPressure * 0.025 + meterPressure,
+      aim: 0.89 + progress * 0.28 + weatherPressure * 0.03 + meterPressure,
+      curve: 0.91 + progress * 0.27 + weatherPressure * 0.035 + meterPressure
     }
   };
 }

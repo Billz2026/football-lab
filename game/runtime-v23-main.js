@@ -2,14 +2,14 @@ import {
   $, $$, formatScore, profile, state, elements, createShot, saveProfile, renderProfile,
   setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
-} from "./core-v6.js?v=7";
-import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js";
-import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=30";
-import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v10.js?v=10";
-import { difficultyForStage } from "./difficulty-v9.js?v=9";
-import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=13";
-import { keeperForStage } from "./keepers-v14.js?v=14";
-import { wallForStage } from "./walls-v15.js?v=15";
+} from "./core-v6.js?v=31";
+import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=31";
+import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=31";
+import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v10.js?v=31";
+import { difficultyForStage } from "./difficulty-v9.js?v=31";
+import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=31";
+import { keeperForStage } from "./keepers-v14.js?v=31";
+import { wallForStage } from "./walls-v15.js?v=31";
 
 state.debugDiagnostics = false;
 state.presentation = null;
@@ -80,13 +80,17 @@ function showStageIntro() {
     stageNumber: state.stage + 1,
     distanceYards: state.currentStage.distanceYards,
     stageName: state.currentStage.name,
+    chapterNumber: state.currentStage.chapterNumber,
+    chapterName: state.currentStage.chapterName,
+    venue: state.currentStage.venue,
+    weather: state.currentStage.weather,
     challenge: difficulty.challenge,
     keeperId: keeper.id,
     wallId: wall.id
   };
   elements.shotAction.textContent = "START STAGE";
   playStageSound();
-  state.presentationTimeout = setTimeout(prepareNextShot, 700);
+  state.presentationTimeout = setTimeout(prepareNextShot, 1100);
 }
 
 function startGame() {
@@ -496,6 +500,10 @@ function continueAfterBreakdown() {
       stageNumber: state.stage + 1,
       distanceYards: state.currentStage.distanceYards,
       stageName: state.currentStage.name,
+      chapterNumber: state.currentStage.chapterNumber,
+      chapterName: state.currentStage.chapterName,
+      venue: state.currentStage.venue,
+      weather: state.currentStage.weather,
       challenge: difficulty.challenge,
       keeperId: keeper.id,
       wallId: wall.id
@@ -503,7 +511,7 @@ function continueAfterBreakdown() {
     elements.shotAction.textContent = "START NEXT STAGE";
     playStageSound();
     vibrate([12, 28, 12]);
-    state.presentationTimeout = setTimeout(prepareNextShot, 700);
+    state.presentationTimeout = setTimeout(prepareNextShot, 1100);
     return;
   }
   prepareNextShot();

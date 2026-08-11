@@ -8,13 +8,13 @@ function replaceRequired(label, before, after) {
   source = source.replace(before, after);
 }
 
-const characterImport = `import { activeCharacter, characterPhysics } from "${new URL("./characters-v13.js?v=13", import.meta.url).href}";`;
-const keeperImport = `import { keeperForStage } from "${new URL("./keepers-v14.js?v=14", import.meta.url).href}";`;
-const wallImport = `import { wallForStage, buildWallLayout } from "${new URL("./walls-v15.js?v=15", import.meta.url).href}";`;
+const characterImport = `import { activeCharacter, characterPhysics } from "${new URL("./characters-v13.js?v=31", import.meta.url).href}";`;
+const keeperImport = `import { keeperForStage } from "${new URL("./keepers-v14.js?v=31", import.meta.url).href}";`;
+const wallImport = `import { wallForStage, buildWallLayout } from "${new URL("./walls-v15.js?v=31", import.meta.url).href}";`;
 replaceRequired(
   "ability imports",
-  'import { difficultyForStage } from "./difficulty-v9.js?v=9";',
-  `import { difficultyForStage } from "./difficulty-v9.js?v=9";\n${characterImport}\n${keeperImport}\n${wallImport}`
+  'import { difficultyForStage } from "./difficulty-v9.js?v=31";',
+  `import { difficultyForStage } from "./difficulty-v9.js?v=31";\n${characterImport}\n${keeperImport}\n${wallImport}`
 );
 
 replaceRequired(
