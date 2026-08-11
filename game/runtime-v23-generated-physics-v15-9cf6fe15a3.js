@@ -20,34 +20,36 @@ function effectiveKeeperSkill(stage, profile) {
   return clamp(0.34 + scenarioSkill + profile.keeperBoost + keeper.modifiers.skillBoost, 0.4, 0.95);
 }
 
-function buildDirectPath(target, profile) {
+function buildDirectPath(inputResult, profile) {
   const stage = stageConfig();
   const modifiers = characterPhysics();
   const start = ballWorld(stage);
+  const target = inputResult.target;
+  const selected = inputResult.selected;
   const power = state.shot.power ?? idealPower();
   const quality = state.shot.strikeQuality ?? strikeQuality(power);
-  const curve = signedCurve(clamp((state.shot.curve ?? 0) * modifiers.curveStrength, -1.15, 1.15));
   const distance = start.z;
   const requestedHeight = Math.max(0, target.y - 1.05);
-  const powerFlattening = (0.69 - power) * 0.58;
-  const poorContactLift = (1 - quality) * 0.12;
+  const poorContactLift = (1 - quality) * 0.07;
   const arcHeight = clamp(
-    0.82 + distance * 0.0175 + powerFlattening + requestedHeight * 0.10 + poorContactLift,
-    0.9,
-    1.62
+    0.75 + distance * 0.018 + requestedHeight * 0.15 + poorContactLift,
+    0.88,
+    1.58
   );
-  const curveBulge = curve * (0.45 + distance * 0.0195);
-  const windBulge = state.stageWind * (0.42 + distance * 0.0135);
 
   return Array.from({ length: SAMPLE_COUNT + 1 }, (_, index) => {
     const t = index / SAMPLE_COUNT;
-    const lineX = lerp(start.x, target.x, t);
+    const lineX = lerp(start.x, selected.x, t);
     const lineY = lerp(start.y, target.y, t);
-    const curveEnvelope = Math.sin(Math.PI * t) * Math.pow(t, 1.18);
-    const windEnvelope = Math.sin(Math.PI * t) * Math.pow(t, 1.42);
+    const curveProgress = Math.pow(t, 1.72);
+    const windProgress = Math.pow(t, 1.48);
+    const contactProgress = Math.pow(t, 1.18);
     const lift = arcHeight * 4 * t * (1 - t);
     return {
-      x: lineX + curveBulge * curveEnvelope + windBulge * windEnvelope,
+      x: lineX
+        + inputResult.curveMetres * curveProgress
+        + inputResult.windMetres * windProgress
+        + inputResult.drift.x * contactProgress,
       y: Math.max(0.03, lineY + lift),
       z: lerp(start.z, GOAL.lineZ, t),
       t
@@ -71,13 +73,13 @@ function targetFromInputs(profile) {
 
   const selectedX = -GOAL.halfWidth + shot.aimX * GOAL.width;
   const selectedY = GOAL.height * (1 - shot.aimY);
-  const finalCurve = curve * (0.19 + stage.distanceYards * 0.0052);
+  const finalCurve = curve * (0.55 + stage.distanceYards * 0.028);
   const finalWind = state.stageWind * (0.21 + stage.distanceYards * 0.006);
-  const underhitDrop = power < 0.33 ? smoothStep((0.33 - power) / 0.33) * 0.19 : 0;
-  const overhitRise = power > 0.89 ? smoothStep((power - 0.89) / 0.11) * 0.125 : 0;
+  const underhitDrop = power < 0.28 ? smoothStep((0.28 - power) / 0.28) * 0.08 : 0;
+  const overhitRise = power > 0.94 ? smoothStep((power - 0.94) / 0.06) * 0.04 : 0;
 
   const contactError = profile.contactError * modifiers.contactError;
-  const powerDrift = powerDelta * 0.22 * contactError;
+  const powerDrift = powerDelta * 0.13 * contactError;
   const curveDrift = deterministicSide * excessiveCurve * (0.42 + controlPenalty * 0.45) * contactError;
   const qualityDrift = deterministicSide * controlPenalty * 0.17 * contactError;
   const horizontalDriftMetres = powerDrift + curveDrift + qualityDrift;
@@ -373,7 +375,7 @@ export function resolveShotPhysics() {
   const shot = state.shot;
   const inputResult = targetFromInputs(profile);
   const target = inputResult.target;
-  let path = buildDirectPath(target, profile);
+  let path = buildDirectPath(inputResult, profile);
   const flightSeconds = ballWorld(stage).z / Math.max(15, shot.speedMps);
   const wallAnalysis = analyseWall(path, profile, target);
   const wall = wallAnalysis.collision;

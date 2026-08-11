@@ -367,7 +367,7 @@ function render(time) {
     frame.boardMuted = true;
     frame.keeperFocus = drawKeeperFocus(time, camera);
 
-    if (state.phase === "aim") {
+    if (state.phase === "aim" || state.phase === "curve") {
       drawGoalZones(camera);
       drawAimGuide(camera);
       const target = drawTargetMarker(time, camera);
@@ -390,6 +390,7 @@ window.__footballLabClarityV21 = Object.freeze({
   targetContrastLayers: 4,
   aimGuideUnderStroke: true,
   goalThirdGuides: true,
+  lockedTargetVisibleDuringCurve: true,
   lockConfirmationMs: 480,
   advertisementBoardQuieting: true,
   goalkeeperFocusRim: true,

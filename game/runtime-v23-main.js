@@ -140,8 +140,14 @@ function vibrate(pattern) {
 }
 
 function placementLabel(shot) {
-  const horizontal = shot.aimX < 0.33 ? "LEFT" : shot.aimX > 0.67 ? "RIGHT" : "CENTRE";
-  const vertical = shot.aimY < 0.31 ? "HIGH" : shot.aimY > 0.59 ? "LOW" : "MID";
+  const horizontal = shot.aimX < 0
+    ? "OUTSIDE LEFT"
+    : shot.aimX > 1
+      ? "OUTSIDE RIGHT"
+      : shot.aimX < 0.33 ? "LEFT" : shot.aimX > 0.67 ? "RIGHT" : "CENTRE";
+  const vertical = shot.aimY < 0
+    ? "ABOVE BAR"
+    : shot.aimY < 0.31 ? "HIGH" : shot.aimY > 0.67 ? "LOW" : "MID";
   return `${vertical} ${horizontal}`;
 }
 
@@ -596,8 +602,8 @@ function updateMeter(delta) {
     const speed = (3.35 + stage.aimSpeed * 0.18) * difficulty.meter.power * meterMultiplier("power", state.stage);
     state.meterValue = (Math.sin(state.meterClock * speed - Math.PI / 2) + 1) / 2;
   } else if (state.phase === "aim") {
-    state.meterClock += delta * difficulty.meter.aim * meterMultiplier("aim", state.stage);
-    state.meterValue = currentAimTarget().x;
+    const target = currentAimTarget();
+    state.meterValue = Math.max(0, Math.min(1, target.x));
   } else {
     state.meterClock += delta;
     const speed = (2.78 + stage.aimSpeed * 0.2) * difficulty.meter.curve * meterMultiplier("curve", state.stage);

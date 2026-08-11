@@ -1,6 +1,6 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=32", {
+  navigator.serviceWorker.register("./sw.js?v=32.1", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -23,7 +23,7 @@ const runtimeCaptureMode = localCaptureHost
   && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
   ? "./game/main-v18.js?v=31"
-  : "./game/runtime-v23-main.js?v=32";
+  : "./game/runtime-v23-main.js?v=32.1";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 const runtimePromise = import(runtimeEntry);
@@ -42,6 +42,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/mobile-shell-v16-1.js?v=31"))
       .then(() => import("./game/mobile-shell-compact-v16-1.js?v=31"))
       .then(() => import("./game/visual-ui-v17.js?v=31"))
+      .then(() => import("./game/free-aim-v32-1.js?v=32.1"))
       .then(() => import("./game/input-precision-ui-v18.js?v=31"))
       .then(() => import("./game/progression-v20.js?v=31"))
       .then(() => import("./game/clarity-v21.js?v=31"))

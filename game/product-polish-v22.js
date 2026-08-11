@@ -336,17 +336,17 @@ const tutorialSteps = {
   },
   power: {
     title: "Lock the power",
-    copy: "Tap when the white marker reaches the bright contact zone. Too much power sends the ball high.",
+    copy: "Tap when the white marker reaches the bright contact zone. Power sets pace and contact quality; you choose the height next.",
     target: () => document.querySelector(".meter-wrap")
   },
   aim: {
-    title: "Pick your side",
-    copy: "Watch the target sweep across the goal. Corners score more, but the wall and keeper cover space.",
-    target: () => document.querySelector(".game-frame")
+    title: "Place it anywhere",
+    copy: "Drag on the goal view or 2D pad. Aim outside the posts to create an around-wall curl, or choose any height directly.",
+    target: () => document.querySelector("#freeAimPadV321") || document.querySelector(".game-frame")
   },
   curve: {
     title: "Shape the strike",
-    copy: "Lock left, centre or right curve. Use bend to clear the wall and counter the wind.",
+    copy: "Use the live direction meter. If you aimed outside a post, apply the opposite bend to curl the ball back in.",
     target: () => document.querySelector(".meter-wrap")
   }
 };

@@ -1,0 +1,167 @@
+.free-aim-v321 {
+  grid-area: meter;
+  display: none;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, .72fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+html[data-free-aim-v321="active"] .screen-game .meter-wrap {
+  display: none;
+}
+
+html[data-free-aim-v321="active"] .free-aim-v321 {
+  display: grid;
+}
+
+.free-aim-pad-v321 {
+  position: relative;
+  min-height: 64px;
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;
+  border: 1px solid rgba(218, 254, 77, .2);
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, rgba(116, 220, 255, .06), transparent 22%, transparent 78%, rgba(116, 220, 255, .06)),
+    linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(5, 16, 10, .65));
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, .3);
+}
+
+.free-aim-pad-v321:focus-visible {
+  outline: 2px solid #dafe4d;
+  outline-offset: 2px;
+}
+
+.free-aim-goal-v321 {
+  position: absolute;
+  left: 15.28%;
+  top: 15.63%;
+  width: 69.44%;
+  height: 78.12%;
+  border: 2px solid rgba(247, 255, 244, .62);
+  border-bottom-color: rgba(247, 255, 244, .26);
+  background:
+    linear-gradient(90deg, transparent 32.8%, rgba(255,255,255,.11) 33%, transparent 33.5%, transparent 66.2%, rgba(255,255,255,.11) 66.4%, transparent 66.8%),
+    linear-gradient(180deg, transparent 49%, rgba(255,255,255,.09) 50%, transparent 51%);
+  box-shadow: 0 0 18px rgba(255, 255, 255, .05);
+  pointer-events: none;
+}
+
+.free-aim-pad-v321::before,
+.free-aim-pad-v321::after {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(184, 219, 232, .48);
+  font: 900 7px/1 system-ui;
+  letter-spacing: .09em;
+  writing-mode: vertical-rl;
+  pointer-events: none;
+}
+
+.free-aim-pad-v321::before { content: "OUTSIDE LEFT"; left: 5px; transform: translateY(-50%) rotate(180deg); }
+.free-aim-pad-v321::after { content: "OUTSIDE RIGHT"; right: 5px; }
+
+.free-aim-reticle-v321 {
+  position: absolute;
+  left: 50%;
+  top: 36.72%;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: rgba(218, 254, 77, .2);
+  box-shadow: 0 0 0 2px rgba(2, 8, 4, .85), 0 0 14px rgba(218, 254, 77, .72);
+  pointer-events: none;
+}
+
+.free-aim-reticle-v321::before,
+.free-aim-reticle-v321::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: #dafe4d;
+  transform: translate(-50%, -50%);
+}
+
+.free-aim-reticle-v321::before { width: 25px; height: 2px; }
+.free-aim-reticle-v321::after { width: 2px; height: 25px; }
+
+.free-aim-copy-v321 {
+  min-width: 0;
+}
+
+.free-aim-copy-v321 span,
+.free-aim-copy-v321 small {
+  display: block;
+  color: rgba(239, 247, 236, .5);
+  font: 800 8px/1.3 system-ui;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.free-aim-copy-v321 strong {
+  display: block;
+  margin: 4px 0;
+  overflow: hidden;
+  color: #fff;
+  font: 950 10px/1.2 system-ui;
+  letter-spacing: .07em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.free-aim-copy-v321 small {
+  color: #dafe4d;
+  font-size: 7px;
+}
+
+@media (min-width: 701px) {
+  .free-aim-v321 {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    margin-top: auto;
+  }
+
+  .free-aim-copy-v321 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .free-aim-copy-v321 span { display: none; }
+  .free-aim-copy-v321 strong { margin: 0; }
+}
+
+@media (max-width: 700px) {
+  html[data-free-aim-v321="active"] .screen-game .control-panel {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "steps"
+      "meter"
+      "action" !important;
+  }
+
+  html[data-free-aim-v321="active"] .screen-game .control-heading {
+    display: none !important;
+  }
+
+  .screen-game .control-panel > .free-aim-v321 {
+    grid-template-columns: minmax(0, 1.5fr) minmax(108px, .75fr);
+    width: 100%;
+    gap: 7px;
+  }
+
+  .free-aim-pad-v321 { min-height: 58px; }
+  .free-aim-copy-v321 span { display: none; }
+  .free-aim-copy-v321 strong { font-size: 8px; }
+  .free-aim-copy-v321 small { font-size: 6px; }
+}
+
+@media (max-width: 430px) {
+  .free-aim-copy-v321 small { display: none; }
+}

@@ -31,7 +31,7 @@ test("a complete shot can be played before the run is voluntarily submitted", as
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 3000 });
 
-  for (const expectedPhase of ["SET POWER", "PICK YOUR SIDE", "ADD CURVE"]) {
+  for (const expectedPhase of ["SET POWER", "PLACE YOUR SHOT", "ADD CURVE"]) {
     await page.locator("#shotAction").click();
     await expect(page.locator("#phaseTitle")).toHaveText(expectedPhase);
     await page.waitForTimeout(90);

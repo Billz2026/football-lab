@@ -82,7 +82,7 @@ test("V23 static runtime preserves the playable five-life flow", async ({ page }
   await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
   await page.waitForTimeout(90);
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("PICK YOUR SIDE");
+  await expect(page.locator("#phaseTitle")).toHaveText("PLACE YOUR SHOT");
   await page.waitForTimeout(90);
   await page.locator("#shotAction").click();
   await expect(page.locator("#phaseTitle")).toHaveText("ADD CURVE");

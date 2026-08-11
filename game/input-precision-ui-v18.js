@@ -130,7 +130,7 @@ function guideForPhase(phase) {
       key: phase,
       left: "0",
       width: "0",
-      copy: "<span>LEFT</span><strong>GOAL THIRDS</strong><span>RIGHT</span>"
+      copy: "<span>OUTSIDE LEFT</span><strong>DIRECT 2D AIM</strong><span>OUTSIDE RIGHT</span>"
     };
   }
   if (phase === "curve") {
@@ -172,7 +172,8 @@ function renderGuide() {
 
 window.__footballLabPrecisionUiV18 = {
   powerWindowPercent: 7,
-  aimThirdsVisible: true,
+  aimThirdsVisible: false,
+  directTwoDimensionalAim: true,
   curveNeutralWindowPercent: 12,
   phaseDrivenDomWrites: true,
   guideWrites

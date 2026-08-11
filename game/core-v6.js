@@ -18,6 +18,7 @@ export const WORLD = { width: 1200, height: 720 };
 export const STORAGE_KEY = "footballLabArcadeProfileV2";
 export const MAX_LIVES = 5;
 export const LIFE_STREAK_TARGET = 3;
+export const AIM_BOUNDS = Object.freeze({ minX: -0.22, maxX: 1.22, minY: -0.2, maxY: 1.08 });
 
 function loadProfile() {
   const fallback = { highScore: 0, bestStreak: 0, xp: 0 };
@@ -81,6 +82,7 @@ export function syncStage() {
 export function createShot() {
   return {
     power: null, aimX: null, aimY: null, curve: null, actualX: null, actualY: null,
+    previewAimX: 0.5, previewAimY: 0.27,
     outcome: null, points: 0, topCorner: false, path: [], impactIndex: null,
     collision: null, keeperPlan: null, saveType: null, strikeQuality: 0, speedMps: 0,
     lifeRestored: false
@@ -149,9 +151,9 @@ export function setPhase(phase) {
   const stage = stageConfig();
   const content = {
     ready: ["READY", `${stage.chapterName} · ${stage.label}. Misses reset the streak, never your stage.`, "START SHOT", "SHOT METER"],
-    power: ["SET POWER", "Power controls pace and height. Stop inside the clean contact zone.", "LOCK POWER", "POWER"],
-    aim: ["PICK YOUR SIDE", "The target sits on the real goal plane. Read the wall coverage before committing.", "LOCK PLACEMENT", "PLACEMENT"],
-    curve: ["ADD CURVE", "Curl develops through the flight. Counter the wind and bend around the wall.", "TAKE SHOT", "CURVE"],
+    power: ["SET POWER", "Power controls pace and contact quality. Placement controls the shot height.", "LOCK POWER", "POWER"],
+    aim: ["PLACE YOUR SHOT", "Drag anywhere on the goal view or target pad—including outside the posts—to choose the exact line.", "LOCK PLACEMENT", "2D PLACEMENT"],
+    curve: ["ADD CURVE", "Curl develops progressively. Aim outside the wall, then bend the ball back toward goal.", "TAKE SHOT", "CURVE"],
     shooting: ["WATCH THE FLIGHT", "The ball travels through the same world space as the wall, goal and goalkeeper.", "SHOT IN PLAY", "LOCKED"],
     result: ["SHOT COMPLETE", "A goal advances the stage. A miss lets you retry without losing progress.", "NEXT SHOT", "RESULT"]
   }[phase];
@@ -189,14 +191,38 @@ export function shotHeightFromPower(power) {
   return clamp(0.47 - linear - extreme, 0.12, 0.83);
 }
 
+export function aimTargetLabel(x, y) {
+  const horizontal = x < 0
+    ? "OUTSIDE LEFT"
+    : x > 1
+      ? "OUTSIDE RIGHT"
+      : x < 0.33
+        ? "LEFT"
+        : x > 0.67
+          ? "RIGHT"
+          : "CENTRE";
+  const vertical = y < 0
+    ? "ABOVE BAR"
+    : y < 0.31
+      ? "HIGH"
+      : y > 0.67
+        ? "LOW"
+        : "MID";
+  return `${vertical} ${horizontal}`;
+}
+
 export function currentAimTarget() {
-  const speed = 2.22 * stageConfig().aimSpeed;
-  const sweep = (Math.sin(state.meterClock * speed - Math.PI / 2) + 1) / 2;
-  const x = 0.065 + smoothStep(sweep) * 0.87;
-  const y = shotHeightFromPower(state.shot.power ?? idealPower());
-  const horizontal = x < 0.33 ? "LEFT" : x > 0.67 ? "RIGHT" : "CENTRE";
-  const vertical = y < 0.31 ? "HIGH" : y > 0.59 ? "LOW" : "MID";
-  return { x, y, label: `${vertical} ${horizontal}` };
+  const x = clamp(
+    Number.isFinite(state.shot?.previewAimX) ? state.shot.previewAimX : 0.5,
+    AIM_BOUNDS.minX,
+    AIM_BOUNDS.maxX
+  );
+  const y = clamp(
+    Number.isFinite(state.shot?.previewAimY) ? state.shot.previewAimY : 0.27,
+    AIM_BOUNDS.minY,
+    AIM_BOUNDS.maxY
+  );
+  return { x, y, label: aimTargetLabel(x, y) };
 }
 
 export function renderHud() {

@@ -80,7 +80,7 @@ function injectStyles() {
 function updatePermanentCopy() {
   const heroCopy = document.querySelector(".hero-copy");
   if (heroCopy) {
-    heroCopy.textContent = "Progress at your own pace with no lives or time pressure. Misses reset the streak, never the stage. Submit the run when you are ready.";
+    heroCopy.textContent = "Aim anywhere, shape realistic curl and progress with no lives or time pressure. Misses reset the streak, never the stage. Submit when you are ready.";
   }
   const modeCopy = document.querySelector("#classicCard small");
   if (modeCopy) {

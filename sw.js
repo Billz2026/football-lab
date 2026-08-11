@@ -1,15 +1,15 @@
-const CACHE_NAME = "football-lab-shell-v32";
+const CACHE_NAME = "football-lab-shell-v32-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=32",
+  "./app.js?v=32.1",
   "./manifest.webmanifest?v=23",
   "./mobile-v16.css?v=16",
   "./mobile-shell-v16-1.css?v=161",
   "./visual-v17.css?v=17",
-  "./game/runtime-v23-main.js?v=32",
+  "./game/runtime-v23-main.js?v=32.1",
   "./game/release-v23.js?v=31",
   "./game/immersive-ui-v24.js?v=31",
   "./game/immersive-ui-v24.css?v=24.2",
@@ -42,6 +42,8 @@ const CORE_ASSETS = [
   "./game/mobile-shell-v16-1.js?v=31",
   "./game/mobile-shell-compact-v16-1.js?v=31",
   "./game/visual-ui-v17.js?v=31",
+  "./game/free-aim-v32-1.js?v=32.1",
+  "./game/free-aim-v32-1.css?v=32.1",
   "./game/input-precision-ui-v18.js?v=31",
   "./game/progression-v20.js?v=31",
   "./game/progression-v20.css?v=20",

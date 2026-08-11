@@ -48,7 +48,7 @@ test("V32 completes a real shot with ball-follow presentation and no runtime err
   const errors = collectRuntimeErrors(page);
   await startMatch(page);
 
-  for (const phase of ["SET POWER", "PICK YOUR SIDE", "ADD CURVE"]) {
+  for (const phase of ["SET POWER", "PLACE YOUR SHOT", "ADD CURVE"]) {
     await page.locator("#shotAction").click();
     await expect(page.locator("#phaseTitle")).toHaveText(phase);
     await page.waitForTimeout(110);

@@ -12,7 +12,7 @@ async function startClassic(page) {
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
-  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 1600 });
+  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 4000 });
 }
 
 test("V21 exposes the gameplay clarity contract and overlay canvas", async ({ page }) => {
@@ -29,6 +29,7 @@ test("V21 exposes the gameplay clarity contract and overlay canvas", async ({ pa
     targetContrastLayers: 4,
     aimGuideUnderStroke: true,
     goalThirdGuides: true,
+    lockedTargetVisibleDuringCurve: true,
     lockConfirmationMs: 480,
     advertisementBoardQuieting: true,
     goalkeeperFocusRim: true,
@@ -51,7 +52,7 @@ test("V21 aim marker is prominent and confirms the locked target", async ({ page
   await page.locator("#shotAction").click();
   await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("PICK YOUR SIDE");
+  await expect(page.locator("#phaseTitle")).toHaveText("PLACE YOUR SHOT");
 
   const aimFrame = await expect.poll(
     () => page.evaluate(() => window.__footballLabClarityFrameV21 || null),

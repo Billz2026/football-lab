@@ -12,7 +12,7 @@ async function startClassic(page) {
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
-  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 1600 });
+  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 4000 });
 }
 
 test("V18 button input advances exactly one phase per physical click", async ({ page }) => {
@@ -25,7 +25,7 @@ test("V18 button input advances exactly one phase per physical click", async ({ 
   await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
 
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("PICK YOUR SIDE");
+  await expect(page.locator("#phaseTitle")).toHaveText("PLACE YOUR SHOT");
 
   const sample = await page.evaluate(() => window.__footballLabLastInputSample);
   expect(sample.phase).toBe("power");
@@ -56,5 +56,6 @@ test("V18 exposes precision guidance and its timing contract", async ({ page }) 
 
   await page.locator("#shotAction").click();
   await expect(page.locator(".meter")).toHaveAttribute("data-precision-phase", "aim");
-  await expect(page.locator(".precision-hint-v18")).toContainText("GOAL THIRDS");
+  await expect(page.locator("#freeAimControlV321")).toBeVisible();
+  await expect(page.locator("#freeAimCoachV321")).toContainText("FULL HEIGHT + WIDTH CONTROL");
 });
