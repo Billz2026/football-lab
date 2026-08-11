@@ -1037,9 +1037,10 @@ export function drawScene(time, finishShot) {
   drawWall(time);
   drawAimGuide();
   drawTarget();
-  const heroSelected = activeCharacter().id === "dax-ryder";
-  window.__footballLabBaseKickerSuppressedV1731 = heroSelected;
-  if (!heroSelected) drawKicker(time);
+  window.__footballLabBaseKickerSuppressedV30 = true;
+  // All four specialists are rendered by the unified premium rig after the base scene.
+  // Keeping the legacy rig available but suppressed avoids duplicate players.
+
   drawContactBurst(time);
   drawBall(time, finishShot);
 }
