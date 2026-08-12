@@ -1,5 +1,13 @@
 const BUILD = "35.3.0";
 
+function ensureStylesheet() {
+  if (document.querySelector("link[href*='hub-v35-3.css']")) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "./game/hub-v35-3.css?v=35.3";
+  document.head.appendChild(link);
+}
+
 function moveProfileIntoSettings() {
   const profile = document.getElementById("hubProfile");
   const howToPlay = document.getElementById("howToPlay");
@@ -35,6 +43,7 @@ function wireProfileNavigation() {
 }
 
 function declutterHub() {
+  ensureStylesheet();
   const homeLink = document.querySelector(".hub-nav a[href='#hubHome']");
   if (homeLink) homeLink.href = "#modeHub";
   wireProfileNavigation();
