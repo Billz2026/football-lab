@@ -1,16 +1,16 @@
-const CACHE_NAME = "football-lab-shell-v33-1";
+const CACHE_NAME = "football-lab-shell-v33-2";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=33.1",
+  "./app.js?v=33.2",
   "./manifest.webmanifest?v=23",
   "./mobile-v16.css?v=16",
   "./mobile-shell-v16-1.css?v=161",
   "./visual-v17.css?v=17",
-  "./game/runtime-v23-main.js?v=33.1",
-  "./game/flight-v33.js?v=33.1",
+  "./game/runtime-v23-main.js?v=33.2",
+  "./game/flight-v33.js?v=33.2",
   "./game/release-v23.js?v=32.4",
   "./game/immersive-ui-v24.js?v=32.4",
   "./game/immersive-ui-v24.css?v=24.2",
