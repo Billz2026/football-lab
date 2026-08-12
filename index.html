@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Football Lab" />
-  <meta name="description" content="Football Lab is a polished arcade free-kick game. Aim on the live pitch, shape the curl, then execute power and contact." />
+  <meta name="description" content="Football Lab is an arcade football skills platform for free kicks, training and future football challenges." />
   <meta name="application-name" content="Football Lab" />
   <meta name="author" content="Football Lab" />
   <meta name="robots" content="index,follow,max-image-preview:large" />
@@ -17,30 +17,31 @@
 
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Football Lab" />
-  <meta property="og:title" content="Football Lab | Arcade Free Kicks" />
-  <meta property="og:description" content="Aim on the live pitch, shape the curl and master a two-stop strike meter against escalating walls and keepers." />
+  <meta property="og:title" content="Football Lab | Arcade Football" />
+  <meta property="og:description" content="Train freely, master free kicks and take on an expanding set of football skill challenges." />
   <meta property="og:url" content="https://billz2026.github.io/football-lab/index.html" />
   <meta property="og:image" content="https://billz2026.github.io/football-lab/social-card.svg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Football Lab | Arcade Free Kicks" />
-  <meta name="twitter:description" content="Aim, curl and execute the strike in a fast browser-based free-kick challenge." />
+  <meta name="twitter:title" content="Football Lab | Arcade Football" />
+  <meta name="twitter:description" content="A growing football skills platform built around precision, technique and repeatable challenges." />
   <meta name="twitter:image" content="https://billz2026.github.io/football-lab/social-card.svg" />
 
-  <title>Football Lab | Arcade Free Kicks</title>
+  <title>Football Lab | Arcade Football</title>
   <link rel="manifest" href="./manifest.webmanifest?v=23" />
   <link rel="icon" href="./icons/football-lab-192.svg?v=161" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./icons/football-lab-192.svg?v=161" />
   <link rel="stylesheet" href="./style.css?v=2" />
   <link rel="stylesheet" href="./product-polish-v22.css?v=22" />
   <link rel="stylesheet" href="./game/strike-v32-4.css?v=32.4" />
+  <link rel="stylesheet" href="./game/hub-v35-1.css?v=35.1" />
 </head>
 <body>
-  <a class="skip-link-v22" href="#menuScreen">Skip to game menu</a>
+  <a class="skip-link-v22" href="#modeHub">Skip to game modes</a>
   <div class="app-shell">
-    <header class="site-header">
+    <header class="site-header hub-header">
       <button class="brand" id="brandButton" type="button" aria-label="Return to main menu">
         <span class="brand-mark" aria-hidden="true"><span></span></span>
         <span class="brand-copy">
@@ -48,6 +49,12 @@
           <small>ARCADE FOOTBALL</small>
         </span>
       </button>
+      <nav class="hub-nav" aria-label="Football Lab navigation">
+        <a href="#hubHome">HOME</a>
+        <a href="#modeHub">PLAY</a>
+        <a href="#trainingCardV35">TRAINING</a>
+        <a href="#hubProfile">PROFILE</a>
+      </nav>
       <div class="header-stats" aria-label="Saved player progress">
         <div><span>LEVEL</span><strong id="headerLevel">1</strong></div>
         <div><span>BEST</span><strong id="headerBest">0</strong></div>
@@ -56,68 +63,102 @@
 
     <main>
       <section class="screen screen-menu is-active" id="menuScreen" tabindex="-1" aria-labelledby="menuTitle">
-        <div class="menu-layout">
-          <div class="hero-panel panel">
-            <div class="hero-light" aria-hidden="true"></div>
-            <div class="eyebrow"><span></span> ORIGINAL ARCADE FOOTBALL</div>
-            <h1 id="menuTitle">MASTER<br />THE STRIKE.</h1>
-            <p class="hero-copy">Plan the free kick on the live pitch, then execute it: stop power and contact under pressure. The game shows the situation—not the answer.</p>
-            <div class="hero-actions">
-              <button class="button button-primary button-large" id="playClassic" type="button"><span>PLAY CLASSIC KICKS</span><b aria-hidden="true">→</b></button>
-              <button class="button button-secondary" id="howToPlay" type="button">HOW TO PLAY</button>
+        <div class="hub-shell" id="hubHome">
+          <section class="hub-hero" aria-labelledby="menuTitle">
+            <div class="hub-eyebrow">FOOTBALL SKILLS PLATFORM</div>
+            <h1 id="menuTitle">MASTER EVERY MOMENT.</h1>
+            <p class="hub-hero-copy">Choose a football discipline, build your technique and keep improving. Free Training and Classic Free Kicks are playable now; the hub is built to expand into penalties, corners, finishing and match situations.</p>
+            <div class="hub-hero-actions">
+              <span class="hub-hero-chip"><b>2</b> PLAYABLE MODES</span>
+              <span class="hub-hero-chip"><b>16–45</b> YARD TRAINING</span>
+              <span class="hub-hero-chip"><b>∞</b> PRACTICE ATTEMPTS</span>
+              <button class="button button-secondary hub-how-button" id="howToPlay" type="button">HOW TO PLAY</button>
             </div>
-            <div class="hero-meta">
-              <span><b>3</b> INPUT CONTROLS</span>
-              <span><b>∞</b> STAGES</span>
-              <span><b>4</b> KICKER STYLES</span>
-            </div>
-          </div>
+            <button id="playClassic" type="button" hidden aria-hidden="true" tabindex="-1">PLAY CLASSIC</button>
+          </section>
 
-          <aside class="player-panel panel" aria-label="Player profile">
-            <div class="player-card-top">
-              <div><span class="section-label">PLAYER PROFILE</span><h2>THE PROSPECT</h2></div>
-              <span class="level-badge" id="profileLevel">LV. 1</span>
+          <section class="hub-profile-strip" id="hubProfile" aria-label="Player profile summary">
+            <div class="hub-profile-id">
+              <span class="hub-profile-mark" aria-hidden="true">FL</span>
+              <div><small>PLAYER PROFILE</small><strong>THE PROSPECT</strong></div>
             </div>
-            <div class="player-visual" aria-hidden="true">
-              <div class="stadium-ring"></div>
-              <div class="player-silhouette">
-                <div class="player-head"></div>
-                <div class="player-body"><span>10</span></div>
-                <div class="player-legs"></div>
-              </div>
-              <div class="football"></div>
-            </div>
-            <div class="progress-block">
+            <div class="hub-profile-progress">
               <div class="progress-copy"><span>CAREER XP</span><strong id="xpCopy">0 / 1,000</strong></div>
               <div class="progress-track"><span id="xpBar"></span></div>
             </div>
-            <div class="profile-records">
+            <div class="hub-profile-records">
+              <div><span>LEVEL</span><strong class="level-badge" id="profileLevel">LV. 1</strong></div>
               <div><span>HIGH SCORE</span><strong id="profileBest">0</strong></div>
               <div><span>BEST STREAK</span><strong id="profileStreak">0</strong></div>
             </div>
-          </aside>
-        </div>
+          </section>
 
-        <section class="modes-section" aria-labelledby="modesTitle">
-          <div class="section-heading">
-            <div><span class="section-label">GAME MODES</span><h2 id="modesTitle">CHOOSE YOUR CHALLENGE</h2></div>
-            <p>Classic Kicks is playable now. The other modes will use the same core shooting engine.</p>
-          </div>
-          <div class="mode-grid">
-            <button class="mode-card mode-card-active" id="classicCard" type="button">
-              <span class="mode-number">01</span><span class="mode-status">PLAYABLE</span><span class="mode-icon" aria-hidden="true">◎</span>
-              <strong>CLASSIC KICKS</strong><small>Choose a specialist, aim on the live pitch, then master the two-stop strike meter.</small><span class="mode-cta">SELECT KICKER <b>→</b></span>
-            </button>
-            <button class="mode-card" data-preview="Road to Glory" type="button">
-              <span class="mode-number">02</span><span class="mode-status mode-status-muted">NEXT BUILD</span><span class="mode-icon" aria-hidden="true">◆</span>
-              <strong>ROAD TO GLORY</strong><small>Develop one player from the street cage to the world stage.</small><span class="mode-cta">VIEW PLAN <b>＋</b></span>
-            </button>
-            <button class="mode-card" data-preview="Score Attack" type="button">
-              <span class="mode-number">03</span><span class="mode-status mode-status-muted">PLANNED</span><span class="mode-icon" aria-hidden="true">↯</span>
-              <strong>SCORE ATTACK</strong><small>Sixty seconds, unlimited shots and a multiplier that punishes misses.</small><span class="mode-cta">VIEW PLAN <b>＋</b></span>
-            </button>
-          </div>
-        </section>
+          <section class="hub-modes-section" id="modeHub" aria-labelledby="modesTitle">
+            <div class="hub-section-heading">
+              <div><span class="section-label">PLAY FOOTBALL LAB</span><h2 id="modesTitle">CHOOSE YOUR MODE.</h2></div>
+              <p>Select the football activity first. Player, keeper and session choices now live inside the mode instead of cluttering the homepage.</p>
+            </div>
+
+            <div class="hub-mode-grid">
+              <button class="hub-mode-tile hub-mode-primary hub-mode-training training-card-v35" id="trainingCardV35" type="button">
+                <span class="hub-mode-number mode-number">01 · TRAINING GROUND</span>
+                <span class="hub-mode-status">PLAYABLE</span>
+                <span class="hub-tile-copy">
+                  <h3>FREE TRAINING</h3>
+                  <p>Build your own session. Choose taker, goalkeeper, distance, wall, wind and specialist footballs with unlimited attempts.</p>
+                  <span class="hub-mode-cta">BUILD A SESSION <b>→</b></span>
+                </span>
+                <span class="hub-tile-art hub-art-training" aria-hidden="true"><i class="art-ball"></i><i class="cone cone-one"></i><i class="cone cone-two"></i></span>
+              </button>
+
+              <button class="hub-mode-tile hub-mode-secondary hub-mode-free-kicks" id="classicCard" type="button">
+                <span class="hub-mode-number mode-number">02 · FLAGSHIP MODE</span>
+                <span class="hub-mode-status">PLAYABLE</span>
+                <span class="hub-tile-copy">
+                  <h3>CLASSIC FREE KICKS</h3>
+                  <p>Choose your specialist after entering the mode, then master aim, curl, power and contact across an escalating campaign.</p>
+                  <span class="hub-mode-cta">ENTER FREE KICKS <b>→</b></span>
+                </span>
+                <span class="hub-tile-art hub-art-free-kick" aria-hidden="true"><i class="art-goal"></i><i class="art-ball"></i><i class="wall w1"></i><i class="wall w2"></i><i class="wall w3"></i><i class="wall w4"></i></span>
+              </button>
+
+              <button class="hub-mode-tile hub-mode-penalties" type="button" disabled aria-disabled="true">
+                <span class="hub-mode-number">03 · ONE VS ONE</span>
+                <span class="hub-mode-status">COMING SOON</span>
+                <span class="hub-tile-copy"><h3>PENALTIES</h3><p>Placement, power, composure and goalkeeper anticipation under pressure.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
+                <span class="hub-tile-art hub-art-penalties" aria-hidden="true"><i class="art-goal"></i><i class="keeper"></i><i class="art-ball"></i></span>
+              </button>
+
+              <button class="hub-mode-tile hub-mode-corners" type="button" disabled aria-disabled="true">
+                <span class="hub-mode-number">04 · DELIVERY</span>
+                <span class="hub-mode-status">COMING SOON</span>
+                <span class="hub-tile-copy"><h3>CORNERS</h3><p>Shape the delivery, attack the box and master headers, volleys and second balls.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
+                <span class="hub-tile-art hub-art-corners" aria-hidden="true"><i class="flag"></i><i class="art-ball"></i></span>
+              </button>
+
+              <button class="hub-mode-tile hub-mode-finishing" type="button" disabled aria-disabled="true">
+                <span class="hub-mode-number">05 · FINAL TOUCH</span>
+                <span class="hub-mode-status">COMING SOON</span>
+                <span class="hub-tile-copy"><h3>FINISHING</h3><p>Through balls, cutbacks, chips, first-time strikes and increasingly difficult goal situations.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
+                <span class="hub-tile-art hub-art-finishing" aria-hidden="true"><i class="art-goal"></i><i class="art-ball"></i></span>
+              </button>
+
+              <button class="hub-mode-tile hub-mode-wide hub-mode-scenarios" type="button" disabled aria-disabled="true">
+                <span class="hub-mode-number">06 · PRESSURE FOOTBALL</span>
+                <span class="hub-mode-status">COMING SOON</span>
+                <span class="hub-tile-copy"><h3>MATCH SCENARIOS</h3><p>Recreate high-pressure football situations: late winners, awkward angles, closing defenders and iconic-style moments with escalating difficulty.</p><span class="hub-mode-cta">SCENARIO ENGINE RESERVED</span></span>
+                <span class="hub-tile-art hub-art-scenarios" aria-hidden="true"><i class="art-ball"></i></span>
+              </button>
+            </div>
+
+            <div class="hub-future-strip" aria-label="Future Football Lab systems">
+              <span>FUTURE COMPETITIVE LAYER</span>
+              <b>SCORE ATTACK</b>
+              <b>ROAD TO GLORY</b>
+              <small>Planned after the core football activities reach premium quality.</small>
+            </div>
+          </section>
+        </div>
       </section>
 
       <section class="screen screen-game" id="gameScreen" aria-label="Classic Kicks game">
@@ -164,11 +205,11 @@
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
       <span class="section-label">HOW TO PLAY</span><h2 id="howTitle">PLAN IT. THEN EXECUTE IT.</h2>
       <ol>
-        <li><span>1</span><div><strong>Aim + curl</strong><p>Tap the live goal to choose an intended finish, then shape the strike with the curl dial. Only the early launch is shown.</p></div></li>
-        <li><span>2</span><div><strong>Power</strong><p>Press Strike and stop the first meter for pace. Overhit and underhit attempts change height and keeper reaction time.</p></div></li>
-        <li><span>3</span><div><strong>Contact</strong><p>Stop the returning meter inside the centre zone. Extreme curl, distance and later stages tighten the window.</p></div></li>
+        <li><span>1</span><div><strong>Choose a mode</strong><p>Enter Free Training for unlimited practice or Classic Free Kicks for the progression campaign.</p></div></li>
+        <li><span>2</span><div><strong>Aim + curl</strong><p>Tap the live goal to choose an intended finish, then shape the strike with the curl dial. Only the early launch is shown.</p></div></li>
+        <li><span>3</span><div><strong>Power + contact</strong><p>Stop both execution meters. Poor timing changes the actual strike, while clean execution rewards accurate planning.</p></div></li>
       </ol>
-      <button class="button button-primary" id="modalPlay" type="button">CHOOSE KICKER</button>
+      <button class="button button-primary" id="modalPlay" type="button">ENTER CLASSIC FREE KICKS</button>
     </div>
   </div>
 
@@ -195,6 +236,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=35.0" defer></script>
+  <script src="./app.js?v=35.1" defer></script>
 </body>
 </html>
