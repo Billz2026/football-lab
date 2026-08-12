@@ -13,6 +13,8 @@
 .site-header.hub-header .brand-copy strong{font-size:clamp(16px,1.8vw,22px)}
 .site-header.hub-header .brand-copy small{font-size:7px;letter-spacing:.22em}
 .site-header.hub-header .hub-nav a{min-height:34px;padding-inline:10px;font-size:9px}
+.site-header.hub-header .hub-nav a.is-active{color:#fff;background:rgba(218,254,77,.065)}
+.site-header.hub-header .hub-nav a.is-active::after{transform:scaleX(1);background:var(--hub-green)}
 .site-header.hub-header .settings-button-v22{transform:scale(.88)}
 
 #menuScreen .hub-modes-section{margin-top:10px}
