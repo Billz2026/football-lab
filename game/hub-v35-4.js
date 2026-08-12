@@ -1,4 +1,4 @@
-const BUILD = "35.6.0";
+const BUILD = "35.6.1";
 
 function ensureHubStyle(){
   if (document.querySelector("link[data-football-lab-hub='35.4']")) return;
@@ -44,7 +44,7 @@ function setPlayNavActive(){
   play?.classList.add("is-active");
 }
 
-function applyHubV356(){
+function applyHubV3561(){
   ensureHubStyle();
   tightenTileCopy();
   promoteFuturePanelIntoMosaic();
@@ -52,10 +52,10 @@ function applyHubV356(){
   setPlayNavActive();
 }
 
-applyHubV356();
+applyHubV3561();
 
 import("./training-ui-v35-5.js?v=35.5")
-  .then(() => import("./training-ui-v35-6.js?v=35.6"))
+  .then(() => import("./training-ui-v35-6.js?v=35.6.1"))
   .catch((error) => {
     console.error("Football Lab training UI failed to load", error);
   });
@@ -67,5 +67,5 @@ window.__footballLabHubV354 = Object.freeze({
   lockedModes: "visually-subordinate",
   futurePanel: "mosaic-integrated",
   artworkSlots: "cinematic-ready",
-  trainingUi: "dedicated-v35-6"
+  trainingUi: "dedicated-v35-6-1"
 });
