@@ -1,10 +1,10 @@
-const CACHE_NAME = "football-lab-shell-v35-3";
+const CACHE_NAME = "football-lab-shell-v35-4";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=35.1",
+  "./app.js?v=35.4",
   "./manifest.webmanifest?v=23",
   "./mobile-v16.css?v=16",
   "./mobile-shell-v16-1.css?v=161",
@@ -12,8 +12,10 @@ const CORE_ASSETS = [
   "./game/hub-v35-1.css?v=35.1",
   "./game/hub-v35-2.css?v=35.2",
   "./game/hub-v35-3.css?v=35.3",
+  "./game/hub-v35-4.css?v=35.4",
   "./game/hub-v35-1.js?v=35.1",
   "./game/hub-v35-3.js?v=35.3",
+  "./game/hub-v35-4.js?v=35.4",
   "./game/runtime-v23-main.js?v=35.1",
   "./game/keeper-ai-v34.js?v=35.1",
   "./game/flight-v33.js?v=35.1",
