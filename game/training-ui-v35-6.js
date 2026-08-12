@@ -2,7 +2,7 @@ import { state, elements } from "./core-v6.js?v=32.4";
 import { characterById } from "./characters-v13.js?v=32.4";
 import { keeperById } from "./keepers-v14.js?v=32.4";
 
-const BUILD = "35.6.0";
+const BUILD = "35.6.1";
 const BALL_NAMES = Object.freeze({
   standard: "STANDARD",
   curve: "CURVE",
@@ -60,7 +60,9 @@ function clearStaleExecution() {
 function rewriteTrainingSummary() {
   if (state.gameMode !== "training") return;
   const node = document.getElementById("trainingConfigV355");
-  if (node) node.textContent = sessionSummary();
+  if (!node) return;
+  const next = sessionSummary();
+  if (node.textContent !== next) node.textContent = next;
 }
 
 function rewriteMobileTrainingHud() {
@@ -68,8 +70,8 @@ function rewriteMobileTrainingHud() {
   const hud = document.getElementById("mobileGameHudV161");
   if (!hud) return;
   const scoreSpans = [...hud.querySelectorAll(".mobile-score-v161 > span")];
-  if (scoreSpans[0]?.firstChild) scoreSpans[0].firstChild.textContent = "ATTEMPTS ";
-  if (scoreSpans[1]?.firstChild) scoreSpans[1].firstChild.textContent = "GOALS ";
+  if (scoreSpans[0]?.firstChild && scoreSpans[0].firstChild.textContent !== "ATTEMPTS ") scoreSpans[0].firstChild.textContent = "ATTEMPTS ";
+  if (scoreSpans[1]?.firstChild && scoreSpans[1].firstChild.textContent !== "GOALS ") scoreSpans[1].firstChild.textContent = "GOALS ";
 }
 
 function applyTrainingMicroPolish() {
@@ -104,15 +106,13 @@ window.addEventListener("footballlab:phasechange", (event) => {
   }
 });
 
-const summaryObserver = new MutationObserver(() => {
-  if (state.gameMode === "training") queueMicrotask(rewriteTrainingSummary);
-});
-const configNode = document.getElementById("trainingConfigV355");
-if (configNode) summaryObserver.observe(configNode, { childList:true, characterData:true, subtree:true });
+// Do not observe trainingConfigV355 and then rewrite it from that observer.
+// V35.6 originally did that, producing a self-triggering MutationObserver loop
+// which could lock mobile browsers while the training setup modal was open.
 
 if (state.gameMode === "training") queueMicrotask(applyTrainingMicroPolish);
 
-document.documentElement.dataset.footballLabBuild = "35.6";
+document.documentElement.dataset.footballLabBuild = "35.6.1";
 const version = document.querySelector(".settings-version-v22 strong");
 if (version) version.textContent = BUILD;
 
@@ -123,5 +123,6 @@ window.__footballLabTrainingUiV356 = Object.freeze({
   setupSummary: "distance-position-wall-ball-taker-keeper",
   staleExecutionReadouts: "cleared-on-ready",
   executionCards: "compact",
+  setupFreezeHotfix: "self-observing-summary-loop-removed",
   physicsChanged: false
 });
