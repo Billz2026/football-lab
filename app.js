@@ -1,7 +1,7 @@
-// Football Lab V35.1 Mode Hub boot
+// Football Lab V35.3 console-first mode hub boot
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=35.1", {
+  navigator.serviceWorker.register("./sw.js?v=35.3", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -53,23 +53,24 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/progression-v20.js?v=32.4"))
       .then(() => import("./game/clarity-v21.js?v=32.4"))
       .then(() => import("./game/product-polish-v22.js?v=32.4"))
+      .then(() => import("./game/hub-v35-3.js?v=35.3"))
       .then(() => import("./game/release-v23.js?v=32.4"))
       .then(() => import("./game/immersive-ui-v24.js?v=32.4"))
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "35.1";
+        document.documentElement.dataset.footballLabBuild = "35.3";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V35.1";
-          badge.title = "Football Lab build 35.1.0";
+          badge.textContent = "V35.3";
+          badge.title = "Football Lab build 35.3.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "35.1.0";
+        if (version) version.textContent = "35.3.0";
         const release = Object.freeze({
-          build: "35.1.0",
-          shell: "premium-static-mode-hub",
-          navigation: "home-play-training-profile",
+          build: "35.3.0",
+          shell: "console-mode-mosaic",
+          navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
           aiming: "live-pitch-intended-target",
           execution: "contact-weighted-deterministic-drift",
@@ -86,7 +87,7 @@ const bootPromise = runtimeCaptureMode
           camera: "target-biased-late-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "35.1"
+          cacheGeneration: "35.3"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -97,6 +98,8 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV341 = release;
         window.__footballLabReleaseV350 = release;
         window.__footballLabReleaseV351 = release;
+        window.__footballLabReleaseV352 = release;
+        window.__footballLabReleaseV353 = release;
       });
 
 bootPromise.catch((error) => {
