@@ -209,6 +209,15 @@ export function buildWallLayout(scenario, stageIndex = state.stage, options = {}
   const base = buildBaseWall(scenario);
   const profile = wallForStage(stageIndex);
   const modifiers = profile.modifiers;
+  if (Number(scenario.wallPlayers) <= 0) {
+    return {
+      ...base,
+      players: [],
+      profile,
+      shift: 0,
+      spacing: modifiers.spacing
+    };
+  }
   const baseCount = Math.max(1, base.players.length);
   const count = Math.max(2, baseCount + modifiers.countDelta);
   const targetX = Number.isFinite(options.targetX) ? options.targetX : scenario.protectedGoalX;
