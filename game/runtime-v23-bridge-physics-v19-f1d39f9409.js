@@ -102,6 +102,7 @@ function convertBorderlineGoalToParry(shot, boostedThreshold) {
   shot.impactIndex = impactIndex;
   shot.outcome = "SAVE";
   shot.saveType = "PARRY";
+  shot.topCorner = false;
   plan.saved = true;
   plan.saveType = "PARRY";
   plan.threshold = boostedThreshold;
@@ -158,6 +159,7 @@ export function resolveShotPhysics() {
       doubleFaultSpeedPenalty: Number(speedPenalty.toFixed(3)),
       doubleFaultKeeperBoost: Number(keeperBoost.toFixed(3)),
       doubleFaultSave,
+      keeperThreshold: shot.keeperPlan ? Number(shot.keeperPlan.threshold.toFixed(3)) : null,
       outcome: shot.outcome,
       pathDistanceMetres: Number(pathMetrics.totalDistance.toFixed(3)),
       primaryDistanceMetres: Number(pathMetrics.primaryDistance.toFixed(3)),
