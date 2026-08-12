@@ -37,6 +37,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/keeper-ai-v34.js?v=35.0"))
       .then(() => import("./game/flight-v33.js?v=35.0"))
       .then(() => import("./game/training-v35.js?v=35.0"))
+      .then(() => import("./game/training-guard-v35.js?v=35.0"))
       .then(() => import("./game/polish-v10-2.js?v=32.4"))
       .then(() => import("./game/polish-v11-4.js?v=32.4"))
       .then(() => import("./game/characters-ui-v13.js?v=32.4"))
@@ -77,6 +78,7 @@ const bootPromise = runtimeCaptureMode
           trainingActivities: "free-kicks-live-penalties-corners-finishing-scenarios-reserved",
           trainingDistanceYards: "16-45",
           trainingBalls: "standard-curve-power-control-knuckle",
+          trainingRecords: "isolated-from-career",
           camera: "target-biased-late-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
