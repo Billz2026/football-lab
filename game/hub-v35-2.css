@@ -1,0 +1,164 @@
+:root{
+  --hub-cyan:#45dcff;
+  --hub-green:#d5ff37;
+  --hub-amber:#ffc65f;
+  --hub-violet:#a98cff;
+  --hub-coral:#ff7777;
+  --hub-blue:#65a5ff;
+}
+
+/* V35.2: denser console-style hub inspired by premium football menus. */
+.hub-shell{padding-top:0}
+.hub-hero{
+  min-height:168px;
+  padding:26px clamp(24px,3.2vw,42px);
+  border-radius:18px;
+  background:
+    linear-gradient(90deg,rgba(3,12,16,.99) 0%,rgba(4,18,20,.92) 52%,rgba(8,34,33,.5) 100%),
+    radial-gradient(circle at 88% 16%,rgba(69,220,255,.34),transparent 17rem),
+    linear-gradient(145deg,#071922,#07140f 72%);
+}
+.hub-hero::after{right:-185px;bottom:-430px}
+.hub-hero h1{margin:8px 0 7px;font-size:clamp(38px,5vw,64px);line-height:.9}
+.hub-hero-copy{max-width:760px;font-size:12px;line-height:1.48}
+.hub-hero-actions{margin-top:14px}
+.hub-profile-strip{margin-top:9px;border-radius:12px;padding:10px 13px}
+.hub-modes-section{margin-top:18px}
+.hub-section-heading{margin-bottom:10px}
+.hub-section-heading h2{font-size:clamp(24px,3vw,34px)}
+
+.hub-mode-grid{
+  grid-auto-flow:dense;
+  gap:7px;
+}
+.hub-mode-tile{
+  min-height:190px;
+  border-radius:8px;
+  padding:15px 16px;
+  box-shadow:0 12px 28px rgba(0,0,0,.22);
+  background:
+    linear-gradient(112deg,rgba(3,12,14,.98) 0%,rgba(4,16,17,.9) 48%,rgba(var(--tile-accent-rgb),.20) 100%),
+    #071411;
+}
+.hub-mode-tile::before{
+  opacity:.7;
+  background:
+    linear-gradient(90deg,transparent 49.75%,rgba(255,255,255,.10) 50%,transparent 50.25%),
+    radial-gradient(circle at 84% 112%,transparent 0 74px,rgba(255,255,255,.10) 75px 77px,transparent 78px),
+    linear-gradient(180deg,transparent 55%,rgba(var(--tile-accent-rgb),.12));
+}
+.hub-mode-tile::after{
+  width:330px;
+  height:260px;
+  right:-95px;
+  bottom:-125px;
+  background:rgba(var(--tile-accent-rgb),.25);
+  filter:blur(30px);
+}
+.hub-mode-primary,.hub-mode-secondary{min-height:218px}
+.hub-mode-primary{grid-column:span 7}
+.hub-mode-secondary{grid-column:span 5}
+.hub-mode-penalties,.hub-mode-corners{grid-column:span 6}
+.hub-mode-finishing{grid-column:span 4}
+.hub-mode-wide{grid-column:span 8;min-height:190px}
+
+.hub-mode-tile:not(:disabled):hover,.hub-mode-tile:not(:disabled):focus-visible{
+  transform:translateY(-2px) scale(1.002);
+  border-color:rgba(var(--tile-accent-rgb),.75);
+  box-shadow:0 18px 38px rgba(0,0,0,.38),inset 0 -4px 0 rgba(var(--tile-accent-rgb),.82),inset 0 0 0 1px rgba(var(--tile-accent-rgb),.18);
+}
+.hub-mode-training{background:linear-gradient(112deg,rgba(2,14,18,.99),rgba(4,27,31,.9) 54%,rgba(69,220,255,.34)),#06181b}
+.hub-mode-free-kicks{background:linear-gradient(112deg,rgba(5,14,8,.99),rgba(14,32,10,.9) 54%,rgba(213,255,55,.30)),#0a1709}
+.hub-mode-penalties{background:linear-gradient(112deg,rgba(13,11,6,.99),rgba(31,24,8,.9) 55%,rgba(255,198,95,.25)),#161207}
+.hub-mode-corners{background:linear-gradient(112deg,rgba(9,8,15,.99),rgba(22,15,36,.9) 55%,rgba(169,140,255,.24)),#110d1b}
+.hub-mode-finishing{background:linear-gradient(112deg,rgba(15,7,8,.99),rgba(35,13,14,.9) 55%,rgba(255,119,119,.24)),#1a0b0c}
+.hub-mode-scenarios{background:linear-gradient(112deg,rgba(5,10,17,.99),rgba(9,21,38,.9) 55%,rgba(101,165,255,.26)),#091421}
+
+.hub-mode-number{font-size:7px;letter-spacing:.17em}
+.hub-mode-status{top:12px;right:12px;min-height:23px;padding:0 7px;border-radius:4px;font-size:6px}
+.hub-tile-copy{width:min(56%,500px)}
+.hub-mode-wide .hub-tile-copy{width:min(50%,600px)}
+.hub-mode-tile h3{margin:34px 0 5px;font-size:clamp(20px,2.7vw,32px)}
+.hub-mode-tile p{font-size:9px;line-height:1.42}
+.hub-mode-cta{padding-top:14px;font-size:7px}
+
+/* Larger, more visual art treatment. */
+.hub-tile-art{opacity:.98}
+.hub-tile-art .art-ball{transform:scale(1.08);filter:drop-shadow(0 12px 18px rgba(0,0,0,.34))}
+.hub-tile-art .art-goal{border-color:rgba(248,253,251,.78);border-bottom-color:rgba(248,253,251,.30);filter:drop-shadow(0 10px 18px rgba(0,0,0,.28))}
+.hub-art-training .art-ball{right:13%;bottom:24px;width:68px;height:68px}
+.hub-art-training .cone{transform:scale(1.12);transform-origin:bottom}
+.hub-art-training .cone-two{transform:scale(.9)}
+.hub-art-free-kick .art-goal{right:2%;bottom:21px;width:190px;height:112px}
+.hub-art-free-kick .art-ball{right:34%;bottom:22px;width:54px;height:54px}
+.hub-art-free-kick .wall{bottom:29px;transform:scale(1.08);transform-origin:bottom}
+.hub-art-penalties .art-goal{right:4%;bottom:27px;width:170px;height:101px}
+.hub-art-penalties .keeper{right:17%;bottom:31px;transform:scale(1.12);transform-origin:bottom}
+.hub-art-penalties .art-ball{right:39%;bottom:24px}
+.hub-art-corners .flag{right:14%;bottom:21px;height:126px}
+.hub-art-corners .art-ball{right:36%;bottom:23px}
+.hub-art-finishing .art-goal{right:-3%;bottom:25px;width:162px;height:96px}
+.hub-art-finishing .art-ball{right:42%;bottom:29px}
+.hub-art-scenarios::before{right:4%;top:27px;width:42%;height:104px}
+.hub-art-scenarios::after{right:11%;top:49px;font-size:34px}
+
+/* Tablet / unfolded fold: retain the game-dashboard mosaic. */
+@media (min-width:601px) and (max-width:1050px){
+  main{padding-inline:clamp(12px,2.5vw,24px)}
+  .site-header.hub-header{padding-inline:clamp(14px,2.5vw,24px)}
+  .header-stats{display:none}
+  .hub-nav{display:flex;gap:1px;margin-left:auto}
+  .hub-nav a{min-height:38px;padding:0 8px;font-size:8px}
+  .hub-hero{min-height:122px;padding:19px 22px}
+  .hub-hero h1{font-size:38px;margin:5px 0 4px}
+  .hub-hero-copy{font-size:10px;max-width:84%}
+  .hub-hero-actions{margin-top:9px;gap:5px}
+  .hub-hero-chip{min-height:28px;padding:0 8px;font-size:6px}
+  .hub-how-button{min-height:28px;padding:0 9px;font-size:7px}
+  .hub-profile-strip{grid-template-columns:minmax(150px,.75fr) 1fr auto;gap:9px;padding:8px 10px}
+  .hub-profile-id{min-width:0}.hub-profile-mark{width:32px;height:32px}
+  .hub-profile-records{grid-column:auto;display:flex;gap:5px}.hub-profile-records>div{min-width:64px;padding:6px 7px}
+  .hub-profile-records span{font-size:5px}.hub-profile-records strong,.hub-profile-records .level-badge{font-size:11px}
+  .hub-modes-section{margin-top:12px}
+  .hub-section-heading{margin-bottom:7px}.hub-section-heading h2{font-size:25px}.hub-section-heading p{font-size:8px;max-width:42%}
+  .hub-mode-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
+  .hub-mode-primary,.hub-mode-secondary{grid-column:span 6;min-height:190px}
+  .hub-mode-penalties,.hub-mode-corners{grid-column:span 6;min-height:172px}
+  .hub-mode-finishing{grid-column:span 4;min-height:165px}
+  .hub-mode-wide{grid-column:span 8;min-height:165px}
+  .hub-mode-tile{padding:13px;border-radius:6px}
+  .hub-tile-copy{width:58%}.hub-mode-wide .hub-tile-copy{width:52%}
+  .hub-mode-tile h3{font-size:clamp(18px,3.6vw,26px);margin-top:30px}
+  .hub-mode-tile p{font-size:8px;line-height:1.38}
+  .hub-mode-cta{padding-top:10px;font-size:6px}
+  .hub-mode-status{top:10px;right:10px}
+  .hub-future-strip{margin-top:6px;min-height:48px;padding:8px 10px}
+}
+
+/* Narrow phones can still stack, but compactly. */
+@media(max-width:600px){
+  .site-header.hub-header{min-height:64px;padding-inline:10px}
+  .hub-nav{display:none}
+  .hub-hero{min-height:104px;padding:16px 15px;border-radius:12px}
+  .hub-hero h1{font-size:32px;margin:4px 0}
+  .hub-hero-copy{display:none}
+  .hub-hero-actions{margin-top:8px;gap:4px}
+  .hub-hero-chip{min-height:24px;padding:0 6px;font-size:5px}
+  .hub-hero-chip:nth-of-type(3){display:none}
+  .hub-how-button{min-height:24px;padding:0 7px;font-size:6px}
+  .hub-profile-strip{grid-template-columns:1fr auto;gap:7px;padding:8px;margin-top:6px}
+  .hub-profile-progress{display:none}
+  .hub-profile-records{display:flex;gap:4px}.hub-profile-records>div{min-width:58px;padding:5px 6px}
+  .hub-profile-records>div:last-child{display:none}
+  .hub-modes-section{margin-top:10px}
+  .hub-section-heading{margin-bottom:6px}.hub-section-heading p{display:none}.hub-section-heading h2{font-size:23px}
+  .hub-mode-grid{grid-template-columns:1fr;gap:5px}
+  .hub-mode-primary,.hub-mode-secondary,.hub-mode-penalties,.hub-mode-corners,.hub-mode-finishing,.hub-mode-wide{grid-column:auto;min-height:158px}
+  .hub-mode-tile{padding:12px;border-radius:6px}
+  .hub-tile-copy,.hub-mode-wide .hub-tile-copy{width:62%}
+  .hub-mode-tile h3{margin-top:28px;font-size:22px}
+  .hub-mode-tile p{font-size:7.5px}
+  .hub-mode-status{top:9px;right:9px}
+  .hub-art-scenarios::before{width:46%;right:2%}.hub-art-scenarios::after{right:8%;font-size:27px}
+  .hub-future-strip{margin-top:5px;min-height:44px;padding:7px 8px}.hub-future-strip small{display:none}
+}
