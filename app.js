@@ -1,7 +1,7 @@
-// Football Lab V35 Training Ground boot
+// Football Lab V35.1 Mode Hub boot
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=35.0", {
+  navigator.serviceWorker.register("./sw.js?v=35.1", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -24,7 +24,7 @@ const runtimeCaptureMode = localCaptureHost
   && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
   ? "./game/main-v18.js?v=32.4"
-  : "./game/runtime-v23-main.js?v=35.0";
+  : "./game/runtime-v23-main.js?v=35.1";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 const runtimePromise = import(runtimeEntry);
@@ -34,10 +34,11 @@ const bootPromise = runtimeCaptureMode
       window.__footballLabCaptureReadyV23 = true;
     })
   : runtimePromise
-      .then(() => import("./game/keeper-ai-v34.js?v=35.0"))
-      .then(() => import("./game/flight-v33.js?v=35.0"))
-      .then(() => import("./game/training-v35.js?v=35.0"))
-      .then(() => import("./game/training-guard-v35.js?v=35.0"))
+      .then(() => import("./game/keeper-ai-v34.js?v=35.1"))
+      .then(() => import("./game/flight-v33.js?v=35.1"))
+      .then(() => import("./game/training-v35.js?v=35.1"))
+      .then(() => import("./game/training-guard-v35.js?v=35.1"))
+      .then(() => import("./game/hub-v35-1.js?v=35.1"))
       .then(() => import("./game/polish-v10-2.js?v=32.4"))
       .then(() => import("./game/polish-v11-4.js?v=32.4"))
       .then(() => import("./game/characters-ui-v13.js?v=32.4"))
@@ -57,16 +58,19 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "35.0";
+        document.documentElement.dataset.footballLabBuild = "35.1";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V35.0";
-          badge.title = "Football Lab build 35.0.0";
+          badge.textContent = "V35.1";
+          badge.title = "Football Lab build 35.1.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "35.0.0";
+        if (version) version.textContent = "35.1.0";
         const release = Object.freeze({
-          build: "35.0.0",
+          build: "35.1.0",
+          shell: "premium-static-mode-hub",
+          navigation: "home-play-training-profile",
+          primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
           aiming: "live-pitch-intended-target",
           execution: "contact-weighted-deterministic-drift",
           doubleFaultProtection: "slow-mishit-recovery-window",
@@ -82,7 +86,7 @@ const bootPromise = runtimeCaptureMode
           camera: "target-biased-late-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "35.0"
+          cacheGeneration: "35.1"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -92,6 +96,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV333 = release;
         window.__footballLabReleaseV341 = release;
         window.__footballLabReleaseV350 = release;
+        window.__footballLabReleaseV351 = release;
       });
 
 bootPromise.catch((error) => {
