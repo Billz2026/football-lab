@@ -1,0 +1,45 @@
+/* V35.3 — console-first hub declutter */
+#menuScreen .hub-hero,
+#menuScreen .hub-profile-strip,
+#menuScreen .hub-section-heading{
+  display:none;
+}
+
+#menuScreen .hub-shell{padding-top:0}
+#menuScreen .hub-modes-section{
+  margin-top:clamp(10px,1.6vw,18px);
+  scroll-margin-top:92px;
+}
+#menuScreen .hub-mode-grid{margin-top:0}
+
+/* Profile data is preserved, but lives in Settings/Profile instead of the play hub. */
+.settings-card-v22 .hub-profile-strip{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin:0 0 16px;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(91,231,255,.14);
+  background:linear-gradient(135deg,rgba(91,231,255,.065),rgba(218,254,77,.025));
+  box-shadow:none;
+}
+.settings-card-v22 .hub-profile-id{min-width:0}
+.settings-card-v22 .hub-profile-progress{width:100%}
+.settings-card-v22 .hub-profile-records{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.settings-card-v22 .hub-profile-records>div{
+  min-width:0;
+  padding:9px;
+}
+.settings-card-v22 #howToPlay{
+  margin:0;
+}
+
+@media(max-width:600px){
+  #menuScreen .hub-modes-section{margin-top:8px}
+  .settings-card-v22 .hub-profile-records{grid-template-columns:1fr}
+}
