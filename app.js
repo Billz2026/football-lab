@@ -1,3 +1,4 @@
+// Football Lab V35 Training Ground boot
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
   navigator.serviceWorker.register("./sw.js?v=35.0", {
