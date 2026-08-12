@@ -68,7 +68,10 @@ function targetFromInputs(profile) {
   const ideal = idealPower();
   const powerQuality = strikeQuality(power);
   const contactQuality = clamp(Number.isFinite(shot.contactQuality) ? shot.contactQuality : 1, 0.06, 1);
-  const quality = Math.sqrt(powerQuality * contactQuality);
+  // Contact now carries more weight than power when execution is genuinely poor,
+  // while clean/perfect contact remains close to the previous V33.1 behaviour.
+  const quality = Math.pow(powerQuality, 0.46) * Math.pow(contactQuality, 0.64);
+  const contactSeverity = smoothStep(clamp((0.74 - contactQuality) / 0.68, 0, 1));
   const rawCurve = clamp((shot.curve ?? 0) * modifiers.curveStrength, -1.15, 1.15);
   const curve = signedCurve(rawCurve);
   const powerDelta = power - ideal;
@@ -76,23 +79,35 @@ function targetFromInputs(profile) {
   const excessiveCurve = Math.max(0, Math.abs(rawCurve) - (0.58 + modifiers.excessiveCurveAllowance));
   const deterministicSide = ((state.stage + (shot.aimX > 0.5 ? 1 : 0)) % 2 === 0) ? 1 : -1;
   const contactOffset = clamp(Number(shot.contactOffset) || 0, -1, 1);
+  const timingSide = Math.sign(contactOffset || deterministicSide);
 
   const selectedX = -GOAL.halfWidth + shot.aimX * GOAL.width;
   const selectedY = GOAL.height * (1 - shot.aimY);
   const routeBend = curve * (0.66 + stage.distanceYards * 0.055);
   const finalWind = state.stageWind * (0.21 + stage.distanceYards * 0.006);
   const powerHeightDrift = -powerDelta * 0.35;
+  const powerContactHeightDrift = -powerDelta * contactSeverity * 0.18;
 
   const contactError = profile.contactError * modifiers.contactError;
-  const powerDrift = powerDelta * 0.13 * contactError;
-  const curveDrift = deterministicSide * excessiveCurve * controlPenalty * 0.87 * contactError;
-  const qualityDrift = deterministicSide * controlPenalty * 0.17 * contactError;
+  const powerDrift = powerDelta * (0.13 + contactSeverity * 0.10) * contactError;
+  const curveDrift = Math.sign(rawCurve || timingSide)
+    * excessiveCurve * controlPenalty * 0.87 * contactError;
+  // Early contact always pulls one way and late contact pushes the opposite way.
+  // The penalty escalates only after contact falls below the clean zone.
+  const qualityDrift = timingSide
+    * controlPenalty * (0.13 + contactSeverity * 0.24) * contactError;
   const timingDrift = contactOffset
-    * (0.28 + stage.distanceYards * 0.014 + Math.abs(rawCurve) * 0.46)
-    * contactError;
+    * (0.30 + stage.distanceYards * 0.015 + Math.abs(rawCurve) * 0.48)
+    * contactError
+    * (1 + contactSeverity * 0.52);
   const horizontalDriftMetres = powerDrift + curveDrift + qualityDrift + timingDrift;
-  const verticalTimingDrift = contactOffset * (0.045 + Math.abs(rawCurve) * 0.035) * contactError;
-  const verticalContactDrift = excessiveCurve * controlPenalty * 0.13 + verticalTimingDrift;
+  const verticalTimingDrift = contactOffset
+    * (0.05 + Math.abs(rawCurve) * 0.04)
+    * contactError
+    * (1 + contactSeverity * 0.45);
+  const verticalContactDrift = excessiveCurve * controlPenalty * 0.13
+    + verticalTimingDrift
+    + powerContactHeightDrift;
   const verticalDriftMetres = (powerHeightDrift + verticalContactDrift) * GOAL.height;
 
   shot.strikeQuality = quality;
@@ -119,6 +134,7 @@ function targetFromInputs(profile) {
     excessiveCurve,
     powerQuality,
     contactQuality,
+    contactSeverity,
     contactOffset
   };
 }
@@ -360,6 +376,7 @@ function pathWithKeeperContact(path, plan) {
 }
 
 function outcomeReason(shot, wallAnalysis, keeperPlan, target) {
+  if ((shot.contactQuality ?? 1) < 0.44 && shot.outcome === "GOAL") return "Poor contact drifted from the intended line, but the placement still beat the goalkeeper.";
   if ((shot.contactQuality ?? 1) < 0.44 && shot.outcome !== "GOAL") return "Poor contact moved the ball away from the intended target.";
   if (shot.outcome === "WALL") return wallAnalysis.lane === "OVER" ? "Trajectory did not clear the jumping wall." : "Shot intersected the outside wall player.";
   if (shot.outcome === "SAVE") return keeperPlan.saveType === "CATCH" ? "Pace and placement allowed a clean catch." : "The goalkeeper reached the ball and parried it.";
@@ -427,7 +444,13 @@ export function resolveShotPhysics() {
     shot.outcome = "MISS";
   }
 
+  const powerDeviation = Math.abs((shot.power ?? idealPower()) - idealPower());
+  const premiumFinishEligible = inputResult.contactQuality >= 0.72
+    && inputResult.powerQuality >= 0.56
+    && powerDeviation <= 0.16
+    && (shot.strikeQuality ?? 0) >= 0.68;
   shot.topCorner = shot.outcome === "GOAL"
+    && premiumFinishEligible
     && target.y > GOAL.height * 0.71
     && Math.abs(target.x) > GOAL.halfWidth * 0.55;
   shot.path = path;
@@ -455,6 +478,8 @@ export function resolveShotPhysics() {
     powerQuality: strikeQualityLabel(shot.power ?? idealPower()),
     powerExecution: Number(inputResult.powerQuality.toFixed(3)),
     contactQuality: Number(inputResult.contactQuality.toFixed(3)),
+    contactSeverity: Number(inputResult.contactSeverity.toFixed(3)),
+    premiumFinishEligible,
     contactTiming: Number.isFinite(shot.contactTiming) ? Number(shot.contactTiming.toFixed(3)) : null,
     contactOffset: Number(inputResult.contactOffset.toFixed(3)),
     contactWindow: Number.isFinite(shot.contactWindow) ? Number(shot.contactWindow.toFixed(3)) : null,
