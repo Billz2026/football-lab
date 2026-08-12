@@ -100,8 +100,8 @@ export function difficultyForStage(stageIndex, scenario) {
   const progress = Math.max(0, Math.min(1, Number(scenario.difficulty) || 0));
   const weatherPressure = Math.max(0, Math.min(0.6, Number(scenario.weatherSeverity) || 0));
   const wallPressure = Math.max(0, (Number(scenario.wallPlayers) || 4) - 3) * 0.012;
-  const cyclePressure = Math.min(0.12, cycle * 0.02);
-  const meterPressure = Math.min(0.14, cycle * 0.025);
+  const cyclePressure = Math.min(0.14, cycle * 0.024);
+  const meterPressure = Math.min(0.16, cycle * 0.03);
 
   return {
     ...base,
@@ -115,11 +115,11 @@ export function difficultyForStage(stageIndex, scenario) {
     reachY: 0.98 + progress * 0.105,
     wallRadius: 0.325 + wallPressure + progress * 0.03,
     wallJump: 0.295 + progress * 0.095,
-    contactError: 0.70 + progress * 0.42 + weatherPressure * 0.07 + cycle * 0.05,
+    contactError: 0.82 + progress * 0.52 + weatherPressure * 0.10 + cycle * 0.06,
     meter: {
-      power: 0.9 + progress * 0.25 + weatherPressure * 0.025 + meterPressure,
-      aim: 0.89 + progress * 0.28 + weatherPressure * 0.03 + meterPressure,
-      curve: 0.91 + progress * 0.27 + weatherPressure * 0.035 + meterPressure
+      power: 0.96 + progress * 0.29 + weatherPressure * 0.035 + meterPressure,
+      aim: 0.98 + progress * 0.36 + weatherPressure * 0.045 + meterPressure,
+      curve: 0.94 + progress * 0.30 + weatherPressure * 0.04 + meterPressure
     }
   };
 }
