@@ -1,7 +1,7 @@
-// Football Lab V35.4 premium console mosaic boot
+// Football Lab V35.6.1 training setup freeze hotfix
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=35.4", {
+  navigator.serviceWorker.register("./sw.js?v=35.6.1", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -54,22 +54,22 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/clarity-v21.js?v=32.4"))
       .then(() => import("./game/product-polish-v22.js?v=32.4"))
       .then(() => import("./game/hub-v35-3.js?v=35.3"))
-      .then(() => import("./game/hub-v35-4.js?v=35.4"))
+      .then(() => import("./game/hub-v35-4.js?v=35.6.1"))
       .then(() => import("./game/release-v23.js?v=32.4"))
       .then(() => import("./game/immersive-ui-v24.js?v=32.4"))
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "35.4";
+        document.documentElement.dataset.footballLabBuild = "35.6.1";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V35.4";
-          badge.title = "Football Lab build 35.4.0";
+          badge.textContent = "V35.6.1";
+          badge.title = "Football Lab build 35.6.1";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "35.4.0";
+        if (version) version.textContent = "35.6.1";
         const release = Object.freeze({
-          build: "35.4.0",
+          build: "35.6.1",
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
@@ -85,10 +85,11 @@ const bootPromise = runtimeCaptureMode
           trainingDistanceYards: "16-45",
           trainingBalls: "standard-curve-power-control-knuckle",
           trainingRecords: "isolated-from-career",
+          trainingSetupFreezeFix: "self-observing-summary-loop-removed",
           camera: "target-biased-late-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "35.4"
+          cacheGeneration: "35.6.1"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -102,6 +103,9 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV352 = release;
         window.__footballLabReleaseV353 = release;
         window.__footballLabReleaseV354 = release;
+        window.__footballLabReleaseV355 = release;
+        window.__footballLabReleaseV356 = release;
+        window.__footballLabReleaseV3561 = release;
       });
 
 bootPromise.catch((error) => {
