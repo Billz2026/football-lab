@@ -13,6 +13,7 @@ const CORE_ASSETS = [
   "./game/keeper-ai-v34.js?v=35.0",
   "./game/flight-v33.js?v=35.0",
   "./game/training-v35.js?v=35.0",
+  "./game/training-guard-v35.js?v=35.0",
   "./game/training-v35.css?v=35.0",
   "./game/release-v23.js?v=32.4",
   "./game/immersive-ui-v24.js?v=32.4",
