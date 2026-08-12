@@ -1,5 +1,14 @@
 const BUILD = "35.4.0";
 
+function ensureHubStyle(){
+  if (document.querySelector("link[data-football-lab-hub='35.4']")) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "./game/hub-v35-4.css?v=35.4";
+  link.dataset.footballLabHub = "35.4";
+  document.head.appendChild(link);
+}
+
 const TILE_COPY = new Map([
   [".hub-mode-training p", "Build your session. Practise without limits."],
   [".hub-mode-free-kicks p", "Master curl, power and contact."],
@@ -36,6 +45,7 @@ function setPlayNavActive(){
 }
 
 function applyHubV354(){
+  ensureHubStyle();
   tightenTileCopy();
   promoteFuturePanelIntoMosaic();
   markArtworkReadyTiles();
