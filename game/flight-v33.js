@@ -1,6 +1,6 @@
 import { clamp, easeOutCubic, elements, lerp, smoothStep, state } from "./core-v6.js?v=32.4";
 
-const BUILD = "33.1.0";
+const BUILD = "33.2.0";
 
 function primaryEndIndex(shot) {
   if (!Array.isArray(shot?.path) || shot.path.length < 2) return 0;
@@ -145,6 +145,7 @@ function updateFlightCamera(now) {
 
   const replay = Boolean(animation.isReplay);
   const focus = easeOutCubic(clamp((progress - 0.012) / 0.988, 0, 1));
+  const latePush = smoothStep(clamp((progress - 0.52) / 0.48, 0, 1));
   const targetX = clamp(
     Number.isFinite(state.shot?.actualX) ? state.shot.actualX : Number(state.shot?.aimX) || 0.5,
     -0.2,
@@ -152,7 +153,11 @@ function updateFlightCamera(now) {
   );
   const originX = clamp(50 + (targetX - 0.5) * 18, 41.5, 58.5);
   const originY = replay ? 43 : 46;
-  const scale = 1 + focus * (replay ? 0.12 : 0.085);
+  // V33.2 adds only a modest extra push in the final half of flight so the
+  // ball and keeper read more clearly without turning the shot into a cut-scene.
+  const scale = 1
+    + focus * (replay ? 0.124 : 0.088)
+    + latePush * (replay ? 0.012 : 0.009);
   const settleLift = focus * (replay ? 0.35 : 0.18);
 
   canvas.style.transformOrigin = `${originX}% ${originY}%`;
@@ -173,5 +178,5 @@ window.__footballLabFlightV33 = Object.freeze({
   model: "progressive-magnus-dip",
   deterministic: true,
   preservesResolvedOutcome: true,
-  camera: "target-biased-flight-push"
+  camera: "target-biased-late-flight-push"
 });
