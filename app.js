@@ -1,6 +1,6 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=32.4", {
+  navigator.serviceWorker.register("./sw.js?v=33.1", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -23,7 +23,7 @@ const runtimeCaptureMode = localCaptureHost
   && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
   ? "./game/main-v18.js?v=32.4"
-  : "./game/runtime-v23-main.js?v=32.4";
+  : "./game/runtime-v23-main.js?v=33.1";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 const runtimePromise = import(runtimeEntry);
@@ -33,6 +33,7 @@ const bootPromise = runtimeCaptureMode
       window.__footballLabCaptureReadyV23 = true;
     })
   : runtimePromise
+      .then(() => import("./game/flight-v33.js?v=33.1"))
       .then(() => import("./game/polish-v10-2.js?v=32.4"))
       .then(() => import("./game/polish-v11-4.js?v=32.4"))
       .then(() => import("./game/characters-ui-v13.js?v=32.4"))
@@ -52,25 +53,28 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "32.4";
+        document.documentElement.dataset.footballLabBuild = "33.1";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V32.4";
-          badge.title = "Football Lab build 32.4.0";
+          badge.textContent = "V33.1";
+          badge.title = "Football Lab build 33.1.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "32.4.0";
+        if (version) version.textContent = "33.1.0";
         const release = Object.freeze({
-          build: "32.4.0",
+          build: "33.1.0",
           aiming: "live-pitch-intended-target",
           execution: "two-stop-power-contact",
+          physics: "progressive-magnus-dip",
+          camera: "target-biased-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "32.4"
+          cacheGeneration: "33.1"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
         window.__footballLabReleaseV324 = release;
+        window.__footballLabReleaseV331 = release;
       });
 
 bootPromise.catch((error) => {
