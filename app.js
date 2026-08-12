@@ -1,6 +1,6 @@
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=32.3", {
+  navigator.serviceWorker.register("./sw.js?v=32.4", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -22,8 +22,8 @@ const localCaptureHost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.host
 const runtimeCaptureMode = localCaptureHost
   && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
-  ? "./game/main-v18.js?v=32.3"
-  : "./game/runtime-v23-main.js?v=32.3";
+  ? "./game/main-v18.js?v=32.4"
+  : "./game/runtime-v23-main.js?v=32.4";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 const runtimePromise = import(runtimeEntry);
@@ -33,41 +33,44 @@ const bootPromise = runtimeCaptureMode
       window.__footballLabCaptureReadyV23 = true;
     })
   : runtimePromise
-      .then(() => import("./game/polish-v10-2.js?v=32.3"))
-      .then(() => import("./game/polish-v11-4.js?v=32.3"))
-      .then(() => import("./game/characters-ui-v13.js?v=32.3"))
-      .then(() => import("./game/keepers-ui-v14.js?v=32.3"))
-      .then(() => import("./game/walls-ui-v15.js?v=32.3"))
-      .then(() => import("./game/mobile-ui-v16.js?v=32.3"))
-      .then(() => import("./game/mobile-shell-v16-1.js?v=32.3"))
-      .then(() => import("./game/mobile-shell-compact-v16-1.js?v=32.3"))
-      .then(() => import("./game/visual-ui-v17.js?v=32.3"))
-      .then(() => import("./game/aiming-v32-2.js?v=32.3"))
-      .then(() => import("./game/input-precision-ui-v18.js?v=32.3"))
-      .then(() => import("./game/progression-v20.js?v=32.3"))
-      .then(() => import("./game/clarity-v21.js?v=32.3"))
-      .then(() => import("./game/product-polish-v22.js?v=32.3"))
-      .then(() => import("./game/release-v23.js?v=32.3"))
-      .then(() => import("./game/immersive-ui-v24.js?v=32.3"))
-      .then(() => import("./game/infinite-runs-v25.js?v=32.3"))
-      .then(() => import("./game/campaign-v31.js?v=32.3"))
+      .then(() => import("./game/polish-v10-2.js?v=32.4"))
+      .then(() => import("./game/polish-v11-4.js?v=32.4"))
+      .then(() => import("./game/characters-ui-v13.js?v=32.4"))
+      .then(() => import("./game/keepers-ui-v14.js?v=32.4"))
+      .then(() => import("./game/walls-ui-v15.js?v=32.4"))
+      .then(() => import("./game/mobile-ui-v16.js?v=32.4"))
+      .then(() => import("./game/mobile-shell-v16-1.js?v=32.4"))
+      .then(() => import("./game/mobile-shell-compact-v16-1.js?v=32.4"))
+      .then(() => import("./game/visual-ui-v17.js?v=32.4"))
+      .then(() => import("./game/strike-v32-4.js?v=32.4"))
+      .then(() => import("./game/input-precision-ui-v18.js?v=32.4"))
+      .then(() => import("./game/progression-v20.js?v=32.4"))
+      .then(() => import("./game/clarity-v21.js?v=32.4"))
+      .then(() => import("./game/product-polish-v22.js?v=32.4"))
+      .then(() => import("./game/release-v23.js?v=32.4"))
+      .then(() => import("./game/immersive-ui-v24.js?v=32.4"))
+      .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
+      .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "32.3";
+        document.documentElement.dataset.footballLabBuild = "32.4";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V32.3";
-          badge.title = "Football Lab build 32.3.0";
+          badge.textContent = "V32.4";
+          badge.title = "Football Lab build 32.4.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "32.3.0";
+        if (version) version.textContent = "32.4.0";
         const release = Object.freeze({
-          build: "32.3.0",
-          aiming: "football-goal-prediction-planner",
-          ballFlight: "close-follow-readable-outcomes",
-          cacheGeneration: "32.3"
+          build: "32.4.0",
+          aiming: "live-pitch-intended-target",
+          execution: "two-stop-power-contact",
+          prediction: "unsolved-short-launch-guide",
+          defaultMode: "standard",
+          cacheGeneration: "32.4"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
+        window.__footballLabReleaseV324 = release;
       });
 
 bootPromise.catch((error) => {

@@ -2,7 +2,7 @@ import {
   $, $$, formatScore, profile, state, elements, createShot, saveProfile, renderProfile,
   setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage
-} from "./core-v6.js?v=32.3";
+} from "./core-v6.js?v=32.4";
 import { resolveShotPhysics } from "./physics-v8.js?v=8";
 import { resizeCanvas, drawScene } from "./render-v8.js?v=8";
 import { unlockAudio, playResultSound } from "./audio-v6.js?v=7";

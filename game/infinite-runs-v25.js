@@ -1,4 +1,4 @@
-import { formatScore, profile, state } from "./core-v6.js?v=32.3";
+import { formatScore, profile, state } from "./core-v6.js?v=32.4";
 
 const BUILD = "25.0.0";
 let pausedPhase = null;
@@ -84,7 +84,7 @@ function updatePermanentCopy() {
   }
   const modeCopy = document.querySelector("#classicCard small");
   if (modeCopy) {
-    modeCopy.textContent = "Lock power, then aim and shape the complete route as stages escalate. Submit your score when ready.";
+    modeCopy.textContent = "Aim and shape the strike on the live pitch, then stop power and contact as stages escalate. Submit your score when ready.";
   }
   const modeSectionCopy = document.querySelector(".modes-section .section-heading p");
   if (modeSectionCopy) {

@@ -1,4 +1,4 @@
-import { state, elements } from "./core-v6.js?v=32.3";
+import { state, elements } from "./core-v6.js?v=32.4";
 
 const BUILD = "22.0.0";
 const SETTINGS_KEY = "footballLabSettingsV22";
@@ -331,15 +331,16 @@ function injectTutorial() {
 const tutorialSteps = {
   ready: {
     title: "Start your run",
-    copy: "Press START SHOT. First lock clean power, then aim and shape the route on one clear screen.",
+    copy: "Press START SHOT. Aim and choose curl on the live pitch, then stop power and contact to execute it.",
     target: () => elements.shotAction
   },
   power: {
     title: "Lock the power",
-    copy: "Tap when the white marker reaches the bright contact zone. Power sets pace and contact quality; you choose the height next.",
+    copy: "First stop: tap when the marker reaches your intended power. More is not always better.",
     target: () => document.querySelector(".meter-wrap")
   },
   aim: null,
+  contact: null,
   curve: {
     title: "Shape the strike",
     copy: "Use the live direction meter. If you aimed outside a post, apply the opposite bend to curl the ball back in.",
@@ -437,7 +438,7 @@ function injectPauseOverlay() {
 }
 
 function pauseForVisibility() {
-  if (state.screen !== "game" || pausedPhase || !["ready", "power", "aim", "curve"].includes(state.phase)) return;
+  if (state.screen !== "game" || pausedPhase || !["ready", "power", "aim", "contact", "curve"].includes(state.phase)) return;
   pausedPhase = state.phase;
   state.phase = "paused";
   hideTutorial();

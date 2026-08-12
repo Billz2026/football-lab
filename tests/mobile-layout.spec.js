@@ -45,10 +45,10 @@ test("unfolded foldable keeps pitch and shot controls in one playable viewport",
   expect(metrics.frame).not.toBeNull();
   expect(metrics.controls).not.toBeNull();
   expect(metrics.action).not.toBeNull();
-  expect(Math.abs(metrics.frame.top - metrics.controls.top)).toBeLessThan(4);
-  expect(metrics.controls.left).toBeGreaterThan(metrics.frame.right - 2);
+  expect(metrics.controls.top).toBeGreaterThanOrEqual(metrics.frame.bottom - 2);
+  expect(metrics.controls.left).toBeGreaterThanOrEqual(metrics.frame.left - 2);
   expect(metrics.action.bottom).toBeLessThan(metrics.viewport.height - 4);
-  expect(metrics.frame.height).toBeLessThan(metrics.viewport.height * 0.62);
+  expect(metrics.frame.height).toBeLessThan(metrics.viewport.height * 0.7);
 });
 
 test("phone portrait keeps the shot button visible without scrolling", async ({ page }) => {
@@ -61,6 +61,6 @@ test("phone portrait keeps the shot button visible without scrolling", async ({ 
   expect(metrics.action).not.toBeNull();
   expect(metrics.controls.top).toBeGreaterThan(metrics.frame.bottom - 2);
   expect(metrics.action.bottom).toBeLessThan(metrics.viewport.height - 4);
-  expect(metrics.frame.height / metrics.frame.width).toBeGreaterThan(0.56);
-  expect(metrics.frame.height / metrics.frame.width).toBeLessThan(0.65);
+  expect(metrics.frame.height / metrics.frame.width).toBeGreaterThan(0.75);
+  expect(metrics.frame.height / metrics.frame.width).toBeLessThan(1.2);
 });

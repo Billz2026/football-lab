@@ -6,13 +6,13 @@ async function openPowerKicker(page, viewport = { width: 884, height: 1100 }) {
   await page.setViewportSize(viewport);
   await page.goto("/index.html?v=173");
   await expect.poll(() => page.evaluate(() => window.__footballLabMainV173 === true), { timeout: 20000 }).toBe(true);
-  await expect.poll(() => page.evaluate(() => window.__footballLabMotionV173 === true), { timeout: 20000 }).toBe(true);
   await page.locator("#playClassic").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
   await expect(page.locator("#shotAction")).toHaveText(/START SHOT/, { timeout: 7000 });
+  await expect.poll(() => page.evaluate(() => Boolean(window.__footballLabMotionSnapshotV173)), { timeout: 7000 }).toBe(true);
   return errors;
 }
 
@@ -20,7 +20,7 @@ async function launchShot(page) {
   const action = page.locator("#shotAction");
   await action.click();
   await page.waitForTimeout(120);
-  await action.click();
+  await page.locator("#strikeStartV324").click();
   await page.waitForTimeout(120);
   await action.click();
   await page.waitForTimeout(120);

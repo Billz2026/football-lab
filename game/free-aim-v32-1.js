@@ -7,9 +7,9 @@ import {
   currentAimTarget,
   elements,
   state
-} from "./core-v6.js?v=32.3";
-import { GOAL, buildCamera } from "./world-v7.js?v=32.3";
-import { cameraBasis } from "./projection-v6.js?v=32.3";
+} from "./core-v6.js?v=32.4";
+import { GOAL, buildCamera } from "./world-v7.js?v=32.4";
+import { cameraBasis } from "./projection-v6.js?v=32.4";
 
 const BUILD = "32.1.0";
 const viewport = { width: WORLD.width, height: WORLD.height };
@@ -23,7 +23,7 @@ if (!meterWrap || !controlPanel || !elements.canvas) {
 if (!document.querySelector('link[href*="free-aim-v32-1.css"]')) {
   const style = document.createElement("link");
   style.rel = "stylesheet";
-  style.href = "./game/free-aim-v32-1.css?v=32.3";
+  style.href = "./game/free-aim-v32-1.css?v=32.4";
   style.dataset.footballLabFreeAim = "v32.1";
   document.head.appendChild(style);
 }

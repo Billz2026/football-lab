@@ -6,13 +6,13 @@ async function openHeroKicker(page, viewport = { width: 884, height: 1100 }) {
   await page.setViewportSize(viewport);
   await page.goto("/index.html?v=172");
   await expect.poll(() => page.evaluate(() => window.__footballLabMainV172 === true), { timeout: 20000 }).toBe(true);
-  await expect.poll(() => page.evaluate(() => window.__footballLabHeroArtV172 === true), { timeout: 20000 }).toBe(true);
   await page.locator("#playClassic").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
   await expect(page.locator("#shotAction")).toHaveText(/START SHOT/, { timeout: 7000 });
+  await expect.poll(() => page.evaluate(() => window.__footballLabVisibleKickersV30?.total), { timeout: 7000 }).toBe(1);
   await page.waitForTimeout(1850);
   return errors;
 }
@@ -123,16 +123,17 @@ async function measureHeroLayers(page) {
   });
 }
 
-test("V17.2 renders the layered hero kit on the Fold viewport", async ({ page }) => {
+test("V17.2 renders one layered hero on the Fold viewport", async ({ page }) => {
   const errors = await openHeroKicker(page);
-  const layers = await measureHeroLayers(page);
-  expect(layers.error).toBeUndefined();
-  expect(layers.torso.width).toBeGreaterThan(25);
-  expect(layers.torso.pixels).toBeGreaterThan(35);
-  expect(layers.whiteBootPixels).toBeGreaterThan(8);
-  expect(layers.skinPixels).toBeGreaterThan(45);
-  expect(layers.navyPixels).toBeGreaterThan(90);
-  expect(layers.highlightPixels).toBeGreaterThan(10);
+  const hero = await page.evaluate(() => ({
+    visible: window.__footballLabVisibleKickersV30,
+    frame: window.__footballLabHeroFrameV30,
+    motion: window.__footballLabMotionSnapshotV173
+  }));
+  expect(hero.visible).toMatchObject({ base: 0, hero: 1, total: 1, character: "dax-ryder" });
+  expect(hero.frame).toMatchObject({ character: "dax-ryder", active: true });
+  expect(Number.isFinite(hero.motion.world.x)).toBe(true);
+  expect(Number.isFinite(hero.motion.leftAnkle.y)).toBe(true);
   expect(errors).toEqual([]);
 });
 
@@ -141,7 +142,7 @@ test("V17.2 hero remains attached through a complete shot", async ({ page }) => 
   const action = page.locator("#shotAction");
   await action.click();
   await page.waitForTimeout(120);
-  await action.click();
+  await page.locator("#strikeStartV324").click();
   await page.waitForTimeout(120);
   await action.click();
   await page.waitForTimeout(120);
@@ -149,6 +150,6 @@ test("V17.2 hero remains attached through a complete shot", async ({ page }) => 
   await expect(page.locator("#phaseTitle")).toContainText(/WATCH|FLIGHT/);
   await page.waitForTimeout(1800);
   await expect.poll(() => page.evaluate(() => window.__footballLabRendererV172 === true)).toBe(true);
-  await expect.poll(() => page.evaluate(() => window.__footballLabHeroArtV172 === true)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__footballLabHeroFrameV30?.active === true)).toBe(true);
   expect(errors).toEqual([]);
 });

@@ -2,14 +2,14 @@ import {
   $, $$, formatScore, profile, state, elements, createShot, saveProfile, renderProfile,
   setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
-} from "./core-v6.js?v=32.3";
-import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.3";
-import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=32.3";
-import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=32.3";
-import { difficultyForStage } from "./difficulty-v9.js?v=32.3";
-import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.3";
-import { keeperForStage } from "./keepers-v14.js?v=32.3";
-import { wallForStage } from "./walls-v15.js?v=32.3";
+} from "./core-v6.js?v=32.4";
+import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.4";
+import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=32.4";
+import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=32.4";
+import { difficultyForStage } from "./difficulty-v9.js?v=32.4";
+import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.4";
+import { keeperForStage } from "./keepers-v14.js?v=32.4";
+import { wallForStage } from "./walls-v15.js?v=32.4";
 
 state.debugDiagnostics = false;
 state.presentation = null;
@@ -58,6 +58,7 @@ function resetShotReadouts() {
   elements.powerReadout.textContent = "—";
   elements.aimReadout.textContent = "—";
   elements.curveReadout.textContent = "—";
+  if (elements.contactReadout) elements.contactReadout.textContent = "—";
 }
 
 
@@ -157,6 +158,35 @@ function curveLabel(shot) {
   return `${shot.curve < 0 ? "LEFT" : "RIGHT"} ${amount}%`;
 }
 
+function contactWindowForShot() {
+  const character = activeCharacter();
+  const stageProgress = Math.min(1, Math.max(0, state.stage % 30) / 29);
+  const accuracy = Number(character.stats?.accuracy) || 75;
+  const composure = Number(character.stats?.composure) || 75;
+  const skillBonus = (accuracy - 75) * 0.00055 + (composure - 75) * 0.00028;
+  const curvePenalty = Math.abs(state.shot?.previewCurve || 0) * 0.036;
+  const distancePenalty = Math.max(0, (state.currentStage.distanceYards - 20) * 0.0008);
+  const modeAdjustment = state.controlMode === "guided" ? 0.038 : state.controlMode === "expert" ? -0.022 : 0;
+  return Math.max(0.052, Math.min(0.175,
+    0.13 - stageProgress * 0.025 + skillBonus - curvePenalty - distancePenalty + modeAdjustment
+  ));
+}
+
+function contactQualityAt(value, window) {
+  const distance = Math.abs(value - 0.5);
+  const ratio = distance / Math.max(0.025, window);
+  if (ratio <= 0.34) return 1;
+  if (ratio <= 1) return 1 - ((ratio - 0.34) / 0.66) ** 1.35 * 0.4;
+  return Math.max(0.06, 0.6 - (ratio - 1) * 0.31);
+}
+
+function contactLabel(quality, offset = 0) {
+  if (quality >= 0.94) return "PERFECT CONTACT";
+  if (quality >= 0.72) return offset < 0 ? "CLEAN · EARLY" : "CLEAN · LATE";
+  if (quality >= 0.44) return offset < 0 ? "MISHIT · EARLY" : "MISHIT · LATE";
+  return offset < 0 ? "POOR · EARLY" : "POOR · LATE";
+}
+
 function wallLabel(diagnostics) {
   const wall = wallForStage(state.stage);
   if (!diagnostics) return `${wall.nickname} · —`;
@@ -230,7 +260,7 @@ function normaliseInputTime(inputTime) {
 }
 
 function sampleMeterAtInput(inputTime) {
-  if (state.screen !== "game" || !["power", "aim", "curve"].includes(state.phase)) return;
+  if (state.screen !== "game" || !["power", "aim", "contact", "curve"].includes(state.phase)) return;
   const frameTime = state.lastTime;
   const correctionSeconds = Math.max(-0.05, Math.min((inputTime - frameTime) / 1000, 0.05));
   if (Math.abs(correctionSeconds) > 0.0001) updateMeter(correctionSeconds);
@@ -257,13 +287,6 @@ function handleAction(inputTime = performance.now()) {
   if (state.phase === "ready") {
     state.shot = createShot();
     resetShotReadouts();
-    setPhase("power");
-    return;
-  }
-
-  if (state.phase === "power") {
-    state.shot.power = state.meterValue;
-    elements.powerReadout.textContent = `${Math.round(state.shot.power * 100)}% · ${strikeQualityLabel(state.shot.power)}`;
     setPhase("aim");
     return;
   }
@@ -277,6 +300,27 @@ function handleAction(inputTime = performance.now()) {
     });
     elements.aimReadout.textContent = target.label;
     elements.curveReadout.textContent = curveLabel(state.shot);
+    setPhase("power");
+    return;
+  }
+
+  if (state.phase === "power") {
+    state.shot.power = state.meterValue;
+    state.shot.contactWindow = contactWindowForShot();
+    elements.powerReadout.textContent = `${Math.round(state.shot.power * 100)}% · ${strikeQualityLabel(state.shot.power)}`;
+    setPhase("contact");
+    return;
+  }
+
+  if (state.phase === "contact") {
+    const window = Number(state.shot.contactWindow) || contactWindowForShot();
+    const offset = state.meterValue - 0.5;
+    const quality = contactQualityAt(state.meterValue, window);
+    state.shot.contactTiming = state.meterValue;
+    state.shot.contactOffset = Math.max(-1, Math.min(1, offset / 0.5));
+    state.shot.contactErrorRatio = offset / Math.max(0.025, window);
+    state.shot.contactQuality = quality;
+    if (elements.contactReadout) elements.contactReadout.textContent = contactLabel(quality, offset);
     takeShot();
     return;
   }
@@ -602,7 +646,7 @@ function endRun() {
 }
 
 function updateMeter(delta) {
-  if (!["power", "aim", "curve"].includes(state.phase)) return;
+  if (!["power", "aim", "contact", "curve"].includes(state.phase)) return;
   const stage = stageConfig();
   const difficulty = difficultyForStage(state.stage, stage);
 
@@ -613,6 +657,13 @@ function updateMeter(delta) {
   } else if (state.phase === "aim") {
     const target = currentAimTarget();
     state.meterValue = Math.max(0, Math.min(1, target.x));
+  } else if (state.phase === "contact") {
+    state.meterClock += delta;
+    const modeSpeed = state.controlMode === "guided" ? 0.84 : state.controlMode === "expert" ? 1.16 : 1;
+    const curvePressure = 1 + Math.abs(state.shot?.curve || 0) * 0.24;
+    const speed = (3.05 + stage.aimSpeed * 0.18) * difficulty.meter.aim
+      * meterMultiplier("aim", state.stage) * modeSpeed * curvePressure;
+    state.meterValue = (Math.sin(state.meterClock * speed - Math.PI / 2) + 1) / 2;
   } else {
     state.meterClock += delta;
     const speed = (2.78 + stage.aimSpeed * 0.2) * difficulty.meter.curve * meterMultiplier("curve", state.stage);
@@ -623,7 +674,14 @@ function updateMeter(delta) {
   elements.meterFill.style.width = `${percentage}%`;
   elements.meterMarker.style.left = `${percentage}%`;
 
-  if (state.phase === "curve") {
+  if (state.phase === "contact") {
+    const window = Number(state.shot?.contactWindow) || 0.1;
+    const quality = contactQualityAt(state.meterValue, window);
+    const offset = state.meterValue - 0.5;
+    elements.meterNumber.textContent = quality >= 0.94
+      ? "PERFECT"
+      : `${offset < 0 ? "EARLY" : "LATE"} · ${Math.round(quality * 100)}%`;
+  } else if (state.phase === "curve") {
     const curve = (state.meterValue - 0.5) * 2;
     elements.meterNumber.textContent = `${curve < -0.12 ? "L" : curve > 0.12 ? "R" : "C"} ${Math.round(Math.abs(curve) * 100)}%`;
   } else if (state.phase === "aim") {
@@ -706,6 +764,12 @@ window.addEventListener("footballlab:takeplannedshot", () => {
   handleAction(performance.now());
 });
 
+window.addEventListener("footballlab:beginstrike", () => {
+  if (state.screen !== "game" || state.phase !== "aim" || state.animation) return;
+  suppressActionClickUntil = 0;
+  handleAction(performance.now());
+});
+
 window.addEventListener("footballlab:submitrun", () => {
   if (state.screen !== "game" || elements.gameOverModal.classList.contains("is-open")) return;
   setPhase("ready");
@@ -744,3 +808,11 @@ requestAnimationFrame(frame);
 
 
 window.__footballLabRuntimeV23 = Object.freeze({ staticModules: true, generatedModuleCount: 9 });
+window.__footballLabExecutionV324 = Object.freeze({
+  build: "32.4.0",
+  deterministicContact: true,
+  twoStopMeter: true,
+  meterValue() { return state.meterValue; },
+  contactWindow() { return contactWindowForShot(); },
+  contactQuality(value, window = contactWindowForShot()) { return contactQualityAt(value, window); }
+});

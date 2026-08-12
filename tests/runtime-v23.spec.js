@@ -31,13 +31,13 @@ test("V23 boots from static modules without browser-time source execution", asyn
   });
 
   await page.goto("/index.html");
-  await page.waitForFunction(() => window.__footballLabReleaseV23?.build === "23.0.0", null, {
+  await page.waitForFunction(() => window.__footballLabReleaseV25?.build === "25.0.0", null, {
     timeout: 20000
   });
 
   const runtime = await page.evaluate(() => ({
     generated: window.__footballLabRuntimeV23,
-    release: window.__footballLabReleaseV23,
+    release: window.__footballLabReleaseV25,
     captureMode: window.__footballLabRuntimeCaptureMode,
     javascriptBlobCount: window.__footballLabJavascriptBlobCountV23,
     startupError: window.__footballLabStartupError
@@ -45,7 +45,7 @@ test("V23 boots from static modules without browser-time source execution", asyn
 
   expect(runtime.generated).toMatchObject({ staticModules: true });
   expect(runtime.release).toEqual({
-    build: "23.0.0",
+    build: "25.0.0",
     runtime: "static-es-modules",
     legacySourceExecution: false
   });
@@ -59,7 +59,7 @@ test("V23 boots from static modules without browser-time source execution", asyn
   expect(errors).toEqual([]);
 });
 
-test("V23 static runtime preserves the playable five-life flow", async ({ page }) => {
+test("V23 static runtime preserves the playable unlimited-run flow", async ({ page }) => {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.addInitScript(() => {
@@ -67,7 +67,7 @@ test("V23 static runtime preserves the playable five-life flow", async ({ page }
   });
 
   await page.goto("/index.html");
-  await page.waitForFunction(() => window.__footballLabReleaseV23?.build === "23.0.0", null, {
+  await page.waitForFunction(() => window.__footballLabReleaseV25?.build === "25.0.0", null, {
     timeout: 20000
   });
   await page.locator("#playClassic").click();
@@ -75,28 +75,27 @@ test("V23 static runtime preserves the playable five-life flow", async ({ page }
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
-  await expect(page.locator("#livesValue")).toContainText("● ● ● ● ●");
+  await expect(page.locator("#livesValue")).toHaveText("0");
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 5000 });
 
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
+  await expect(page.locator("#phaseTitle")).toHaveText("PLAN THE STRIKE");
   await page.waitForTimeout(90);
-  await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("AIM SHOT");
-  await page.waitForTimeout(90);
-  await expect(page.locator("#aimPlannerV322")).toBeVisible();
+  await expect(page.locator("#strikeConsoleV324")).toBeVisible();
 
   const contracts = await page.evaluate(() => ({
     main: window.__footballLabMainV19,
     fastFlow: window.__footballLabFastFlowV174,
     precision: window.__footballLabInputPrecisionV18,
     physics: window.__footballLabPhysicsRouteV19,
-    renderer: window.__footballLabRendererV1731
+    renderer: window.__footballLabRendererV1731,
+    strike: window.__footballLabStrikeV324
   }));
   expect(contracts.main).toBe(true);
   expect(contracts.fastFlow.stageIntroMs).toBe(700);
   expect(contracts.precision.eventTimeSampling).toBe(true);
   expect(contracts.physics.worldDistanceResampling).toBe(true);
   expect(contracts.renderer).toBe(true);
+  expect(contracts.strike.solvedTrajectory).toBe(false);
   expect(errors).toEqual([]);
 });

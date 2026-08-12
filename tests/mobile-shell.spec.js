@@ -42,7 +42,7 @@ test("phone portrait keeps the mobile HUD, control status and action button visi
   await startClassicRun(page, { width: 390, height: 844 });
 
   await expect(page.locator("#mobileGameHudV161")).toBeVisible();
-  await expect(page.locator("#mobileRunStripV161")).toBeVisible();
+  await expect(page.locator("#mobileRunStripV161")).toBeHidden();
   await expect(page.locator(".mobile-fullscreen-v161")).toBeVisible();
   await expect.poll(() => page.evaluate(() => Boolean(document.getElementById("mobileGameShellCompactStylesV161")?.sheet))).toBe(true);
 
@@ -61,8 +61,8 @@ test("phone portrait keeps the mobile HUD, control status and action button visi
 
   expect(metrics.actionBottom).not.toBeNull();
   expect(metrics.actionBottom).toBeLessThan(metrics.viewportHeight);
-  expect(metrics.frameRatio).toBeGreaterThan(.56);
-  expect(metrics.frameRatio).toBeLessThan(.65);
+  expect(metrics.frameRatio).toBeGreaterThan(.75);
+  expect(metrics.frameRatio).toBeLessThan(1.2);
   expect(metrics.hudRatio).not.toBeNull();
   expect(metrics.hudRatio).toBeLessThan(.34);
 });

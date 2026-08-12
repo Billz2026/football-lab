@@ -7,6 +7,7 @@
     "build:runtime:v23": "node scripts/run-capture-runtime-v23.mjs",
     "verify:runtime:v23": "node scripts/verify-runtime-v23.mjs",
     "verify:build:32.3": "node scripts/verify-build-32-3.mjs",
+    "verify:build:32.4": "node scripts/verify-build-32-4.mjs",
     "test:browser": "playwright test"
   },
   "devDependencies": {

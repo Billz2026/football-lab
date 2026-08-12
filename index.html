@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Football Lab" />
-  <meta name="description" content="Football Lab is a polished arcade free-kick game. Lock power, aim the finish and shape the complete route on one clear screen." />
+  <meta name="description" content="Football Lab is a polished arcade free-kick game. Aim on the live pitch, shape the curl, then execute power and contact." />
   <meta name="application-name" content="Football Lab" />
   <meta name="author" content="Football Lab" />
   <meta name="robots" content="index,follow,max-image-preview:large" />
@@ -18,7 +18,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Football Lab" />
   <meta property="og:title" content="Football Lab | Arcade Free Kicks" />
-  <meta property="og:description" content="Lock power, aim the finish and shape the route. Beat escalating walls and keepers, build your streak and chase a new personal best." />
+  <meta property="og:description" content="Aim on the live pitch, shape the curl and master a two-stop strike meter against escalating walls and keepers." />
   <meta property="og:url" content="https://billz2026.github.io/football-lab/index.html" />
   <meta property="og:image" content="https://billz2026.github.io/football-lab/social-card.svg" />
   <meta property="og:image:width" content="1200" />
@@ -26,7 +26,7 @@
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Football Lab | Arcade Free Kicks" />
-  <meta name="twitter:description" content="Lock power, aim the finish and shape the route in a fast browser-based free-kick challenge." />
+  <meta name="twitter:description" content="Aim, curl and execute the strike in a fast browser-based free-kick challenge." />
   <meta name="twitter:image" content="https://billz2026.github.io/football-lab/social-card.svg" />
 
   <title>Football Lab | Arcade Free Kicks</title>
@@ -35,7 +35,7 @@
   <link rel="apple-touch-icon" href="./icons/football-lab-192.svg?v=161" />
   <link rel="stylesheet" href="./style.css?v=2" />
   <link rel="stylesheet" href="./product-polish-v22.css?v=22" />
-  <link rel="stylesheet" href="./game/aiming-v32-2.css?v=32.3" />
+  <link rel="stylesheet" href="./game/strike-v32-4.css?v=32.4" />
 </head>
 <body>
   <a class="skip-link-v22" href="#menuScreen">Skip to game menu</a>
@@ -61,7 +61,7 @@
             <div class="hero-light" aria-hidden="true"></div>
             <div class="eyebrow"><span></span> ORIGINAL ARCADE FOOTBALL</div>
             <h1 id="menuTitle">MASTER<br />THE STRIKE.</h1>
-            <p class="hero-copy">Two clear steps decide everything: lock power, then use unrestricted aiming and live bend control together. Progress at your own pace and submit the run when ready.</p>
+            <p class="hero-copy">Plan the free kick on the live pitch, then execute it: stop power and contact under pressure. The game shows the situation—not the answer.</p>
             <div class="hero-actions">
               <button class="button button-primary button-large" id="playClassic" type="button"><span>PLAY CLASSIC KICKS</span><b aria-hidden="true">→</b></button>
               <button class="button button-secondary" id="howToPlay" type="button">HOW TO PLAY</button>
@@ -106,7 +106,7 @@
           <div class="mode-grid">
             <button class="mode-card mode-card-active" id="classicCard" type="button">
               <span class="mode-number">01</span><span class="mode-status">PLAYABLE</span><span class="mode-icon" aria-hidden="true">◎</span>
-              <strong>CLASSIC KICKS</strong><small>Choose a specialist, lock power, then aim and shape the complete route on one screen.</small><span class="mode-cta">SELECT KICKER <b>→</b></span>
+              <strong>CLASSIC KICKS</strong><small>Choose a specialist, aim on the live pitch, then master the two-stop strike meter.</small><span class="mode-cta">SELECT KICKER <b>→</b></span>
             </button>
             <button class="mode-card" data-preview="Road to Glory" type="button">
               <span class="mode-number">02</span><span class="mode-status mode-status-muted">NEXT BUILD</span><span class="mode-icon" aria-hidden="true">◆</span>
@@ -140,17 +140,18 @@
           </div>
 
           <aside class="control-panel panel">
-            <div class="control-heading"><span class="section-label">SHOT CONTROL</span><h2 id="phaseTitle">READY</h2><p id="phaseHelp">Lock power, then aim the finish and shape the route together.</p></div>
+            <div class="control-heading"><span class="section-label">SHOT CONTROL</span><h2 id="phaseTitle">READY</h2><p id="phaseHelp">Aim and curl first. Then stop power and contact to execute the strike.</p></div>
             <div class="shot-steps" aria-label="Shot setup progress">
-              <div class="shot-step is-current" data-step="power"><span>1</span><div><strong>POWER</strong><small id="powerReadout">—</small></div></div>
-              <div class="shot-step" data-step="aim"><span>2</span><div><strong>AIM + BEND</strong><small id="aimReadout">—</small><small id="curveReadout">—</small></div></div>
+              <div class="shot-step is-current" data-step="aim"><span>1</span><div><strong>AIM + CURL</strong><small id="aimReadout">—</small><small id="curveReadout">—</small></div></div>
+              <div class="shot-step" data-step="power"><span>2</span><div><strong>POWER</strong><small id="powerReadout">—</small></div></div>
+              <div class="shot-step" data-step="contact"><span>3</span><div><strong>CONTACT</strong><small id="contactReadout">—</small></div></div>
             </div>
             <div class="meter-wrap">
               <div class="meter-label"><span id="meterLabel">SHOT METER</span><strong id="meterNumber">0%</strong></div>
               <div class="meter"><span id="meterFill"></span><i id="meterMarker"></i></div>
             </div>
             <button class="button button-primary action-button" id="shotAction" type="button">START SHOT</button>
-            <p class="input-note">Keyboard: arrows/WASD aim · Q/E bend · SPACE shoots.</p>
+            <p class="input-note">Keyboard: arrows/WASD aim · Q/E curl · SPACE locks each step.</p>
           </aside>
         </div>
       </section>
@@ -161,10 +162,11 @@
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-card panel">
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
-      <span class="section-label">HOW TO PLAY</span><h2 id="howTitle">TWO CLEAR STEPS. ONE SHOT.</h2>
+      <span class="section-label">HOW TO PLAY</span><h2 id="howTitle">PLAN IT. THEN EXECUTE IT.</h2>
       <ol>
-        <li><span>1</span><div><strong>Power</strong><p>Stop the meter in the clean-contact zone. Power controls pace—not the target height.</p></div></li>
-        <li><span>2</span><div><strong>Aim + bend</strong><p>Drag the target to the intended finish, then choose Over Wall, Around Left or Around Right—or adjust bend manually. The exact live route shows whether the wall is clear.</p></div></li>
+        <li><span>1</span><div><strong>Aim + curl</strong><p>Tap the live goal to choose an intended finish, then shape the strike with the curl dial. Only the early launch is shown.</p></div></li>
+        <li><span>2</span><div><strong>Power</strong><p>Press Strike and stop the first meter for pace. Overhit and underhit attempts change height and keeper reaction time.</p></div></li>
+        <li><span>3</span><div><strong>Contact</strong><p>Stop the returning meter inside the centre zone. Extreme curl, distance and later stages tighten the window.</p></div></li>
       </ol>
       <button class="button button-primary" id="modalPlay" type="button">CHOOSE KICKER</button>
     </div>
@@ -193,6 +195,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=32.3" defer></script>
+  <script src="./app.js?v=32.4" defer></script>
 </body>
 </html>

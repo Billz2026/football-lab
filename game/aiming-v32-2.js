@@ -6,17 +6,17 @@ import {
   elements,
   idealPower,
   state
-} from "./core-v6.js?v=32.3";
-import { previewShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.3";
-import { GOAL, ballWorld, keeperWorld } from "./world-v7.js?v=32.3";
-import { buildWallLayout, wallForStage } from "./walls-v15.js?v=32.3";
+} from "./core-v6.js?v=32.4";
+import { previewShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.4";
+import { GOAL, ballWorld, keeperWorld } from "./world-v7.js?v=32.4";
+import { buildWallLayout, wallForStage } from "./walls-v15.js?v=32.4";
 
-const BUILD = "32.3.0";
+const BUILD = "32.4.0";
 const VIEWBOX = Object.freeze({ width: 1000, height: 620 });
 const gameFrame = document.querySelector(".game-frame");
 
 if (!gameFrame || !elements.canvas || !elements.shotAction) {
-  throw new Error("Build 32.3 could not initialise the shot planner.");
+  throw new Error("Build 32.4 could not initialise the shot planner.");
 }
 
 const planner = document.createElement("section");

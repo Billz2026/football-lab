@@ -46,22 +46,19 @@ test("V21 exposes the gameplay clarity contract and overlay canvas", async ({ pa
   ).toBe(true);
 });
 
-test("V21 aim marker is prominent and confirms the locked target", async ({ page }) => {
+test("V21 keeps the live-pitch target clear without revealing the answer", async ({ page }) => {
   await startClassic(page);
 
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
-  await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("AIM SHOT");
-  await expect(page.locator("#aimPlannerV322")).toBeVisible();
+  await expect(page.locator("#phaseTitle")).toHaveText("PLAN THE STRIKE");
+  await expect(page.locator("#strikeConsoleV324")).toBeVisible();
 
-  const marker = await page.locator("#aimTargetV322").boundingBox();
-  expect(marker.width).toBeGreaterThanOrEqual(40);
-  expect(marker.height).toBeGreaterThanOrEqual(40);
-  await expect(page.locator("[data-aim-route='over']")).toHaveClass(/is-active/);
-  await expect(page.locator("#aimBendLabelV322")).toContainText("STRAIGHT");
+  await expect(page.locator("#gameCanvas")).toBeVisible();
+  await expect(page.locator("#strikeCurveLabelV324")).toContainText("CLEAN STRIKE");
+  await expect(page.locator("[data-aim-route]")).toHaveCount(0);
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabAimFrameV322?.active),
+    () => page.evaluate(() => window.__footballLabStrikeFrameV324?.active),
     { timeout: 1000 }
   ).toBe(true);
+  expect(await page.evaluate(() => window.__footballLabStrikeFrameV324?.prediction)).toBeNull();
 });

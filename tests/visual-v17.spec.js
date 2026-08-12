@@ -59,8 +59,8 @@ async function canvasSignature(page) {
       opaqueCoverage: opaqueSamples / sampleCount,
       filter: getComputedStyle(canvas).filter,
       visualBuild: document.documentElement.dataset.visualBuild,
-      renderedAt: window.__footballLabVisibleKickersV1731?.time || 0,
-      visibleKickers: window.__footballLabVisibleKickersV1731?.total ?? 0
+      renderedAt: window.__footballLabVisibleKickersV30?.time || 0,
+      visibleKickers: window.__footballLabVisibleKickersV30?.total ?? 0
     };
   });
 }
@@ -90,17 +90,19 @@ test("V17 boots the cinematic renderer and produces a graded stadium frame", asy
   expect(errors).toEqual([]);
 });
 
-test("V17 completes the two-step Build 32.3 shot without breaking the renderer", async ({ page }) => {
+test("V17 completes the Build 32.4 aim, power and contact flow without breaking the renderer", async ({ page }) => {
   const errors = await startRun(page);
   const action = page.locator("#shotAction");
 
   await action.click();
-  await expect(page.locator("#phaseTitle")).toContainText(/POWER/);
-  await page.waitForTimeout(140);
-  await action.click();
-  await expect(page.locator("#phaseTitle")).toContainText(/AIM SHOT/);
+  await expect(page.locator("#phaseTitle")).toContainText(/PLAN THE STRIKE/);
+  await page.locator("#strikeStartV324").click();
+  await expect(page.locator("#phaseTitle")).toContainText(/STOP POWER/);
   await page.waitForTimeout(130);
-  await page.locator("#aimTakeShotV322").click();
+  await action.click();
+  await expect(page.locator("#phaseTitle")).toContainText(/STOP CONTACT/);
+  await page.waitForTimeout(130);
+  await action.click();
   await expect(page.locator("#phaseTitle")).toContainText(/WATCH|FLIGHT/);
   await page.waitForTimeout(1800);
 
@@ -123,6 +125,6 @@ test("V17 retains the installed-game Fold layout and visible shot button", async
   });
 
   expect(metrics.actionBottom).toBeLessThan(metrics.viewportHeight);
-  expect(metrics.controlsLeft).toBeGreaterThanOrEqual(metrics.frameRight - 2);
+  expect(metrics.controlsLeft).toBeGreaterThanOrEqual(8);
   expect(errors).toEqual([]);
 });

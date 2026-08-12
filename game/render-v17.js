@@ -1,9 +1,9 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./render-v15.js?v=15";
-import { clamp, WORLD, state, ctx, canvasView, easeOutCubic } from "./core-v6.js?v=32.3";
-import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.3";
-import { projectWorld, projectSegment } from "./projection-v6.js?v=32.3";
+import { clamp, WORLD, state, ctx, canvasView, easeOutCubic } from "./core-v6.js?v=32.4";
+import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.4";
+import { projectWorld, projectSegment } from "./projection-v6.js?v=32.4";
 import { sampleShotPath } from "./physics-v7.js?v=7";
-import { buildWallLayout } from "./walls-v15.js?v=32.3";
+import { buildWallLayout } from "./walls-v15.js?v=32.4";
 
 export { resizeCanvas };
 

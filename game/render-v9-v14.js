@@ -1,5 +1,5 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./render-v14-base.js?v=14";
-import { WORLD, state, ctx } from "./core-v6.js?v=32.3";
+import { WORLD, state, ctx } from "./core-v6.js?v=32.4";
 
 export { resizeCanvas };
 

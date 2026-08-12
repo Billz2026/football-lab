@@ -1,4 +1,4 @@
-import { state, idealPower } from "./core-v6.js?v=32.3";
+import { state, idealPower } from "./core-v6.js?v=32.4";
 
 const meter = document.querySelector(".meter");
 const meterWrap = document.querySelector(".meter-wrap");
@@ -130,7 +130,15 @@ function guideForPhase(phase) {
       key: phase,
       left: "0",
       width: "0",
-      copy: "<span>OUTSIDE LEFT</span><strong>DIRECT 2D AIM</strong><span>OUTSIDE RIGHT</span>"
+      copy: "<span>LIVE PITCH</span><strong>SET TARGET + CURL</strong><span>NO SOLVED ROUTE</span>"
+    };
+  }
+  if (phase === "contact") {
+    return {
+      key: `${phase}:${Number(state.shot?.contactWindow || 0).toFixed(4)}`,
+      left: "0",
+      width: "0",
+      copy: "<span>EARLY</span><strong>MEET THE CENTRE ZONE</strong><span>LATE</span>"
     };
   }
   if (phase === "curve") {
@@ -145,7 +153,7 @@ function guideForPhase(phase) {
     key: phase,
     left: "0",
     width: "0",
-    copy: "<span>LOCK POWER</span><strong>INPUT PRECISION</strong><span>2 STEPS</span>"
+    copy: "<span>PLAN</span><strong>POWER + CONTACT</strong><span>3 STEPS</span>"
   };
 }
 
@@ -163,7 +171,7 @@ function renderGuide() {
     lastGuideKey = guide.key;
   }
 
-  if (["power", "aim", "curve"].includes(previousPhase) && previousPhase !== phase) {
+  if (["power", "aim", "contact", "curve"].includes(previousPhase) && previousPhase !== phase) {
     flashLockedMarker();
   }
   previousPhase = phase;
@@ -174,6 +182,8 @@ window.__footballLabPrecisionUiV18 = {
   powerWindowPercent: 7,
   aimThirdsVisible: false,
   directTwoDimensionalAim: true,
+  livePitchAim: true,
+  contactTimingZone: true,
   curveNeutralWindowPercent: 12,
   phaseDrivenDomWrites: true,
   guideWrites

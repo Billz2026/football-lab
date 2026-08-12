@@ -51,12 +51,15 @@ test("V32 completes a real shot with ball-follow presentation and no runtime err
   const errors = collectRuntimeErrors(page);
   await startMatch(page);
 
-  for (const phase of ["SET POWER", "AIM SHOT"]) {
-    await page.locator("#shotAction").click();
-    await expect(page.locator("#phaseTitle")).toHaveText(phase);
-    await page.waitForTimeout(110);
-  }
-  await page.locator("#aimTakeShotV322").click();
+  await page.locator("#shotAction").click();
+  await expect(page.locator("#phaseTitle")).toHaveText("PLAN THE STRIKE");
+  await page.locator("#strikeStartV324").click();
+  await expect(page.locator("#phaseTitle")).toHaveText("STOP POWER");
+  await page.waitForTimeout(110);
+  await page.locator("#shotAction").click();
+  await expect(page.locator("#phaseTitle")).toHaveText("STOP CONTACT");
+  await page.waitForTimeout(110);
+  await page.locator("#shotAction").click();
   await expect(page.locator("#phaseTitle")).toHaveText("WATCH THE FLIGHT");
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCameraV32?.ballFollow),
@@ -74,7 +77,7 @@ test("V32 renders catch recovery and chapter-complete presentation states", asyn
   await startMatch(page);
 
   await page.evaluate(async () => {
-    const { state } = await import("/game/core-v6.js?v=32.3");
+    const { state } = await import("/game/core-v6.js?v=32.4");
     const startedAt = performance.now() - 1150;
     state.shot = {
       ...state.shot,
@@ -113,7 +116,7 @@ test("V32 renders catch recovery and chapter-complete presentation states", asyn
   ).toBe("CATCH");
 
   await page.evaluate(async () => {
-    const { state } = await import("/game/core-v6.js?v=32.3");
+    const { state } = await import("/game/core-v6.js?v=32.4");
     state.animation = null;
     state.presentation = {
       phase: "chapter-complete",

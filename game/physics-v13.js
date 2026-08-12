@@ -8,11 +8,11 @@ function replaceRequired(label, before, after) {
   source = source.replace(before, after);
 }
 
-const characterImport = `import { activeCharacter, characterPhysics } from "${new URL("./characters-v13.js?v=32.3", import.meta.url).href}";`;
+const characterImport = `import { activeCharacter, characterPhysics } from "${new URL("./characters-v13.js?v=32.4", import.meta.url).href}";`;
 replaceRequired(
   "character import",
-  'import { difficultyForStage } from "./difficulty-v9.js?v=32.3";',
-  `import { difficultyForStage } from "./difficulty-v9.js?v=32.3";\n${characterImport}`
+  'import { difficultyForStage } from "./difficulty-v9.js?v=32.4";',
+  `import { difficultyForStage } from "./difficulty-v9.js?v=32.4";\n${characterImport}`
 );
 
 replaceRequired(

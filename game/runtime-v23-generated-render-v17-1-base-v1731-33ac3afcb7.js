@@ -1,17 +1,17 @@
 import {
   clamp, lerp, WORLD, state, elements, ctx, canvasView,
   currentAimTarget, easeInOutCubic, easeOutCubic
-} from "./core-v6.js?v=32.3";
+} from "./core-v6.js?v=32.4";
 import {
   GOAL, PITCH, buildCamera, ballWorld, buildWall, keeperWorld,
   kickerWorld, supportingPlayers
-} from "./world-v7.js?v=32.3";
-import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=32.3";
-import { sampleShotPath } from "./physics-v7.js?v=32.3";
-import { playKickSound } from "./audio-v6.js?v=32.3";
-import { activeCharacter } from "./characters-v13.js?v=32.3";
-import { keeperForStage } from "./keepers-v14.js?v=32.3";
-import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.3";
+} from "./world-v7.js?v=32.4";
+import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=32.4";
+import { sampleShotPath } from "./physics-v7.js?v=32.4";
+import { playKickSound } from "./audio-v6.js?v=32.4";
+import { activeCharacter } from "./characters-v13.js?v=32.4";
+import { keeperForStage } from "./keepers-v14.js?v=32.4";
+import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.4";
 
 let activeCamera;
 const viewport = { width: WORLD.width, height: WORLD.height };
@@ -999,17 +999,32 @@ function targetWorld() {
 
 function drawAimGuide() {
   if (state.phase !== "aim") return;
-  const start = projectWorld(ballWorld(state.currentStage), activeCamera, viewport);
-  const end = projectWorld(targetWorld(), activeCamera, viewport);
+  const guideProgress = state.controlMode === "guided" ? 0.55 : state.controlMode === "expert" ? 0 : 0.32;
+  if (guideProgress <= 0) return;
+  const startWorld = ballWorld(state.currentStage);
+  const finishWorld = targetWorld();
+  const curve = clamp(state.shot?.previewCurve || 0, -1, 1);
+  const guideWorld = {
+    x: lerp(startWorld.x, finishWorld.x, guideProgress) + curve * 0.22,
+    y: lerp(startWorld.y, finishWorld.y, guideProgress) + Math.sin(Math.PI * guideProgress) * 0.55,
+    z: lerp(startWorld.z, finishWorld.z, guideProgress)
+  };
+  const start = projectWorld(startWorld, activeCamera, viewport);
+  const end = projectWorld(guideWorld, activeCamera, viewport);
   if (!start.visible || !end.visible) return;
   ctx.save();
-  ctx.strokeStyle = "rgba(218,254,77,.13)";
-  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = "rgba(218,254,77,.28)";
+  ctx.lineWidth = 1.5;
   ctx.setLineDash([5, 8]);
   ctx.beginPath();
   ctx.moveTo(start.x, start.y);
   ctx.lineTo(end.x, end.y);
   ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "rgba(218,254,77,.5)";
+  ctx.beginPath();
+  ctx.arc(end.x, end.y, 2.4, 0, TAU);
+  ctx.fill();
   ctx.restore();
 }
 

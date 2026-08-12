@@ -8,12 +8,12 @@ function replaceRequired(label, before, after) {
   source = source.replace(before, after);
 }
 
-const characterImport = `import { activeCharacter, characterPhysics } from "${new URL("./characters-v13.js?v=32.3", import.meta.url).href}";`;
-const keeperImport = `import { keeperForStage } from "${new URL("./keepers-v14.js?v=32.3", import.meta.url).href}";`;
+const characterImport = `import { activeCharacter, characterPhysics } from "${new URL("./characters-v13.js?v=32.4", import.meta.url).href}";`;
+const keeperImport = `import { keeperForStage } from "${new URL("./keepers-v14.js?v=32.4", import.meta.url).href}";`;
 replaceRequired(
   "ability imports",
-  'import { difficultyForStage } from "./difficulty-v9.js?v=32.3";',
-  `import { difficultyForStage } from "./difficulty-v9.js?v=32.3";\n${characterImport}\n${keeperImport}`
+  'import { difficultyForStage } from "./difficulty-v9.js?v=32.4";',
+  `import { difficultyForStage } from "./difficulty-v9.js?v=32.4";\n${characterImport}\n${keeperImport}`
 );
 
 replaceRequired(

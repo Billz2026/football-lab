@@ -1,0 +1,194 @@
+.strike-console-v324 {
+  position: absolute;
+  z-index: 34;
+  left: 50%;
+  bottom: 12px;
+  width: min(720px, calc(100% - 24px));
+  transform: translate(-50%, 12px);
+  padding: 12px 14px 10px;
+  border: 1px solid rgba(218, 254, 77, .24);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(6, 15, 10, .94), rgba(10, 27, 18, .92));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .42), inset 0 1px rgba(255, 255, 255, .04);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease, visibility .18s;
+}
+
+.strike-console-v324[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.strike-console-top-v324,
+.strike-dial-row-v324,
+.strike-compact-guide-v324 { display: flex; align-items: center; }
+
+.strike-console-top-v324 {
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(255, 255, 255, .075);
+}
+
+.strike-target-copy-v324 { display: grid; gap: 1px; min-width: 0; }
+.strike-target-copy-v324 span,
+.strike-shape-copy-v324 span,
+.strike-mode-v324 span {
+  color: rgba(234, 246, 231, .48);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .15em;
+}
+.strike-target-copy-v324 strong,
+.strike-shape-copy-v324 strong { color: #f4faef; font-size: 13px; letter-spacing: .04em; }
+.strike-target-copy-v324 small,
+.strike-shape-copy-v324 small { color: rgba(234, 246, 231, .58); font-size: 9px; }
+
+.strike-mode-v324 {
+  display: grid;
+  gap: 1px;
+  min-width: 92px;
+  padding: 7px 10px;
+  border: 1px solid rgba(218, 254, 77, .22);
+  border-radius: 10px;
+  background: rgba(218, 254, 77, .06);
+  color: #dafe4d;
+  text-align: left;
+  cursor: pointer;
+}
+.strike-mode-v324 strong { font-size: 10px; letter-spacing: .08em; }
+
+.strike-dial-row-v324 { gap: 14px; min-height: 104px; }
+.strike-dial-v324 { position: relative; flex: 0 0 226px; height: 108px; }
+.strike-dial-v324 svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.strike-dial-track-v324,
+.strike-dial-zone-v324 { fill: none; stroke-linecap: round; stroke-width: 8; }
+.strike-dial-track-v324 { stroke: rgba(234, 246, 231, .13); }
+.strike-dial-zone-v324 { stroke: url("#none"); stroke: rgba(218, 254, 77, .34); stroke-width: 2; }
+.strike-dial-ticks-v324 { fill: none; stroke: rgba(234, 246, 231, .32); stroke-width: 2; }
+.strike-needle-v324 {
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  width: 2px;
+  height: 76px;
+  transform-origin: 50% 100%;
+  background: linear-gradient(to top, #dafe4d, #fff);
+  box-shadow: 0 0 12px rgba(218, 254, 77, .52);
+  transition: transform .05s linear;
+}
+.strike-needle-v324 b {
+  position: absolute;
+  left: 50%; bottom: -7px;
+  width: 15px; height: 15px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #dafe4d;
+  box-shadow: 0 0 0 4px rgba(218, 254, 77, .13);
+}
+.strike-dial-v324 > span { position: absolute; bottom: 1px; color: rgba(234, 246, 231, .46); font-size: 8px; font-weight: 900; letter-spacing: .08em; }
+.strike-dial-left-v324 { left: 10px; }
+.strike-dial-centre-v324 { left: 50%; transform: translateX(-50%); color: #dafe4d !important; }
+.strike-dial-right-v324 { right: 6px; }
+.strike-dial-v324 input { position: absolute; inset: 4px 0 0; width: 100%; height: 92px; opacity: 0; cursor: ew-resize; touch-action: none; }
+
+.strike-shape-copy-v324 { display: grid; flex: 1; gap: 4px; min-width: 130px; }
+.strike-start-v324 { min-width: 170px; min-height: 58px; display: grid; align-content: center; gap: 1px; }
+.strike-start-v324 span { font-size: 16px; letter-spacing: .08em; }
+.strike-start-v324 small { font-size: 8px; opacity: .65; letter-spacing: .07em; }
+
+.strike-compact-guide-v324 {
+  justify-content: center;
+  gap: 8px;
+  padding-top: 4px;
+  color: rgba(234, 246, 231, .48);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+.strike-compact-guide-v324 b { color: #dafe4d; }
+.strike-compact-guide-v324 i { width: 26px; height: 1px; background: rgba(218, 254, 77, .2); }
+
+.contact-zone-v324 {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: var(--contact-window-v324, 20%);
+  transform: translateX(-50%);
+  border: 1px solid rgba(116, 219, 255, .68);
+  border-radius: 7px;
+  background:
+    linear-gradient(90deg, transparent calc(50% - var(--perfect-window-v324, 7%) / 2), rgba(218, 254, 77, .38) 0 calc(50% + var(--perfect-window-v324, 7%) / 2), transparent 0),
+    rgba(116, 219, 255, .11);
+  box-shadow: 0 0 20px rgba(116, 219, 255, .14);
+  opacity: 0;
+  pointer-events: none;
+}
+
+html[data-strike-phase-v324="contact"] .contact-zone-v324 { opacity: 1; }
+html[data-strike-phase-v324="aim"] #shotAction { display: none; }
+html[data-strike-phase-v324="aim"] .meter-wrap { opacity: .32; }
+html[data-strike-phase-v324="contact"] .meter #meterFill { background: linear-gradient(90deg, #74dcff, #dafe4d 50%, #74dcff); }
+
+@media (max-width: 900px) {
+  .strike-console-v324 { width: calc(100% - 16px); bottom: 8px; padding: 9px 10px 7px; border-radius: 14px; }
+  .strike-dial-row-v324 { gap: 8px; min-height: 84px; }
+  .strike-dial-v324 { flex-basis: 166px; height: 82px; transform: scale(.9); transform-origin: left center; margin-right: -16px; }
+  .strike-start-v324 { min-width: 132px; min-height: 50px; padding-inline: 12px; }
+  .strike-shape-copy-v324 { min-width: 100px; }
+}
+
+@media (max-width: 620px) {
+  body.is-game-active .screen-game .control-panel {
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 8px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    grid-template-areas: "steps" "meter" "action" !important;
+    gap: 6px !important;
+    align-items: stretch !important;
+  }
+  body.is-game-active .screen-game .control-heading,
+  body.is-game-active .screen-game .run-rules-v152,
+  body.is-game-active .screen-game .active-wall-chip-v15,
+  body.is-game-active .screen-game .infinite-rules-v25,
+  body.is-game-active .screen-game .mobile-run-strip-v161 { display: none !important; }
+  body.is-game-active .screen-game .shot-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    margin: 0 !important;
+  }
+  body.is-game-active .screen-game .shot-step { padding: 6px 5px !important; }
+  body.is-game-active .screen-game .meter-wrap { margin: 0 !important; }
+  body.is-game-active .screen-game .action-button {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+  .strike-console-v324 { bottom: 5px; width: calc(100% - 10px); padding: 7px 8px 6px; }
+  .strike-console-top-v324 { padding-bottom: 4px; }
+  .strike-target-copy-v324 small { display: none; }
+  .strike-mode-v324 { min-width: 76px; padding: 5px 7px; }
+  .strike-dial-row-v324 { display: grid; grid-template-columns: 1fr 112px; gap: 4px 7px; min-height: 77px; }
+  .strike-dial-v324 { grid-row: span 2; width: 160px; height: 76px; transform: scale(.82); margin: -4px -22px -5px -8px; }
+  .strike-shape-copy-v324 { align-self: end; gap: 1px; }
+  .strike-shape-copy-v324 strong { font-size: 10px; }
+  .strike-shape-copy-v324 small { font-size: 7px; }
+  .strike-start-v324 { min-width: 0; min-height: 35px; padding: 5px 8px; align-self: start; }
+  .strike-start-v324 span { font-size: 13px; }
+  .strike-start-v324 small { display: none; }
+  .strike-compact-guide-v324 { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strike-console-v324,
+  .strike-needle-v324 { transition: none; }
+}

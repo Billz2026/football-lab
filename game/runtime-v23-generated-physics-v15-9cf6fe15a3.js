@@ -1,11 +1,11 @@
 import {
   clamp, lerp, smoothStep, state, stageConfig, idealPower, strikeQuality, strikeQualityLabel
-} from "./core-v6.js?v=32.3";
-import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=32.3";
-import { difficultyForStage } from "./difficulty-v9.js?v=32.3";
-import { activeCharacter, characterPhysics } from "./characters-v13.js?v=32.3";
-import { keeperForStage } from "./keepers-v14.js?v=32.3";
-import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.3";
+} from "./core-v6.js?v=32.4";
+import { GOAL, ballWorld, buildWall, keeperWorld } from "./world-v7.js?v=32.4";
+import { difficultyForStage } from "./difficulty-v9.js?v=32.4";
+import { activeCharacter, characterPhysics } from "./characters-v13.js?v=32.4";
+import { keeperForStage } from "./keepers-v14.js?v=32.4";
+import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.4";
 
 const BALL_RADIUS = 0.11;
 const SAMPLE_COUNT = 220;
@@ -66,35 +66,43 @@ function targetFromInputs(profile) {
   const modifiers = characterPhysics();
   const power = clamp(shot.power ?? idealPower(), 0, 1);
   const ideal = idealPower();
-  const quality = strikeQuality(power);
+  const powerQuality = strikeQuality(power);
+  const contactQuality = clamp(Number.isFinite(shot.contactQuality) ? shot.contactQuality : 1, 0.06, 1);
+  const quality = Math.sqrt(powerQuality * contactQuality);
   const rawCurve = clamp((shot.curve ?? 0) * modifiers.curveStrength, -1.15, 1.15);
   const curve = signedCurve(rawCurve);
   const powerDelta = power - ideal;
   const controlPenalty = 1 - quality;
   const excessiveCurve = Math.max(0, Math.abs(rawCurve) - (0.58 + modifiers.excessiveCurveAllowance));
   const deterministicSide = ((state.stage + (shot.aimX > 0.5 ? 1 : 0)) % 2 === 0) ? 1 : -1;
+  const contactOffset = clamp(Number(shot.contactOffset) || 0, -1, 1);
 
   const selectedX = -GOAL.halfWidth + shot.aimX * GOAL.width;
   const selectedY = GOAL.height * (1 - shot.aimY);
   const routeBend = curve * (0.66 + stage.distanceYards * 0.055);
   const finalWind = state.stageWind * (0.21 + stage.distanceYards * 0.006);
-  const underhitDrop = power < 0.28 ? smoothStep((0.28 - power) / 0.28) * 0.08 : 0;
-  const overhitRise = power > 0.94 ? smoothStep((power - 0.94) / 0.06) * 0.04 : 0;
+  const powerHeightDrift = -powerDelta * 0.35;
 
   const contactError = profile.contactError * modifiers.contactError;
   const powerDrift = powerDelta * 0.13 * contactError;
   const curveDrift = deterministicSide * excessiveCurve * controlPenalty * 0.87 * contactError;
   const qualityDrift = deterministicSide * controlPenalty * 0.17 * contactError;
-  const horizontalDriftMetres = powerDrift + curveDrift + qualityDrift;
-  const verticalContactDrift = excessiveCurve * controlPenalty * 0.13;
-  const verticalDriftMetres = (underhitDrop - overhitRise) * GOAL.height + verticalContactDrift;
+  const timingDrift = contactOffset
+    * (0.28 + stage.distanceYards * 0.014 + Math.abs(rawCurve) * 0.46)
+    * contactError;
+  const horizontalDriftMetres = powerDrift + curveDrift + qualityDrift + timingDrift;
+  const verticalTimingDrift = contactOffset * (0.045 + Math.abs(rawCurve) * 0.035) * contactError;
+  const verticalContactDrift = excessiveCurve * controlPenalty * 0.13 + verticalTimingDrift;
+  const verticalDriftMetres = (powerHeightDrift + verticalContactDrift) * GOAL.height;
 
   shot.strikeQuality = quality;
-  shot.speedMps = lerp(15.5, 36.5, smoothStep(power)) * lerp(0.86, 1, quality) * modifiers.shotSpeed;
+  const curvePacePenalty = 1 - Math.max(0, Math.abs(rawCurve) - 0.42) * 0.17;
+  shot.speedMps = lerp(15.5, 36.5, smoothStep(power))
+    * lerp(0.82, 1, quality) * modifiers.shotSpeed * curvePacePenalty;
   shot.actualX = shot.aimX
     + finalWind / GOAL.width
     + horizontalDriftMetres / GOAL.width;
-  shot.actualY = shot.aimY + underhitDrop - overhitRise + verticalContactDrift / GOAL.height;
+  shot.actualY = shot.aimY + powerHeightDrift + verticalContactDrift;
 
   const target = {
     x: -GOAL.halfWidth + shot.actualX * GOAL.width,
@@ -108,7 +116,10 @@ function targetFromInputs(profile) {
     curveMetres: routeBend,
     windMetres: finalWind,
     drift: { x: horizontalDriftMetres, y: verticalDriftMetres },
-    excessiveCurve
+    excessiveCurve,
+    powerQuality,
+    contactQuality,
+    contactOffset
   };
 }
 
@@ -349,6 +360,7 @@ function pathWithKeeperContact(path, plan) {
 }
 
 function outcomeReason(shot, wallAnalysis, keeperPlan, target) {
+  if ((shot.contactQuality ?? 1) < 0.44 && shot.outcome !== "GOAL") return "Poor contact moved the ball away from the intended target.";
   if (shot.outcome === "WALL") return wallAnalysis.lane === "OVER" ? "Trajectory did not clear the jumping wall." : "Shot intersected the outside wall player.";
   if (shot.outcome === "SAVE") return keeperPlan.saveType === "CATCH" ? "Pace and placement allowed a clean catch." : "The goalkeeper reached the ball and parried it.";
   if (shot.outcome === "POST") return "Final target clipped the post.";
@@ -441,6 +453,11 @@ export function resolveShotPhysics() {
     challenge: profile.challenge,
     powerPercent: Math.round((shot.power ?? 0) * 100),
     powerQuality: strikeQualityLabel(shot.power ?? idealPower()),
+    powerExecution: Number(inputResult.powerQuality.toFixed(3)),
+    contactQuality: Number(inputResult.contactQuality.toFixed(3)),
+    contactTiming: Number.isFinite(shot.contactTiming) ? Number(shot.contactTiming.toFixed(3)) : null,
+    contactOffset: Number(inputResult.contactOffset.toFixed(3)),
+    contactWindow: Number.isFinite(shot.contactWindow) ? Number(shot.contactWindow.toFixed(3)) : null,
     strikeQuality: Number((shot.strikeQuality ?? 0).toFixed(3)),
     speedMps: Number(shot.speedMps.toFixed(2)),
     selectedTarget: {

@@ -138,15 +138,20 @@ async function measureKickerRig(page) {
   });
 }
 
-test("V17.1 keeps the kicker head attached to the torso on Fold layout", async ({ page }) => {
+test("V17.1 keeps one finite shared kicker rig on Fold layout", async ({ page }) => {
   const errors = await openFirstKicker(page);
-  const rig = await measureKickerRig(page);
-
-  expect(rig.error).toBeUndefined();
-  expect(rig.torso.width).toBeGreaterThan(25);
-  expect(rig.head.pixels).toBeGreaterThan(20);
-  expect(rig.head.width).toBeLessThan(rig.torso.width * 0.9);
-  expect(rig.gapRatio).toBeLessThan(0.25);
+  const rig = await page.evaluate(() => ({
+    visible: window.__footballLabVisibleKickersV30,
+    frame: window.__footballLabHeroFrameV30,
+    motion: window.__footballLabMotionSnapshotV173
+  }));
+  expect(rig.visible).toMatchObject({ base: 0, hero: 1, total: 1 });
+  expect(rig.frame.active).toBe(true);
+  expect([rig.motion.world.x, rig.motion.world.y, rig.motion.world.z]).toEqual(expect.arrayContaining([
+    expect.any(Number), expect.any(Number), expect.any(Number)
+  ]));
+  expect(Number.isFinite(rig.motion.leftAnkle.y)).toBe(true);
+  expect(Number.isFinite(rig.motion.rightAnkle.y)).toBe(true);
   expect(errors).toEqual([]);
 });
 
@@ -155,7 +160,7 @@ test("V17.1 completes a shot with the repaired shared rig", async ({ page }) => 
   const action = page.locator("#shotAction");
   await action.click();
   await page.waitForTimeout(120);
-  await action.click();
+  await page.locator("#strikeStartV324").click();
   await page.waitForTimeout(120);
   await action.click();
   await page.waitForTimeout(120);

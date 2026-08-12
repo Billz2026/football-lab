@@ -1,8 +1,8 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=32.3";
-import { drawHeroKicker } from "./runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js?v=32.3";
-import { activeCharacter } from "./characters-v13.js?v=32.3";
-import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.3";
-import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=32.3";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=32.4";
+import { drawHeroKicker } from "./runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js?v=32.4";
+import { activeCharacter } from "./characters-v13.js?v=32.4";
+import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
+import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=32.4";
 
 export { resizeCanvas };
 

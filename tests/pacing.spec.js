@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("fast-flow build loads and clears the opening stage reveal quickly", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("footballLabTutorialV22", "complete"));
   await page.goto("/index.html");
 
   await expect.poll(
@@ -10,6 +11,7 @@ test("fast-flow build loads and clears the opening stage reveal quickly", async 
 
   await page.locator("#playClassic").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
+  await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
 
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
@@ -26,6 +28,6 @@ test("fast-flow timing contract is exposed for regression checks", async ({ page
     stageIntroMs: 700,
     breakdownMs: 650,
     replayMs: 751,
-    replayPolicy: "top-corner-life-restored-or-frame"
+    replayPolicy: "top-corner-or-frame"
   });
 });

@@ -20,7 +20,7 @@ async function lockShotInputs(page) {
   const action = page.locator("#shotAction");
   await action.click();
   await page.waitForTimeout(130);
-  await action.click();
+  await page.locator("#strikeStartV324").click();
   await page.waitForTimeout(130);
   await action.click();
   await page.waitForTimeout(130);
@@ -30,17 +30,16 @@ async function lockShotInputs(page) {
 test("V17.3.1 renders exactly one Power Kicker at idle and during the shot", async ({ page }) => {
   const errors = await openPowerKicker(page);
 
-  await expect.poll(() => page.evaluate(() => window.__footballLabVisibleKickersV1731?.total), { timeout: 7000 }).toBe(1);
-  let rendererState = await page.evaluate(() => window.__footballLabVisibleKickersV1731);
+  await expect.poll(() => page.evaluate(() => window.__footballLabVisibleKickersV30?.total), { timeout: 7000 }).toBe(1);
+  let rendererState = await page.evaluate(() => window.__footballLabVisibleKickersV30);
   expect(rendererState).toMatchObject({ base: 0, hero: 1, total: 1, character: "dax-ryder" });
-  expect(await page.evaluate(() => window.__footballLabBaseKickerSuppressedV1731)).toBe(true);
 
   await lockShotInputs(page);
   await expect(page.locator("#phaseTitle")).toContainText(/WATCH|FLIGHT/);
-  await expect.poll(() => page.evaluate(() => window.__footballLabVisibleKickersV1731?.total), { timeout: 7000 }).toBe(1);
-  rendererState = await page.evaluate(() => window.__footballLabVisibleKickersV1731);
+  await expect.poll(() => page.evaluate(() => window.__footballLabVisibleKickersV30?.total), { timeout: 7000 }).toBe(1);
+  rendererState = await page.evaluate(() => window.__footballLabVisibleKickersV30);
   expect(rendererState).toMatchObject({ base: 0, hero: 1, total: 1, character: "dax-ryder" });
-  expect(await page.evaluate(() => window.__footballLabHeroFrameV1731?.active)).toBe(true);
+  expect(await page.evaluate(() => window.__footballLabHeroFrameV30?.active)).toBe(true);
   expect(errors).toEqual([]);
 });
 

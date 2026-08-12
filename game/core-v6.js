@@ -1,4 +1,4 @@
-import { scenarioForStage } from "./world-v6.js?v=32.3";
+import { scenarioForStage } from "./world-v6.js?v=32.4";
 
 export const $ = (selector, scope = document) => scope.querySelector(selector);
 export const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
@@ -62,7 +62,7 @@ export const elements = {
   windArrow: $("#windArrow"), windValue: $("#windValue"), resultBanner: $("#resultBanner"), canvasPrompt: $("#canvasPrompt"),
   phaseTitle: $("#phaseTitle"), phaseHelp: $("#phaseHelp"), meterFill: $("#meterFill"), meterMarker: $("#meterMarker"),
   meterLabel: $("#meterLabel"), meterNumber: $("#meterNumber"), powerReadout: $("#powerReadout"), aimReadout: $("#aimReadout"),
-  curveReadout: $("#curveReadout"), previewTitle: $("#previewTitle"), previewCopy: $("#previewCopy"), previewList: $("#previewList"),
+  curveReadout: $("#curveReadout"), contactReadout: $("#contactReadout"), previewTitle: $("#previewTitle"), previewCopy: $("#previewCopy"), previewList: $("#previewList"),
   finalScore: $("#finalScore"), finalStage: $("#finalStage"), finalStreak: $("#finalStreak"), finalBest: $("#finalBest"),
   gameOverTitle: $("#gameOverTitle")
 };
@@ -83,6 +83,7 @@ export function createShot() {
   return {
     power: null, aimX: null, aimY: null, curve: null, actualX: null, actualY: null,
     previewAimX: 0.5, previewAimY: 0.27, previewCurve: 0,
+    contactTiming: null, contactOffset: 0, contactQuality: null, contactWindow: null,
     outcome: null, points: 0, topCorner: false, path: [], impactIndex: null,
     collision: null, keeperPlan: null, saveType: null, strikeQuality: 0, speedMps: 0,
     lifeRestored: false
@@ -136,7 +137,7 @@ export function closeModal(modal) {
 }
 
 export function renderSteps() {
-  const order = ["power", "aim", "curve"];
+  const order = ["aim", "power", "contact"];
   const phaseIndex = order.indexOf(state.phase);
   $$(".shot-step").forEach((step, index) => {
     step.classList.toggle("is-current", (state.phase === "ready" && index === 0) || phaseIndex === index);
@@ -147,13 +148,14 @@ export function renderSteps() {
 export function setPhase(phase) {
   state.phase = phase;
   state.meterClock = 0;
-  state.meterValue = phase === "curve" ? 0.5 : 0;
+  state.meterValue = 0;
   const stage = stageConfig();
   const content = {
-    ready: ["READY", `${stage.chapterName} · ${stage.label}. Misses reset the streak, never your stage.`, "START SHOT", "SHOT METER"],
-    power: ["SET POWER", "Power controls pace and contact quality. Placement controls the shot height.", "LOCK POWER", "POWER"],
-    aim: ["AIM SHOT", "Drag the finish target, then choose an over-wall or around-wall route. Every angle remains available.", "TAKE FREE KICK", "TARGET + BEND"],
-    curve: ["ADD CURVE", "Curl develops progressively. Aim outside the wall, then bend the ball back toward goal.", "TAKE SHOT", "CURVE"],
+    ready: ["READY", `${stage.chapterName} · ${stage.label}. Misses reset the streak, never your stage.`, "START SHOT", "SHOT SETUP"],
+    aim: ["PLAN THE STRIKE", "Aim directly on the live pitch and choose the curl. The game will not reveal the solved route.", "STRIKE", "TARGET + CURL"],
+    power: ["STOP POWER", "First stop: lock the pace. Overhit and underhit strikes carry real consequences.", "LOCK POWER", "POWER"],
+    contact: ["STOP CONTACT", "Second stop: meet the centre contact zone. Extreme curl makes the window tighter.", "LOCK CONTACT", "CONTACT"],
+    curve: ["ADD CURVE", "Legacy curve phase retained for compatibility.", "TAKE SHOT", "CURVE"],
     shooting: ["WATCH THE FLIGHT", "The ball travels through the same world space as the wall, goal and goalkeeper.", "SHOT IN PLAY", "LOCKED"],
     result: ["SHOT COMPLETE", "A goal advances the stage. A miss lets you retry without losing progress.", "NEXT SHOT", "RESULT"]
   }[phase];
@@ -164,6 +166,8 @@ export function setPhase(phase) {
   elements.shotAction.disabled = phase === "shooting";
   elements.canvasPrompt.textContent = phase === "ready" ? stage.label : phase === "shooting" ? "SHOT IN PLAY" : content[2];
   renderSteps();
+  document.documentElement.dataset.strikePhaseV324 = phase;
+  window.dispatchEvent(new CustomEvent("footballlab:phasechange", { detail: { phase } }));
 }
 
 export function idealPower() {

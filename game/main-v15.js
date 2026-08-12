@@ -20,8 +20,8 @@ replaceRequired(
 );
 replaceRequired(
   "matchup imports",
-  'import { difficultyForStage } from "./difficulty-v9.js?v=32.3";',
-  `import { difficultyForStage } from "./difficulty-v9.js?v=32.3";\nimport { activeCharacter, meterMultiplier } from "${new URL("./characters-v13.js?v=32.3", import.meta.url).href}";\nimport { keeperForStage } from "${new URL("./keepers-v14.js?v=32.3", import.meta.url).href}";\nimport { wallForStage } from "${new URL("./walls-v15.js?v=32.3", import.meta.url).href}";`
+  'import { difficultyForStage } from "./difficulty-v9.js?v=32.4";',
+  `import { difficultyForStage } from "./difficulty-v9.js?v=32.4";\nimport { activeCharacter, meterMultiplier } from "${new URL("./characters-v13.js?v=32.4", import.meta.url).href}";\nimport { keeperForStage } from "${new URL("./keepers-v14.js?v=32.4", import.meta.url).href}";\nimport { wallForStage } from "${new URL("./walls-v15.js?v=32.4", import.meta.url).href}";`
 );
 
 const startMarker = "function startGame() {";

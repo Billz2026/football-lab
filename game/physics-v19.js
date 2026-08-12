@@ -1,4 +1,4 @@
-import { clamp, lerp, state } from "./core-v6.js?v=32.3";
+import { clamp, lerp, state } from "./core-v6.js?v=32.4";
 import {
   resolveShotPhysics as resolveBaseShotPhysics,
   sampleShotPath as sampleBaseShotPath

@@ -19,14 +19,16 @@ test("V18 button input advances exactly one phase per physical click", async ({ 
   await startClassic(page);
 
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
+  await expect(page.locator("#phaseTitle")).toHaveText("PLAN THE STRIKE");
 
   await page.waitForTimeout(220);
-  await expect(page.locator("#phaseTitle")).toHaveText("SET POWER");
+  await expect(page.locator("#phaseTitle")).toHaveText("PLAN THE STRIKE");
 
+  await page.locator("#strikeStartV324").click();
+  await expect(page.locator("#phaseTitle")).toHaveText("STOP POWER");
+  await page.waitForTimeout(90);
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("AIM SHOT");
-  await expect(page.locator("#aimPlannerV322")).toBeVisible();
+  await expect(page.locator("#phaseTitle")).toHaveText("STOP CONTACT");
 
   const sample = await page.evaluate(() => window.__footballLabLastInputSample);
   expect(sample.phase).toBe("power");
@@ -51,14 +53,19 @@ test("V18 exposes precision guidance and its timing contract", async ({ page }) 
   });
 
   await page.locator("#shotAction").click();
+  await expect(page.locator(".meter")).toHaveAttribute("data-precision-phase", "aim");
+  await expect(page.locator("#strikeConsoleV324")).toBeVisible();
+  await expect(page.locator("#strikeCurveV324")).toBeVisible();
+  await expect(page.locator(".precision-hint-v18")).toContainText("NO SOLVED ROUTE");
+
+  await page.locator("#strikeStartV324").click();
   await expect(page.locator(".meter")).toHaveAttribute("data-precision-phase", "power");
   await expect(page.locator(".precision-hint-v18")).toContainText("PERFECT CONTACT ZONE");
   await expect(page.locator(".precision-zone-v18")).toHaveCSS("width", /[1-9][0-9.]*px/);
 
   await page.waitForTimeout(100);
   await page.locator("#shotAction").click();
-  await expect(page.locator(".meter")).toHaveAttribute("data-precision-phase", "aim");
-  await expect(page.locator("#aimPlannerV322")).toBeVisible();
-  await expect(page.locator("#aimSurfaceV322")).toHaveAttribute("aria-label", /Drag anywhere/);
-  await expect(page.locator("#aimCurveV322")).toBeVisible();
+  await expect(page.locator(".meter")).toHaveAttribute("data-precision-phase", "contact");
+  await expect(page.locator(".precision-hint-v18")).toContainText("MEET THE CENTRE ZONE");
+  await expect(page.locator("#contactZoneV324")).toBeVisible();
 });

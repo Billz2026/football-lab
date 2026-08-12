@@ -5,7 +5,7 @@ import {
   saveProfile,
   state,
   elements
-} from "./core-v6.js?v=32.3";
+} from "./core-v6.js?v=32.4";
 
 const MEDALS = Object.freeze([
   Object.freeze({ id: "ELITE", label: "ELITE", threshold: 25000, xpBonus: 400, rank: 4 }),
