@@ -117,6 +117,14 @@ export const SCENARIOS = Object.freeze(STAGE_BLUEPRINTS.map((blueprint, stageInd
 }));
 
 export function scenarioForStage(stageIndex) {
+  const training = globalThis.__footballLabTrainingScenario;
+  if (training?.active) {
+    return {
+      ...training,
+      cycle: 0,
+      chapterCycle: 0
+    };
+  }
   const index = Math.max(0, Number(stageIndex) || 0);
   const cycle = Math.floor(index / SCENARIOS.length);
   const base = SCENARIOS[index % SCENARIOS.length];
