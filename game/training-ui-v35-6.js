@@ -15,7 +15,7 @@ function ensureStylesheet() {
   if (document.querySelector('link[data-training-ui-v356]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "./game/training-ui-v35-6.css?v=35.6";
+  link.href = "./game/training-ui-v35-6.css?v=38.2.1";
   link.dataset.trainingUiV356 = "true";
   document.head.appendChild(link);
 }
@@ -124,5 +124,6 @@ window.__footballLabTrainingUiV356 = Object.freeze({
   staleExecutionReadouts: "cleared-on-ready",
   executionCards: "compact",
   setupFreezeHotfix: "self-observing-summary-loop-removed",
+  foldFullscreenV3821: "coarse-pointer-full-width-pitch-bottom-touch-tray",
   physicsChanged: false
 });
