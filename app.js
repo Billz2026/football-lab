@@ -1,7 +1,7 @@
-// Football Lab V36.2 goalkeeper realism, compact target and visible save attempts
+// Football Lab V36.3 goalkeeper readability, direct reticle cleanup and sharper visible attempts
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=36.2", {
+  navigator.serviceWorker.register("./sw.js?v=36.3", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -37,6 +37,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/keeper-ai-v34.js?v=35.1"))
       .then(() => import("./game/keeper-polish-v36.js?v=36.0"))
       .then(() => import("./game/keeper-realism-v36-2.js?v=36.2"))
+      .then(() => import("./game/keeper-readability-v36-3.js?v=36.3"))
       .then(() => import("./game/flight-v33.js?v=35.1"))
       .then(() => import("./game/training-v35.js?v=35.1"))
       .then(() => import("./game/training-guard-v35.js?v=35.1"))
@@ -62,20 +63,20 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "36.2";
+        document.documentElement.dataset.footballLabBuild = "36.3";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V36.2";
-          badge.title = "Football Lab build 36.2.0";
+          badge.textContent = "V36.3";
+          badge.title = "Football Lab build 36.3.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "36.2.0";
+        if (version) version.textContent = "36.3.0";
         const release = Object.freeze({
-          build: "36.2.0",
+          build: "36.3.0",
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
-          aiming: "compact-bracket-target-no-large-ring",
+          aiming: "compact-bracket-target-legacy-circle-directly-blocked",
           execution: "contact-weighted-deterministic-drift",
           doubleFaultProtection: "slow-mishit-recovery-window",
           premiumFinishes: "clean-execution-gated",
@@ -84,11 +85,11 @@ const bootPromise = runtimeCaptureMode
           keeperPresentation: "set-push-dive-visible-attempt",
           keeperVisualRig: "base-proportion-rig-no-oversized-overlay",
           keeperVisualScale: "base-1.08",
-          keeperContactRing: "removed",
+          keeperContactRing: "directly-blocked",
           keeperGloves: "smaller-readable-cuffs",
-          keeperReflexPresentation: "archetype-capped-visible-reaction",
+          keeperReflexPresentation: "sharper-archetype-capped-visible-reaction",
           keeperWrongFootMotion: "two-phase-commit-recovery",
-          keeperReadability: "long-sleeve-contrast-wall-aware",
+          keeperReadability: "jersey-colour-long-sleeves-wall-aware",
           keeperSavePresentation: "archetype-and-contact-classified",
           keeperArchetypes: "reading-reflex-reach-aggression",
           trainingGround: "shared-sandbox-framework",
@@ -101,7 +102,7 @@ const bootPromise = runtimeCaptureMode
           camera: "target-biased-late-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "36.2"
+          cacheGeneration: "36.3"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -122,6 +123,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV360 = release;
         window.__footballLabReleaseV361 = release;
         window.__footballLabReleaseV362 = release;
+        window.__footballLabReleaseV363 = release;
       });
 
 bootPromise.catch((error) => {
