@@ -167,7 +167,8 @@ function drawCompactTarget() {
   ctx.translate(point.x, point.y);
   ctx.strokeStyle = "rgba(218,254,77,.94)";
   ctx.fillStyle = "rgba(218,254,77,.96)";
-  ctx.lineWidth = 1.65;
+  // Deliberately different from the 1.7px legacy target stroke so the suppression hook never catches this.
+  ctx.lineWidth = 1.3;
   ctx.lineCap = "round";
 
   const inner = 5.5;
