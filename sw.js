@@ -1,5 +1,5 @@
-// Football Lab V38.1.2 goalkeeper ghost cleanup cache generation
-const CACHE_NAME = "football-lab-shell-v38-1-2";
+// Football Lab V38.1.3 aim risk halo removal cache generation
+const CACHE_NAME = "football-lab-shell-v38-1-3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
