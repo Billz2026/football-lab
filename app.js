@@ -1,7 +1,7 @@
-// Football Lab V36.0 goalkeeper presentation and intelligence polish
+// Football Lab V36.1 goalkeeper visual dominance, gloves and grounded reflex polish
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=36.0", {
+  navigator.serviceWorker.register("./sw.js?v=36.1", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -36,6 +36,8 @@ const bootPromise = runtimeCaptureMode
   : runtimePromise
       .then(() => import("./game/keeper-ai-v34.js?v=35.1"))
       .then(() => import("./game/keeper-polish-v36.js?v=36.0"))
+      .then(() => import("./game/keeper-reflex-v36-1.js?v=36.1"))
+      .then(() => import("./game/keeper-visual-v36-1.js?v=36.1"))
       .then(() => import("./game/flight-v33.js?v=35.1"))
       .then(() => import("./game/training-v35.js?v=35.1"))
       .then(() => import("./game/training-guard-v35.js?v=35.1"))
@@ -61,16 +63,16 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "36.0";
+        document.documentElement.dataset.footballLabBuild = "36.1";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V36.0";
-          badge.title = "Football Lab build 36.0.0";
+          badge.textContent = "V36.1";
+          badge.title = "Football Lab build 36.1.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "36.0.0";
+        if (version) version.textContent = "36.1.0";
         const release = Object.freeze({
-          build: "36.0.0",
+          build: "36.1.0",
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
@@ -81,6 +83,11 @@ const bootPromise = runtimeCaptureMode
           physics: "progressive-magnus-dip",
           keeperAI: "early-lane-commit-correct",
           keeperPresentation: "read-set-correct-dive",
+          keeperVisualRig: "dominant-long-sleeve-gloved-overlay",
+          keeperVisualScale: "1.19",
+          keeperContactRing: "removed",
+          keeperGloves: "shaped-palm-cuff",
+          keeperReflexPresentation: "grounded-first-step-no-wrongfoot-rescue",
           keeperWrongFootMotion: "two-phase-commit-recovery",
           keeperReadability: "wall-aware-visual-start-offset",
           keeperSavePresentation: "archetype-and-contact-classified",
@@ -95,7 +102,7 @@ const bootPromise = runtimeCaptureMode
           camera: "target-biased-late-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "36.0"
+          cacheGeneration: "36.1"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -114,6 +121,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV3561 = release;
         window.__footballLabReleaseV3562 = release;
         window.__footballLabReleaseV360 = release;
+        window.__footballLabReleaseV361 = release;
       });
 
 bootPromise.catch((error) => {
