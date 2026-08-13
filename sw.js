@@ -1,3 +1,4 @@
+// Football Lab V36.1 final cache generation
 const CACHE_NAME = "football-lab-shell-v36-1";
 const CORE_ASSETS = [
   "./",
