@@ -1,5 +1,5 @@
-// Football Lab V37.0 deterministic execution cone cache generation
-const CACHE_NAME = "football-lab-shell-v37-0";
+// Football Lab V37.1 feedback and training HUD cache generation
+const CACHE_NAME = "football-lab-shell-v37-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",

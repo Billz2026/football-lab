@@ -161,3 +161,7 @@ window.__footballLabSkillBalanceV37 = Object.freeze({
   modeScale: { ...MODE_SCALE },
   preview: previewExecution
 });
+
+import("./refinement-release-v37-1.js?v=37.1").catch((error) => {
+  console.error("Football Lab V37.1 refinement failed to load", error);
+});
