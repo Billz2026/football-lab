@@ -1,5 +1,5 @@
-// Football Lab V38.1.1 goalkeeper oval hotfix cache generation
-const CACHE_NAME = "football-lab-shell-v38-1-1";
+// Football Lab V38.1.2 goalkeeper ghost cleanup cache generation
+const CACHE_NAME = "football-lab-shell-v38-1-2";
 const CORE_ASSETS = [
   "./",
   "./index.html",
