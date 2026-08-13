@@ -1,11 +1,11 @@
-// Football Lab V36.2 goalkeeper realism cache generation
-const CACHE_NAME = "football-lab-shell-v36-2";
+// Football Lab V36.3 goalkeeper readability cache generation
+const CACHE_NAME = "football-lab-shell-v36-3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=36.2",
+  "./app.js?v=36.3",
   "./manifest.webmanifest?v=23",
   "./mobile-v16.css?v=16",
   "./mobile-shell-v16-1.css?v=161",
@@ -24,6 +24,7 @@ const CORE_ASSETS = [
   "./game/keeper-polish-v36.css?v=36.0",
   "./game/keeper-polish-v36.js?v=36.0",
   "./game/keeper-realism-v36-2.js?v=36.2",
+  "./game/keeper-readability-v36-3.js?v=36.3",
   "./game/runtime-v23-main.js?v=35.1",
   "./game/keeper-ai-v34.js?v=35.1",
   "./game/flight-v33.js?v=35.1",
