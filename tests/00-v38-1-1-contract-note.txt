@@ -1,0 +1,1 @@
+V38.1.1 removes the projected penalty-arc line that visually reads as an oval behind the goalkeeper in the free-kick camera. It does not modify keeper AI, aiming, physics, difficulty, or shot outcome resolution.

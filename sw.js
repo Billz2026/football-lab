@@ -1,5 +1,5 @@
-// Football Lab V38.1 goalkeeper visual readability cache generation
-const CACHE_NAME = "football-lab-shell-v38-1";
+// Football Lab V38.1.1 goalkeeper oval hotfix cache generation
+const CACHE_NAME = "football-lab-shell-v38-1-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -26,6 +26,7 @@ const CORE_ASSETS = [
   "./game/keeper-realism-v36-2.js?v=36.2",
   "./game/keeper-readability-v36-3.js?v=36.3",
   "./game/keeper-visuals-v38-1.js?v=38.1",
+  "./game/keeper-halo-hotfix-v38-1-1.js?v=38.1.1",
   "./game/runtime-v23-main.js?v=35.1",
   "./game/keeper-ai-v34.js?v=35.1",
   "./game/flight-v33.js?v=35.1",
