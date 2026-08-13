@@ -53,6 +53,7 @@ function installStrokeGuard() {
   ctx.stroke = mark(function footballLabStrokeV3811(...args) {
     const colour = normaliseColour(this.strokeStyle);
     const width = Number(this.lineWidth) || 0;
+    const pitchWhite = colour === "rgba(236,255,232,0.66)" || colour === "rgba(236,255,232,.66)";
 
     // The free-kick pitch renderer draws the penalty arc as one long projected
     // 1.5px white polyline. From the low free-kick camera it lands directly
@@ -61,7 +62,7 @@ function installStrokeGuard() {
     // goalkeeper rig, aiming, physics and shot resolution are untouched.
     const projectedPenaltyArc = (
       state.screen === "game"
-      && colour === "rgba(236,255,232,.66)"
+      && pitchWhite
       && Math.abs(width - 1.5) < 0.06
       && moveCount >= 1
       && lineCount >= 10
