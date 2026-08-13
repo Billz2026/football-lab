@@ -1,0 +1,53 @@
+/* Football Lab V36.0 — goalkeeper presentation polish */
+
+.keeper-callout-v36 {
+  position:absolute;
+  top:58px;
+  right:16px;
+  z-index:24;
+  display:grid;
+  gap:2px;
+  min-width:138px;
+  padding:8px 11px;
+  border:1px solid rgba(116,219,255,.22);
+  border-radius:10px;
+  background:linear-gradient(135deg,rgba(3,12,9,.92),rgba(10,28,24,.88));
+  box-shadow:0 12px 34px rgba(0,0,0,.24);
+  opacity:0;
+  transform:translateY(-7px) scale(.98);
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+  backdrop-filter:blur(8px);
+}
+
+.keeper-callout-v36.is-visible {
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+
+.keeper-callout-v36 span {
+  color:#74dbff;
+  font:950 8px/1 system-ui;
+  letter-spacing:.12em;
+}
+
+.keeper-callout-v36 strong {
+  color:#f6fbf8;
+  font:900 10px/1.15 system-ui;
+  letter-spacing:.035em;
+}
+
+@media (max-width:700px) {
+  .keeper-callout-v36 {
+    top:50px;
+    right:9px;
+    min-width:116px;
+    padding:7px 9px;
+  }
+  .keeper-callout-v36 span { font-size:7px; }
+  .keeper-callout-v36 strong { font-size:9px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .keeper-callout-v36 { transition:none; }
+}
