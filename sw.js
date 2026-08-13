@@ -1,5 +1,5 @@
-// Football Lab V36.3 goalkeeper readability cache generation
-const CACHE_NAME = "football-lab-shell-v36-3";
+// Football Lab V37.0 deterministic execution cone cache generation
+const CACHE_NAME = "football-lab-shell-v37-0";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -67,6 +67,7 @@ const CORE_ASSETS = [
   "./game/visual-ui-v17.js?v=32.4",
   "./game/strike-v32-4.js?v=32.4",
   "./game/strike-v32-4.css?v=32.4",
+  "./game/skill-balance-v37.js?v=37.0",
   "./game/input-precision-ui-v18.js?v=32.4",
   "./game/progression-v20.js?v=32.4",
   "./game/progression-v20.css?v=20",
