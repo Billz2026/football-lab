@@ -1,16 +1,12 @@
 import {
-  WORLD,
-  canvasView,
   clamp,
-  currentAimTarget,
   elements,
   smoothStep,
   state
 } from "./core-v6.js?v=32.4";
-import { buildCamera, GOAL } from "./world-v7.js?v=32.4";
-import { projectWorld } from "./projection-v6.js?v=32.4";
+import { GOAL } from "./world-v7.js?v=32.4";
 
-const BUILD = "37.1.0";
+const BUILD = "37.1.1";
 const MODE_RISK = Object.freeze({ guided: 0.78, standard: 1, expert: 1.2 });
 
 function ensureStyles() {
@@ -18,33 +14,6 @@ function ensureStyles() {
   const style = document.createElement("style");
   style.id = "refinementStylesV371";
   style.textContent = `
-    .aim-risk-halo-v371 {
-      position:fixed;
-      left:0;
-      top:0;
-      width:46px;
-      height:46px;
-      z-index:55;
-      pointer-events:none;
-      border:1.5px solid rgba(218,254,77,.58);
-      border-radius:50%;
-      box-shadow:0 0 0 1px rgba(3,10,6,.45),0 0 20px rgba(218,254,77,.1),inset 0 0 16px rgba(218,254,77,.055);
-      transform:translate(-50%,-50%);
-      opacity:0;
-      transition:width .12s ease,height .12s ease,opacity .12s ease,border-color .12s ease;
-    }
-    .aim-risk-halo-v371::before,
-    .aim-risk-halo-v371::after {
-      content:"";
-      position:absolute;
-      inset:50% auto auto 50%;
-      background:rgba(218,254,77,.72);
-      transform:translate(-50%,-50%);
-      border-radius:99px;
-    }
-    .aim-risk-halo-v371::before { width:7px; height:1px; }
-    .aim-risk-halo-v371::after { width:1px; height:7px; }
-    .aim-risk-halo-v371[data-risk="high"] { border-color:rgba(255,211,102,.72); }
     .training-accuracy-v371 { display:none; }
     html.training-active-v35 #livesValue { display:none !important; }
     html.training-active-v35 .training-accuracy-v371 { display:inline !important; }
@@ -52,15 +21,10 @@ function ensureStyles() {
   document.head.appendChild(style);
 }
 
-function ensureRiskHalo() {
-  let halo = document.getElementById("aimRiskHaloV371");
-  if (halo) return halo;
-  halo = document.createElement("i");
-  halo.id = "aimRiskHaloV371";
-  halo.className = "aim-risk-halo-v371";
-  halo.setAttribute("aria-hidden", "true");
-  document.body.appendChild(halo);
-  return halo;
+function removeLegacyRiskHalo() {
+  document.getElementById("aimRiskHaloV371")?.remove();
+  document.querySelectorAll(".aim-risk-halo-v371").forEach((node) => node.remove());
+  window.__footballLabAimRiskV371 = null;
 }
 
 function ensureTrainingAccuracyValue() {
@@ -79,11 +43,7 @@ function ensureTrainingAccuracyValue() {
 function trainingAccuracy() {
   const attempts = Number(state.trainingAttempts) || 0;
   const goals = Number(state.trainingGoals) || 0;
-  return {
-    attempts,
-    goals,
-    percent: attempts ? Math.round(goals / attempts * 100) : 0
-  };
+  return { attempts, goals, percent: attempts ? Math.round(goals / attempts * 100) : 0 };
 }
 
 function syncTrainingAccuracy() {
@@ -105,70 +65,9 @@ function aimRisk() {
   return { curvePressure, distancePressure, mode, modeScale, risk };
 }
 
-function targetScreenPoint() {
-  const target = currentAimTarget();
-  const world = {
-    x: -GOAL.halfWidth + target.x * GOAL.width,
-    y: GOAL.height * (1 - target.y),
-    z: 0.03
-  };
-  const projected = projectWorld(world, buildCamera(state.currentStage), WORLD);
-  if (!projected?.visible) return null;
-  const rect = elements.canvas.getBoundingClientRect();
-  return {
-    x: rect.left + canvasView.offsetX + projected.x * canvasView.scale,
-    y: rect.top + canvasView.offsetY + projected.y * canvasView.scale,
-    rect,
-    projected,
-    target
-  };
-}
-
-function renderRiskHalo() {
-  const halo = ensureRiskHalo();
-  const active = state.screen === "game" && state.phase === "aim" && !state.animation;
-  if (!active) {
-    halo.style.opacity = "0";
-    requestAnimationFrame(renderRiskHalo);
-    return;
-  }
-  const point = targetScreenPoint();
-  if (!point) {
-    halo.style.opacity = "0";
-    requestAnimationFrame(renderRiskHalo);
-    return;
-  }
-  const risk = aimRisk();
-  const viewportScale = clamp(point.rect.width / 920, 0.72, 1.12);
-  const diameter = (34 + risk.risk * 40) * viewportScale;
-  halo.style.left = `${point.x}px`;
-  halo.style.top = `${point.y}px`;
-  halo.style.width = `${diameter}px`;
-  halo.style.height = `${diameter}px`;
-  halo.style.opacity = "1";
-  halo.dataset.risk = risk.risk >= 0.82 ? "high" : risk.risk >= 0.55 ? "medium" : "low";
-  halo.title = "Precision risk area: intended target only, not a solved trajectory";
-  window.__footballLabAimRiskV371 = {
-    build: BUILD,
-    risk: Number(risk.risk.toFixed(3)),
-    diameter: Number(diameter.toFixed(2)),
-    curvePressure: Number(risk.curvePressure.toFixed(3)),
-    distancePressure: Number(risk.distancePressure.toFixed(3)),
-    mode: risk.mode,
-    solvedTrajectory: false
-  };
-  requestAnimationFrame(renderRiskHalo);
-}
-
 function placementLabel(x, y) {
-  const horizontal = x < 0
-    ? "OUTSIDE LEFT"
-    : x > 1
-      ? "OUTSIDE RIGHT"
-      : x < 0.33 ? "LEFT" : x > 0.67 ? "RIGHT" : "CENTRE";
-  const vertical = y < 0
-    ? "ABOVE BAR"
-    : y < 0.31 ? "HIGH" : y > 0.67 ? "LOW" : "MID";
+  const horizontal = x < 0 ? "OUTSIDE LEFT" : x > 1 ? "OUTSIDE RIGHT" : x < 0.33 ? "LEFT" : x > 0.67 ? "RIGHT" : "CENTRE";
+  const vertical = y < 0 ? "ABOVE BAR" : y < 0.31 ? "HIGH" : y > 0.67 ? "LOW" : "MID";
   return `${vertical} ${horizontal}`;
 }
 
@@ -184,28 +83,20 @@ function contactCopy(shot) {
 function executionFeedback(shot) {
   const intendedX = Number.isFinite(shot?.intendedAimX) ? shot.intendedAimX : shot?.aimX;
   const intendedY = Number.isFinite(shot?.intendedAimY) ? shot.intendedAimY : shot?.aimY;
-  const actualX = Number.isFinite(shot?.actualX)
-    ? shot.actualX
-    : Number.isFinite(shot?.executionAimX) ? shot.executionAimX : intendedX;
-  const actualY = Number.isFinite(shot?.actualY)
-    ? shot.actualY
-    : Number.isFinite(shot?.executionAimY) ? shot.executionAimY : intendedY;
+  const actualX = Number.isFinite(shot?.actualX) ? shot.actualX : Number.isFinite(shot?.executionAimX) ? shot.executionAimX : intendedX;
+  const actualY = Number.isFinite(shot?.actualY) ? shot.actualY : Number.isFinite(shot?.executionAimY) ? shot.executionAimY : intendedY;
   if (![intendedX, intendedY, actualX, actualY].every(Number.isFinite)) return null;
-
   const dx = (actualX - intendedX) * GOAL.width;
   const dy = (actualY - intendedY) * GOAL.height;
   const total = Math.hypot(dx, dy);
-  const horizontal = Math.abs(dx) < 0.03 ? "CENTRED" : dx < 0 ? `${Math.abs(dx).toFixed(2)}m LEFT` : `${Math.abs(dx).toFixed(2)}m RIGHT`;
-  const vertical = Math.abs(dy) < 0.03 ? "LEVEL" : dy < 0 ? `${Math.abs(dy).toFixed(2)}m HIGH` : `${Math.abs(dy).toFixed(2)}m LOW`;
-
   return {
     intended: placementLabel(intendedX, intendedY),
     actual: placementLabel(actualX, actualY),
     dx,
     dy,
     total,
-    horizontal,
-    vertical,
+    horizontal: Math.abs(dx) < 0.03 ? "CENTRED" : dx < 0 ? `${Math.abs(dx).toFixed(2)}m LEFT` : `${Math.abs(dx).toFixed(2)}m RIGHT`,
+    vertical: Math.abs(dy) < 0.03 ? "LEVEL" : dy < 0 ? `${Math.abs(dy).toFixed(2)}m HIGH` : `${Math.abs(dy).toFixed(2)}m LOW`,
     contact: contactCopy(shot)
   };
 }
@@ -223,8 +114,7 @@ function enhanceBreakdown() {
   const executionCopy = feedback.total < 0.04
     ? `EXECUTION ON TARGET · ${feedback.contact}`
     : `EXECUTION ${feedback.total.toFixed(2)}m · ${feedback.horizontal} · ${feedback.vertical} · ${feedback.contact}`;
-  const baseReason = String(breakdown.reason || "");
-  breakdown.reason = `${executionCopy}. ${baseReason}`.slice(0, 182);
+  breakdown.reason = `${executionCopy}. ${String(breakdown.reason || "")}`.slice(0, 182);
   window.__footballLabLastFeedbackV371 = {
     build: BUILD,
     intended: feedback.intended,
@@ -237,25 +127,25 @@ function enhanceBreakdown() {
 }
 
 function refinementLoop() {
+  removeLegacyRiskHalo();
   syncTrainingAccuracy();
   enhanceBreakdown();
   requestAnimationFrame(refinementLoop);
 }
 
 ensureStyles();
+removeLegacyRiskHalo();
 ensureTrainingAccuracyValue();
-requestAnimationFrame(renderRiskHalo);
 requestAnimationFrame(refinementLoop);
-
 window.addEventListener("footballlab:trainingstart", syncTrainingAccuracy);
 window.addEventListener("footballlab:phasechange", syncTrainingAccuracy);
-window.addEventListener("footballlab:shotmodechange", () => { window.__footballLabAimRiskV371 = null; });
+window.addEventListener("footballlab:shotmodechange", removeLegacyRiskHalo);
 
 window.__footballLabRefinementV371 = Object.freeze({
   build: BUILD,
   trainingAccuracyIsolation: true,
   intendedVsActualFeedback: true,
-  aimRiskHalo: true,
+  aimRiskHalo: false,
   solvedTrajectory: false,
   standardDifficultyChanged: false,
   modeRisk: { ...MODE_RISK },
