@@ -1,7 +1,7 @@
-// Football Lab V37.0 deterministic execution cone and skill balance pass
+// Football Lab V38.1 goalkeeper visual readability pass
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=37.0", {
+  navigator.serviceWorker.register("./sw.js?v=38.1", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -38,6 +38,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/keeper-polish-v36.js?v=36.0"))
       .then(() => import("./game/keeper-realism-v36-2.js?v=36.2"))
       .then(() => import("./game/keeper-readability-v36-3.js?v=36.3"))
+      .then(() => import("./game/keeper-visuals-v38-1.js?v=38.1"))
       .then(() => import("./game/flight-v33.js?v=35.1"))
       .then(() => import("./game/training-v35.js?v=35.1"))
       .then(() => import("./game/training-guard-v35.js?v=35.1"))
