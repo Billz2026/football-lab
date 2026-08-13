@@ -1,90 +1,11 @@
-// Football Lab V38.1.4 final circular aim overlay removal cache generation
-const CACHE_NAME = "football-lab-shell-v38-1-4";
+// Football Lab V38.1.5 stale-script cache reset
+const CACHE_NAME = "football-lab-shell-v38-1-5";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=36.3",
-  "./manifest.webmanifest?v=23",
-  "./mobile-v16.css?v=16",
-  "./mobile-shell-v16-1.css?v=161",
-  "./visual-v17.css?v=17",
-  "./game/hub-v35-1.css?v=35.1",
-  "./game/hub-v35-2.css?v=35.2",
-  "./game/hub-v35-3.css?v=35.3",
-  "./game/hub-v35-4.css?v=35.4",
-  "./game/hub-v35-1.js?v=35.1",
-  "./game/hub-v35-3.js?v=35.3",
-  "./game/hub-v35-4.js?v=35.6.2",
-  "./game/training-ui-v35-5.css?v=35.5",
-  "./game/training-ui-v35-5.js?v=35.5",
-  "./game/training-ui-v35-6.css?v=35.6",
-  "./game/training-ui-v35-6.js?v=35.6.1",
-  "./game/keeper-polish-v36.css?v=36.0",
-  "./game/keeper-polish-v36.js?v=36.0",
-  "./game/keeper-realism-v36-2.js?v=36.2",
-  "./game/keeper-readability-v36-3.js?v=36.3",
-  "./game/keeper-visuals-v38-1.js?v=38.1",
-  "./game/keeper-halo-hotfix-v38-1-1.js?v=38.1.1",
-  "./game/runtime-v23-main.js?v=35.1",
-  "./game/keeper-ai-v34.js?v=35.1",
-  "./game/flight-v33.js?v=35.1",
-  "./game/training-v35.js?v=35.1",
-  "./game/training-guard-v35.js?v=35.1",
-  "./game/training-v35.css?v=35.0",
-  "./game/release-v23.js?v=32.4",
-  "./game/immersive-ui-v24.js?v=32.4",
-  "./game/immersive-ui-v24.css?v=24.2",
-  "./game/desktop-fit-v24-1.css?v=24.2",
-  "./game/runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.4",
-  "./game/runtime-v23-bridge-physics-v19-base-v332.js?v=33.3",
-  "./game/runtime-v23-bridge-physics-v19-base-v333.js?v=34.1",
-  "./game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=32.4",
-  "./game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=32.4",
-  "./game/runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js?v=32.4",
-  "./game/runtime-v23-generated-physics-v15-9cf6fe15a3.js?v=32.4",
-  "./game/runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=32.4",
-  "./game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js?v=32.4",
-  "./game/runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=32.4",
-  "./game/core-v6.js?v=32.4",
-  "./game/world-v6.js?v=32.4",
-  "./game/world-v7.js?v=32.4",
-  "./game/projection-v6.js?v=32.4",
-  "./game/difficulty-v9.js?v=32.4",
-  "./game/characters-v13.js?v=32.4",
-  "./game/keepers-v14.js?v=32.4",
-  "./game/walls-v15.js?v=32.4",
-  "./game/audio-v32.js?v=32.4",
-  "./game/audio-v6.js?v=32.4",
-  "./game/physics-v7.js?v=32.4",
-  "./game/polish-v10-2.js?v=32.4",
-  "./game/polish-v11-4.js?v=32.4",
-  "./game/characters-ui-v13.js?v=32.4",
-  "./game/keepers-ui-v14.js?v=32.4",
-  "./game/walls-ui-v15.js?v=32.4",
-  "./game/mobile-ui-v16.js?v=32.4",
-  "./game/mobile-shell-v16-1.js?v=32.4",
-  "./game/mobile-shell-compact-v16-1.js?v=32.4",
-  "./game/visual-ui-v17.js?v=32.4",
-  "./game/final-aim-cleanup-v38-1-4.js?v=38.1.4",
-  "./game/strike-v32-4.js?v=32.4",
-  "./game/strike-v32-4.css?v=32.4",
-  "./game/skill-balance-v37.js?v=37.0",
-  "./game/refinement-release-v37-1.js?v=37.1",
-  "./game/refinement-v37-1.js?v=37.1",
-  "./game/input-precision-ui-v18.js?v=32.4",
-  "./game/progression-v20.js?v=32.4",
-  "./game/progression-v20.css?v=20",
-  "./game/clarity-v21.js?v=32.4",
-  "./game/product-polish-v22.js?v=32.4",
-  "./game/infinite-runs-v25.js?v=32.4",
-  "./game/campaign-v31.js?v=32.4",
-  "./game/campaign-v31.css?v=32.4",
-  "./game/matchday-impact-v32.js?v=32.4",
-  "./icons/football-lab-192.svg?v=161",
-  "./icons/football-lab-512.svg?v=161",
-  "./social-card.svg"
+  "./app.js?v=36.3"
 ];
 
 async function refreshCoreCache() {
@@ -115,7 +36,7 @@ self.addEventListener("message", (event) => {
 async function networkFirst(request, fallbackUrl = null) {
   const cache = await caches.open(CACHE_NAME);
   try {
-    const response = await fetch(request);
+    const response = await fetch(request, { cache: "no-store" });
     if (response.ok) await cache.put(request, response.clone());
     return response;
   } catch (error) {
@@ -150,7 +71,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (["script", "style", "image", "font", "audio"].includes(request.destination)) {
+  if (request.destination === "script") {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  if (["style", "image", "font", "audio"].includes(request.destination)) {
     event.respondWith(cacheFirst(request));
     return;
   }
