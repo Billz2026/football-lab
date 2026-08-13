@@ -1,5 +1,5 @@
-// Football Lab V38.1.3 aim risk halo removal cache generation
-const CACHE_NAME = "football-lab-shell-v38-1-3";
+// Football Lab V38.1.4 final aim circle removal cache generation
+const CACHE_NAME = "football-lab-shell-v38-1-4";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -27,6 +27,7 @@ const CORE_ASSETS = [
   "./game/keeper-readability-v36-3.js?v=36.3",
   "./game/keeper-visuals-v38-1.js?v=38.1",
   "./game/keeper-halo-hotfix-v38-1-1.js?v=38.1.1",
+  "./game/final-aim-cleanup-v38-1-4.js?v=38.1.4",
   "./game/runtime-v23-main.js?v=35.1",
   "./game/keeper-ai-v34.js?v=35.1",
   "./game/flight-v33.js?v=35.1",
