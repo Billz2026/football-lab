@@ -1,4 +1,4 @@
-const BUILD = "35.6.1";
+const BUILD = "35.6.2";
 
 function ensureHubStyle(){
   if (document.querySelector("link[data-football-lab-hub='35.4']")) return;
@@ -44,15 +44,24 @@ function setPlayNavActive(){
   play?.classList.add("is-active");
 }
 
-function applyHubV3561(){
+function hideLegacyTrainingBridge(){
+  const bridge = document.querySelector(".hub-training-bridge");
+  if (!bridge) return;
+  bridge.hidden = true;
+  bridge.setAttribute("aria-hidden", "true");
+  bridge.style.setProperty("display", "none", "important");
+}
+
+function applyHubV3562(){
   ensureHubStyle();
   tightenTileCopy();
   promoteFuturePanelIntoMosaic();
   markArtworkReadyTiles();
   setPlayNavActive();
+  hideLegacyTrainingBridge();
 }
 
-applyHubV3561();
+applyHubV3562();
 
 import("./training-ui-v35-5.js?v=35.5")
   .then(() => import("./training-ui-v35-6.js?v=35.6.1"))
@@ -67,5 +76,6 @@ window.__footballLabHubV354 = Object.freeze({
   lockedModes: "visually-subordinate",
   futurePanel: "mosaic-integrated",
   artworkSlots: "cinematic-ready",
-  trainingUi: "dedicated-v35-6-1"
+  trainingUi: "dedicated-v35-6-1",
+  legacyTrainingBridge: "hidden-internal-only"
 });
