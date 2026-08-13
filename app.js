@@ -1,7 +1,7 @@
-// Football Lab V36.1 goalkeeper visual dominance, gloves and grounded reflex polish
+// Football Lab V36.2 goalkeeper realism, compact target and visible save attempts
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=36.1", {
+  navigator.serviceWorker.register("./sw.js?v=36.2", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -36,8 +36,7 @@ const bootPromise = runtimeCaptureMode
   : runtimePromise
       .then(() => import("./game/keeper-ai-v34.js?v=35.1"))
       .then(() => import("./game/keeper-polish-v36.js?v=36.0"))
-      .then(() => import("./game/keeper-reflex-v36-1.js?v=36.1"))
-      .then(() => import("./game/keeper-visual-v36-1.js?v=36.1"))
+      .then(() => import("./game/keeper-realism-v36-2.js?v=36.2"))
       .then(() => import("./game/flight-v33.js?v=35.1"))
       .then(() => import("./game/training-v35.js?v=35.1"))
       .then(() => import("./game/training-guard-v35.js?v=35.1"))
@@ -63,33 +62,33 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "36.1";
+        document.documentElement.dataset.footballLabBuild = "36.2";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V36.1";
-          badge.title = "Football Lab build 36.1.0";
+          badge.textContent = "V36.2";
+          badge.title = "Football Lab build 36.2.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "36.1.0";
+        if (version) version.textContent = "36.2.0";
         const release = Object.freeze({
-          build: "36.1.0",
+          build: "36.2.0",
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
-          aiming: "live-pitch-intended-target",
+          aiming: "compact-bracket-target-no-large-ring",
           execution: "contact-weighted-deterministic-drift",
           doubleFaultProtection: "slow-mishit-recovery-window",
           premiumFinishes: "clean-execution-gated",
           physics: "progressive-magnus-dip",
           keeperAI: "early-lane-commit-correct",
-          keeperPresentation: "read-set-correct-dive",
-          keeperVisualRig: "dominant-long-sleeve-gloved-overlay",
-          keeperVisualScale: "1.19",
+          keeperPresentation: "set-push-dive-visible-attempt",
+          keeperVisualRig: "base-proportion-rig-no-oversized-overlay",
+          keeperVisualScale: "base-1.08",
           keeperContactRing: "removed",
-          keeperGloves: "shaped-palm-cuff",
-          keeperReflexPresentation: "grounded-first-step-no-wrongfoot-rescue",
+          keeperGloves: "smaller-readable-cuffs",
+          keeperReflexPresentation: "archetype-capped-visible-reaction",
           keeperWrongFootMotion: "two-phase-commit-recovery",
-          keeperReadability: "wall-aware-visual-start-offset",
+          keeperReadability: "long-sleeve-contrast-wall-aware",
           keeperSavePresentation: "archetype-and-contact-classified",
           keeperArchetypes: "reading-reflex-reach-aggression",
           trainingGround: "shared-sandbox-framework",
@@ -102,7 +101,7 @@ const bootPromise = runtimeCaptureMode
           camera: "target-biased-late-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "36.1"
+          cacheGeneration: "36.2"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -122,6 +121,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV3562 = release;
         window.__footballLabReleaseV360 = release;
         window.__footballLabReleaseV361 = release;
+        window.__footballLabReleaseV362 = release;
       });
 
 bootPromise.catch((error) => {
