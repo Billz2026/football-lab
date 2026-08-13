@@ -75,3 +75,186 @@ html.training-active-v35[data-strike-phase-v324="ready"] body.is-game-active #me
     min-height:44px !important;
   }
 }
+
+/* V38.2.1 — unfolded foldable fullscreen training layout.
+   Touch/coarse-pointer only. Desktop training remains unchanged. */
+@media (hover:none) and (pointer:coarse) {
+  html.training-active-v35,
+  html.training-active-v35 body,
+  html.training-active-v35 body.is-game-active {
+    width:100%;
+    min-height:100dvh;
+    background:#020604;
+  }
+
+  html.training-active-v35 body.is-game-active {
+    overflow-x:hidden;
+  }
+
+  html.training-active-v35 body.is-game-active main {
+    width:100%;
+    min-height:100dvh;
+    padding:max(5px,env(safe-area-inset-top)) max(5px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left)) !important;
+  }
+
+  html.training-active-v35 body.is-game-active #gameScreen.is-active {
+    min-height:calc(100dvh - max(10px,env(safe-area-inset-top)) - max(10px,env(safe-area-inset-bottom)));
+    display:grid;
+    align-content:start;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .game-topbar,
+  html.training-active-v35 body.is-game-active .training-session-bar-v355 {
+    display:none !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .game-layout {
+    width:100% !important;
+    min-height:100% !important;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-rows:auto auto !important;
+    gap:7px !important;
+    margin:0 !important;
+    align-content:start !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .game-frame {
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+    aspect-ratio:5 / 3 !important;
+    border-radius:17px !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game #gameCanvas {
+    width:100% !important;
+    height:100% !important;
+    min-height:0 !important;
+    max-height:none !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .control-panel {
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(220px,.42fr) !important;
+    grid-template-areas:
+      "steps steps"
+      "meter action"
+      "training-tools training-tools" !important;
+    gap:7px 9px !important;
+    padding:9px !important;
+    border-radius:15px !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .control-heading {
+    display:none !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .shot-steps {
+    grid-area:steps !important;
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:5px !important;
+    margin:0 !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .shot-step {
+    min-height:42px !important;
+    padding:5px 7px !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .meter-wrap {
+    grid-area:meter !important;
+    margin:0 !important;
+    align-self:center !important;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game #shotAction {
+    grid-area:action !important;
+    width:100% !important;
+    min-height:52px !important;
+    height:52px !important;
+    max-height:52px !important;
+    margin:0 !important;
+  }
+
+  html.training-active-v35 body.is-game-active .training-tools-v355 {
+    grid-area:training-tools !important;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(260px,.8fr) !important;
+    gap:6px !important;
+  }
+
+  html.training-active-v35 body.is-game-active .training-stats-v355 {
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:5px !important;
+  }
+
+  html.training-active-v35 body.is-game-active .training-stat-v355 {
+    min-height:42px !important;
+    padding:6px 7px !important;
+  }
+
+  html.training-active-v35 body.is-game-active .training-stat-v355 strong {
+    font-size:11px !important;
+  }
+
+  html.training-active-v35 body.is-game-active .training-actions-v355 {
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:5px !important;
+  }
+
+  html.training-active-v35 body.is-game-active .training-action-v355 {
+    min-height:42px !important;
+    padding:6px !important;
+  }
+
+  html.training-active-v35[data-touch-gameplay-v382="active"][data-strike-phase-v324="power"] body.is-game-active .screen-game .control-panel {
+    grid-template-columns:1fr !important;
+    grid-template-areas:
+      "steps"
+      "training-power"
+      "training-tools" !important;
+  }
+
+  html.training-active-v35[data-touch-gameplay-v382="active"][data-strike-phase-v324="power"] body.is-game-active .touch-power-v382 {
+    grid-area:training-power !important;
+    width:100% !important;
+  }
+}
+
+@media (hover:none) and (pointer:coarse) and (max-width:700px) {
+  html.training-active-v35 body.is-game-active .screen-game .control-panel {
+    grid-template-columns:1fr !important;
+    grid-template-areas:
+      "steps"
+      "meter"
+      "action"
+      "training-tools" !important;
+  }
+
+  html.training-active-v35 body.is-game-active .training-tools-v355 {
+    grid-template-columns:1fr !important;
+  }
+}
+
+@media (hover:none) and (pointer:coarse) and (orientation:landscape) and (max-height:760px) {
+  html.training-active-v35 body.is-game-active main {
+    min-height:100dvh;
+    overflow-y:auto;
+  }
+
+  html.training-active-v35 body.is-game-active .screen-game .game-frame {
+    aspect-ratio:16 / 8.6 !important;
+  }
+
+  html.training-active-v35 body.is-game-active .training-stat-v355,
+  html.training-active-v35 body.is-game-active .training-action-v355 {
+    min-height:38px !important;
+  }
+}
