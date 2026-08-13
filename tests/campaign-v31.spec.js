@@ -10,9 +10,9 @@ async function waitForCampaign(page) {
 
 test("V31 exposes six premium chapters and thirty handcrafted stages", async ({ page }) => {
   await waitForCampaign(page);
-  await expect(page.locator("#campaignMapV31")).toBeVisible();
-  await expect(page.locator(".campaign-chapters-v31 article")).toHaveCount(6);
-  await expect(page.locator("#campaignMapTitleV31")).toHaveText("SIX VENUES. THIRTY STAGES.");
+  await expect(page.locator("#classicCard")).toBeVisible();
+  await expect(page.locator("#classicCard")).toContainText("CLASSIC FREE KICKS");
+  await expect(page.locator("#classicCard")).toContainText("FLAGSHIP MODE");
 
   const contract = await page.evaluate(() => window.__footballLabCampaignV31);
   expect(contract.chapters).toBe(6);
@@ -23,7 +23,8 @@ test("V31 exposes six premium chapters and thirty handcrafted stages", async ({ 
 
 test("V31 starts with full stage, venue and condition context", async ({ page }) => {
   await waitForCampaign(page);
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
+  await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
   await expect(page.locator("#stageNumber")).toContainText("CH 1 · STAGE 01");
