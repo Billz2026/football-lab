@@ -1,5 +1,5 @@
-// Football Lab V38.1.3 aim risk halo removal cache generation
-const CACHE_NAME = "football-lab-shell-v38-1-3";
+// Football Lab V38.1.4 final circular aim overlay removal cache generation
+const CACHE_NAME = "football-lab-shell-v38-1-4";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -67,6 +67,7 @@ const CORE_ASSETS = [
   "./game/mobile-shell-v16-1.js?v=32.4",
   "./game/mobile-shell-compact-v16-1.js?v=32.4",
   "./game/visual-ui-v17.js?v=32.4",
+  "./game/final-aim-cleanup-v38-1-4.js?v=38.1.4",
   "./game/strike-v32-4.js?v=32.4",
   "./game/strike-v32-4.css?v=32.4",
   "./game/skill-balance-v37.js?v=37.0",
