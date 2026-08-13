@@ -1,5 +1,5 @@
-// Football Lab V37.1 feedback and training HUD cache generation
-const CACHE_NAME = "football-lab-shell-v37-1";
+// Football Lab V38.1 goalkeeper visual readability cache generation
+const CACHE_NAME = "football-lab-shell-v38-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -25,6 +25,7 @@ const CORE_ASSETS = [
   "./game/keeper-polish-v36.js?v=36.0",
   "./game/keeper-realism-v36-2.js?v=36.2",
   "./game/keeper-readability-v36-3.js?v=36.3",
+  "./game/keeper-visuals-v38-1.js?v=38.1",
   "./game/runtime-v23-main.js?v=35.1",
   "./game/keeper-ai-v34.js?v=35.1",
   "./game/flight-v33.js?v=35.1",
@@ -68,6 +69,8 @@ const CORE_ASSETS = [
   "./game/strike-v32-4.js?v=32.4",
   "./game/strike-v32-4.css?v=32.4",
   "./game/skill-balance-v37.js?v=37.0",
+  "./game/refinement-release-v37-1.js?v=37.1",
+  "./game/refinement-v37-1.js?v=37.1",
   "./game/input-precision-ui-v18.js?v=32.4",
   "./game/progression-v20.js?v=32.4",
   "./game/progression-v20.css?v=20",
