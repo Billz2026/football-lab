@@ -1,7 +1,7 @@
-// Football Lab V36.3 goalkeeper readability, direct reticle cleanup and sharper visible attempts
+// Football Lab V37.0 deterministic execution cone and skill balance pass
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=36.3", {
+  navigator.serviceWorker.register("./sw.js?v=37.0", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -52,6 +52,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/mobile-shell-compact-v16-1.js?v=32.4"))
       .then(() => import("./game/visual-ui-v17.js?v=32.4"))
       .then(() => import("./game/strike-v32-4.js?v=32.4"))
+      .then(() => import("./game/skill-balance-v37.js?v=37.0"))
       .then(() => import("./game/input-precision-ui-v18.js?v=32.4"))
       .then(() => import("./game/progression-v20.js?v=32.4"))
       .then(() => import("./game/clarity-v21.js?v=32.4"))
@@ -63,21 +64,23 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "36.3";
+        document.documentElement.dataset.footballLabBuild = "37.0";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V36.3";
-          badge.title = "Football Lab build 36.3.0";
+          badge.textContent = "V37.0";
+          badge.title = "Football Lab build 37.0.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "36.3.0";
+        if (version) version.textContent = "37.0.0";
         const release = Object.freeze({
-          build: "36.3.0",
+          build: "37.0.0",
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
-          aiming: "compact-bracket-target-legacy-circle-directly-blocked",
-          execution: "contact-weighted-deterministic-drift",
+          aiming: "direct-intended-target-unsolved-route",
+          execution: "deterministic-execution-cone-contact-weighted",
+          skillBalance: "power-contact-curl-distance-mode",
+          executionRng: false,
           doubleFaultProtection: "slow-mishit-recovery-window",
           premiumFinishes: "clean-execution-gated",
           physics: "progressive-magnus-dip",
@@ -102,7 +105,7 @@ const bootPromise = runtimeCaptureMode
           camera: "target-biased-late-flight-push",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "36.3"
+          cacheGeneration: "37.0"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -124,6 +127,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV361 = release;
         window.__footballLabReleaseV362 = release;
         window.__footballLabReleaseV363 = release;
+        window.__footballLabReleaseV370 = release;
       });
 
 bootPromise.catch((error) => {
