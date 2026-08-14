@@ -1,0 +1,77 @@
+name: Apply V38.8 cinematic goal-save payoff
+
+on:
+  push:
+    paths:
+      - "tools/apply-v38-8.mjs"
+      - ".github/workflows/apply-v38-8.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply V38.8 cinematic payoff patch
+        run: node tools/apply-v38-8.mjs
+      - name: Validate JavaScript syntax
+        run: |
+          node --check game/runtime-v23-main.js
+          node --check game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          node --check game/keeper-visuals-v38-1.js
+          node --check game/runtime-v23-generated-render-v17-v1731-7f257084b1.js
+          node --check game/matchday-impact-v32.js
+          node --check game/runtime-v23-generated-render-v15-v1731-1b04a249af.js
+          node --check game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js
+          node --check game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          node --check app.js
+          node --check sw.js
+      - name: Verify V38.8 payoff contract
+        run: |
+          grep -q 'function cinematicFlightProgress' game/runtime-v23-main.js
+          grep -q 'visualTimeRatioForPath' game/runtime-v23-main.js
+          grep -q 'motionFlight: replay ? replayPathProgress(flight) : cinematicFlightProgress(flight)' game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          grep -q 'motionFlight: replay ? replayPathProgress(flight) : cinematicFlightProgress(flight)' game/keeper-visuals-v38-1.js
+          grep -q 'cleanImpactFrame: true' game/matchday-impact-v32.js
+          if grep -q '^  drawOutcomeCallout(progress);' game/matchday-impact-v32.js; then
+            echo 'Duplicate technical result callout is still active'
+            exit 1
+          fi
+          if grep -q 'const titleDelay = presentation.outcome' game/runtime-v23-generated-render-v15-v1731-1b04a249af.js; then
+            echo 'Legacy pre-result canvas title is still active'
+            exit 1
+          fi
+          grep -q 'stronger-localised-persistent-impact-ripple' app.js
+          grep -q 'duplicateImpactLabels: "retired"' app.js
+      - name: Guard gameplay systems
+        run: |
+          git diff --exit-code HEAD -- \
+            game/runtime-v23-bridge-physics-v19-f1d39f9409.js \
+            game/keeper-ai-v34.js \
+            game/difficulty-v9.js \
+            game/skill-balance-v37.js \
+            game/core-v6.js
+      - name: Commit V38.8
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js sw.js \
+            game/runtime-v23-main.js \
+            game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js \
+            game/keeper-visuals-v38-1.js \
+            game/runtime-v23-generated-render-v17-v1731-7f257084b1.js \
+            game/matchday-impact-v32.js \
+            game/runtime-v23-generated-render-v15-v1731-1b04a249af.js \
+            game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js \
+            game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          if git diff --cached --quiet; then
+            echo "No V38.8 changes to commit"
+            exit 0
+          fi
+          git commit -m "Build V38.8 cinematic goal-save payoff"
+          git push
