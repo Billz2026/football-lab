@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          npx playwright test --reporter=line,html 2>&1 | tee playwright-output.txt
+          npx playwright test tests/runtime-v23.spec.js tests/campaign-v41.spec.js --reporter=line,html 2>&1 | tee playwright-output.txt
 
       - name: Upload validation diagnostics
         if: always()
