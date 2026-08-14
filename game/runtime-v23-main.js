@@ -4,7 +4,7 @@ import {
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
 } from "./core-v6.js?v=32.4";
 import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.4";
-import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=38.7.2";
+import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=38.8.0";
 import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=38.7.0";
 import { difficultyForStage } from "./difficulty-v9.js?v=32.4";
 import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.4";
@@ -352,11 +352,31 @@ function impactRatioForShot(shot) {
   return shot.outcome === "GOAL" || shot.outcome === "MISS" ? 0.96 : 0.9;
 }
 
+function cinematicFlightProgress(value) {
+  const t = Math.max(0, Math.min(1, value));
+  if (t <= 0.87) return (t / 0.87) * 0.9;
+  const u = Math.max(0, Math.min(1, (t - 0.87) / 0.13));
+  const smooth = u * u * (3 - 2 * u);
+  return 0.9 + smooth * 0.1;
+}
+
+function visualTimeRatioForPath(pathRatio) {
+  const target = Math.max(0, Math.min(1, pathRatio));
+  let low = 0;
+  let high = 1;
+  for (let index = 0; index < 16; index += 1) {
+    const mid = (low + high) / 2;
+    if (cinematicFlightProgress(mid) < target) low = mid;
+    else high = mid;
+  }
+  return (low + high) / 2;
+}
+
 function settleDurationForShot(shot) {
-  if (shot.outcome === "SAVE") return 390;
-  if (shot.outcome === "WALL") return 300;
-  if (shot.outcome === "POST" || shot.outcome === "BAR") return 310;
-  return 260;
+  if (shot.outcome === "SAVE") return 410;
+  if (shot.outcome === "WALL") return 310;
+  if (shot.outcome === "POST" || shot.outcome === "BAR") return 330;
+  return 285;
 }
 
 function takeShot() {
@@ -375,7 +395,8 @@ function takeShot() {
   const settleDuration = settleDurationForShot(state.shot) + motionProfile.settleBonus;
   const startedAt = performance.now();
   const impactRatio = impactRatioForShot(state.shot);
-  const impactDelayMs = runUpDuration + contactHoldDuration + flightDuration * impactRatio;
+  const impactTimeRatio = visualTimeRatioForPath(impactRatio);
+  const impactDelayMs = runUpDuration + contactHoldDuration + flightDuration * impactTimeRatio;
 
   state.presentation = {
     phase: "flight",
@@ -383,7 +404,10 @@ function takeShot() {
     impactAt: startedAt + impactDelayMs,
     outcome: state.shot.outcome,
     saveType: state.shot.saveType,
-    topCorner: state.shot.topCorner
+    topCorner: state.shot.topCorner,
+    impactHoldMs: 220,
+    cinematicFinalApproach: true,
+    impactTimeRatio
   };
 
   playImpactSound(state.shot.outcome, impactDelayMs / 1000);

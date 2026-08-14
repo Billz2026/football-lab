@@ -49,6 +49,12 @@ function replayPathProgress(value) {
   return 0.82 + smooth01((t - 0.67) / 0.33) * 0.18;
 }
 
+function cinematicFlightProgress(value) {
+  const t = clamp(value, 0, 1);
+  if (t <= 0.87) return (t / 0.87) * 0.9;
+  return 0.9 + smooth01((t - 0.87) / 0.13) * 0.1;
+}
+
 function progressAt(time) {
   if (!state.animation) {
     return { elapsed: 0, run: 0, contact: 0, flight: 0, motionFlight: 0, settle: 0, complete: false, replay: false };
@@ -67,7 +73,7 @@ function progressAt(time) {
     run: clamp(elapsed / runUpDuration, 0, 1),
     contact: contactHoldDuration > 0 ? clamp((elapsed - runUpDuration) / contactHoldDuration, 0, 1) : 0,
     flight,
-    motionFlight: replay ? replayPathProgress(flight) : flight,
+    motionFlight: replay ? replayPathProgress(flight) : cinematicFlightProgress(flight),
     settle: clamp((elapsed - flightEnd) / settleDuration, 0, 1),
     complete: elapsed >= state.animation.totalDuration,
     replay
@@ -300,9 +306,9 @@ function drawGoal(time) {
     ? clamp((progress.motionFlight - impact) / Math.max(0.028, 1 - impact), 0, 1)
     : 0;
   const rippleClock = impactFlightTail * 0.28 + progress.settle * 0.72;
-  const speedEnergy = 0.52 + clamp((state.shot.speedMps || 0) / 42, 0, 1) * 0.34;
+  const speedEnergy = 0.6 + clamp((state.shot.speedMps || 0) / 42, 0, 1) * 0.42;
   const rippleEnergy = goalImpactActive
-    ? Math.max(0, Math.exp(-rippleClock * 1.45) * speedEnergy * (0.72 + Math.cos(rippleClock * TAU * 2.2) * 0.28))
+    ? Math.max(0, Math.exp(-rippleClock * 1.22) * speedEnergy * (0.7 + Math.cos(rippleClock * TAU * 2.15) * 0.3))
     : 0;
   const impactX = Number.isFinite(state.shot?.actualX) ? lerp(left, right, state.shot.actualX) : 0;
   const impactY = Number.isFinite(state.shot?.actualY) ? GOAL.height * (1 - state.shot.actualY) : GOAL.height * 0.5;
@@ -322,12 +328,12 @@ function drawGoal(time) {
   for (let i = 0; i <= 10; i += 1) {
     const x = lerp(left, right, i / 10);
     const ripple = localRipple(x, impactY);
-    lineWorld({ x, y: 0.04, z: backZ - ripple * 0.58 }, { x, y: GOAL.height, z: -ripple * 0.14 }, 0.82, net);
+    lineWorld({ x, y: 0.04, z: backZ - ripple * 0.72 }, { x, y: GOAL.height, z: -ripple * 0.18 }, 0.82, net);
   }
   for (let i = 1; i < 7; i += 1) {
     const y = (GOAL.height * i) / 7;
     const ripple = localRipple(impactX, y);
-    lineWorld({ x: left, y, z: -ripple * 0.08 }, { x: right, y, z: backZ - ripple * 1.08 }, 0.82, net);
+    lineWorld({ x: left, y, z: -ripple * 0.1 }, { x: right, y, z: backZ - ripple * 1.3 }, 0.82, net);
   }
   window.__footballLabNetV32 = {
     localised: true,

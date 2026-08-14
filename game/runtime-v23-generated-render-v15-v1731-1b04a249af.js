@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=38.7.2";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=38.8.0";
 import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=32.4";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { keeperForStage } from "./keepers-v14.js?v=32.4";
@@ -57,23 +57,7 @@ function drawImpactFeedback(time) {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
 
-  const titleDelay = presentation.outcome === "SAVE" ? 175 : 145;
-  if (elapsed > titleDelay) {
-    const titleProgress = clamp((elapsed - titleDelay) / 245, 0, 1);
-    const scale = 0.86 + titleProgress * 0.14;
-    const alpha = Math.min(1, titleProgress * 2.4) * (1 - clamp((elapsed - 465) / 145, 0, 1));
-    ctx.globalAlpha = alpha;
-    ctx.translate(WORLD.width * 0.5, WORLD.height * 0.31);
-    ctx.scale(scale, scale);
-    ctx.textAlign = "center";
-    ctx.font = "1000 58px system-ui";
-    ctx.lineWidth = 8;
-    ctx.strokeStyle = "rgba(2,7,4,.7)";
-    const title = resultTitle(presentation.outcome, presentation.saveType, presentation.topCorner);
-    ctx.strokeText(title, 0, 0);
-    ctx.fillStyle = palette.primary;
-    ctx.fillText(title, 0, 0);
-  }
+  // V38.8: no result typography during the impact hold. The normal result banner is authoritative.
   ctx.restore();
 }
 

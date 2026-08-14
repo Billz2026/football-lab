@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=38.7.2";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=38.8.0";
 import { clamp, WORLD, state, ctx, canvasView, easeOutCubic } from "./core-v6.js?v=32.4";
 import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.4";
 import { projectWorld, projectSegment } from "./projection-v6.js?v=32.4";
@@ -22,6 +22,12 @@ function smooth01(value) {
   return t * t * (3 - 2 * t);
 }
 
+function cinematicFlightProgress(value) {
+  const t = clamp(value, 0, 1);
+  if (t <= 0.87) return (t / 0.87) * 0.9;
+  return 0.9 + smooth01((t - 0.87) / 0.13) * 0.1;
+}
+
 function animationProgress(time) {
   if (!state.animation) return { flight: 0, motionFlight: 0, settle: 0, replay: false };
   const elapsed = time - state.animation.startedAt;
@@ -35,7 +41,7 @@ function animationProgress(time) {
     ? flight < 0.67
       ? easeOutCubic(flight / 0.67) * 0.82
       : 0.82 + smooth01((flight - 0.67) / 0.33) * 0.18
-    : flight;
+    : cinematicFlightProgress(flight);
   return {
     flight,
     motionFlight,

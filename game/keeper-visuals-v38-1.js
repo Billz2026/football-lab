@@ -42,6 +42,12 @@ function replayPathProgress(value) {
   return 0.82 + smooth01((t - 0.67) / 0.33) * 0.18;
 }
 
+function cinematicFlightProgress(value) {
+  const t = clamp(value, 0, 1);
+  if (t <= 0.87) return (t / 0.87) * 0.9;
+  return 0.9 + smooth01((t - 0.87) / 0.13) * 0.1;
+}
+
 function progressAt(time) {
   if (!state.animation) {
     return {
@@ -71,7 +77,7 @@ function progressAt(time) {
       ? clamp((elapsed - runUpDuration) / contactHoldDuration, 0, 1)
       : 0,
     flight,
-    motionFlight: replay ? replayPathProgress(flight) : flight,
+    motionFlight: replay ? replayPathProgress(flight) : cinematicFlightProgress(flight),
     settle: clamp((elapsed - flightEnd) / Math.max(1, state.animation.settleDuration || 1), 0, 1),
     replay
   };

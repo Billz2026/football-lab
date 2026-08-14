@@ -17,6 +17,12 @@ function smooth(value) {
   return t * t * (3 - 2 * t);
 }
 
+function cinematicFlightProgress(value) {
+  const t = clamp(value, 0, 1);
+  if (t <= 0.87) return (t / 0.87) * 0.9;
+  return 0.9 + smooth((t - 0.87) / 0.13) * 0.1;
+}
+
 function roundedRect(x, y, width, height, radius) {
   const r = Math.min(radius, width / 2, height / 2);
   ctx.beginPath();
@@ -34,12 +40,14 @@ function progressAt(time) {
   const elapsed = time - animation.startedAt;
   const flightStart = (animation.runUpDuration || 0) + (animation.contactHoldDuration || 0);
   const flightDuration = Math.max(1, animation.flightDuration || 1);
-  const flight = clamp((elapsed - flightStart) / flightDuration, 0, 1);
+  const rawFlight = clamp((elapsed - flightStart) / flightDuration, 0, 1);
+  const replay = Boolean(animation.isReplay);
+  const flight = replay ? rawFlight : cinematicFlightProgress(rawFlight);
   return {
     elapsed,
     flight,
     settle: clamp((elapsed - flightStart - flightDuration) / Math.max(1, animation.settleDuration || 1), 0, 1),
-    replay: Boolean(animation.isReplay)
+    replay
   };
 }
 
@@ -244,7 +252,7 @@ export function drawMatchdayImpact(time) {
   const progress = progressAt(time);
   drawCrowdSurge(time, progress);
   drawImpactParticles(time, progress);
-  drawOutcomeCallout(progress);
+  // V38.8: keep the decisive glove/net/frame contact unobstructed; one result label follows after the hold.
   drawVelocityChip(progress);
   drawChapterComplete(time);
   window.__footballLabMatchdayFrameV32 = {
@@ -268,7 +276,9 @@ window.__footballLabMatchdayV32 = Object.freeze({
   specialistReactions: true,
   chapterMoments: true,
   closeBallFollow: true,
-  outcomeCallouts: true,
+  outcomeCallouts: false,
+  cleanImpactFrame: true,
+  cinematicFinalApproach: true,
   readableFlightTiming: true,
   reducedMotionAware: true
 });
