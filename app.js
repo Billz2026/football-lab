@@ -1,4 +1,4 @@
-// Football Lab V38.1.1 goalkeeper oval hotfix
+// Football Lab V38.6 ball flight and impact feel
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
   navigator.serviceWorker.register("./sw.js?v=38.6.0", {
@@ -65,16 +65,16 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "38.1.1";
+        document.documentElement.dataset.footballLabBuild = "38.6.0";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V38.1.1";
-          badge.title = "Football Lab build 38.1.1";
+          badge.textContent = "V38.6";
+          badge.title = "Football Lab build 38.6.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "38.1.1";
+        if (version) version.textContent = "38.6.0";
         const release = Object.freeze({
-          build: "38.1.1",
+          build: "38.6.0",
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
@@ -86,17 +86,17 @@ const bootPromise = runtimeCaptureMode
           premiumFinishes: "clean-execution-gated",
           physics: "progressive-magnus-dip",
           keeperAI: "early-lane-commit-correct",
-          keeperPresentation: "set-push-dive-visible-attempt",
-          keeperVisualRig: "v38-1-athletic-readability-rig",
-          keeperVisualScale: "base-1.18",
-          keeperContactRing: "directly-blocked",
+          keeperPresentation: "weighted-true-scene-depth-save-motion",
+          keeperVisualRig: "v38-5-2-athletic-scene-depth-rig",
+          keeperVisualScale: "base-1.20",
+          keeperContactRing: "removed",
           keeperBodyHalo: "removed",
           keeperProjectedPenaltyArc: "suppressed-in-free-kick-view",
           keeperGroundShadow: "soft-ground-only",
           keeperGloves: "smaller-readable-cuffs",
           keeperReflexPresentation: "sharper-archetype-capped-visible-reaction",
           keeperWrongFootMotion: "two-phase-commit-recovery",
-          keeperReadability: "jersey-colour-long-sleeves-wall-aware",
+          keeperReadability: "jersey-colour-long-sleeves-wall-depth-aware",
           keeperSavePresentation: "archetype-and-contact-classified",
           keeperArchetypes: "reading-reflex-reach-aggression",
           trainingGround: "shared-sandbox-framework",
@@ -106,10 +106,14 @@ const bootPromise = runtimeCaptureMode
           trainingRecords: "isolated-from-career",
           trainingSetupFreezeFix: "self-observing-summary-loop-removed",
           duplicateTrainingTileFix: "legacy-bridge-hidden-internal-only",
-          camera: "target-biased-late-flight-push",
+          camera: "cinematic-target-biased-ball-follow",
+          ballPresentation: "readable-match-ball-continuous-curl-ribbon-contact-squash",
+          netPresentation: "localised-persistent-impact-ripple",
+          impactPresentation: "glove-net-frame-contact-flash-particles",
+          impactAudio: "net-thump-glove-slap-frame-ring",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "38.1.1"
+          cacheGeneration: "38.6.0"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -134,6 +138,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV370 = release;
         window.__footballLabReleaseV381 = release;
         window.__footballLabReleaseV3811 = release;
+        window.__footballLabReleaseV386 = release;
       });
 
 bootPromise.catch((error) => {
