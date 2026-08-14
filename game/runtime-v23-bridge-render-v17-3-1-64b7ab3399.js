@@ -1,5 +1,5 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=40.3.0";
-import { drawHeroKicker } from "./runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js?v=40.3.0";
+import { drawHeroCharacterV42 } from "./hero-character-v42.js?v=42.0.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
 import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=40.3.0";
@@ -82,7 +82,7 @@ function drawVenueWeather(time) {
 export function drawScene(time, finishShot) {
   drawBaseScene(time, finishShot);
   drawStadiumProgressionV41(time);
-  drawHeroKicker(time);
+  drawHeroCharacterV42(time);
   drawVenueWeather(time);
   drawMatchdayImpact(time);
   drawCampaignPresentationV41(time);
@@ -94,6 +94,7 @@ export function drawScene(time, finishShot) {
     hero: heroVisible,
     total: baseVisible + heroVisible,
     character: activeCharacter().id,
+    renderer: "v42-layered-character",
     time
   };
 }
@@ -106,3 +107,4 @@ window.__footballLabRendererV1731 = true;
 window.__footballLabEnvironmentRendererV31 = true;
 window.__footballLabRendererV32 = true;
 window.__footballLabStadiumRendererV41 = true;
+window.__footballLabCharacterRendererBridgeV42 = true;
