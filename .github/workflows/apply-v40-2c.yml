@@ -56,7 +56,7 @@ jobs:
             echo "$bad"
             exit 1
           fi
-          git diff -- game/runtime-v23-main.js | grep -q 'resolveShotPhysics' && { echo 'Physics resolver line changed unexpectedly'; exit 1; } || true
+          git diff -- game/runtime-v23-main.js | grep -E '^[+-].*resolveShotPhysics' && { echo 'Physics resolver line changed unexpectedly'; exit 1; } || true
           git diff -- game/runtime-v23-main.js | grep -q '^[-+]function scoreShot' && { echo 'Scoring function changed unexpectedly'; exit 1; } || true
       - name: Commit V40.2C
         run: |
