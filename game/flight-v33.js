@@ -1,6 +1,6 @@
 import { clamp, easeOutCubic, elements, lerp, smoothStep, state } from "./core-v6.js?v=32.4";
 
-const BUILD = "38.6.0";
+const BUILD = "38.7.0";
 
 function primaryEndIndex(shot) {
   if (!Array.isArray(shot?.path) || shot.path.length < 2) return 0;
@@ -144,24 +144,23 @@ function updateFlightCamera(now) {
   }
 
   const replay = Boolean(animation.isReplay);
-  const focus = easeOutCubic(clamp((progress - 0.012) / 0.988, 0, 1));
-  const latePush = smoothStep(clamp((progress - 0.52) / 0.48, 0, 1));
+  const focus = easeOutCubic(clamp((progress - 0.06) / 0.94, 0, 1));
+  const latePush = smoothStep(clamp((progress - 0.64) / 0.36, 0, 1));
   const targetX = clamp(
     Number.isFinite(state.shot?.actualX) ? state.shot.actualX : Number(state.shot?.aimX) || 0.5,
     -0.2,
     1.2
   );
-  const originX = clamp(50 + (targetX - 0.5) * 22, 41.5, 58.5);
-  const originY = replay ? 43 : 46;
+  const originX = clamp(50 + (targetX - 0.5) * 34, 34, 66);
+  const originY = replay ? 37 : 39;
   // V33.2 adds only a modest extra push in the final half of flight so the
   // ball and keeper read more clearly without turning the shot into a cut-scene.
   const scale = 1
-    + focus * (replay ? 0.138 : 0.108)
-    + latePush * (replay ? 0.016 : 0.013);
-  const settleLift = focus * (replay ? 0.3 : 0.12);
+    + focus * (replay ? 0.165 : 0.135)
+    + latePush * (replay ? 0.065 : 0.052);
 
-  canvas.style.transformOrigin = `${originX}% ${originY}%`;
-  canvas.style.transform = `translate3d(0, ${settleLift}%, 0) scale(${scale.toFixed(4)})`;
+  canvas.style.transformOrigin = originX + "% " + originY + "%";
+  canvas.style.transform = "translate3d(0, 0, 0) scale(" + scale.toFixed(4) + ")";
   canvas.dataset.flightCameraV33 = "active";
   requestAnimationFrame(updateFlightCamera);
 }
@@ -178,7 +177,10 @@ window.__footballLabFlightV33 = Object.freeze({
   model: "progressive-magnus-dip",
   deterministic: true,
   preservesResolvedOutcome: true,
-  camera: "cinematic-target-biased-ball-follow",
+  camera: "goal-first-destination-biased-flight-composition",
   readableCurl: true,
+  kickerClearsFrameAfterContact: true,
+  finalApproachEmphasis: true,
+  impactHoldThroughSettle: true,
   presentationOnly: true
 });

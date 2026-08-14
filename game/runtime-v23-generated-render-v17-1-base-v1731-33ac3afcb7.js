@@ -79,20 +79,28 @@ function cameraForFrame(time) {
   const progress = progressAt(time);
   const reducedMotion = document.documentElement.classList.contains("reduced-motion-v22");
   if (state.animation && progress.motionFlight > 0 && !reducedMotion) {
-    const follow = easeOutCubic(progress.motionFlight);
+    const composition = easeOutCubic(clamp((progress.motionFlight - 0.085) / 0.915, 0, 1));
+    const finalApproach = smooth01(clamp((progress.motionFlight - 0.66) / 0.34, 0, 1));
     const ball = sampleShotPath(state.shot?.path, progress.motionFlight);
-    camera.position.z -= follow * (progress.replay ? 4.9 : 3.8);
-    camera.position.y += follow * 0.24;
-    camera.fovY = lerp(camera.fovY, progress.replay ? 27.8 : 30.4, follow * 0.76);
+    camera.position.z -= composition * (progress.replay ? 5.55 : 4.55) + finalApproach * (progress.replay ? 0.55 : 0.42);
+    camera.position.y += composition * 0.14;
+    camera.fovY = lerp(
+      camera.fovY,
+      progress.replay ? 25.9 : 27.9,
+      clamp(composition * 0.82 + finalApproach * 0.12, 0, 0.94)
+    );
     if (ball) {
-      camera.target.x = lerp(camera.target.x, ball.x, follow * 0.76);
-      camera.target.y = lerp(camera.target.y, ball.y, follow * 0.64);
-      camera.target.z = lerp(camera.target.z, ball.z, follow * (1 - progress.motionFlight) * 0.36);
+      camera.target.x = lerp(camera.target.x, ball.x, clamp(composition * 0.84 + finalApproach * 0.1, 0, 0.94));
+      camera.target.y = lerp(camera.target.y, ball.y, clamp(composition * 0.72 + finalApproach * 0.12, 0, 0.9));
+      camera.target.z = lerp(camera.target.z, ball.z, composition * (1 - progress.motionFlight) * 0.26);
     }
   }
   window.__footballLabCameraV32 = {
     ballFollow: Boolean(state.animation && progress.motionFlight > 0 && !reducedMotion),
     closeFollow: true,
+    kickerClearsFrame: true,
+    finalApproachEmphasis: true,
+    impactHoldThroughSettle: true,
     fovY: camera.fovY,
     reducedMotion,
     flight: progress.motionFlight
