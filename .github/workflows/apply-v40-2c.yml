@@ -1,0 +1,77 @@
+name: Apply V40.2C natural goalmouth and outcome feedback
+
+on:
+  push:
+    paths:
+      - "tools/apply-v40-2c.mjs"
+      - ".github/workflows/apply-v40-2c.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply V40.2C patch
+        run: node tools/apply-v40-2c.mjs
+      - name: Validate JavaScript syntax
+        run: |
+          node --check game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          node --check game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js
+          node --check game/runtime-v23-generated-render-v15-v1731-1b04a249af.js
+          node --check game/runtime-v23-generated-render-v17-v1731-7f257084b1.js
+          node --check game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          node --check game/runtime-v23-main.js
+          node --check app.js
+          node --check sw.js
+      - name: Verify V40.2C presentation contracts
+        run: |
+          grep -q 'function drawGoalContrastV402C' game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          grep -q 'treatment: "no-rectangle-continuous-stadium"' game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          if grep -q 'drawGoalBackdropV402B();' game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js; then
+            echo 'Old block-shaped goal backdrop call is still active'
+            exit 1
+          fi
+          grep -q 'window.__footballLabGoalContrastV402C' game/runtime-v23-generated-render-v17-v1731-7f257084b1.js
+          grep -q 'hardDividers: false' game/runtime-v23-generated-render-v17-v1731-7f257084b1.js
+          grep -q 'GOAL · TOP CORNER' game/runtime-v23-main.js
+          grep -q 'POST: "OFF THE POST"' game/runtime-v23-main.js
+          grep -q 'BAR: "CROSSBAR"' game/runtime-v23-main.js
+          grep -q 'resultHoldMs: 760' game/runtime-v23-main.js
+          grep -q 'if (phase === "result") return true;' game/runtime-v23-main.js
+          grep -q 'badge.textContent = "V40.2C"' app.js
+      - name: Guard frozen gameplay systems
+        run: |
+          changed="$(git diff --name-only)"
+          echo "$changed"
+          allowed='^(app\.js|sw\.js|game/runtime-v23-main\.js|game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7\.js|game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b\.js|game/runtime-v23-generated-render-v15-v1731-1b04a249af\.js|game/runtime-v23-generated-render-v17-v1731-7f257084b1\.js|game/runtime-v23-bridge-render-v17-3-1-64b7ab3399\.js)$'
+          bad="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
+          if [ -n "$bad" ]; then
+            echo "Unexpected gameplay/system files changed:"
+            echo "$bad"
+            exit 1
+          fi
+          git diff -- game/runtime-v23-main.js | grep -q 'resolveShotPhysics' && { echo 'Physics resolver line changed unexpectedly'; exit 1; } || true
+          git diff -- game/runtime-v23-main.js | grep -q '^[-+]function scoreShot' && { echo 'Scoring function changed unexpectedly'; exit 1; } || true
+      - name: Commit V40.2C
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js sw.js \
+            game/runtime-v23-main.js \
+            game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js \
+            game/runtime-v23-generated-render-v17-v1731-7f257084b1.js \
+            game/runtime-v23-generated-render-v15-v1731-1b04a249af.js \
+            game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js \
+            game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          if git diff --cached --quiet; then
+            echo "No V40.2C changes to commit"
+            exit 0
+          fi
+          git commit -m "Build V40.2C natural goalmouth and outcome feedback"
+          git push
