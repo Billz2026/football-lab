@@ -29,6 +29,23 @@ const VENUES = Object.freeze({
   })
 });
 
+const CHAPTER_IDENTITIES = Object.freeze({
+  academy: "CONTROL & FOUNDATIONS",
+  city: "ANGLES & CROSSWIND",
+  night: "RANGE & PRECISION",
+  storm: "WEATHER & COMPOSURE",
+  world: "PRESSURE & ELITE KEEPERS",
+  summit: "MASTERY"
+});
+
+const NEXT_VENUES = Object.freeze({
+  1: "BOROUGH ARENA",
+  2: "CONTINENTAL PARK",
+  3: "TEMPEST STADIUM",
+  4: "CROWN ARENA",
+  5: "SUMMIT BOWL"
+});
+
 function applyTransform() {
   const { dpr, scale, offsetX, offsetY } = canvasView;
   ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * offsetX, dpr * offsetY);
@@ -208,6 +225,151 @@ function drawFinalOccasion(time, venue) {
   ctx.restore();
 }
 
+function transitionAlpha(elapsed, phase) {
+  const enter = clamp(elapsed / 190, 0, 1);
+  const exitStart = phase === "chapter-complete" ? 1320 : 850;
+  const exitLength = phase === "chapter-complete" ? 300 : 240;
+  const exit = 1 - clamp((elapsed - exitStart) / exitLength, 0, 1);
+  return Math.min(enter, exit);
+}
+
+function drawTransitionBackdrop(time, venue, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const grade = ctx.createLinearGradient(0, 0, WORLD.width, WORLD.height);
+  grade.addColorStop(0, "rgba(1,5,4,.98)");
+  grade.addColorStop(0.58, "rgba(2,8,6,.96)");
+  grade.addColorStop(1, `rgba(${venue.accent},.10)`);
+  ctx.fillStyle = grade;
+  ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+
+  const glow = ctx.createRadialGradient(WORLD.width * 0.5, WORLD.height * 0.40, 20, WORLD.width * 0.5, WORLD.height * 0.40, 470);
+  glow.addColorStop(0, `rgba(${venue.accent},${0.11 + venue.energy * 0.035})`);
+  glow.addColorStop(1, `rgba(${venue.accent},0)`);
+  ctx.fillStyle = glow;
+  ctx.fillRect(100, 40, WORLD.width - 200, WORLD.height - 80);
+
+  ctx.fillStyle = `rgba(${venue.accent},.08)`;
+  for (let index = 0; index < 24; index += 1) {
+    const x = (index * 73 + 19) % WORLD.width;
+    const y = 545 + ((index * 29) % 85);
+    const height = 16 + ((index * 11) % 44);
+    ctx.fillRect(x, y - height, 32 + (index % 4) * 13, height);
+  }
+
+  if (!document.documentElement.classList.contains("reduced-motion-v22")) {
+    ctx.globalCompositeOperation = "screen";
+    for (let index = 0; index < 44; index += 1) {
+      const x = 22 + ((index * 97) % 1155);
+      const y = 92 + ((index * 53) % 470);
+      const pulse = 0.32 + Math.sin(time / 180 + index * 1.7) * 0.18;
+      ctx.fillStyle = `rgba(${venue.secondary},${clamp(pulse, 0.08, 0.5) * alpha})`;
+      ctx.fillRect(x, y, 1.5, 1.5);
+    }
+  }
+  ctx.restore();
+}
+
+function drawStageDots(active, venue, alpha) {
+  const width = 224;
+  const gap = 12;
+  const dotWidth = (width - gap * 4) / 5;
+  const x = (WORLD.width - width) / 2;
+  const y = WORLD.height * 0.655;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  for (let index = 1; index <= 5; index += 1) {
+    ctx.fillStyle = index < active
+      ? `rgba(${venue.accent},.46)`
+      : index === active
+        ? `rgba(${venue.secondary},.94)`
+        : "rgba(240,247,238,.12)";
+    roundedRect(x + (index - 1) * (dotWidth + gap), y, dotWidth, 5, 3);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawStagePresentation(time, presentation, venue, alpha) {
+  const identity = CHAPTER_IDENTITIES[state.currentStage?.environment] || "CLASSIC FREE KICKS";
+  const stageInChapter = chapterStage();
+  const final = isChapterFinal();
+  const newVenue = stageInChapter === 1 && state.stage > 0 && state.stage < 30;
+  const label = final ? "CHAPTER FINAL" : newVenue ? "NEW VENUE" : `STAGE ${stageInChapter} OF 5`;
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.textAlign = "center";
+  ctx.fillStyle = `rgba(${venue.accent},.88)`;
+  ctx.font = "950 10px system-ui";
+  ctx.fillText(`CHAPTER ${presentation.chapterNumber || 1} · ${identity}`, WORLD.width / 2, WORLD.height * 0.285);
+
+  ctx.fillStyle = `rgba(${venue.secondary},.76)`;
+  ctx.font = "900 9px system-ui";
+  ctx.fillText(label, WORLD.width / 2, WORLD.height * 0.34);
+
+  ctx.fillStyle = "#f8fcf6";
+  const title = presentation.stageName || state.currentStage?.name || "CLASSIC FREE KICK";
+  ctx.font = title.length > 18 ? "1000 39px system-ui" : "1000 48px system-ui";
+  ctx.fillText(title, WORLD.width / 2, WORLD.height * 0.445);
+
+  ctx.fillStyle = `rgba(${venue.accent},.9)`;
+  ctx.font = "950 12px system-ui";
+  ctx.fillText(presentation.venue || state.currentStage?.venue || venue.label, WORLD.width / 2, WORLD.height * 0.515);
+
+  ctx.fillStyle = "rgba(239,247,236,.58)";
+  ctx.font = "800 10px system-ui";
+  ctx.fillText(`${presentation.distanceYards || state.currentStage?.distanceYards || 20} YDS · ${presentation.weather || state.currentStage?.weather || "MATCH CONDITIONS"}`, WORLD.width / 2, WORLD.height * 0.56);
+
+  ctx.fillStyle = "rgba(239,247,236,.44)";
+  ctx.font = "800 9px system-ui";
+  ctx.fillText(final ? "MASTER THIS TEST TO COMPLETE THE CHAPTER" : "FIVE DISTINCT TESTS DEFINE EVERY VENUE", WORLD.width / 2, WORLD.height * 0.61);
+
+  ctx.fillStyle = `rgba(${venue.secondary},.74)`;
+  ctx.font = "850 9px system-ui";
+  ctx.fillText("TAP TO START", WORLD.width / 2, WORLD.height * 0.86);
+  ctx.restore();
+  drawStageDots(stageInChapter, venue, alpha);
+}
+
+function drawChapterCompletePresentation(presentation, venue, alpha) {
+  const chapter = Number(presentation.chapterNumber || state.currentStage?.chapterNumber || 1);
+  const campaignComplete = chapter >= 6;
+  const nextVenue = NEXT_VENUES[chapter];
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.textAlign = "center";
+  ctx.fillStyle = `rgba(${venue.accent},.92)`;
+  ctx.font = "950 11px system-ui";
+  ctx.fillText(campaignComplete ? "CAMPAIGN MILESTONE" : `CHAPTER ${chapter} COMPLETE`, WORLD.width / 2, WORLD.height * 0.30);
+
+  ctx.fillStyle = "#f8fcf6";
+  const title = presentation.chapterName || state.currentStage?.chapterName || "CHAPTER COMPLETE";
+  ctx.font = title.length > 17 ? "1000 42px system-ui" : "1000 52px system-ui";
+  ctx.fillText(title, WORLD.width / 2, WORLD.height * 0.43);
+
+  ctx.fillStyle = `rgba(${venue.secondary},.82)`;
+  ctx.font = "950 12px system-ui";
+  ctx.fillText(`${presentation.venue || state.currentStage?.venue || venue.label} MASTERED`, WORLD.width / 2, WORLD.height * 0.505);
+
+  ctx.fillStyle = "rgba(239,247,236,.62)";
+  ctx.font = "850 10px system-ui";
+  ctx.fillText(presentation.scoreLabel || "CHAPTER CLEARED", WORLD.width / 2, WORLD.height * 0.555);
+
+  const nextLine = campaignComplete
+    ? "ENDLESS MASTERY NOW CONTINUES BEYOND STAGE 30"
+    : `NEXT DESTINATION · ${nextVenue}`;
+  ctx.fillStyle = `rgba(${venue.accent},.76)`;
+  ctx.font = "900 10px system-ui";
+  ctx.fillText(nextLine, WORLD.width / 2, WORLD.height * 0.66);
+
+  ctx.fillStyle = "rgba(239,247,236,.44)";
+  ctx.font = "800 9px system-ui";
+  ctx.fillText("TAP TO CONTINUE THE JOURNEY", WORLD.width / 2, WORLD.height * 0.86);
+  ctx.restore();
+}
+
 export function drawStadiumProgressionV41(time) {
   if (!state.currentStage || state.screen !== "game") return;
   if (["stage", "chapter-complete"].includes(state.presentation?.phase)) return;
@@ -228,5 +390,26 @@ export function drawStadiumProgressionV41(time) {
     chapterFinal: isChapterFinal(),
     crowdEnergy: venue.energy,
     venueTier: venue.tier
+  };
+}
+
+export function drawCampaignPresentationV41(time) {
+  const presentation = state.presentation;
+  if (!presentation || !["stage", "chapter-complete"].includes(presentation.phase)) return;
+  applyTransform();
+  const elapsed = Math.max(0, time - (presentation.startedAt || time));
+  const alpha = transitionAlpha(elapsed, presentation.phase);
+  if (alpha <= 0) return;
+  const venue = profile();
+  drawTransitionBackdrop(time, venue, alpha);
+  if (presentation.phase === "chapter-complete") drawChapterCompletePresentation(presentation, venue, alpha);
+  else drawStagePresentation(time, presentation, venue, alpha);
+  window.__footballLabCampaignPresentationV41 = {
+    build: "41.0.0",
+    phase: presentation.phase,
+    chapter: state.currentStage?.chapterNumber,
+    stageInChapter: chapterStage(),
+    venue: state.currentStage?.venue,
+    visible: alpha > 0
   };
 }
