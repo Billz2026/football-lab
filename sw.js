@@ -1,11 +1,11 @@
-// Football Lab V39 character motion cache reset
-const CACHE_NAME = "football-lab-shell-v39-0-0";
+// Football Lab V40.1 premium pitch cache reset
+const CACHE_NAME = "football-lab-shell-v40-1-0";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=39.0.0"
+  "./app.js?v=40.1.0"
 ];
 
 async function refreshCoreCache() {
