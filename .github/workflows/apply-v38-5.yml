@@ -1,0 +1,36 @@
+name: Apply V38.5 keeper motion
+
+on:
+  push:
+    paths:
+      - "tools/apply-v38-5.mjs"
+      - ".github/workflows/apply-v38-5.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply source patch
+        run: node tools/apply-v38-5.mjs
+      - name: Validate JavaScript syntax
+        run: |
+          node --check game/keeper-visuals-v38-1.js
+          node --check app.js
+      - name: Commit V38.5
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/keeper-visuals-v38-1.js app.js
+          if git diff --cached --quiet; then
+            echo "No V38.5 changes to commit"
+            exit 0
+          fi
+          git commit -m "Build V38.5 goalkeeper motion overhaul"
+          git push
