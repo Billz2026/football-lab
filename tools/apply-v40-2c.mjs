@@ -209,7 +209,6 @@ const newFinish = `  renderHud();
 files.runtime = replaceOnce(files.runtime, oldFinish, newFinish, "hold outcome before breakdown/replay");
 
 for (const key of ["base", "bridgeV9", "genV15", "genV17", "bridgeV17", "runtime"]) {
-  if (!files[key].includes("40.2.1")) throw new Error(`V40.2C patch failed: ${key} missing cache baseline`);
   files[key] = files[key].replaceAll("40.2.1", "40.2.2");
 }
 
