@@ -1098,6 +1098,78 @@ function drawContactBurst(time) {
   ctx.restore();
 }
 
+function drawPanelPentagon(cx, cy, radius, rotation, fillStyle) {
+  ctx.fillStyle = fillStyle;
+  ctx.beginPath();
+  for (let i = 0; i < 5; i += 1) {
+    const angle = rotation - Math.PI / 2 + i * TAU / 5;
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawPremiumMatchBall(projected, radius, pathProgress, contactImpact) {
+  const squashX = 1 + contactImpact * 0.075;
+  const squashY = 1 - contactImpact * 0.1;
+  const speed = clamp((state.shot?.speedMps || 0) / 40, 0, 1);
+  const curve = Number(state.shot?.curve) || 0;
+  const spinDirection = Math.sign(curve) || 1;
+  const rotation = pathProgress * (9.5 + speed * 8.5) * spinDirection;
+
+  ctx.save();
+  ctx.translate(projected.x, projected.y);
+  ctx.scale(squashX, squashY);
+
+  const sphere = ctx.createRadialGradient(-radius * 0.34, -radius * 0.42, radius * 0.05, 0, 0, radius);
+  sphere.addColorStop(0, "#ffffff");
+  sphere.addColorStop(0.55, "#f3f4f2");
+  sphere.addColorStop(0.82, "#d9ddda");
+  sphere.addColorStop(1, "#aeb5b0");
+  ctx.fillStyle = sphere;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius, 0, TAU);
+  ctx.fill();
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.965, 0, TAU);
+  ctx.clip();
+  ctx.rotate(rotation);
+
+  ctx.strokeStyle = "rgba(25,29,27,.28)";
+  ctx.lineWidth = Math.max(0.45, radius * 0.055);
+  for (let i = 0; i < 5; i += 1) {
+    const angle = -Math.PI / 2 + i * TAU / 5;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(angle) * radius * 0.25, Math.sin(angle) * radius * 0.25);
+    ctx.quadraticCurveTo(Math.cos(angle + 0.18) * radius * 0.48, Math.sin(angle + 0.18) * radius * 0.48, Math.cos(angle) * radius * 0.64, Math.sin(angle) * radius * 0.64);
+    ctx.stroke();
+  }
+
+  drawPanelPentagon(0, 0, radius * 0.285, 0, "#101312");
+  for (let i = 0; i < 5; i += 1) {
+    const angle = -Math.PI / 2 + i * TAU / 5;
+    const cx = Math.cos(angle) * radius * 0.68;
+    const cy = Math.sin(angle) * radius * 0.68;
+    drawPanelPentagon(cx, cy, radius * 0.17, angle + Math.PI / 5, "#171a18");
+  }
+  ctx.restore();
+
+  ctx.strokeStyle = "rgba(4,8,6,.92)";
+  ctx.lineWidth = Math.max(0.8, radius * 0.105);
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.96, 0, TAU);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(255,255,255,.42)";
+  ctx.beginPath();
+  ctx.ellipse(-radius * 0.32, -radius * 0.38, radius * 0.2, radius * 0.12, -0.45, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
 function drawBall(time, finishShot) {
   const progress = progressAt(time);
   let world = ballWorld(state.currentStage);
@@ -1137,102 +1209,41 @@ function drawBall(time, finishShot) {
   if (state.animation && pathProgress > 0.035) drawTrail(pathProgress);
   const projected = projectWorld(world, activeCamera, viewport);
   if (!projected.visible) return;
-  const radius = clamp(projected.scale * 0.112, 4.8, 11.4);
+  const radius = clamp(projected.scale * 0.122, 5.2, 12.2);
 
   const contactImpact = state.animation && ["SAVE", "POST", "BAR"].includes(state.shot?.outcome)
-    ? Math.max(0, 1 - Math.abs(pathProgress - impactRatio()) / 0.026)
+    ? Math.max(0, 1 - Math.abs(pathProgress - impactRatio()) / 0.022)
     : 0;
-  const squashX = 1 + contactImpact * 0.16;
-  const squashY = 1 - contactImpact * 0.2;
 
-  ctx.save();
-  ctx.globalCompositeOperation = "screen";
-  ctx.fillStyle = `rgba(244,255,235,${0.1 + clamp((state.shot?.speedMps || 0) / 42, 0, 1) * 0.12})`;
-  ctx.shadowColor = "rgba(218,254,77,.22)";
-  ctx.shadowBlur = 7;
-  ctx.beginPath();
-  ctx.arc(projected.x, projected.y, radius * 1.48, 0, TAU);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.save();
-  ctx.globalAlpha = 0.22;
-  ctx.fillStyle = "#000";
-  ctx.beginPath();
-  ctx.ellipse(projected.x, projected.y + radius * 0.68, radius * 1.1, radius * 0.35, 0, 0, TAU);
-  ctx.fill();
-  ctx.restore();
-
-  const gradient = ctx.createRadialGradient(
-    projected.x - radius * 0.35,
-    projected.y - radius * 0.4,
-    1,
-    projected.x,
-    projected.y,
-    radius
-  );
-  gradient.addColorStop(0, "#fff");
-  gradient.addColorStop(1, "#c7d0c6");
-  ctx.fillStyle = gradient;
-  ctx.beginPath();
-  ctx.ellipse(projected.x, projected.y, radius * squashX, radius * squashY, 0, 0, TAU);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(5,13,8,.72)";
-  ctx.lineWidth = 1.05;
-  ctx.stroke();
-
-  ctx.fillStyle = "#172019";
-  ctx.beginPath();
-  for (let i = 0; i < 5; i += 1) {
-    const angle = -Math.PI / 2 + i * TAU / 5 + pathProgress * 12;
-    const px = projected.x + Math.cos(angle) * radius * 0.38 * squashX;
-    const py = projected.y + Math.sin(angle) * radius * 0.38 * squashY;
-    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-  }
-  ctx.closePath();
-  ctx.fill();
+  drawPremiumMatchBall(projected, radius, pathProgress, contactImpact);
 }
 
 function drawTrail(progress) {
-  ctx.save();
   const speed = clamp((state.shot?.speedMps || 24) / 38, 0.55, 1.25);
-  const curve = Math.abs(state.shot?.curve || 0);
-  const trailCount = 12 + Math.round(speed * 7);
-  const ribbon = [];
-  for (let index = trailCount; index >= 1; index -= 1) {
-    const world = sampleShotPath(state.shot.path, clamp(progress - index * (0.009 + speed * 0.0045), 0, 1));
+  const sampleCount = 18;
+  const step = 0.0085 + speed * 0.0035;
+  const points = [];
+  for (let index = sampleCount; index >= 1; index -= 1) {
+    const world = sampleShotPath(state.shot.path, clamp(progress - index * step, 0, 1));
     if (!world) continue;
     const projected = projectWorld(world, activeCamera, viewport);
-    if (projected.visible) ribbon.push(projected);
+    if (projected.visible) points.push(projected);
   }
-  if (ribbon.length > 1) {
-    ctx.strokeStyle = `rgba(236,255,223,${0.12 + speed * 0.08})`;
-    ctx.lineWidth = clamp(1.15 + speed * 0.72, 1.25, 2.2);
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.shadowColor = "rgba(218,254,77,.2)";
-    ctx.shadowBlur = 5;
+  if (points.length < 2) return;
+
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  for (let index = 1; index < points.length; index += 1) {
+    const t = index / (points.length - 1);
+    const a = points[index - 1];
+    const b = points[index];
+    ctx.strokeStyle = "rgba(235,242,234," + (0.025 + t * 0.11).toFixed(3) + ")";
+    ctx.lineWidth = 0.45 + t * (0.75 + speed * 0.18);
     ctx.beginPath();
-    ribbon.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
     ctx.stroke();
-    ctx.shadowBlur = 0;
-  }
-  for (let i = 1; i <= trailCount; i += 1) {
-    const world = sampleShotPath(state.shot.path, clamp(progress - i * (0.009 + speed * 0.0045), 0, 1));
-    if (!world) continue;
-    const projected = projectWorld(world, activeCamera, viewport);
-    if (!projected.visible) continue;
-    ctx.fillStyle = `rgba(218,254,77,${(1 - i / (trailCount + 1)) * (0.15 + speed * 0.1)})`;
-    ctx.beginPath();
-    ctx.arc(projected.x, projected.y, clamp(projected.scale * 0.072, 2.1, 7), 0, TAU);
-    ctx.fill();
-    if (curve > 0.2 && i % 2 === 0) {
-      ctx.strokeStyle = `rgba(239,255,220,${(1 - i / trailCount) * 0.16})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(projected.x, projected.y, clamp(projected.scale * 0.09, 3, 9), progress * TAU * 5 + i, progress * TAU * 5 + i + Math.PI * 0.9);
-      ctx.stroke();
-    }
   }
   ctx.restore();
 }

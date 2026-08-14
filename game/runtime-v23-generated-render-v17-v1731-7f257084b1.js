@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=38.7.0";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=38.7.1";
 import { clamp, WORLD, state, ctx, canvasView, easeOutCubic } from "./core-v6.js?v=32.4";
 import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.4";
 import { projectWorld, projectSegment } from "./projection-v6.js?v=32.4";

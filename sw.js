@@ -1,11 +1,11 @@
-// Football Lab V38.1.5 stale-script cache reset
-const CACHE_NAME = "football-lab-shell-v38-1-5";
+// Football Lab V38.7.1 single ball integrity cache reset
+const CACHE_NAME = "football-lab-shell-v38-7-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=36.3"
+  "./app.js?v=38.7.1"
 ];
 
 async function refreshCoreCache() {
