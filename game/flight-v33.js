@@ -1,6 +1,6 @@
 import { clamp, easeOutCubic, elements, lerp, smoothStep, state } from "./core-v6.js?v=32.4";
 
-const BUILD = "33.2.0";
+const BUILD = "38.6.0";
 
 function primaryEndIndex(shot) {
   if (!Array.isArray(shot?.path) || shot.path.length < 2) return 0;
@@ -64,13 +64,13 @@ function reshapePrimaryFlight(shot) {
   const curveSign = curveMagnitude > 0.06
     ? Math.sign(curve)
     : inferredCurveSign(primary, start, end);
-  const minimumCurvePeak = curveMagnitude * (0.34 + distanceYards * 0.018);
+  const minimumCurvePeak = curveMagnitude * (0.42 + distanceYards * 0.021);
   const desiredCurvePeak = Math.max(peakOriginalCurve * 0.96, minimumCurvePeak);
   const outcomeBlend = shot.outcome === "WALL"
     ? 0.42
     : shot.outcome === "SAVE"
-      ? 0.62
-      : 0.72;
+      ? 0.68
+      : 0.79;
   const xBlend = curveMagnitude < 0.08 ? 0.18 : outcomeBlend;
 
   const controlledPeakLift = clamp(peakLift, 0.72, 3.05);
@@ -151,14 +151,14 @@ function updateFlightCamera(now) {
     -0.2,
     1.2
   );
-  const originX = clamp(50 + (targetX - 0.5) * 18, 41.5, 58.5);
+  const originX = clamp(50 + (targetX - 0.5) * 22, 41.5, 58.5);
   const originY = replay ? 43 : 46;
   // V33.2 adds only a modest extra push in the final half of flight so the
   // ball and keeper read more clearly without turning the shot into a cut-scene.
   const scale = 1
-    + focus * (replay ? 0.124 : 0.088)
-    + latePush * (replay ? 0.012 : 0.009);
-  const settleLift = focus * (replay ? 0.35 : 0.18);
+    + focus * (replay ? 0.138 : 0.108)
+    + latePush * (replay ? 0.016 : 0.013);
+  const settleLift = focus * (replay ? 0.3 : 0.12);
 
   canvas.style.transformOrigin = `${originX}% ${originY}%`;
   canvas.style.transform = `translate3d(0, ${settleLift}%, 0) scale(${scale.toFixed(4)})`;
@@ -178,5 +178,7 @@ window.__footballLabFlightV33 = Object.freeze({
   model: "progressive-magnus-dip",
   deterministic: true,
   preservesResolvedOutcome: true,
-  camera: "target-biased-late-flight-push"
+  camera: "cinematic-target-biased-ball-follow",
+  readableCurl: true,
+  presentationOnly: true
 });

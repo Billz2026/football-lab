@@ -81,13 +81,13 @@ function cameraForFrame(time) {
   if (state.animation && progress.motionFlight > 0 && !reducedMotion) {
     const follow = easeOutCubic(progress.motionFlight);
     const ball = sampleShotPath(state.shot?.path, progress.motionFlight);
-    camera.position.z -= follow * (progress.replay ? 4.6 : 3.3);
-    camera.position.y += follow * 0.2;
-    camera.fovY = lerp(camera.fovY, progress.replay ? 28.5 : 31.5, follow * 0.72);
+    camera.position.z -= follow * (progress.replay ? 4.9 : 3.8);
+    camera.position.y += follow * 0.24;
+    camera.fovY = lerp(camera.fovY, progress.replay ? 27.8 : 30.4, follow * 0.76);
     if (ball) {
-      camera.target.x = lerp(camera.target.x, ball.x, follow * 0.68);
-      camera.target.y = lerp(camera.target.y, ball.y, follow * 0.56);
-      camera.target.z = lerp(camera.target.z, ball.z, follow * (1 - progress.motionFlight) * 0.42);
+      camera.target.x = lerp(camera.target.x, ball.x, follow * 0.76);
+      camera.target.y = lerp(camera.target.y, ball.y, follow * 0.64);
+      camera.target.z = lerp(camera.target.z, ball.z, follow * (1 - progress.motionFlight) * 0.36);
     }
   }
   window.__footballLabCameraV32 = {
@@ -287,11 +287,14 @@ function drawGoal(time) {
   const net = "rgba(238,255,236,.19)";
   const progress = progressAt(time);
   const impact = impactRatio();
-  const ripplePhase = state.animation && state.shot.outcome === "GOAL"
-    ? clamp((progress.motionFlight - impact) / Math.max(0.045, 1 - impact), 0, 1)
+  const goalImpactActive = Boolean(state.animation && state.shot.outcome === "GOAL" && progress.motionFlight >= impact);
+  const impactFlightTail = goalImpactActive
+    ? clamp((progress.motionFlight - impact) / Math.max(0.028, 1 - impact), 0, 1)
     : 0;
-  const rippleEnergy = ripplePhase > 0
-    ? Math.sin(ripplePhase * Math.PI) * (0.42 + clamp((state.shot.speedMps || 0) / 42, 0, 1) * 0.24)
+  const rippleClock = impactFlightTail * 0.28 + progress.settle * 0.72;
+  const speedEnergy = 0.52 + clamp((state.shot.speedMps || 0) / 42, 0, 1) * 0.34;
+  const rippleEnergy = goalImpactActive
+    ? Math.max(0, Math.exp(-rippleClock * 1.45) * speedEnergy * (0.72 + Math.cos(rippleClock * TAU * 2.2) * 0.28))
     : 0;
   const impactX = Number.isFinite(state.shot?.actualX) ? lerp(left, right, state.shot.actualX) : 0;
   const impactY = Number.isFinite(state.shot?.actualY) ? GOAL.height * (1 - state.shot.actualY) : GOAL.height * 0.5;
@@ -311,12 +314,12 @@ function drawGoal(time) {
   for (let i = 0; i <= 10; i += 1) {
     const x = lerp(left, right, i / 10);
     const ripple = localRipple(x, impactY);
-    lineWorld({ x, y: 0.04, z: backZ - ripple * 0.42 }, { x, y: GOAL.height, z: -ripple }, 0.75, net);
+    lineWorld({ x, y: 0.04, z: backZ - ripple * 0.58 }, { x, y: GOAL.height, z: -ripple * 0.14 }, 0.82, net);
   }
   for (let i = 1; i < 7; i += 1) {
     const y = (GOAL.height * i) / 7;
     const ripple = localRipple(impactX, y);
-    lineWorld({ x: left, y, z: 0 }, { x: right, y, z: backZ - ripple }, 0.75, net);
+    lineWorld({ x: left, y, z: -ripple * 0.08 }, { x: right, y, z: backZ - ripple * 1.08 }, 0.82, net);
   }
   window.__footballLabNetV32 = {
     localised: true,
@@ -1126,7 +1129,23 @@ function drawBall(time, finishShot) {
   if (state.animation && pathProgress > 0.035) drawTrail(pathProgress);
   const projected = projectWorld(world, activeCamera, viewport);
   if (!projected.visible) return;
-  const radius = clamp(projected.scale * 0.105, 3.5, 10.2);
+  const radius = clamp(projected.scale * 0.112, 4.8, 11.4);
+
+  const contactImpact = state.animation && ["SAVE", "POST", "BAR"].includes(state.shot?.outcome)
+    ? Math.max(0, 1 - Math.abs(pathProgress - impactRatio()) / 0.026)
+    : 0;
+  const squashX = 1 + contactImpact * 0.16;
+  const squashY = 1 - contactImpact * 0.2;
+
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  ctx.fillStyle = `rgba(244,255,235,${0.1 + clamp((state.shot?.speedMps || 0) / 42, 0, 1) * 0.12})`;
+  ctx.shadowColor = "rgba(218,254,77,.22)";
+  ctx.shadowBlur = 7;
+  ctx.beginPath();
+  ctx.arc(projected.x, projected.y, radius * 1.48, 0, TAU);
+  ctx.fill();
+  ctx.restore();
 
   ctx.save();
   ctx.globalAlpha = 0.22;
@@ -1148,15 +1167,18 @@ function drawBall(time, finishShot) {
   gradient.addColorStop(1, "#c7d0c6");
   ctx.fillStyle = gradient;
   ctx.beginPath();
-  ctx.arc(projected.x, projected.y, radius, 0, TAU);
+  ctx.ellipse(projected.x, projected.y, radius * squashX, radius * squashY, 0, 0, TAU);
   ctx.fill();
+  ctx.strokeStyle = "rgba(5,13,8,.72)";
+  ctx.lineWidth = 1.05;
+  ctx.stroke();
 
   ctx.fillStyle = "#172019";
   ctx.beginPath();
   for (let i = 0; i < 5; i += 1) {
     const angle = -Math.PI / 2 + i * TAU / 5 + pathProgress * 12;
-    const px = projected.x + Math.cos(angle) * radius * 0.38;
-    const py = projected.y + Math.sin(angle) * radius * 0.38;
+    const px = projected.x + Math.cos(angle) * radius * 0.38 * squashX;
+    const py = projected.y + Math.sin(angle) * radius * 0.38 * squashY;
     i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
   }
   ctx.closePath();
@@ -1168,6 +1190,25 @@ function drawTrail(progress) {
   const speed = clamp((state.shot?.speedMps || 24) / 38, 0.55, 1.25);
   const curve = Math.abs(state.shot?.curve || 0);
   const trailCount = 12 + Math.round(speed * 7);
+  const ribbon = [];
+  for (let index = trailCount; index >= 1; index -= 1) {
+    const world = sampleShotPath(state.shot.path, clamp(progress - index * (0.009 + speed * 0.0045), 0, 1));
+    if (!world) continue;
+    const projected = projectWorld(world, activeCamera, viewport);
+    if (projected.visible) ribbon.push(projected);
+  }
+  if (ribbon.length > 1) {
+    ctx.strokeStyle = `rgba(236,255,223,${0.12 + speed * 0.08})`;
+    ctx.lineWidth = clamp(1.15 + speed * 0.72, 1.25, 2.2);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.shadowColor = "rgba(218,254,77,.2)";
+    ctx.shadowBlur = 5;
+    ctx.beginPath();
+    ribbon.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
   for (let i = 1; i <= trailCount; i += 1) {
     const world = sampleShotPath(state.shot.path, clamp(progress - i * (0.009 + speed * 0.0045), 0, 1));
     if (!world) continue;
@@ -1184,6 +1225,61 @@ function drawTrail(progress) {
       ctx.arc(projected.x, projected.y, clamp(projected.scale * 0.09, 3, 9), progress * TAU * 5 + i, progress * TAU * 5 + i + Math.PI * 0.9);
       ctx.stroke();
     }
+  }
+  ctx.restore();
+}
+
+function drawShotImpactFx(time) {
+  if (!state.animation || !state.shot?.path?.length) return;
+  const outcome = state.shot.outcome;
+  if (!["GOAL", "SAVE", "POST", "BAR", "WALL"].includes(outcome)) return;
+  const progress = progressAt(time);
+  const ratio = impactRatio();
+  if (progress.motionFlight < ratio) return;
+  const flightTail = clamp((progress.motionFlight - ratio) / Math.max(0.025, 1 - ratio), 0, 1);
+  const age = progress.motionFlight < 0.999 ? flightTail * 0.24 : 0.24 + progress.settle * 0.76;
+  if (age >= 1) return;
+
+  const impactWorld = outcome === "SAVE" && state.shot.keeperPlan?.contact
+    ? state.shot.keeperPlan.contact
+    : Number.isInteger(state.shot.impactIndex)
+      ? state.shot.path[state.shot.impactIndex]
+      : state.shot.path[state.shot.path.length - 1];
+  if (!impactWorld) return;
+  const point = projectWorld(impactWorld, activeCamera, viewport);
+  if (!point.visible) return;
+
+  const palette = outcome === "SAVE" ? "156,225,255"
+    : outcome === "GOAL" ? "218,254,77"
+      : outcome === "POST" || outcome === "BAR" ? "255,235,177"
+        : "244,247,240";
+  const fade = Math.max(0, 1 - age);
+  const radius = 9 + age * (outcome === "POST" || outcome === "BAR" ? 34 : 27);
+
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  const glow = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius * 1.65);
+  glow.addColorStop(0, "rgba(" + palette + "," + (0.27 * fade) + ")");
+  glow.addColorStop(1, "rgba(" + palette + ",0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(point.x - radius * 2, point.y - radius * 2, radius * 4, radius * 4);
+  ctx.strokeStyle = "rgba(" + palette + "," + (0.5 * fade) + ")";
+  ctx.lineWidth = outcome === "SAVE" ? 1.7 : 1.35;
+  ctx.beginPath();
+  ctx.arc(point.x, point.y, radius, 0, TAU);
+  ctx.stroke();
+
+  const particleCount = outcome === "POST" || outcome === "BAR" ? 9 : outcome === "SAVE" ? 6 : 4;
+  for (let index = 0; index < particleCount; index += 1) {
+    const angle = -2.7 + index * (TAU / particleCount) + age * 0.38;
+    const distance = 8 + age * (18 + (index % 3) * 5);
+    const length = 4 + (index % 3) * 2.5;
+    ctx.strokeStyle = "rgba(" + palette + "," + (fade * (0.2 + (index % 2) * 0.12)) + ")";
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(point.x + Math.cos(angle) * distance, point.y + Math.sin(angle) * distance);
+    ctx.lineTo(point.x + Math.cos(angle) * (distance + length), point.y + Math.sin(angle) * (distance + length));
+    ctx.stroke();
   }
   ctx.restore();
 }
@@ -1209,4 +1305,7 @@ export function drawScene(time, finishShot) {
 
   drawContactBurst(time);
   drawBall(time, finishShot);
+  drawShotImpactFx(time);
 }
+
+window.__footballLabBallImpactV386 = Object.freeze({ build: "38.6.0", readableBall: true, continuousCurlRibbon: true, persistentNetRipple: true, impactFx: true, physicsChanged: false, outcomeChanged: false });

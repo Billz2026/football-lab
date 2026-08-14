@@ -105,14 +105,16 @@ export function unlockAudio() {
 
 export function playImpactSound(outcome, delaySeconds = 0) {
   if (outcome === "GOAL") {
-    noise({ duration: 0.24, volume: 0.052, delay: delaySeconds, frequency: 2100, q: 0.48 });
+    noise({ duration: 0.28, volume: 0.064, delay: delaySeconds, frequency: 1760, q: 0.46 });
+    noise({ duration: 0.09, volume: 0.032, delay: delaySeconds + 0.012, frequency: 720, q: 0.62 });
     noise({ duration: 0.11, volume: 0.035, delay: delaySeconds + 0.018, frequency: 460, q: 0.7 });
     tone({ frequency: 86, endFrequency: 51, duration: 0.14, type: "triangle", volume: 0.06, delay: delaySeconds });
   } else if (outcome === "SAVE") {
-    noise({ duration: 0.14, volume: 0.06, delay: delaySeconds, frequency: 580, q: 0.62, pan: 0.12 });
-    tone({ frequency: 138, endFrequency: 72, duration: 0.16, type: "triangle", volume: 0.058, delay: delaySeconds });
+    noise({ duration: 0.13, volume: 0.072, delay: delaySeconds, frequency: 760, q: 0.58, pan: 0.12 });
+    noise({ duration: 0.07, volume: 0.03, delay: delaySeconds + 0.008, frequency: 1850, q: 0.9, pan: 0.12 });
+    tone({ frequency: 124, endFrequency: 64, duration: 0.17, type: "triangle", volume: 0.06, delay: delaySeconds });
   } else if (outcome === "POST" || outcome === "BAR") {
-    tone({ frequency: outcome === "BAR" ? 1260 : 1040, endFrequency: 710, duration: 0.38, type: "sine", volume: 0.075, delay: delaySeconds });
+    tone({ frequency: outcome === "BAR" ? 1320 : 1080, endFrequency: 690, duration: 0.42, type: "sine", volume: 0.082, delay: delaySeconds });
     tone({ frequency: 1820, endFrequency: 1160, duration: 0.19, type: "triangle", volume: 0.04, delay: delaySeconds + 0.012 });
   } else if (outcome === "WALL") {
     noise({ duration: 0.14, volume: 0.056, delay: delaySeconds, frequency: 410, q: 0.55 });
@@ -152,3 +154,5 @@ export function playStageSound({ chapterComplete = false } = {}) {
 }
 
 window.__footballLabAudioV32 = Object.freeze({ layered: true, crowdReactive: true, stereoImpact: true });
+
+window.__footballLabAudioV386 = Object.freeze({ build: "38.6.0", netImpact: true, gloveSlap: true, frameRing: true });

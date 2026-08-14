@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=38.5.2";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=38.6.0";
 import { drawHeroKicker } from "./runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js?v=32.4";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";

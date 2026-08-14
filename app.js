@@ -1,7 +1,7 @@
 // Football Lab V38.1.1 goalkeeper oval hotfix
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=38.1.1", {
+  navigator.serviceWorker.register("./sw.js?v=38.6.0", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -24,7 +24,7 @@ const runtimeCaptureMode = localCaptureHost
   && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
   ? "./game/main-v18.js?v=32.4"
-  : "./game/runtime-v23-main.js?v=38.5.2";
+  : "./game/runtime-v23-main.js?v=38.6.0";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 const runtimePromise = import(runtimeEntry);
@@ -39,7 +39,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/keeper-realism-v36-2.js?v=36.2"))
       .then(() => import("./game/keeper-readability-v36-3.js?v=36.3"))
       .then(() => import("./game/keeper-visuals-v38-1.js?v=38.5.2"))
-      .then(() => import("./game/flight-v33.js?v=35.1"))
+      .then(() => import("./game/flight-v33.js?v=38.6.0"))
       .then(() => import("./game/training-v35.js?v=35.1"))
       .then(() => import("./game/training-guard-v35.js?v=35.1"))
       .then(() => import("./game/hub-v35-1.js?v=35.1"))
