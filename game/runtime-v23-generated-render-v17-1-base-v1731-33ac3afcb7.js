@@ -1139,8 +1139,8 @@ function drawPremiumMatchBall(projected, radius, pathProgress, contactImpact) {
   ctx.clip();
   ctx.rotate(rotation);
 
-  ctx.strokeStyle = "rgba(25,29,27,.28)";
-  ctx.lineWidth = Math.max(0.45, radius * 0.055);
+  ctx.strokeStyle = "rgba(25,29,27,.20)";
+  ctx.lineWidth = Math.max(0.4, radius * 0.045);
   for (let i = 0; i < 5; i += 1) {
     const angle = -Math.PI / 2 + i * TAU / 5;
     ctx.beginPath();
@@ -1149,22 +1149,22 @@ function drawPremiumMatchBall(projected, radius, pathProgress, contactImpact) {
     ctx.stroke();
   }
 
-  drawPanelPentagon(0, 0, radius * 0.285, 0, "#101312");
+  drawPanelPentagon(0, 0, radius * 0.275, 0, "#141715");
   for (let i = 0; i < 5; i += 1) {
     const angle = -Math.PI / 2 + i * TAU / 5;
     const cx = Math.cos(angle) * radius * 0.68;
     const cy = Math.sin(angle) * radius * 0.68;
-    drawPanelPentagon(cx, cy, radius * 0.17, angle + Math.PI / 5, "#171a18");
+    drawPanelPentagon(cx, cy, radius * 0.165, angle + Math.PI / 5, "#1a1d1b");
   }
   ctx.restore();
 
-  ctx.strokeStyle = "rgba(4,8,6,.92)";
-  ctx.lineWidth = Math.max(0.8, radius * 0.105);
+  ctx.strokeStyle = "rgba(4,8,6,.72)";
+  ctx.lineWidth = Math.max(0.65, radius * 0.078);
   ctx.beginPath();
   ctx.arc(0, 0, radius * 0.96, 0, TAU);
   ctx.stroke();
 
-  ctx.fillStyle = "rgba(255,255,255,.42)";
+  ctx.fillStyle = "rgba(255,255,255,.30)";
   ctx.beginPath();
   ctx.ellipse(-radius * 0.32, -radius * 0.38, radius * 0.2, radius * 0.12, -0.45, 0, TAU);
   ctx.fill();

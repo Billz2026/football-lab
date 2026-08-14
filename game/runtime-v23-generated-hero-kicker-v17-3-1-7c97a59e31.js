@@ -333,7 +333,7 @@ function draw(world, pose, time, character, p) {
   ctx.fillStyle = hair; ctx.beginPath(); ctx.arc(head.x, head.y - headR * .11, headR * .91, Math.PI, TAU); ctx.lineTo(head.x + headR * .62, head.y + headR * .03); ctx.quadraticCurveTo(head.x, head.y - headR * .02, head.x - headR * .62, head.y + headR * .03); ctx.closePath(); ctx.fill();
   ctx.restore();
   window.__footballLabMotionSnapshotV173 = { phase: pose.phase, run: p.run, flight: p.flight, plantLocked: Boolean(state.animation && !p.replay && p.run >= .72), travel: travel(p), world: { x: world.x, y: world.y, z: world.z }, leftAnkle: { ...pose.la }, rightAnkle: { ...pose.ra }, bodyRotation: pose.rotate, torsoLean: pose.lean };
-  transform(); impactFx(time, p, camera);
+  transform(); // V38.7.2: ball-shaped contact ring retired; base renderer owns ball/contact readability.
 }
 
 export function drawHeroKicker(time) {
