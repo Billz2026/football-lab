@@ -12,6 +12,16 @@ function applyCanvasTransform() {
   ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * offsetX, dpr * offsetY);
 }
 
+function drawBaseWithoutLegacyKicker(time, finishShot) {
+  const selectedCharacterId = state.characterId;
+  state.characterId = "dax-ryder";
+  try {
+    drawBaseScene(time, finishShot);
+  } finally {
+    state.characterId = selectedCharacterId;
+  }
+}
+
 function drawVenueWeather(time) {
   const weather = state.currentStage.weatherId || "clear";
   const severity = Math.max(0, Math.min(1, Number(state.currentStage.weatherSeverity) || 0));
@@ -80,7 +90,7 @@ function drawVenueWeather(time) {
 }
 
 export function drawScene(time, finishShot) {
-  drawBaseScene(time, finishShot);
+  drawBaseWithoutLegacyKicker(time, finishShot);
   drawStadiumProgressionV41(time);
   drawHeroCharacterV42(time);
   drawVenueWeather(time);
