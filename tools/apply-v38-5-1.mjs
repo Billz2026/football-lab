@@ -50,26 +50,32 @@ source = replaceOnce(
   "keeper visual scale"
 );
 source = replaceOnce(source, '    visualScale: 1.18,', '    visualScale: 1.20,', "frame scale metadata");
-source = replaceOnce(source, '    visualScale: "base-1.18",', '    visualScale: "base-1.20",', "release scale metadata");
+source = replaceOnce(source, '    keeperVisualScale: "base-1.18",', '    keeperVisualScale: "base-1.20",', "release scale metadata");
 source = replaceOnce(
   source,
-  '    keeperDiveMotion: "read-commit-correct-plant-low-mid-high-contact-land-recover",',
-  '    keeperDiveMotion: "weighted-read-plant-lateral-low-mid-high-contact-shoulder-land-recover",',
+  '    keeperDiveMotion: "read-commit-correct-plant-push-height-dive-contact-land-recover",',
+  '    keeperDiveMotion: "weighted-read-commit-correct-plant-lateral-height-dive-contact-shoulder-land-slide-recover",\n    keeperMotionCorrection: "38.5.1-weight-depth-lateral",\n    keeperDepthModel: "goalmouth-clamped",',
   "release dive metadata"
 );
 source = replaceOnce(
   source,
-  '    keeperMotionBuild: "38.5.0",',
-  '    keeperMotionBuild: "38.5.1",',
-  "release motion build"
+  '    cacheGeneration: "38.5"',
+  '    cacheGeneration: "38.5.1"',
+  "release cache metadata"
 );
 source = replaceOnce(
   source,
-  '    diveSequence: ["read", "commit", "correct", "plant", "push", "low-mid-high", "contact", "secure-or-parry", "land", "recover"],',
-  '    diveSequence: ["read", "commit", "correct", "plant", "lateral-push", "low-mid-high", "contact", "secure-or-parry", "shoulder-land", "slide", "recover"],',
+  '  diveSequence: ["read", "commit", "correct", "plant", "push", "low-mid-high-dive", "contact", "land", "recover"],',
+  '  diveSequence: ["read", "commit", "correct", "plant", "lateral-push", "low-mid-high-dive", "contact", "shoulder-land", "slide", "recover"],',
   "public dive sequence"
 );
 source = replaceOnce(source, '  build: BUILD,\n  legacyKeeperSuppressed: true,', '  build: BUILD,\n  motionCorrection: "38.5.1-weight-depth-lateral",\n  legacyKeeperSuppressed: true,', "public motion correction");
+source = replaceOnce(
+  source,
+  '      console.error("Football Lab V38.5 keeper overlay failed", error);',
+  '      console.error("Football Lab V38.5.1 keeper overlay failed", error);',
+  "overlay error label"
+);
 
 app = replaceOnce(
   app,
