@@ -1,21 +1,19 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./render-v17-v1731.js?v=1731";
-import { drawHeroKicker } from "./hero-kicker-v17-3-1.js?v=1731";
+import { drawHeroCharacterV42 } from "./hero-character-v42.js?v=42.0.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 
 export { resizeCanvas };
 
 export function drawScene(time, finishShot) {
   drawBaseScene(time, finishShot);
-  drawHeroKicker(time);
+  drawHeroCharacterV42(time);
 
-  const heroSelected = activeCharacter().id === "dax-ryder";
-  const baseVisible = heroSelected ? 0 : 1;
-  const heroVisible = heroSelected ? 1 : 0;
   window.__footballLabVisibleKickersV1731 = {
-    base: baseVisible,
-    hero: heroVisible,
-    total: baseVisible + heroVisible,
+    base: 0,
+    hero: 1,
+    total: 1,
     character: activeCharacter().id,
+    renderer: "v42-layered-character",
     time
   };
 }
@@ -25,3 +23,4 @@ window.__footballLabRigV171 = true;
 window.__footballLabRendererV172 = true;
 window.__footballLabRendererV173 = true;
 window.__footballLabRendererV1731 = true;
+window.__footballLabCharacterRendererBridgeV42 = true;
