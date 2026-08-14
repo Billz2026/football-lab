@@ -450,21 +450,23 @@ function drawArticulated(world, pose, colours, heightMetres = 1.82) {
   ctx.rotate(rotation);
   ctx.globalAlpha = pose.alpha ?? 1;
 
-  ctx.fillStyle = "rgba(0,0,0,.22)";
+  const airborne = clamp((pose.lift || 0) / 0.14, 0, 1);
+  ctx.fillStyle = `rgba(0,0,0,${0.24 - airborne * 0.1})`;
   ctx.beginPath();
-  ctx.ellipse(0, 3 + liftPixels, h * 0.15, h * 0.038, 0, 0, TAU);
+  ctx.ellipse(0, 3 + liftPixels, h * (0.15 - airborne * 0.025), h * (0.038 - airborne * 0.008), 0, 0, TAU);
   ctx.fill();
 
   const crouch = pose.crouch || 0;
   const pelvis = screenPoint((pose.pelvisX || 0) * h, -0.335 * h + crouch * h * 0.09);
   const chest = screenPoint((pose.chestX || 0) * h, -0.635 * h + crouch * h * 0.1);
-  const headRadius = h * 0.068;
+  const headRadius = h * 0.064;
   const neckBase = screenPoint(chest.x + (pose.headX || 0) * h * 0.2, chest.y - h * 0.025);
   const head = screenPoint(neckBase.x + (pose.headX || 0) * h * 0.8, neckBase.y - h * 0.12);
-  const shoulderHalf = h * 0.118;
-  const hipHalf = h * 0.068;
-  const leftShoulder = screenPoint(chest.x - shoulderHalf, chest.y + h * 0.015);
-  const rightShoulder = screenPoint(chest.x + shoulderHalf, chest.y + h * 0.015);
+  const shoulderHalf = h * 0.112;
+  const shoulderTilt = (pose.shoulderTilt || 0) * h;
+  const hipHalf = h * 0.072;
+  const leftShoulder = screenPoint(chest.x - shoulderHalf, chest.y + h * 0.015 + shoulderTilt);
+  const rightShoulder = screenPoint(chest.x + shoulderHalf, chest.y + h * 0.015 - shoulderTilt);
   const leftHip = screenPoint(pelvis.x - hipHalf, pelvis.y);
   const rightHip = screenPoint(pelvis.x + hipHalf, pelvis.y);
 
@@ -504,7 +506,7 @@ function drawArticulated(world, pose, colours, heightMetres = 1.82) {
       : screenPoint(0.22 * h, -0.55 * h)
   );
 
-  const legWidth = Math.max(4, h * 0.052);
+  const legWidth = Math.max(3.8, h * 0.049);
   drawSegment(leftHip, leftKnee, legWidth, shorts);
   drawSegment(leftKnee, leftAnkle, legWidth * 0.86, shorts);
   drawSegment(rightHip, rightKnee, legWidth, shorts);
@@ -717,43 +719,61 @@ function pathRatioAtWall() {
 }
 
 function wallPose(progress, index, count, hit) {
+  const centreIndex = (count - 1) / 2;
+  const direction = index < centreIndex ? -1 : 1;
+  const variant = index % 4;
+  const idleBias = (variant - 1.5) * 0.006;
   if (!state.animation) {
+    const handLift = variant === 2 ? 0.055 : variant === 1 ? 0.025 : 0;
     return {
-      crouch: 0.025,
-      leftHand: { x: -0.1, y: -0.42 },
-      rightHand: { x: 0.1, y: -0.42 }
+      crouch: 0.025 + (index % 3) * 0.006,
+      pelvisX: idleBias,
+      chestX: -idleBias * 0.7,
+      headX: direction * (0.008 + variant * 0.003),
+      shoulderTilt: (variant % 2 ? 1 : -1) * 0.012,
+      leftHand: { x: -0.1 - variant * 0.008, y: -0.42 - handLift },
+      rightHand: { x: 0.1 + variant * 0.008, y: -0.42 + (variant === 3 ? 0.035 : -handLift * 0.35) }
     };
   }
 
   const flight = progress.motionFlight;
   const wallProfile = wallForStage(state.stage);
   const modifiers = wallProfile.modifiers;
-  const centreIndex = (count - 1) / 2;
+  const personalityOffset = [-0.018, 0.012, -0.004, 0.024][variant];
   const stagger = (index - centreIndex) * modifiers.staggerTiming
-    + (index % 2 === 0 ? -modifiers.alternateDelay : modifiers.alternateDelay);
+    + (index % 2 === 0 ? -modifiers.alternateDelay : modifiers.alternateDelay)
+    + personalityOffset;
   const passRatio = clamp(pathRatioAtWall() - modifiers.jumpLead + stagger, 0.1, 0.88);
-  const anticipation = smooth01((flight - (passRatio - 0.23)) / 0.14);
-  const jump = pulse01((flight - (passRatio - 0.12)) / Math.max(0.18, modifiers.jumpWindow * 1.5));
-  const landing = pulse01((flight - (passRatio + 0.1)) / 0.3);
+  const anticipation = smooth01((flight - (passRatio - 0.24)) / 0.15);
+  const jump = pulse01((flight - (passRatio - 0.115)) / Math.max(0.19, modifiers.jumpWindow * (1.42 + variant * 0.045)));
+  const landing = pulse01((flight - (passRatio + 0.085 + variant * 0.012)) / (0.29 + variant * 0.018));
   const jumpPattern = modifiers.jumpPattern[index % modifiers.jumpPattern.length] || 1;
   const hitRatio = state.shot.outcome === "WALL" && Number.isInteger(state.shot.collision?.index)
     ? state.shot.collision.index / Math.max(1, state.shot.path.length - 1)
     : passRatio;
-  const hitReact = hit ? pulse01((flight - hitRatio) / 0.32) : 0;
-  const passReact = pulse01((flight - passRatio) / 0.26) * (hit ? 0 : 1);
-  const direction = index < centreIndex ? -1 : 1;
+  const hitReact = hit ? pulse01((flight - hitRatio) / 0.34) : 0;
+  const passReact = pulse01((flight - passRatio) / (0.28 + variant * 0.015)) * (hit ? 0 : 1);
+  const headTurn = smooth01(clamp((flight - passRatio) / 0.22, 0, 1));
+  const tuck = Math.max(0, jump) * (0.018 + variant * 0.004);
+  const armGuard = [0.0, 0.035, 0.07, 0.02][variant];
+  const lateralFlinch = passReact * direction * (0.018 + variant * 0.006);
 
   return {
-    crouch: 0.025 + anticipation * 0.13 + landing * 0.105,
-    lift: Math.max(0, jump) * 0.118 * modifiers.jumpMultiplier * jumpPattern,
-    rotation: hitReact * direction * 0.34 + passReact * direction * 0.055,
-    chestX: hitReact * direction * 0.1 + passReact * direction * 0.018,
-    leftKnee: { x: -0.1 - hitReact * direction * 0.025, y: -0.15 + landing * 0.035 },
-    rightKnee: { x: 0.1 - hitReact * direction * 0.025, y: -0.15 + landing * 0.035 },
-    leftAnkle: { x: -0.13, y: -0.005 + landing * 0.01 },
-    rightAnkle: { x: 0.13, y: -0.005 + landing * 0.01 },
-    leftHand: { x: -0.09 - hitReact * 0.16 - passReact * 0.035, y: -0.42 + anticipation * 0.055 + hitReact * 0.04 },
-    rightHand: { x: 0.09 + hitReact * 0.16 + passReact * 0.035, y: -0.42 + anticipation * 0.055 - hitReact * 0.025 }
+    crouch: 0.025 + anticipation * 0.12 + landing * (0.095 + variant * 0.01),
+    lift: Math.max(0, jump) * 0.112 * modifiers.jumpMultiplier * jumpPattern * (0.94 + variant * 0.035),
+    rotation: hitReact * direction * 0.34 + passReact * direction * (0.045 + variant * 0.012),
+    torsoLean: hitReact * direction * 0.11 + lateralFlinch,
+    shoulderTilt: (variant % 2 ? 1 : -1) * (0.012 + anticipation * 0.018) + hitReact * direction * 0.055,
+    chestX: hitReact * direction * 0.095 + lateralFlinch,
+    headX: direction * (0.008 + headTurn * (0.028 + variant * 0.006)),
+    leftKnee: { x: -0.1 - hitReact * direction * 0.025 - jump * 0.008, y: -0.15 - tuck + landing * 0.035 },
+    rightKnee: { x: 0.1 - hitReact * direction * 0.025 + jump * 0.008, y: -0.15 - tuck * 0.86 + landing * 0.035 },
+    leftAnkle: { x: -0.13 - jump * 0.006, y: -0.005 - tuck * 0.45 + landing * 0.012 },
+    rightAnkle: { x: 0.13 + jump * 0.006, y: -0.005 - tuck * 0.38 + landing * 0.012 },
+    leftToe: { x: -0.18 - jump * 0.012, y: -0.002 + landing * 0.006 },
+    rightToe: { x: 0.18 + jump * 0.012, y: -0.002 + landing * 0.006 },
+    leftHand: { x: -0.09 - armGuard - hitReact * 0.16 - passReact * (0.025 + variant * 0.008), y: -0.42 - anticipation * (0.02 + variant * 0.012) + hitReact * 0.045 },
+    rightHand: { x: 0.09 + armGuard + hitReact * 0.16 + passReact * (0.025 + (3 - variant) * 0.006), y: -0.42 + (variant === 3 ? anticipation * 0.035 : -anticipation * 0.015) - hitReact * 0.025 }
   };
 }
 
@@ -926,8 +946,12 @@ function drawWall(time) {
   window.__footballLabWallMotionV32 = {
     profile: wallProfile.id,
     reactive: true,
+    individualTiming: true,
+    individualHeadAndArmReaction: true,
+    staggeredLanding: true,
     jumping: Boolean(state.animation && progress.motionFlight > 0),
-    hitPlayer: state.shot?.collision?.playerIndex ?? null
+    hitPlayer: state.shot?.collision?.playerIndex ?? null,
+    build: "39.0.0"
   };
 }
 
@@ -1334,3 +1358,5 @@ export function drawScene(time, finishShot) {
 }
 
 window.__footballLabBallImpactV386 = Object.freeze({ build: "38.6.0", readableBall: true, continuousCurlRibbon: true, persistentNetRipple: true, impactFx: true, physicsChanged: false, outcomeChanged: false });
+
+window.__footballLabWallAnimationV39 = Object.freeze({ build: "39.0.0", anticipation: "individual", jump: "staggered", reaction: "head-arm-torso", landing: "offset", proportions: "refined" });

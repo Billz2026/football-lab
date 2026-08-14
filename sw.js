@@ -1,11 +1,11 @@
-// Football Lab V38.8 cinematic payoff cache reset
-const CACHE_NAME = "football-lab-shell-v38-8-0";
+// Football Lab V39 character motion cache reset
+const CACHE_NAME = "football-lab-shell-v39-0-0";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=38.8.0"
+  "./app.js?v=39.0.0"
 ];
 
 async function refreshCoreCache() {
