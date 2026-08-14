@@ -24,6 +24,15 @@ jobs:
           sed -i 's|app.js?v=39.0.0|app.js?v=39.1.0|g' sw.js
       - name: Apply V40.1 premium pitch
         run: node tools/apply-v40-1.mjs
+      - name: Normalize generated alpha expressions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js')
+          s = p.read_text()
+          s = s.replace('replace(/.[0-9]+)$/,', 'replace(/\\.[0-9]+\\)$/,')
+          p.write_text(s)
+          PY
       - name: Validate JavaScript syntax
         run: |
           node --check game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
