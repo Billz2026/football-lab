@@ -1,0 +1,57 @@
+name: Apply V38.5.2 true keeper depth
+
+on:
+  push:
+    paths:
+      - "tools/apply-v38-5-2.mjs"
+      - ".github/workflows/apply-v38-5-2.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply V38.5.2 renderer patch
+        run: node tools/apply-v38-5-2.mjs
+      - name: Validate JavaScript syntax
+        run: |
+          node --check game/keeper-visuals-v38-1.js
+          node --check game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          node --check game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js
+          node --check game/runtime-v23-generated-render-v15-v1731-1b04a249af.js
+          node --check game/runtime-v23-generated-render-v17-v1731-7f257084b1.js
+          node --check game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          node --check game/runtime-v23-main.js
+          node --check app.js
+      - name: Verify true scene ordering hooks
+        run: |
+          grep -q '__footballLabPremiumKeeperSceneDrawV3852' game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          grep -q 'scene-depth-before-wall' game/keeper-visuals-v38-1.js
+          if grep -q 'keeper-halo-hotfix-v38-1-1.js' app.js; then
+            echo 'Legacy keeper canvas interceptor is still in app boot chain'
+            exit 1
+          fi
+      - name: Commit V38.5.2
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js \
+            game/keeper-visuals-v38-1.js \
+            game/runtime-v23-main.js \
+            game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js \
+            game/runtime-v23-generated-render-v17-v1731-7f257084b1.js \
+            game/runtime-v23-generated-render-v15-v1731-1b04a249af.js \
+            game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js \
+            game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          if git diff --cached --quiet; then
+            echo "No V38.5.2 changes to commit"
+            exit 0
+          fi
+          git commit -m "Build V38.5.2 true keeper scene depth"
+          git push
