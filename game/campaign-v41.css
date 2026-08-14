@@ -1,0 +1,299 @@
+.campaign-journey-v41 {
+  margin-top: 22px;
+  padding: 22px;
+  overflow: hidden;
+  border-color: rgba(218, 254, 77, .12);
+  background:
+    radial-gradient(circle at 78% 0%, rgba(218, 254, 77, .06), transparent 34%),
+    linear-gradient(145deg, rgba(6, 16, 10, .96), rgba(5, 12, 8, .94));
+}
+
+.campaign-journey-heading-v41 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+  gap: 24px;
+  align-items: end;
+}
+
+.campaign-journey-heading-v41 span,
+.campaign-journey-footer-v41 span {
+  color: #dafe4d;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .16em;
+}
+
+.campaign-journey-heading-v41 h2 {
+  margin: 5px 0 0;
+  color: #f6faf4;
+  font-size: clamp(22px, 3vw, 36px);
+  line-height: .98;
+  letter-spacing: -.035em;
+}
+
+.campaign-journey-heading-v41 p {
+  margin: 0;
+  color: rgba(235, 243, 232, .62);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.campaign-journey-grid-v41 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.campaign-journey-grid-v41 article {
+  position: relative;
+  min-height: 218px;
+  padding: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 16px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .012));
+  transition: border-color .2s ease, opacity .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+.campaign-journey-grid-v41 article::after {
+  content: "";
+  position: absolute;
+  inset: auto -18% -45% 24%;
+  height: 120px;
+  border-radius: 50%;
+  opacity: .14;
+  filter: blur(24px);
+  background: rgba(218, 254, 77, .32);
+  pointer-events: none;
+}
+
+.campaign-journey-grid-v41 article[data-environment="city"]::after { background: rgba(255, 178, 103, .42); }
+.campaign-journey-grid-v41 article[data-environment="night"]::after { background: rgba(120, 190, 255, .44); }
+.campaign-journey-grid-v41 article[data-environment="storm"]::after { background: rgba(163, 218, 228, .42); }
+.campaign-journey-grid-v41 article[data-environment="world"]::after { background: rgba(245, 205, 112, .46); }
+.campaign-journey-grid-v41 article[data-environment="summit"]::after { background: rgba(205, 242, 244, .46); }
+
+.campaign-journey-grid-v41 article.is-current {
+  transform: translateY(-2px);
+  border-color: rgba(218, 254, 77, .45);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .22), inset 0 0 0 1px rgba(218, 254, 77, .06);
+}
+
+.campaign-journey-grid-v41 article.is-complete {
+  border-color: rgba(126, 221, 158, .22);
+}
+
+.campaign-journey-grid-v41 article.is-locked {
+  opacity: .54;
+  filter: saturate(.65);
+}
+
+.campaign-chapter-top-v41 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.campaign-chapter-top-v41 i {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(218, 254, 77, .22);
+  border-radius: 10px;
+  color: #dafe4d;
+  background: rgba(218, 254, 77, .055);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.campaign-chapter-top-v41 span {
+  color: rgba(236, 245, 233, .46);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+.campaign-journey-grid-v41 article > strong,
+.campaign-journey-grid-v41 article > b,
+.campaign-journey-grid-v41 article > em,
+.campaign-journey-grid-v41 article > small {
+  display: block;
+}
+
+.campaign-journey-grid-v41 article > strong {
+  color: #f7fbf5;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+
+.campaign-journey-grid-v41 article > b {
+  margin-top: 6px;
+  color: rgba(218, 254, 77, .84);
+  font-size: 10px;
+  letter-spacing: .09em;
+}
+
+.campaign-journey-grid-v41 article > small {
+  margin-top: 5px;
+  color: rgba(235, 243, 232, .48);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.campaign-journey-grid-v41 article > em {
+  margin-top: 17px;
+  color: rgba(247, 251, 245, .9);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.campaign-journey-grid-v41 article > p {
+  margin: 6px 0 13px;
+  color: rgba(235, 243, 232, .58);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.campaign-stage-dots-v41 {
+  position: absolute;
+  right: 16px;
+  bottom: 15px;
+  left: 16px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.campaign-stage-dots-v41 span {
+  height: 5px;
+  border: 1px solid rgba(235, 243, 232, .17);
+  border-radius: 999px;
+  background: rgba(235, 243, 232, .06);
+}
+
+.campaign-stage-dots-v41 span.is-cleared {
+  border-color: rgba(218, 254, 77, .36);
+  background: rgba(218, 254, 77, .68);
+}
+
+.campaign-stage-dots-v41 span.is-current {
+  border-color: #f7fbf5;
+  background: #f7fbf5;
+  box-shadow: 0 0 12px rgba(218, 254, 77, .48);
+}
+
+.campaign-stage-dots-v41 span.is-final {
+  border-color: rgba(255, 211, 105, .42);
+  box-shadow: inset 0 0 0 1px rgba(255, 211, 105, .07);
+}
+
+.campaign-journey-footer-v41 {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 211, 105, .14);
+  border-radius: 12px;
+  background: rgba(255, 211, 105, .035);
+}
+
+.campaign-journey-footer-v41 b {
+  color: rgba(255, 222, 145, .9);
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+
+.campaign-journey-footer-v41 small {
+  color: rgba(235, 243, 232, .48);
+  font-size: 9px;
+}
+
+.venue-identity-v41 {
+  position: absolute;
+  z-index: 27;
+  top: 14px;
+  left: 14px;
+  display: grid;
+  gap: 2px;
+  min-width: 190px;
+  max-width: 250px;
+  padding: 9px 11px;
+  border: 1px solid rgba(218, 254, 77, .20);
+  border-radius: 10px;
+  background: rgba(2, 8, 5, .72);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .22);
+  backdrop-filter: blur(9px);
+  pointer-events: none;
+}
+
+.venue-identity-v41 span {
+  color: rgba(218, 254, 77, .75);
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .13em;
+}
+
+.venue-identity-v41 strong {
+  color: rgba(248, 252, 246, .96);
+  font-size: 11px;
+  letter-spacing: .035em;
+}
+
+.venue-identity-v41 small {
+  color: rgba(235, 243, 232, .55);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .035em;
+}
+
+html[data-football-lab-chapter-final-v41="true"] .venue-identity-v41 {
+  border-color: rgba(255, 211, 105, .50);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .28), 0 0 22px rgba(255, 211, 105, .07);
+}
+
+html[data-football-lab-chapter-final-v41="true"] .venue-identity-v41 span {
+  color: #ffd973;
+}
+
+@media (max-width: 900px) {
+  .campaign-journey-heading-v41 { grid-template-columns: 1fr; gap: 10px; }
+  .campaign-journey-grid-v41 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .campaign-journey-footer-v41 { grid-template-columns: 1fr auto; }
+  .campaign-journey-footer-v41 small { grid-column: 1 / -1; }
+}
+
+@media (max-width: 620px) {
+  .campaign-journey-v41 { margin-top: 12px; padding: 13px; border-radius: 14px; }
+  .campaign-journey-heading-v41 h2 { font-size: 22px; }
+  .campaign-journey-heading-v41 p { font-size: 10px; }
+  .campaign-journey-grid-v41 { grid-template-columns: 1fr; gap: 8px; margin-top: 12px; }
+  .campaign-journey-grid-v41 article { min-height: 188px; padding: 13px; }
+  .campaign-stage-dots-v41 { right: 13px; bottom: 12px; left: 13px; }
+  .campaign-journey-footer-v41 { grid-template-columns: 1fr; gap: 5px; }
+  .venue-identity-v41 {
+    top: 7px;
+    left: 7px;
+    min-width: 0;
+    max-width: 170px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: rgba(2, 8, 5, .62);
+  }
+  .venue-identity-v41 strong { font-size: 9px; }
+  .venue-identity-v41 small { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-journey-grid-v41 article { transition: none; }
+}

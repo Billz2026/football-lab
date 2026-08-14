@@ -70,7 +70,7 @@ test("V23 static runtime preserves the playable unlimited-run flow", async ({ pa
   await page.waitForFunction(() => window.__footballLabReleaseV25?.build === "25.0.0", null, {
     timeout: 20000
   });
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
@@ -79,9 +79,10 @@ test("V23 static runtime preserves the playable unlimited-run flow", async ({ pa
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 5000 });
 
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("PLAN THE STRIKE");
+  await expect(page.locator("#phaseTitle")).toHaveText("STOP POWER");
   await page.waitForTimeout(90);
-  await expect(page.locator("#strikeConsoleV324")).toBeVisible();
+  await expect(page.locator("#strikeConsoleV324")).toHaveCount(1);
+  await expect(page.locator("#strikeConsoleV324")).toHaveAttribute("aria-hidden", "true");
 
   const contracts = await page.evaluate(() => ({
     main: window.__footballLabMainV19,

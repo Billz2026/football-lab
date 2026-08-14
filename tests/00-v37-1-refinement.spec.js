@@ -8,7 +8,7 @@ async function ready(page) {
 test("V37.1 refinement contract is live and Standard balance is unchanged", async ({ page }) => {
   await ready(page);
   const contract = await page.evaluate(() => window.__footballLabRefinementV371);
-  expect(contract.build).toBe("37.1.0");
+  expect(contract.build).toBe("37.1.1");
   expect(contract.standardDifficultyChanged).toBe(false);
   expect(contract.solvedTrajectory).toBe(false);
 });

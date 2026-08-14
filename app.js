@@ -1,7 +1,7 @@
-// Football Lab V40.3A stadium progression architecture
+// Football Lab V41 stadium and campaign progression
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=40.3.0", {
+  navigator.serviceWorker.register("./sw.js?v=41.0.0", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -24,7 +24,7 @@ const runtimeCaptureMode = localCaptureHost
   && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
   ? "./game/main-v18.js?v=32.4"
-  : "./game/runtime-v23-main.js?v=40.3.0";
+  : "./game/runtime-v23-main.js?v=41.0.0";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 const runtimePromise = import(runtimeEntry);
@@ -64,17 +64,18 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/immersive-ui-v24.js?v=32.4"))
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
+      .then(() => import("./game/campaign-v41.js?v=41.0.0"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "40.3.0";
+        document.documentElement.dataset.footballLabBuild = "41.0.0";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V40.3A";
-          badge.title = "Football Lab build 40.3.0";
+          badge.textContent = "V41.0";
+          badge.title = "Football Lab build 41.0.0";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "40.3.0";
+        if (version) version.textContent = "41.0.0";
         const release = Object.freeze({
-          build: "40.3.0",
+          build: "41.0.0",
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
@@ -129,6 +130,10 @@ const bootPromise = runtimeCaptureMode
           stadiumProgression: "six-distinct-chapter-venues-academy-to-summit",
           stadiumArchitecture: "scaled-tiers-concourse-roof-aisles-rails-crowd-silhouettes",
           stadiumQualityScaling: "fold-mobile-reduced-crowd-detail",
+          stadiumProgressionV41: "venue-tier-crowd-energy-scoreboards-supporter-flags-final-occasion-boost",
+          campaignLevelIdentity: "six-football-identities-five-stages-each",
+          chapterFinalPresentation: "stages-05-10-15-20-25-30-major-occasion",
+          campaignProgressPersistence: "highest-stage-local-profile-v41",
           keeperBackdropContrast: "radial-continuous-stadium-no-block",
           goalLayering: "backdrop-before-pitch-goal-keeper",
           wallMotion: "five-behaviour-individual-anticipation-jump-head-arm-turn-landing",
@@ -141,7 +146,7 @@ const bootPromise = runtimeCaptureMode
           impactAudio: "net-thump-glove-slap-frame-ring",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "40.3.0"
+          cacheGeneration: "41.0.0"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -179,6 +184,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV402C = release;
         window.__footballLabReleaseV402D = release;
         window.__footballLabReleaseV403A = release;
+        window.__footballLabReleaseV410 = release;
       });
 
 bootPromise.catch((error) => {
