@@ -1,4 +1,5 @@
 import "./final-aim-cleanup-v38-1-4.js?v=38.1.6";
+import "./fold-shell-v38-2-2.js?v=38.2.2";
 
 const STYLE_ID = "visualSliceStylesV17";
 
