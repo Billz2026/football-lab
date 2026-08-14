@@ -79,7 +79,7 @@ test("V23 static runtime preserves the playable unlimited-run flow", async ({ pa
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 5000 });
 
   await page.locator("#shotAction").click();
-  await expect(page.locator("#phaseTitle")).toHaveText("PLAN THE STRIKE");
+  await expect(page.locator("#phaseTitle")).toHaveText("STOP POWER");
   await page.waitForTimeout(90);
   await expect(page.locator("#strikeConsoleV324")).toBeVisible();
 
