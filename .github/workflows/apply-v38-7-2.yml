@@ -1,0 +1,70 @@
+name: Apply V38.7.2 true single-ball renderer
+
+on:
+  push:
+    paths:
+      - "tools/apply-v38-7-2.mjs"
+      - ".github/workflows/apply-v38-7-2.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply V38.7.2 single-ball patch
+        run: node tools/apply-v38-7-2.mjs
+      - name: Validate JavaScript syntax
+        run: |
+          node --check game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          node --check game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js
+          node --check game/runtime-v23-generated-render-v15-v1731-1b04a249af.js
+          node --check game/runtime-v23-generated-render-v17-v1731-7f257084b1.js
+          node --check game/runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js
+          node --check game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          node --check game/runtime-v23-main.js
+          node --check app.js
+          node --check sw.js
+      - name: Verify one authoritative ball renderer
+        run: |
+          grep -q 'function drawPremiumMatchBall' game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          grep -q 'drawPremiumMatchBall(projected, radius, pathProgress, contactImpact)' game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
+          if grep -q '^  drawBallEnergy(time);' game/runtime-v23-generated-render-v17-v1731-7f257084b1.js; then
+            echo 'Legacy circular ball-energy renderer is still active'
+            exit 1
+          fi
+          if grep -q '^  drawContactFx(time);' game/runtime-v23-generated-render-v17-v1731-7f257084b1.js; then
+            echo 'Legacy radial contact orb is still active'
+            exit 1
+          fi
+          if grep -q 'transform(); impactFx(time, p, camera);' game/runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js; then
+            echo 'Hero contact ring is still active'
+            exit 1
+          fi
+          grep -q 'one-authoritative-black-white-panel-match-ball-no-circular-ghost-overlays' app.js
+      - name: Guard gameplay systems
+        run: |
+          git diff --exit-code HEAD -- game/runtime-v23-bridge-physics-v19-f1d39f9409.js game/keeper-ai-v34.js game/difficulty-v9.js game/skill-balance-v37.js game/core-v6.js
+      - name: Commit V38.7.2
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js sw.js \
+            game/runtime-v23-main.js \
+            game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js \
+            game/runtime-v23-generated-render-v17-v1731-7f257084b1.js \
+            game/runtime-v23-generated-render-v15-v1731-1b04a249af.js \
+            game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js \
+            game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js \
+            game/runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js
+          if git diff --cached --quiet; then
+            echo "No V38.7.2 changes to commit"
+            exit 0
+          fi
+          git commit -m "Build V38.7.2 true single-ball renderer"
+          git push
