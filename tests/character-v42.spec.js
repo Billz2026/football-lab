@@ -12,13 +12,15 @@ async function waitForV42(page) {
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterSystemV42?.build),
     { timeout: 15000 }
-  ).toBe("42.0.0");
+  ).toBe("42.1.0");
 }
 
-test("V42 exposes four outfield and four goalkeeper visual identities", async ({ page }) => {
+test("V42.1 exposes the reusable premium character roster", async ({ page }) => {
   await waitForV42(page);
   const contract = await page.evaluate(() => window.__footballLabCharacterSystemV42);
   expect(contract.rendererTarget).toBe("layered-2.5d-skeletal");
+  expect(contract.artDirection).toBe("premium-stylised-realism");
+  expect(contract.sharedOutfieldKit).toBe(true);
   expect(contract.outfieldCount).toBe(4);
   expect(contract.goalkeeperCount).toBe(4);
   expect(contract.outfield).toEqual(["viktor-kane", "bruno-silva", "david-beckett", "wayne-redman"]);
@@ -27,7 +29,7 @@ test("V42 exposes four outfield and four goalkeeper visual identities", async ({
   expect(contract.directCelebrityLikenesses).toBe(false);
 });
 
-test("V42 renders every selectable outfield player through the new character layer", async ({ page }) => {
+test("V42.1 renders every selectable outfield player through the refined character layer", async ({ page }) => {
   for (const [sourceId, visualId] of KICKERS) {
     await page.goto("/index.html?test=character-v42");
     await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), sourceId);
@@ -35,7 +37,7 @@ test("V42 renders every selectable outfield player through the new character lay
     await expect.poll(
       () => page.evaluate(() => window.__footballLabCharacterSystemV42?.build),
       { timeout: 15000 }
-    ).toBe("42.0.0");
+    ).toBe("42.1.0");
 
     await page.locator("#classicCard").click();
     await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
@@ -51,6 +53,10 @@ test("V42 renders every selectable outfield player through the new character lay
       () => page.evaluate(() => window.__footballLabHeroFrameV42?.character),
       { timeout: 5000 }
     ).toBe(visualId);
+    await expect.poll(
+      () => page.evaluate(() => window.__footballLabHeroFrameV42?.build),
+      { timeout: 5000 }
+    ).toBe("42.1.0");
 
     await page.screenshot({
       path: `test-results/v42-${visualId}.png`,
