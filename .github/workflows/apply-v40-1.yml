@@ -17,6 +17,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Normalize stale V39 service worker baseline
+        run: |
+          sed -i 's|// Football Lab V39 character motion cache reset|// Football Lab V38.8 cinematic payoff cache reset|' sw.js
+          sed -i 's|football-lab-shell-v39-0-0|football-lab-shell-v39-1-0|g' sw.js
+          sed -i 's|app.js?v=39.0.0|app.js?v=39.1.0|g' sw.js
       - name: Apply V40.1 premium pitch
         run: node tools/apply-v40-1.mjs
       - name: Validate JavaScript syntax
