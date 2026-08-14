@@ -4,7 +4,7 @@ import {
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
 } from "./core-v6.js?v=32.4";
 import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.4";
-import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=40.2.1";
+import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=40.2.2";
 import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=38.7.0";
 import { difficultyForStage } from "./difficulty-v9.js?v=32.4";
 import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.4";
@@ -234,6 +234,7 @@ function buildBreakdown(shot) {
 
 function handlePresentationAction() {
   const phase = state.presentation?.phase;
+  if (phase === "result") return true;
   if (phase === "replay") {
     finishReplay(state.animation?.id);
     return true;
@@ -466,19 +467,30 @@ function scoreShot(shot) {
   return points;
 }
 
+function outcomeHeading(shot) {
+  return ({
+    GOAL: "GOAL",
+    SAVE: "SAVED",
+    WALL: "BLOCKED",
+    POST: "OFF THE POST",
+    BAR: "CROSSBAR",
+    MISS: "WIDE"
+  })[shot.outcome] || "SHOT COMPLETE";
+}
+
 function resultBannerForShot(shot, points) {
   if (shot.outcome === "GOAL") {
-    if (shot.topCorner) return `TOP CORNER +${formatScore(points)}`;
-    if (shot.strikeQuality >= 0.9) return `PERFECT STRIKE +${formatScore(points)}`;
+    if (shot.topCorner) return `GOAL · TOP CORNER +${formatScore(points)}`;
+    if (shot.strikeQuality >= 0.9) return `GOAL · PERFECT STRIKE +${formatScore(points)}`;
     return `GOAL +${formatScore(points)}`;
   }
   return ({
-    SAVE: shot.saveType === "CATCH" ? "HELD BY KEEPER" : "PARRIED AWAY",
-    WALL: "BLOCKED BY WALL",
+    SAVE: shot.saveType === "CATCH" ? "SAVED · HELD" : "SAVED · PARRIED",
+    WALL: "BLOCKED",
     POST: "OFF THE POST",
-    BAR: "OFF THE BAR",
-    MISS: "OFF TARGET"
-  })[shot.outcome] || "NO GOAL";
+    BAR: "CROSSBAR",
+    MISS: "WIDE"
+  })[shot.outcome] || "SHOT COMPLETE";
 }
 
 function finishPrimaryShot(animationId) {
@@ -490,8 +502,13 @@ function finishPrimaryShot(animationId) {
   const miss = shot.outcome !== "GOAL";
 
   renderHud();
-  showResult(resultBannerForShot(shot, points), miss);
+  const resultMessage = resultBannerForShot(shot, points);
+  showResult(resultMessage, miss);
   setPhase("result");
+  elements.phaseTitle.textContent = outcomeHeading(shot);
+  elements.phaseHelp.textContent = resultMessage;
+  elements.shotAction.textContent = "RESULT";
+  elements.shotAction.disabled = true;
   playOutcomeSound(shot.outcome, { topCorner: shot.topCorner, saveType: shot.saveType });
 
   state.presentation = {
@@ -501,6 +518,7 @@ function finishPrimaryShot(animationId) {
     outcome: shot.outcome,
     saveType: shot.saveType,
     topCorner: shot.topCorner,
+    resultHoldMs: 760,
     breakdown: buildBreakdown(shot)
   };
 
@@ -509,8 +527,13 @@ function finishPrimaryShot(animationId) {
     || shot.strikeQuality >= 0.9
     || (Math.abs(shot.curve || 0) >= 0.68 && shot.diagnostics?.wallLane === "AROUND")
   ));
-  if (replayable) startReplay();
-  else showBreakdown();
+  state.presentationTimeout = setTimeout(() => {
+    if (state.presentation?.phase !== "result") return;
+    clearResultBanner();
+    elements.shotAction.disabled = false;
+    if (replayable) startReplay();
+    else showBreakdown();
+  }, 760);
 }
 
 function startReplay() {

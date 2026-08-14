@@ -232,7 +232,7 @@ function drawBackground() {
   ctx.fillText(state.currentStage.venue || "FOOTBALL LAB", 600, 146);
 }
 
-function drawGoalBackdropV402B() {
+function drawGoalContrastV402C() {
   const leftBottom = projectWorld({ x: -GOAL.halfWidth, y: 0.02, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
   const rightBottom = projectWorld({ x: GOAL.halfWidth, y: 0.02, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
   const leftTop = projectWorld({ x: -GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
@@ -245,82 +245,45 @@ function drawGoalBackdropV402B() {
   const minY = Math.min(leftTop.y, rightTop.y);
   const maxY = Math.max(leftBottom.y, rightBottom.y);
   const goalSpan = Math.max(120, maxX - minX);
-  const padX = goalSpan * 0.18;
-  const x = clamp(minX - padX, 120, WORLD.width - 320);
-  const right = clamp(maxX + padX, x + 260, WORLD.width - 120);
-  const y = clamp(minY - 18, 210, 332);
-  const bottom = clamp(maxY + 14, y + 86, 382);
-  const width = right - x;
-  const height = bottom - y;
-  const feather = clamp(width * 0.16, 28, 58);
-  const outerLeft = Math.max(58, x - feather);
-  const outerRight = Math.min(WORLD.width - 58, right + feather);
-  const centreX = (x + right) / 2;
+  const goalHeight = Math.max(60, maxY - minY);
+  const centreX = (minX + maxX) / 2;
+  const centreY = minY + goalHeight * 0.6;
+  const radiusX = clamp(goalSpan * 0.78, 118, 250);
+  const radiusY = clamp(goalHeight * 0.92, 58, 128);
+  const feather = clamp(goalSpan * 0.16, 26, 54);
+  const left = clamp(centreX - radiusX * 0.82, 130, WORLD.width * 0.48);
+  const right = clamp(centreX + radiusX * 0.82, WORLD.width * 0.52, WORLD.width - 130);
 
+  // V40.2C: no rectangular backdrop. A very soft elliptical contrast field sits over the
+  // existing stand so the stadium remains continuous while the keeper lane stays readable.
   ctx.save();
-
-  // Integrated translucent recess: the underlying stadium remains visible.
-  const bay = ctx.createLinearGradient(outerLeft, 0, outerRight, 0);
-  bay.addColorStop(0, "rgba(12,31,23,0)");
-  bay.addColorStop(0.12, "rgba(12,31,23,.055)");
-  bay.addColorStop(0.28, "rgba(12,31,23,.16)");
-  bay.addColorStop(0.50, "rgba(10,27,20,.245)");
-  bay.addColorStop(0.72, "rgba(12,31,23,.16)");
-  bay.addColorStop(0.88, "rgba(12,31,23,.055)");
-  bay.addColorStop(1, "rgba(12,31,23,0)");
-  ctx.fillStyle = bay;
-  ctx.fillRect(outerLeft, y, outerRight - outerLeft, height);
-
-  // Soft vertical depth, not a hard slab.
-  const depth = ctx.createLinearGradient(0, y, 0, bottom);
-  depth.addColorStop(0, "rgba(19,40,31,.08)");
-  depth.addColorStop(0.45, "rgba(7,24,17,.13)");
-  depth.addColorStop(1, "rgba(4,18,12,.075)");
-  ctx.fillStyle = depth;
-  ctx.fillRect(x, y, width, height);
-
-  // Keeper clarity is concentrated gently in the centre/lower lane.
-  const keeperLane = ctx.createRadialGradient(centreX, y + height * 0.63, 8, centreX, y + height * 0.63, width * 0.5);
-  keeperLane.addColorStop(0, "rgba(0,0,0,.13)");
-  keeperLane.addColorStop(0.48, "rgba(0,0,0,.065)");
-  keeperLane.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = keeperLane;
-  ctx.fillRect(outerLeft, y, outerRight - outerLeft, height);
-
-  // Faint upper stadium ribs add architecture without cluttering the keeper/net lane.
-  ctx.strokeStyle = "rgba(208,229,203,.038)";
-  ctx.lineWidth = 1;
-  const ribCount = 8;
-  for (let index = 1; index < ribCount; index += 1) {
-    const ribX = x + (width * index) / ribCount;
-    ctx.beginPath();
-    ctx.moveTo(ribX, y + 5);
-    ctx.lineTo(ribX, y + height * 0.42);
-    ctx.stroke();
-  }
-
-  ctx.strokeStyle = "rgba(218,238,211,.026)";
+  ctx.translate(centreX, centreY);
+  const scaleY = radiusY / radiusX;
+  ctx.scale(1, scaleY);
+  const shade = ctx.createRadialGradient(0, 0, 0, 0, 0, radiusX);
+  shade.addColorStop(0, "rgba(3,15,10,.115)");
+  shade.addColorStop(0.42, "rgba(3,15,10,.075)");
+  shade.addColorStop(0.72, "rgba(3,15,10,.032)");
+  shade.addColorStop(1, "rgba(3,15,10,0)");
+  ctx.fillStyle = shade;
   ctx.beginPath();
-  ctx.moveTo(x + 18, y + height * 0.26);
-  ctx.lineTo(right - 18, y + height * 0.26);
-  ctx.stroke();
-
+  ctx.arc(0, 0, radiusX, 0, TAU);
+  ctx.fill();
   ctx.restore();
 
-  window.__footballLabGoalBackdropV402B = {
-    build: "40.2B",
-    left: x,
+  window.__footballLabGoalContrastV402C = {
+    build: "40.2C",
+    left,
     right,
-    top: y,
-    bottom,
-    width,
-    goalSpan,
+    centreX,
+    centreY,
+    radiusX,
+    radiusY,
     feather,
-    outerLeft,
-    outerRight,
+    goalSpan,
     advertisingClear: true,
-    keeperContrast: "soft-integrated-centre-lane",
-    treatment: "transparent-feathered-stadium-recess"
+    keeperContrast: "soft-radial-only",
+    treatment: "no-rectangle-continuous-stadium"
   };
 }
 
@@ -1553,7 +1516,7 @@ export function drawScene(time, finishShot) {
   applyTransform();
   applyCameraFeedback(time);
   drawBackground();
-  drawGoalBackdropV402B();
+  drawGoalContrastV402C();
   drawPitch();
   drawGoal(time);
   drawSupportingPlayers();

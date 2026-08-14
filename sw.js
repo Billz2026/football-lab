@@ -1,11 +1,11 @@
-// Football Lab V40.2B integrated goal bay cache reset
-const CACHE_NAME = "football-lab-shell-v40-2-1";
+// Football Lab V40.2C natural goalmouth and outcome feedback cache reset
+const CACHE_NAME = "football-lab-shell-v40-2-2";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=40.2.1"
+  "./app.js?v=40.2.2"
 ];
 
 async function refreshCoreCache() {

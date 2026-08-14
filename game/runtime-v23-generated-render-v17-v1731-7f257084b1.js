@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=40.2.1";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=40.2.2";
 import { clamp, WORLD, state, ctx, canvasView, easeOutCubic } from "./core-v6.js?v=32.4";
 import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.4";
 import { projectWorld, projectSegment } from "./projection-v6.js?v=32.4";
@@ -113,7 +113,7 @@ function drawStadiumAtmosphere(time) {
   }
   ctx.restore();
 
-  const keeperBackdrop = window.__footballLabGoalBackdropV402B;
+  const keeperBackdrop = window.__footballLabGoalContrastV402C;
   const fallbackHalf = 190;
   const cleanLeft = keeperBackdrop?.advertisingClear
     ? clamp(keeperBackdrop.left - keeperBackdrop.feather * 0.22, 160, WORLD.width * 0.48)
@@ -174,8 +174,8 @@ function drawStadiumAtmosphere(time) {
   drawSideBoard(0, cleanLeft, "left");
   drawSideBoard(cleanRight, WORLD.width, "right");
 
-  window.__footballLabAdvertisingV402B = {
-    build: "40.2B",
+  window.__footballLabAdvertisingV402C = {
+    build: "40.2C",
     layout: "side-only-feathered",
     cleanGoalZone: true,
     hardDividers: false,
@@ -183,7 +183,8 @@ function drawStadiumAtmosphere(time) {
     cleanRight,
     boardY,
     boardHeight,
-    tone: "muted-low-profile"
+    tone: "muted-low-profile",
+    centreTreatment: "radial-no-block"
   };
 
 }
