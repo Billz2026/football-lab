@@ -3,7 +3,7 @@ import { drawHeroKicker } from "./runtime-v23-generated-hero-kicker-v17-3-1-7c97
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
 import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=40.3.0";
-import { drawStadiumProgressionV41 } from "./stadium-progression-v41.js?v=41.0.0";
+import { drawStadiumProgressionV41, drawCampaignPresentationV41 } from "./stadium-progression-v41.js?v=41.0.0";
 
 export { resizeCanvas };
 
@@ -85,6 +85,7 @@ export function drawScene(time, finishShot) {
   drawHeroKicker(time);
   drawVenueWeather(time);
   drawMatchdayImpact(time);
+  drawCampaignPresentationV41(time);
 
   const baseVisible = 0;
   const heroVisible = 1;
