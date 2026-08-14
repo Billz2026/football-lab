@@ -28,10 +28,14 @@ test("current premium keeper rig replaces the legacy visual rig without changing
   expect(contract.preservesDifficulty).toBe(true);
 });
 
-test("V41 publishes the live build marker while preserving keeper visual safeguards", async ({ page }) => {
+test("V41 publishes authoritative release and campaign markers while preserving keeper visual safeguards", async ({ page }) => {
   await ready(page);
   await expect.poll(
-    () => page.evaluate(() => document.documentElement.dataset.footballLabBuild),
+    () => page.evaluate(() => window.__footballLabReleaseV410?.build),
+    { timeout: 10000 }
+  ).toBe("41.0.0");
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabCampaignProgressionV41?.build),
     { timeout: 10000 }
   ).toBe("41.0.0");
 
