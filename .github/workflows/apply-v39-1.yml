@@ -17,6 +17,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Normalize V39.1 patch for existing shoulder rig
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/apply-v39-1.mjs')
+          text = path.read_text()
+          marker = '// ---------- Base articulated rig: actually render shoulder tilt from wall personality ----------'
+          start = text.index(marker)
+          replace_start = text.index('files.base = replaceOnce(', start)
+          wall_start = text.index('const wallPose = `', replace_start)
+          text = text[:replace_start] + text[wall_start:]
+          path.write_text(text)
+          PY
       - name: Apply V39.1 motion cleanup
         run: node tools/apply-v39-1.mjs
       - name: Validate JavaScript syntax
