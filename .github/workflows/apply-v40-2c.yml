@@ -18,24 +18,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Apply V40.2C patch
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('tools/apply-v40-2c.mjs')
-          s = p.read_text()
-          old = '''for (const key of ["base", "bridgeV9", "genV15", "genV17", "bridgeV17", "runtime"]) {
-  if (!files[key].includes("40.2.1")) throw new Error(`V40.2C patch failed: ${key} missing cache baseline`);
-  files[key] = files[key].replaceAll("40.2.1", "40.2.2");
-}'''
-          new = '''for (const key of ["base", "bridgeV9", "genV15", "genV17", "bridgeV17", "runtime"]) {
-  files[key] = files[key].replaceAll("40.2.1", "40.2.2");
-}'''
-          if old not in s:
-              raise SystemExit('V40.2C workflow hotfix marker missing')
-          p.write_text(s.replace(old, new))
-          PY
-          node tools/apply-v40-2c.mjs
-          git checkout -- tools/apply-v40-2c.mjs
+        run: node tools/apply-v40-2c.mjs
       - name: Validate JavaScript syntax
         run: |
           node --check game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js
