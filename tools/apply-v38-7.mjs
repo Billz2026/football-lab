@@ -71,16 +71,18 @@ files.flight = replaceOnce(files.flight,
 `  const scale = 1
     + focus * (replay ? 0.138 : 0.108)
     + latePush * (replay ? 0.016 : 0.013);
-  const settleLift = focus * (replay ? 0.3 : 0.12);
-
-  canvas.style.transformOrigin = \`${originX}% ${originY}%\`;
-  canvas.style.transform = \`translate3d(0, ${settleLift}%, 0) scale(${scale.toFixed(4)})\`;`,
+  const settleLift = focus * (replay ? 0.3 : 0.12);`,
 `  const scale = 1
     + focus * (replay ? 0.165 : 0.135)
-    + latePush * (replay ? 0.065 : 0.052);
-
-  canvas.style.transformOrigin = \`${originX}% ${originY}%\`;
-  canvas.style.transform = \`translate3d(0, 0, 0) scale(${scale.toFixed(4)})\`;`, "goal-first canvas composition");
+    + latePush * (replay ? 0.065 : 0.052);`, "goal-first scale");
+files.flight = replaceOnce(files.flight,
+  '  canvas.style.transformOrigin = `${originX}% ${originY}%`;',
+  '  canvas.style.transformOrigin = originX + "% " + originY + "%";',
+  "transform origin expression");
+files.flight = replaceOnce(files.flight,
+  '  canvas.style.transform = `translate3d(0, ${settleLift}%, 0) scale(${scale.toFixed(4)})`;',
+  '  canvas.style.transform = "translate3d(0, 0, 0) scale(" + scale.toFixed(4) + ")";',
+  "goal-first canvas transform");
 files.flight = replaceOnce(files.flight,
 `  camera: "cinematic-target-biased-ball-follow",
   readableCurl: true,
