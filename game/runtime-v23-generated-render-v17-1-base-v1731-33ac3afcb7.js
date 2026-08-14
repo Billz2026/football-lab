@@ -721,59 +721,68 @@ function pathRatioAtWall() {
 function wallPose(progress, index, count, hit) {
   const centreIndex = (count - 1) / 2;
   const direction = index < centreIndex ? -1 : 1;
-  const variant = index % 4;
-  const idleBias = (variant - 1.5) * 0.006;
+  const variant = index % 5;
+  const personality = ["brace", "face-guard", "track-ball", "duck-flinch", "late-jump"][variant];
+  const idleBias = (variant - 2) * 0.005;
   if (!state.animation) {
-    const handLift = variant === 2 ? 0.055 : variant === 1 ? 0.025 : 0;
+    const faceGuard = variant === 1 ? 0.075 : 0;
+    const duck = variant === 3 ? 0.014 : 0;
     return {
-      crouch: 0.025 + (index % 3) * 0.006,
+      personality,
+      crouch: 0.025 + (index % 3) * 0.005 + duck,
       pelvisX: idleBias,
       chestX: -idleBias * 0.7,
-      headX: direction * (0.008 + variant * 0.003),
-      shoulderTilt: (variant % 2 ? 1 : -1) * 0.012,
-      leftHand: { x: -0.1 - variant * 0.008, y: -0.42 - handLift },
-      rightHand: { x: 0.1 + variant * 0.008, y: -0.42 + (variant === 3 ? 0.035 : -handLift * 0.35) }
+      headX: direction * (0.007 + variant * 0.0025),
+      shoulderTilt: (variant % 2 ? 1 : -1) * 0.011,
+      leftHand: { x: -0.1 - variant * 0.006, y: -0.42 - faceGuard },
+      rightHand: { x: 0.1 + variant * 0.006, y: -0.42 - faceGuard * 0.7 + (variant === 4 ? 0.025 : 0) }
     };
   }
 
   const flight = progress.motionFlight;
   const wallProfile = wallForStage(state.stage);
   const modifiers = wallProfile.modifiers;
-  const personalityOffset = [-0.018, 0.012, -0.004, 0.024][variant];
+  const personalityOffset = [-0.016, 0.004, -0.006, 0.014, 0.038][variant];
   const stagger = (index - centreIndex) * modifiers.staggerTiming
     + (index % 2 === 0 ? -modifiers.alternateDelay : modifiers.alternateDelay)
     + personalityOffset;
-  const passRatio = clamp(pathRatioAtWall() - modifiers.jumpLead + stagger, 0.1, 0.88);
-  const anticipation = smooth01((flight - (passRatio - 0.24)) / 0.15);
-  const jump = pulse01((flight - (passRatio - 0.115)) / Math.max(0.19, modifiers.jumpWindow * (1.42 + variant * 0.045)));
-  const landing = pulse01((flight - (passRatio + 0.085 + variant * 0.012)) / (0.29 + variant * 0.018));
+  const passRatio = clamp(pathRatioAtWall() - modifiers.jumpLead + stagger, 0.1, 0.9);
+  const anticipation = smooth01((flight - (passRatio - 0.245)) / 0.15);
+  const jumpWindow = Math.max(0.19, modifiers.jumpWindow * (1.4 + variant * 0.035));
+  const jump = pulse01((flight - (passRatio - 0.112)) / jumpWindow);
+  const landing = pulse01((flight - (passRatio + 0.082 + variant * 0.011)) / (0.29 + variant * 0.017));
   const jumpPattern = modifiers.jumpPattern[index % modifiers.jumpPattern.length] || 1;
   const hitRatio = state.shot.outcome === "WALL" && Number.isInteger(state.shot.collision?.index)
     ? state.shot.collision.index / Math.max(1, state.shot.path.length - 1)
     : passRatio;
   const hitReact = hit ? pulse01((flight - hitRatio) / 0.34) : 0;
-  const passReact = pulse01((flight - passRatio) / (0.28 + variant * 0.015)) * (hit ? 0 : 1);
+  const passReact = pulse01((flight - passRatio) / (0.27 + variant * 0.016)) * (hit ? 0 : 1);
   const headTurn = smooth01(clamp((flight - passRatio) / 0.22, 0, 1));
-  const tuck = Math.max(0, jump) * (0.018 + variant * 0.004);
-  const armGuard = [0.0, 0.035, 0.07, 0.02][variant];
-  const lateralFlinch = passReact * direction * (0.018 + variant * 0.006);
+  const faceGuard = variant === 1 ? anticipation * 0.095 : 0;
+  const duck = variant === 3 ? anticipation * 0.04 + Math.max(0, jump) * 0.025 : 0;
+  const lateJumpScale = variant === 4 ? 0.86 : 1;
+  const trackTurn = headTurn * (variant === 2 ? 1 : variant === 4 ? 0.72 : 0.42);
+  const tuck = Math.max(0, jump) * (0.017 + variant * 0.0035);
+  const armGuard = [0, 0.055, 0.025, 0.018, 0.012][variant];
+  const lateralFlinch = passReact * direction * (0.016 + variant * 0.005);
 
   return {
-    crouch: 0.025 + anticipation * 0.12 + landing * (0.095 + variant * 0.01),
-    lift: Math.max(0, jump) * 0.112 * modifiers.jumpMultiplier * jumpPattern * (0.94 + variant * 0.035),
-    rotation: hitReact * direction * 0.34 + passReact * direction * (0.045 + variant * 0.012),
-    torsoLean: hitReact * direction * 0.11 + lateralFlinch,
-    shoulderTilt: (variant % 2 ? 1 : -1) * (0.012 + anticipation * 0.018) + hitReact * direction * 0.055,
-    chestX: hitReact * direction * 0.095 + lateralFlinch,
-    headX: direction * (0.008 + headTurn * (0.028 + variant * 0.006)),
-    leftKnee: { x: -0.1 - hitReact * direction * 0.025 - jump * 0.008, y: -0.15 - tuck + landing * 0.035 },
-    rightKnee: { x: 0.1 - hitReact * direction * 0.025 + jump * 0.008, y: -0.15 - tuck * 0.86 + landing * 0.035 },
-    leftAnkle: { x: -0.13 - jump * 0.006, y: -0.005 - tuck * 0.45 + landing * 0.012 },
-    rightAnkle: { x: 0.13 + jump * 0.006, y: -0.005 - tuck * 0.38 + landing * 0.012 },
-    leftToe: { x: -0.18 - jump * 0.012, y: -0.002 + landing * 0.006 },
-    rightToe: { x: 0.18 + jump * 0.012, y: -0.002 + landing * 0.006 },
-    leftHand: { x: -0.09 - armGuard - hitReact * 0.16 - passReact * (0.025 + variant * 0.008), y: -0.42 - anticipation * (0.02 + variant * 0.012) + hitReact * 0.045 },
-    rightHand: { x: 0.09 + armGuard + hitReact * 0.16 + passReact * (0.025 + (3 - variant) * 0.006), y: -0.42 + (variant === 3 ? anticipation * 0.035 : -anticipation * 0.015) - hitReact * 0.025 }
+    personality,
+    crouch: 0.025 + anticipation * 0.112 + landing * (0.09 + variant * 0.009) + duck,
+    lift: Math.max(0, jump) * 0.11 * modifiers.jumpMultiplier * jumpPattern * (0.95 + variant * 0.027) * lateJumpScale,
+    rotation: hitReact * direction * 0.34 + passReact * direction * (0.04 + variant * 0.011) + trackTurn * direction * 0.022,
+    torsoLean: hitReact * direction * 0.11 + lateralFlinch + (variant === 3 ? -duck * 0.8 : 0),
+    shoulderTilt: (variant % 2 ? 1 : -1) * (0.011 + anticipation * 0.016) + hitReact * direction * 0.052,
+    chestX: hitReact * direction * 0.09 + lateralFlinch,
+    headX: direction * (0.006 + trackTurn * (0.03 + variant * 0.004)),
+    leftKnee: { x: -0.1 - hitReact * direction * 0.024 - jump * 0.007, y: -0.15 - tuck + landing * 0.034 + duck * 0.24 },
+    rightKnee: { x: 0.1 - hitReact * direction * 0.024 + jump * 0.007, y: -0.15 - tuck * 0.84 + landing * 0.034 + duck * 0.24 },
+    leftAnkle: { x: -0.13 - jump * 0.005 - landing * (variant % 2 ? 0.008 : 0), y: -0.005 - tuck * 0.42 + landing * 0.012 },
+    rightAnkle: { x: 0.13 + jump * 0.005 + landing * (variant % 2 ? 0 : 0.008), y: -0.005 - tuck * 0.36 + landing * 0.012 },
+    leftToe: { x: -0.18 - jump * 0.01 - landing * (variant === 2 ? 0.016 : 0), y: -0.002 + landing * 0.006 },
+    rightToe: { x: 0.18 + jump * 0.01 + landing * (variant === 4 ? 0.018 : 0), y: -0.002 + landing * 0.006 },
+    leftHand: { x: -0.09 - armGuard - hitReact * 0.16 - passReact * (0.024 + variant * 0.007), y: -0.42 - faceGuard - anticipation * (0.014 + variant * 0.007) + hitReact * 0.045 },
+    rightHand: { x: 0.09 + armGuard + hitReact * 0.16 + passReact * (0.024 + (4 - variant) * 0.005), y: -0.42 - faceGuard * 0.72 + (variant === 4 ? anticipation * 0.025 : -anticipation * 0.012) - hitReact * 0.025 }
   };
 }
 
@@ -929,8 +938,8 @@ function drawWall(time) {
   for (const player of sorted) {
     const hit = state.shot.outcome === "WALL" && state.shot.collision?.playerIndex === player.index;
     const variedPose = wallPose(progress, player.index, wall.players.length, hit);
-    variedPose.headX = ((player.index % 3) - 1) * 0.012;
-    variedPose.rotation = (variedPose.rotation || 0) + (player.index % 2 ? 0.012 : -0.01);
+    variedPose.headX = (variedPose.headX || 0) + ((player.index % 3) - 1) * 0.008;
+    variedPose.rotation = (variedPose.rotation || 0) + (player.index % 2 ? 0.009 : -0.008);
     drawArticulated(
       player,
       variedPose,
@@ -948,10 +957,12 @@ function drawWall(time) {
     reactive: true,
     individualTiming: true,
     individualHeadAndArmReaction: true,
+    shoulderCounterMotion: true,
+    behaviourVariants: ["brace", "face-guard", "track-ball", "duck-flinch", "late-jump"],
     staggeredLanding: true,
     jumping: Boolean(state.animation && progress.motionFlight > 0),
     hitPlayer: state.shot?.collision?.playerIndex ?? null,
-    build: "39.0.0"
+    build: "39.1.0"
   };
 }
 

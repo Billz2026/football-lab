@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=39.0.0";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=39.1.0";
 import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=32.4";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { keeperForStage } from "./keepers-v14.js?v=32.4";

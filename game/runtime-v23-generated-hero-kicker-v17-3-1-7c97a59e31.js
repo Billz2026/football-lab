@@ -53,9 +53,9 @@ const idle = {
 };
 const step = {
   phase: "final-step", crouch: .062, pelvisX: .006, chestX: -.018, lean: -.102, rotate: -.024, shoulder: -.018,
-  lk: P(-.145, -.148), rk: P(.145, -.215), la: P(-.198, -.006), ra: P(.19, -.105),
-  lt: P(-.255, -.002), rt: P(.245, -.078), le: P(-.265, -.54), re: P(.25, -.575),
-  lh: P(-.34, -.465), rh: P(.33, -.5)
+  lk: P(-.16, -.14), rk: P(.145, -.215), la: P(-.21, -.006), ra: P(.19, -.105),
+  lt: P(-.268, -.002), rt: P(.245, -.078), le: P(-.272, -.538), re: P(.252, -.575),
+  lh: P(-.345, -.46), rh: P(.334, -.5)
 };
 const windup = {
   phase: "wind-up", crouch: .09, pelvisX: .018, chestX: -.04, lean: -.158, rotate: -.046, shoulder: -.044,
@@ -76,16 +76,16 @@ const contact = {
   lh: P(-.37, -.355), rh: P(.42, -.44)
 };
 const follow = {
-  phase: "follow-through", crouch: .034, pelvisX: -.03, chestX: .07, lean: .074, rotate: .074, shoulder: .064,
-  lk: P(-.125, -.148), rk: P(-.045, -.278), la: P(-.18, -.006), ra: P(-.18, -.272),
-  lt: P(-.245, -.002), rt: P(-.282, -.248), le: P(-.235, -.425), re: P(.292, -.482),
-  lh: P(-.282, -.292), rh: P(.382, -.382)
+  phase: "follow-through", crouch: .034, pelvisX: -.026, chestX: .082, lean: .068, rotate: .062, shoulder: .09,
+  lk: P(-.15, -.142), rk: P(-.03, -.265), la: P(-.21, -.006), ra: P(-.135, -.258),
+  lt: P(-.268, -.002), rt: P(-.22, -.235), le: P(-.255, -.405), re: P(.31, -.46),
+  lh: P(-.34, -.275), rh: P(.425, -.355)
 };
 const crossStep = {
-  phase: "recovery-cross-step", crouch: .046, pelvisX: -.024, chestX: .045, lean: .038, rotate: .042, shoulder: .026,
-  lk: P(-.125, -.15), rk: P(.012, -.19), la: P(-.175, -.006), ra: P(-.04, -.038),
-  lt: P(-.24, -.002), rt: P(-.115, -.012), le: P(-.22, -.46), re: P(.25, -.49),
-  lh: P(-.275, -.34), rh: P(.315, -.4)
+  phase: "recovery-cross-step", crouch: .044, pelvisX: -.022, chestX: .052, lean: .034, rotate: .036, shoulder: .035,
+  lk: P(-.132, -.15), rk: P(.006, -.19), la: P(-.19, -.006), ra: P(-.018, -.035),
+  lt: P(-.252, -.002), rt: P(-.085, -.01), le: P(-.225, -.452), re: P(.26, -.48),
+  lh: P(-.286, -.332), rh: P(.325, -.39)
 };
 const recover = {
   phase: "recovery-step", crouch: .052, pelvisX: -.025, chestX: .028, lean: .032, rotate: .034, shoulder: .018,
@@ -142,17 +142,17 @@ function runPose(run, time) {
 function currentPose(p, time) {
   if (!state.animation) return { ...idle, crouch: idle.crouch + Math.sin(time / 520) * .007 };
   if (p.replay) {
-    if (p.flight < .18) return blend(contact, follow, smooth(p.flight / .18));
-    if (p.flight < .36) return blend(follow, crossStep, smooth((p.flight - .18) / .18));
-    if (p.flight < .7) return blend(crossStep, recover, smooth((p.flight - .36) / .34));
-    return blend(recover, neutral, smooth((p.flight - .7) / .3));
+    if (p.flight < .2) return blend(contact, follow, smooth(p.flight / .2));
+    if (p.flight < .4) return blend(follow, crossStep, smooth((p.flight - .2) / .2));
+    if (p.flight < .72) return blend(crossStep, recover, smooth((p.flight - .4) / .32));
+    return blend(recover, neutral, smooth((p.flight - .72) / .28));
   }
   if (p.contact > 0 && p.flight <= 0) return contact;
   if (p.flight > 0 || p.settle > 0) {
-    if (p.flight < .14) return blend(contact, follow, smooth(p.flight / .14));
-    if (p.flight < .3) return blend(follow, crossStep, smooth((p.flight - .14) / .16));
-    if (p.flight < .58) return blend(crossStep, recover, smooth((p.flight - .3) / .28));
-    return blend(recover, neutral, Math.max(smooth((p.flight - .58) / .34), p.settle));
+    if (p.flight < .18) return blend(contact, follow, smooth(p.flight / .18));
+    if (p.flight < .38) return blend(follow, crossStep, smooth((p.flight - .18) / .2));
+    if (p.flight < .64) return blend(crossStep, recover, smooth((p.flight - .38) / .26));
+    return blend(recover, neutral, Math.max(smooth((p.flight - .64) / .3), p.settle));
   }
   return runPose(p.run, time);
 }
@@ -160,9 +160,10 @@ function currentPose(p, time) {
 function travel(p) {
   if (!state.animation) return 0;
   if (p.replay) return 1;
-  const t = clamp(p.run / .82, 0, 1);
-  if (t < .58) return smooth(t / .58) * .52;
-  return .52 + easeOutCubic((t - .58) / .42) * .48;
+  // V39.1: the root reaches its final position exactly as the support foot plants.
+  const t = clamp(p.run / .73, 0, 1);
+  if (t < .62) return smooth(t / .62) * .54;
+  return .54 + easeOutCubic((t - .62) / .38) * .46;
 }
 
 function copyPose(base) {
@@ -185,10 +186,11 @@ function specialistPose(base, character, p) {
     pose.rotate *= 1.18;
     pose.shoulder *= 1.12;
     if (p.flight > 0 && p.flight < .34) {
-      pose.ra.x -= .045 * release;
-      pose.ra.y -= .025 * release;
-      pose.rt.x -= .06 * release;
-      pose.chestX += .018 * release;
+      pose.ra.x -= .02 * release;
+      pose.ra.y -= .012 * release;
+      pose.rt.x -= .028 * release;
+      pose.chestX += .014 * release;
+      pose.shoulder += .018 * release;
     }
   } else if (character.id === "leo-vale") {
     pose.crouch *= .88;
@@ -333,10 +335,10 @@ function draw(world, pose, time, character, p) {
   const ls = P(chest.x - sh, chest.y + h * .012 + tilt), rs = P(chest.x + sh, chest.y + h * .012 - tilt);
   const lh = P(pelvis.x - hip, pelvis.y), rh = P(pelvis.x + hip, pelvis.y), q = (v) => P(v.x * h, v.y * h);
   const lk = q(pose.lk), rk = q(pose.rk), la = q(pose.la), ra = q(pose.ra), lt = q(pose.lt), rt = q(pose.rt), le = q(pose.le), re = q(pose.re), lhand = q(pose.lh), rhand = q(pose.rh);
-  const groundedPhase = ["final-step", "wind-up", "hip-drive", "lower-leg-snap", "contact"].includes(pose.phase);
+  const groundedPhase = ["final-step", "wind-up", "hip-drive", "lower-leg-snap", "contact", "follow-through"].includes(pose.phase);
   const shadowWidth = h * (pose.phase.includes("follow") || pose.phase.includes("recovery") ? .205 : .178);
   ctx.fillStyle = groundedPhase ? "rgba(0,0,0,.29)" : "rgba(0,0,0,.21)"; ctx.beginPath(); ctx.ellipse(0, 5, shadowWidth, h * (groundedPhase ? .043 : .036), -pose.rotate * .18, 0, TAU); ctx.fill();
-  if (["final-step", "wind-up", "hip-drive", "lower-leg-snap", "contact"].includes(pose.phase)) { ctx.fillStyle = "rgba(12,45,23,.55)"; ctx.beginPath(); ctx.ellipse(la.x, la.y + h * .008, h * .07, h * .017, -.12, 0, TAU); ctx.fill(); }
+  if (["final-step", "wind-up", "hip-drive", "lower-leg-snap", "contact", "follow-through"].includes(pose.phase)) { ctx.fillStyle = "rgba(10,39,20,.62)"; ctx.beginPath(); ctx.ellipse(la.x, la.y + h * .008, h * .072, h * .018, -.12, 0, TAU); ctx.fill(); }
   const tw = Math.max(6.2, h * .067), kw = Math.max(5.1, h * .055), sw = Math.max(4.5, h * .049);
   const lse = mix(lh, lk, .43), rse = mix(rh, rk, .43), lst = mix(lk, la, .3), rst = mix(rk, ra, .3);
   tapered(lh, lse, tw * 1.08, tw, shortsLight, shorts); tapered(rh, rse, tw * 1.08, tw, shortsLight, shorts);
@@ -353,7 +355,7 @@ function draw(world, pose, time, character, p) {
   const face = ctx.createRadialGradient(head.x - headR * .35, head.y - headR * .38, headR * .1, head.x, head.y, headR); face.addColorStop(0, skinLight); face.addColorStop(.62, skin); face.addColorStop(1, skinDark); joint(head, headR, face);
   ctx.fillStyle = hair; ctx.beginPath(); ctx.arc(head.x, head.y - headR * .11, headR * .91, Math.PI, TAU); ctx.lineTo(head.x + headR * .62, head.y + headR * .03); ctx.quadraticCurveTo(head.x, head.y - headR * .02, head.x - headR * .62, head.y + headR * .03); ctx.closePath(); ctx.fill();
   ctx.restore();
-  window.__footballLabMotionSnapshotV173 = { phase: pose.phase, run: p.run, flight: p.flight, plantLocked: Boolean(state.animation && !p.replay && p.run >= .73), hipDrive: pose.phase === "hip-drive", legSnap: pose.phase === "lower-leg-snap", crossStep: pose.phase === "recovery-cross-step", travel: travel(p), world: { x: world.x, y: world.y, z: world.z }, leftAnkle: { ...pose.la }, rightAnkle: { ...pose.ra }, bodyRotation: pose.rotate, torsoLean: pose.lean, build: "39.0.0" };
+  window.__footballLabMotionSnapshotV173 = { phase: pose.phase, run: p.run, flight: p.flight, plantLocked: Boolean(state.animation && !p.replay && p.run >= .73 && p.flight < .18), rootLocked: Boolean(state.animation && !p.replay && p.run >= .73), hipDrive: pose.phase === "hip-drive", legSnap: pose.phase === "lower-leg-snap", crossStep: pose.phase === "recovery-cross-step", shoulderCounterRotation: true, travel: travel(p), world: { x: world.x, y: world.y, z: world.z }, leftAnkle: { ...pose.la }, rightAnkle: { ...pose.ra }, bodyRotation: pose.rotate, torsoLean: pose.lean, build: "39.1.0" };
   transform(); // V38.7.2: ball-shaped contact ring retired; base renderer owns ball/contact readability.
 }
 
@@ -369,4 +371,5 @@ export function drawHeroKicker(time) {
 window.__footballLabHeroArtV30 = true;
 window.__footballLabMotionV30 = true;
 
-window.__footballLabCharacterMotionV39 = Object.freeze({ build: "39.0.0", approach: "accelerating-short-final-stride", plant: "support-leg-load", strike: "hip-drive-then-lower-leg-snap", followThrough: "cross-body-then-recovery-step", grounded: true });
+window.__footballLabCharacterMotionV39 = Object.freeze({ build: "39.1.0", approach: "accelerating-short-final-stride", plant: "root-and-support-foot-locked-through-contact", strike: "hip-drive-then-lower-leg-snap", followThrough: "controlled-cross-body-shoulder-counter-rotation-recovery-step", grounded: true });
+window.__footballLabCharacterMotionV391 = window.__footballLabCharacterMotionV39;
