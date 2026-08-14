@@ -81,7 +81,8 @@ test("V23 static runtime preserves the playable unlimited-run flow", async ({ pa
   await page.locator("#shotAction").click();
   await expect(page.locator("#phaseTitle")).toHaveText("STOP POWER");
   await page.waitForTimeout(90);
-  await expect(page.locator("#strikeConsoleV324")).toBeVisible();
+  await expect(page.locator("#strikeConsoleV324")).toHaveCount(1);
+  await expect(page.locator("#strikeConsoleV324")).toHaveAttribute("aria-hidden", "true");
 
   const contracts = await page.evaluate(() => ({
     main: window.__footballLabMainV19,
