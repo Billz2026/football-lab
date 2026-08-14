@@ -11,7 +11,7 @@ import { projectWorld, projectedHeight } from "./projection-v6.js?v=32.4";
 import { sampleShotPath } from "./physics-v7.js?v=32.4";
 import { keeperForStage } from "./keepers-v14.js?v=32.4";
 
-const BUILD = "38.5.0";
+const BUILD = "38.5.1";
 const VIEWPORT = Object.freeze({ width: 1200, height: 720 });
 const TAU = Math.PI * 2;
 
@@ -234,13 +234,23 @@ function premiumKeeperState(progress, time) {
 
   const bodyGap = 0.105 + high * 0.115 + low * 0.055 + (profile.id === "giant" ? 0.035 : 0);
   const bodyTargetX = plan.contact.x - direction * bodyGap;
-  const arcHeight = Math.max(0.12, 0.22 + mid * 0.18 + high * 0.34 - low * 0.08 + style.arc);
-  const arcPulse = Math.sin(clamp(launch, 0, 1) * Math.PI * 0.72);
+  // V38.5.1: dives travel across goal first, upward second. High saves still rise,
+  // but the hips no longer float above the wall and the keeper stays in the goalmouth depth.
+  const arcHeight = Math.max(0.075, 0.13 + mid * 0.095 + high * 0.17 - low * 0.045 + style.arc * 0.4);
+  const arcPulse = Math.sin(clamp(launch, 0, 1) * Math.PI * 0.68);
+  const lateralDrive = smooth01(clamp(diveRaw / Math.max(0.62, 0.74 - high * 0.045 + low * 0.025), 0, 1));
+  const landingSlide = direction * land * (0.045 + low * 0.05 + mid * 0.025);
   const committedZ = Number.isFinite(committed.z) ? committed.z : baseStart.z;
+  const contactDepth = Number.isFinite(plan.contact.z) ? plan.contact.z : committedZ;
+  const depthTarget = clamp(
+    lerp(committedZ, contactDepth, profile.id === "aggressive" ? 0.42 : 0.28),
+    0.2,
+    baseStart.z + (profile.id === "aggressive" ? 0.34 : 0.16)
+  );
   const world = {
-    x: lerp(preLaunchX, bodyTargetX, launch),
-    y: Math.max(0, arcPulse * arcHeight + push * (0.045 + high * 0.04)) * (1 - land * 0.96),
-    z: lerp(committedZ, plan.contact.z, launch)
+    x: lerp(preLaunchX, bodyTargetX, lateralDrive) + landingSlide,
+    y: Math.max(0, arcPulse * arcHeight + push * (0.022 + high * 0.018)) * (1 - land * 0.985),
+    z: lerp(committedZ, depthTarget, launch)
   };
 
   const reach = smooth01(clamp(
@@ -292,9 +302,10 @@ function premiumKeeperState(progress, time) {
     lead.z += parryFollow * 0.025;
   }
 
-  const rotationTarget = direction * (low * 1.38 + mid * 1.1 + high * 0.86);
+  // High dives remain diagonally athletic instead of rotating into a floating horizontal pose.
+  const rotationTarget = direction * (low * 1.28 + mid * 0.98 + high * 0.68);
   const launchRotation = rotationTarget * launch;
-  const recoveryTarget = direction * (state.shot?.saveType === "CATCH" ? 0.18 : 0.31);
+  const recoveryTarget = direction * (state.shot?.saveType === "CATCH" ? 0.14 : 0.24);
   const recoveryBlend = Math.max(recovery, land * 0.28);
   const rotation = land > 0
     ? lerp(launchRotation, recoveryTarget, recoveryBlend)
@@ -318,13 +329,13 @@ function premiumKeeperState(progress, time) {
   return {
     world,
     pose: {
-      crouch: 0.105 + coil * 0.18 + plant * 0.055 + land * 0.16 + recovery * 0.075 + catchHold * 0.03,
+      crouch: 0.105 + coil * 0.18 + plant * 0.06 + land * 0.205 + recovery * 0.09 + catchHold * 0.03,
       rotation,
       torsoLean: direction * launch * (0.105 + low * 0.075 - high * 0.018),
       chestX: direction * launch * (0.042 + low * 0.032),
       leftKnee: {
         x: -stance - lateral - direction * push * 0.075,
-        y: -0.14 - launch * (0.025 + high * 0.065) + land * 0.065 + (leftTrail ? -plant * 0.018 : plant * 0.025)
+        y: -0.14 - launch * (0.025 + high * 0.035) + land * 0.065 + (leftTrail ? -plant * 0.018 : plant * 0.025)
       },
       rightKnee: {
         x: stance - lateral + direction * push * 0.075,
@@ -332,11 +343,11 @@ function premiumKeeperState(progress, time) {
       },
       leftAnkle: {
         x: -stance - 0.045 - direction * launch * (0.16 + low * 0.075) - direction * push * 0.115 - (leftTrail ? scissor * 0.2 : 0),
-        y: -0.01 - launch * (leftTrail ? 0.085 + high * 0.05 : 0.018 + low * 0.025) + land * 0.05
+        y: -0.01 - launch * (leftTrail ? 0.085 + high * 0.026 : 0.018 + low * 0.025) + land * 0.05
       },
       rightAnkle: {
         x: stance + 0.045 - direction * launch * (0.16 + low * 0.075) + direction * push * 0.115 + (rightTrail ? scissor * 0.2 : 0),
-        y: -0.01 - launch * (rightTrail ? 0.085 + high * 0.05 : 0.018 + low * 0.025) + land * 0.05
+        y: -0.01 - launch * (rightTrail ? 0.085 + high * 0.026 : 0.018 + low * 0.025) + land * 0.05
       },
       leftToe: { x: -stance - 0.11 - direction * launch * (0.18 + low * 0.06), y: -0.005 },
       rightToe: { x: stance + 0.11 - direction * launch * (0.18 + low * 0.06), y: -0.005 },
@@ -414,7 +425,7 @@ function drawSoftGroundShadow(foot, height, airborne) {
 }
 
 function drawPremiumKeeperRig(world, pose, profile, camera) {
-  const visualHeight = profile.visualHeight * 1.18;
+  const visualHeight = profile.visualHeight * 1.20;
   const projection = projectedHeight(world, visualHeight, camera, VIEWPORT);
   if (!projection || projection.height < 8) return;
 
@@ -535,7 +546,7 @@ function drawPremiumKeeperRig(world, pose, profile, camera) {
     build: BUILD,
     keeper: profile.id,
     motion: pose.motion || "READY",
-    visualScale: 1.18,
+    visualScale: 1.20,
     groundedShadow: "soft-radial",
     wallLayering: "readability-overlay",
     airborne: Number(world.y) > 0.02
@@ -614,7 +625,7 @@ function schedulePremiumKeeperOverlay() {
     try {
       renderPremiumKeeper(performance.now());
     } catch (error) {
-      console.error("Football Lab V38.5 keeper overlay failed", error);
+      console.error("Football Lab V38.5.1 keeper overlay failed", error);
     }
   });
 }
@@ -730,9 +741,11 @@ function publishRelease() {
     keeperLegacyRig: "suppressed",
     keeperOvalMarker: "removed",
     keeperGroundShadow: "soft-radial-no-ring",
-    keeperVisualScale: "base-1.18",
+    keeperVisualScale: "base-1.20",
     keeperReadyStance: "wide-crouched-balanced",
-    keeperDiveMotion: "read-commit-correct-plant-push-height-dive-contact-land-recover",
+    keeperDiveMotion: "weighted-read-commit-correct-plant-lateral-height-dive-contact-shoulder-land-slide-recover",
+    keeperMotionCorrection: "38.5.1-weight-depth-lateral",
+    keeperDepthModel: "goalmouth-clamped",
     keeperWallReadability: "post-wall-overlay",
     keeperSleeves: "jersey-colour",
     keeperGloves: "compact-cuffed",
@@ -742,7 +755,7 @@ function publishRelease() {
     difficultyChanged: false,
     physicsChanged: false,
     shotOutcomeChanged: false,
-    cacheGeneration: "38.5"
+    cacheGeneration: "38.5.1"
   });
 }
 
@@ -756,13 +769,14 @@ window.addEventListener("footballlab:phasechange", (event) => {
 
 window.__footballLabKeeperVisualsV381 = Object.freeze({
   build: BUILD,
+  motionCorrection: "38.5.1-weight-depth-lateral",
   legacyKeeperSuppressed: true,
   ovalMarkerRemoved: true,
   hardEllipseShadowRemoved: true,
   shadow: "soft-grounded-radial",
   visualScale: 1.18,
   readyStance: "athletic-wide-crouch",
-  diveSequence: ["read", "commit", "correct", "plant", "push", "low-mid-high-dive", "contact", "land", "recover"],
+  diveSequence: ["read", "commit", "correct", "plant", "lateral-push", "low-mid-high-dive", "contact", "shoulder-land", "slide", "recover"],
   wallReadabilityOverlay: true,
   jerseySleeves: true,
   compactGloves: true,
