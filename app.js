@@ -1,7 +1,7 @@
-// Football Lab V40.2C natural goalmouth and outcome feedback
+// Football Lab V40.2D authoritative canvas outcome feedback
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=40.2.2", {
+  navigator.serviceWorker.register("./sw.js?v=40.2.3", {
     scope: "./",
     updateViaCache: "none"
   })
@@ -24,7 +24,7 @@ const runtimeCaptureMode = localCaptureHost
   && new URLSearchParams(location.search).get("runtime-capture") === "v23";
 const runtimeEntry = runtimeCaptureMode
   ? "./game/main-v18.js?v=32.4"
-  : "./game/runtime-v23-main.js?v=40.2.2";
+  : "./game/runtime-v23-main.js?v=40.2.3";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
 const runtimePromise = import(runtimeEntry);
@@ -38,8 +38,8 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/keeper-polish-v36.js?v=36.0"))
       .then(() => import("./game/keeper-realism-v36-2.js?v=36.2"))
       .then(() => import("./game/keeper-readability-v36-3.js?v=36.3"))
-      .then(() => import("./game/keeper-visuals-v38-1.js?v=40.2.2"))
-      .then(() => import("./game/flight-v33.js?v=40.2.2"))
+      .then(() => import("./game/keeper-visuals-v38-1.js?v=40.2.3"))
+      .then(() => import("./game/flight-v33.js?v=40.2.3"))
       .then(() => import("./game/training-v35.js?v=35.1"))
       .then(() => import("./game/training-guard-v35.js?v=35.1"))
       .then(() => import("./game/hub-v35-1.js?v=35.1"))
@@ -65,16 +65,16 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "40.2.2";
+        document.documentElement.dataset.footballLabBuild = "40.2.3";
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V40.2C";
-          badge.title = "Football Lab build 40.2.2";
+          badge.textContent = "V40.2D";
+          badge.title = "Football Lab build 40.2.3";
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "40.2.2";
+        if (version) version.textContent = "40.2.3";
         const release = Object.freeze({
-          build: "40.2.2",
+          build: "40.2.3",
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
@@ -111,7 +111,7 @@ const bootPromise = runtimeCaptureMode
           cameraFinalApproach: "late-flight-goalmouth-emphasis",
           cameraImpactHold: "clean-contact-before-result",
           cinematicFinalApproach: "final-13-percent-subtle-time-remap",
-          resultReveal: "single-authoritative-banner-after-impact-hold",
+          resultReveal: "authoritative-canvas-sting-after-impact-hold",
           duplicateImpactLabels: "retired",
           characterMotion: "root-locked-plant-hip-drive-leg-snap-controlled-cross-step",
           plantFootLock: "root-and-support-foot-fixed-through-contact",
@@ -124,7 +124,8 @@ const bootPromise = runtimeCaptureMode
           pitchQualityScaling: "fold-mobile-reduced-micro-detail",
           goalBackdrop: "no-rectangle-soft-radial-keeper-contrast",
           advertisingArchitecture: "muted-side-only-clear-goalmouth",
-          outcomeFeedback: "impact-hold-then-clear-goal-save-post-bar-block-wide-banner",
+          outcomeFeedback: "canvas-goal-save-parry-post-bar-block-wide-sting-plus-control-panel",
+          outcomeCanvasSting: "visible-on-desktop-fold-mobile",
           keeperBackdropContrast: "radial-continuous-stadium-no-block",
           goalLayering: "backdrop-before-pitch-goal-keeper",
           wallMotion: "five-behaviour-individual-anticipation-jump-head-arm-turn-landing",
@@ -137,7 +138,7 @@ const bootPromise = runtimeCaptureMode
           impactAudio: "net-thump-glove-slap-frame-ring",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "40.2.2"
+          cacheGeneration: "40.2.3"
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -173,6 +174,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV402A = release;
         window.__footballLabReleaseV402B = release;
         window.__footballLabReleaseV402C = release;
+        window.__footballLabReleaseV402D = release;
       });
 
 bootPromise.catch((error) => {

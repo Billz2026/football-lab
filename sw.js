@@ -1,11 +1,11 @@
-// Football Lab V40.2C natural goalmouth and outcome feedback cache reset
-const CACHE_NAME = "football-lab-shell-v40-2-2";
+// Football Lab V40.2D authoritative canvas outcome feedback cache reset
+const CACHE_NAME = "football-lab-shell-v40-2-3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=40.2.2"
+  "./app.js?v=40.2.3"
 ];
 
 async function refreshCoreCache() {
