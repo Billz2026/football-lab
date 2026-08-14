@@ -70,7 +70,7 @@ test("V23 static runtime preserves the playable unlimited-run flow", async ({ pa
   await page.waitForFunction(() => window.__footballLabReleaseV25?.build === "25.0.0", null, {
     timeout: 20000
   });
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
