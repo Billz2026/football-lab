@@ -232,6 +232,82 @@ function drawBackground() {
   ctx.fillText(state.currentStage.venue || "FOOTBALL LAB", 600, 146);
 }
 
+function drawGoalBackdropV402A() {
+  const leftBottom = projectWorld({ x: -GOAL.halfWidth, y: 0.02, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
+  const rightBottom = projectWorld({ x: GOAL.halfWidth, y: 0.02, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
+  const leftTop = projectWorld({ x: -GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
+  const rightTop = projectWorld({ x: GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
+  const points = [leftBottom, rightBottom, leftTop, rightTop];
+  if (points.some((point) => !point?.visible)) return;
+
+  const minX = Math.min(...points.map((point) => point.x));
+  const maxX = Math.max(...points.map((point) => point.x));
+  const minY = Math.min(leftTop.y, rightTop.y);
+  const maxY = Math.max(leftBottom.y, rightBottom.y);
+  const goalSpan = Math.max(120, maxX - minX);
+  const padX = goalSpan * 0.2;
+  const x = clamp(minX - padX, 120, WORLD.width - 320);
+  const right = clamp(maxX + padX, x + 260, WORLD.width - 120);
+  const y = clamp(minY - 24, 205, 330);
+  const bottom = clamp(maxY + 18, y + 92, 386);
+  const width = right - x;
+  const height = bottom - y;
+
+  ctx.save();
+  roundedRect(x, y, width, height, 10);
+  ctx.clip();
+
+  const recess = ctx.createLinearGradient(0, y, 0, bottom);
+  recess.addColorStop(0, "rgba(3,11,8,.985)");
+  recess.addColorStop(0.55, "rgba(5,17,12,.97)");
+  recess.addColorStop(1, "rgba(1,8,5,.99)");
+  ctx.fillStyle = recess;
+  ctx.fillRect(x, y, width, height);
+
+  const centreShade = ctx.createRadialGradient((x + right) / 2, y + height * 0.55, 12, (x + right) / 2, y + height * 0.55, width * 0.54);
+  centreShade.addColorStop(0, "rgba(0,0,0,.32)");
+  centreShade.addColorStop(0.58, "rgba(0,0,0,.12)");
+  centreShade.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = centreShade;
+  ctx.fillRect(x, y, width, height);
+
+  ctx.strokeStyle = "rgba(195,225,190,.045)";
+  ctx.lineWidth = 1;
+  const panelCount = 7;
+  for (let index = 1; index < panelCount; index += 1) {
+    const panelX = x + (width * index) / panelCount;
+    ctx.beginPath();
+    ctx.moveTo(panelX, y + 8);
+    ctx.lineTo(panelX, bottom - 6);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = "rgba(218,254,77,.11)";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(x + 12, y + 7);
+  ctx.lineTo(right - 12, y + 7);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.strokeStyle = "rgba(214,238,207,.10)";
+  ctx.lineWidth = 1;
+  roundedRect(x + 0.5, y + 0.5, width - 1, height - 1, 10);
+  ctx.stroke();
+
+  window.__footballLabGoalBackdropV402A = {
+    build: "40.2A",
+    left: x,
+    right,
+    top: y,
+    bottom,
+    width,
+    goalSpan,
+    advertisingClear: true,
+    keeperContrast: "recessed-matte-dark"
+  };
+}
+
 function pitchDetailTier() {
   const coarse = window.matchMedia?.("(pointer: coarse)")?.matches || false;
   const rect = elements.canvas.getBoundingClientRect();
@@ -1461,6 +1537,7 @@ export function drawScene(time, finishShot) {
   applyTransform();
   applyCameraFeedback(time);
   drawBackground();
+  drawGoalBackdropV402A();
   drawPitch();
   drawGoal(time);
   drawSupportingPlayers();

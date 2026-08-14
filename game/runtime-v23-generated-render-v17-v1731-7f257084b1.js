@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=40.1.0";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=40.2.0";
 import { clamp, WORLD, state, ctx, canvasView, easeOutCubic } from "./core-v6.js?v=32.4";
 import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.4";
 import { projectWorld, projectSegment } from "./projection-v6.js?v=32.4";
@@ -113,26 +113,73 @@ function drawStadiumAtmosphere(time) {
   }
   ctx.restore();
 
+  const keeperBackdrop = window.__footballLabGoalBackdropV402A;
+  const fallbackHalf = 185;
+  const cleanLeft = keeperBackdrop?.advertisingClear
+    ? clamp(keeperBackdrop.left - 12, 170, WORLD.width * 0.48)
+    : WORLD.width / 2 - fallbackHalf;
+  const cleanRight = keeperBackdrop?.advertisingClear
+    ? clamp(keeperBackdrop.right + 12, WORLD.width * 0.52, WORLD.width - 170)
+    : WORLD.width / 2 + fallbackHalf;
+  const boardY = 342;
+  const boardHeight = 22;
+  const offset = (time / 28) % 196;
+
+  const drawSideBoard = (startX, endX) => {
+    const width = endX - startX;
+    if (width < 48) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(startX, boardY, width, boardHeight);
+    ctx.clip();
+
+    const board = ctx.createLinearGradient(0, boardY, 0, boardY + boardHeight);
+    board.addColorStop(0, "rgba(2,12,7,.78)");
+    board.addColorStop(1, "rgba(1,7,4,.9)");
+    ctx.fillStyle = board;
+    ctx.fillRect(startX, boardY, width, boardHeight);
+
+    const ribbon = ctx.createLinearGradient(startX, 0, endX, 0);
+    ribbon.addColorStop(0, "rgba(45,92,58,.12)");
+    ribbon.addColorStop(0.5, "rgba(218,254,77,.24)");
+    ribbon.addColorStop(1, "rgba(45,92,58,.12)");
+    ctx.fillStyle = ribbon;
+    ctx.fillRect(startX, boardY + 1, width, 1.5);
+    ctx.fillStyle = "rgba(220,238,215,.085)";
+    ctx.fillRect(startX, boardY + boardHeight - 1, width, 1);
+
+    ctx.fillStyle = "rgba(239,247,236,.50)";
+    ctx.font = "820 8px system-ui";
+    ctx.textAlign = "center";
+    for (let x = startX - 196 + offset; x < endX + 196; x += 196) {
+      ctx.fillText("FOOTBALL LAB  •  MASTER THE STRIKE", x, boardY + 15);
+    }
+    ctx.restore();
+  };
+
+  drawSideBoard(0, cleanLeft);
+  drawSideBoard(cleanRight, WORLD.width);
+
   ctx.save();
-  const ribbon = ctx.createLinearGradient(0, 0, WORLD.width, 0);
-  ribbon.addColorStop(0, "rgba(25,75,47,.2)");
-  ribbon.addColorStop(0.2, "rgba(218,254,77,.28)");
-  ribbon.addColorStop(0.5, "rgba(240,255,205,.12)");
-  ribbon.addColorStop(0.8, "rgba(218,254,77,.28)");
-  ribbon.addColorStop(1, "rgba(25,75,47,.2)");
-  ctx.fillStyle = "rgba(1,8,4,.74)";
-  ctx.fillRect(0, 330, WORLD.width, 30);
-  ctx.fillStyle = ribbon;
-  ctx.fillRect(0, 332, WORLD.width, 2);
-  ctx.fillRect(0, 356, WORLD.width, 1);
-  ctx.fillStyle = "rgba(239,247,236,.62)";
-  ctx.font = "850 9px system-ui";
-  ctx.textAlign = "center";
-  const offset = (time / 22) % 220;
-  for (let x = -220 + offset; x < WORLD.width + 220; x += 220) {
-    ctx.fillText("FOOTBALL LAB  •  MASTER THE STRIKE", x, 350);
+  ctx.strokeStyle = "rgba(218,254,77,.16)";
+  ctx.lineWidth = 1.2;
+  for (const x of [cleanLeft, cleanRight]) {
+    ctx.beginPath();
+    ctx.moveTo(x, boardY + 2);
+    ctx.lineTo(x, boardY + boardHeight - 2);
+    ctx.stroke();
   }
   ctx.restore();
+
+  window.__footballLabAdvertisingV402A = {
+    build: "40.2A",
+    layout: "side-only",
+    cleanGoalZone: true,
+    cleanLeft,
+    cleanRight,
+    boardY,
+    boardHeight
+  };
 }
 
 function drawGoalHighlights(time) {
