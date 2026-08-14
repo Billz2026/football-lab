@@ -1,11 +1,11 @@
-// Football Lab V40.2D authoritative canvas outcome feedback cache reset
-const CACHE_NAME = "football-lab-shell-v40-2-3";
+// Football Lab V40.3A stadium progression architecture cache reset
+const CACHE_NAME = "football-lab-shell-v40-3-0";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=40.2.3"
+  "./app.js?v=40.3.0"
 ];
 
 async function refreshCoreCache() {

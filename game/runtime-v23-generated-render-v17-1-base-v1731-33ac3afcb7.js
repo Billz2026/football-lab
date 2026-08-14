@@ -162,74 +162,248 @@ function roundedRect(x, y, width, height, radius) {
 }
 
 const VENUE_THEMES = Object.freeze({
-  academy: Object.freeze({ sky: ["#173929", "#2f6946", "#8aac6b"], stand: ["#0c1711", "#19281e"], crowd: "220,244,207", glow: "210,249,153", rows: 3, roof: false, lights: false }),
-  city: Object.freeze({ sky: ["#1b2432", "#654a45", "#c27a51"], stand: ["#080d12", "#18212a"], crowd: "255,220,178", glow: "255,167,94", rows: 5, roof: true, lights: true }),
-  night: Object.freeze({ sky: ["#020714", "#071527", "#142b3f"], stand: ["#010409", "#08111a"], crowd: "202,228,255", glow: "102,181,255", rows: 6, roof: true, lights: true }),
-  storm: Object.freeze({ sky: ["#081016", "#172832", "#334750"], stand: ["#03070a", "#0d171b"], crowd: "187,216,220", glow: "151,208,220", rows: 6, roof: true, lights: true }),
-  world: Object.freeze({ sky: ["#080516", "#15102b", "#2b2040"], stand: ["#020205", "#0e0b16"], crowd: "255,233,174", glow: "242,201,102", rows: 7, roof: true, lights: true }),
-  summit: Object.freeze({ sky: ["#03070d", "#101d28", "#29404a"], stand: ["#010304", "#091014"], crowd: "228,245,247", glow: "194,236,239", rows: 7, roof: true, lights: true })
+  academy: Object.freeze({
+    sky: ["#173929", "#2f6946", "#8aac6b"], stand: ["#0c1711", "#19281e"], crowd: "220,244,207", glow: "210,249,153", lights: false,
+    architecture: Object.freeze({ name: "FOUNDATION GROUND", scale: 0.62, tiers: 1, crowdDensity: 0.48, roof: 0, concourse: false, bays: 6, aisleCount: 3, upperDepth: 0, capacityLabel: "ACADEMY GROUND" })
+  }),
+  city: Object.freeze({
+    sky: ["#1b2432", "#654a45", "#c27a51"], stand: ["#080d12", "#18212a"], crowd: "255,220,178", glow: "255,167,94", lights: true,
+    architecture: Object.freeze({ name: "BOROUGH ARENA", scale: 0.76, tiers: 2, crowdDensity: 0.62, roof: 0.38, concourse: true, bays: 8, aisleCount: 4, upperDepth: 0.36, capacityLabel: "BOROUGH END" })
+  }),
+  night: Object.freeze({
+    sky: ["#020714", "#071527", "#142b3f"], stand: ["#010409", "#08111a"], crowd: "202,228,255", glow: "102,181,255", lights: true,
+    architecture: Object.freeze({ name: "CONTINENTAL PARK", scale: 0.86, tiers: 2, crowdDensity: 0.74, roof: 0.58, concourse: true, bays: 10, aisleCount: 5, upperDepth: 0.52, capacityLabel: "CONTINENTAL STAND" })
+  }),
+  storm: Object.freeze({
+    sky: ["#081016", "#172832", "#334750"], stand: ["#03070a", "#0d171b"], crowd: "187,216,220", glow: "151,208,220", lights: true,
+    architecture: Object.freeze({ name: "TEMPEST STADIUM", scale: 0.91, tiers: 2, crowdDensity: 0.80, roof: 0.78, concourse: true, bays: 11, aisleCount: 5, upperDepth: 0.58, capacityLabel: "TEMPEST BOWL" })
+  }),
+  world: Object.freeze({
+    sky: ["#080516", "#15102b", "#2b2040"], stand: ["#020205", "#0e0b16"], crowd: "255,233,174", glow: "242,201,102", lights: true,
+    architecture: Object.freeze({ name: "CROWN ARENA", scale: 1.0, tiers: 3, crowdDensity: 0.91, roof: 0.88, concourse: true, bays: 13, aisleCount: 6, upperDepth: 0.74, capacityLabel: "WORLD STAGE" })
+  }),
+  summit: Object.freeze({
+    sky: ["#03070d", "#101d28", "#29404a"], stand: ["#010304", "#091014"], crowd: "228,245,247", glow: "194,236,239", lights: true,
+    architecture: Object.freeze({ name: "SUMMIT BOWL", scale: 1.08, tiers: 3, crowdDensity: 0.98, roof: 1, concourse: true, bays: 15, aisleCount: 7, upperDepth: 0.88, capacityLabel: "LEGENDS SUMMIT" })
+  })
 });
+
+function stadiumQualityV403A() {
+  const coarse = window.matchMedia?.("(pointer: coarse)")?.matches || false;
+  const rect = elements.canvas.getBoundingClientRect();
+  const pixels = Math.max(1, rect.width * rect.height * Math.min(window.devicePixelRatio || 1, 2));
+  return coarse || pixels > 1550000 ? 1 : 2;
+}
+
+function goalClearBoundsV403A() {
+  const left = projectWorld({ x: -GOAL.halfWidth * 1.45, y: 0.1, z: -GOAL.depth * 0.25 }, activeCamera, viewport);
+  const right = projectWorld({ x: GOAL.halfWidth * 1.45, y: 0.1, z: -GOAL.depth * 0.25 }, activeCamera, viewport);
+  if (!left?.visible || !right?.visible) return { left: WORLD.width * 0.39, right: WORLD.width * 0.61 };
+  return { left: Math.min(left.x, right.x), right: Math.max(left.x, right.x) };
+}
+
+function drawTierShapeV403A(top, bottom, inset, topColour, bottomColour) {
+  const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+  gradient.addColorStop(0, topColour);
+  gradient.addColorStop(1, bottomColour);
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.moveTo(inset, top);
+  ctx.lineTo(WORLD.width - inset, top);
+  ctx.lineTo(WORLD.width, bottom);
+  ctx.lineTo(0, bottom);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawCrowdTierV403A(theme, top, bottom, rowCount, density, seed, cleanBounds) {
+  const quality = stadiumQualityV403A();
+  const rowGap = (bottom - top) / Math.max(1, rowCount);
+  const baseSpacing = quality === 1 ? 28 : 21;
+  const spacing = baseSpacing / Math.max(0.58, density);
+  for (let row = 0; row < rowCount; row += 1) {
+    const y = top + rowGap * (row + 0.62);
+    const rowScale = 0.72 + row * 0.045;
+    for (let x = -12 + ((row + seed) % 3) * 7; x < WORLD.width + 12; x += spacing) {
+      const wave = Math.sin((x + seed * 31 + row * 19) * 0.071);
+      const jitterX = wave * 3.2;
+      const px = x + jitterX;
+      const inKeeperLane = px > cleanBounds.left && px < cleanBounds.right && y > 210;
+      const silhouetteAlpha = inKeeperLane ? 0.075 : 0.13 + ((row + seed) % 4) * 0.012;
+      const highlight = ((Math.floor(px / spacing) + row * 5 + seed) % 11 === 0) && !inKeeperLane;
+      const headR = (quality === 1 ? 2.0 : 2.35) * rowScale;
+      ctx.fillStyle = highlight ? `rgba(${theme.crowd},${0.22 * density})` : `rgba(${theme.crowd},${silhouetteAlpha * density})`;
+      ctx.beginPath();
+      ctx.arc(px, y - headR * 1.25, headR, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = inKeeperLane ? "rgba(3,8,6,.11)" : `rgba(${theme.crowd},${0.085 * density})`;
+      ctx.beginPath();
+      ctx.ellipse(px, y + headR * 0.8, headR * 1.75, headR * 1.1, 0, 0, TAU);
+      ctx.fill();
+    }
+  }
+}
+
+function drawAislesV403A(top, bottom, count, alpha) {
+  ctx.save();
+  ctx.strokeStyle = `rgba(220,235,226,${alpha})`;
+  ctx.lineWidth = 1.2;
+  for (let i = 1; i <= count; i += 1) {
+    const x = (WORLD.width / (count + 1)) * i;
+    const lean = (x - WORLD.width / 2) * 0.035;
+    ctx.beginPath();
+    ctx.moveTo(x - lean, top);
+    ctx.lineTo(x + lean, bottom);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawConcourseV403A(theme, y, height, bays, cleanBounds) {
+  ctx.fillStyle = "rgba(2,7,7,.78)";
+  ctx.fillRect(0, y, WORLD.width, height);
+  ctx.fillStyle = `rgba(${theme.glow},.10)`;
+  ctx.fillRect(0, y, WORLD.width, 2);
+  const bayW = WORLD.width / bays;
+  for (let i = 0; i < bays; i += 1) {
+    const x = i * bayW + bayW * 0.16;
+    const w = bayW * 0.68;
+    const centre = x + w / 2;
+    const inKeeperLane = centre > cleanBounds.left && centre < cleanBounds.right;
+    ctx.fillStyle = inKeeperLane ? "rgba(8,14,12,.48)" : `rgba(${theme.glow},.065)`;
+    ctx.fillRect(x, y + 7, w, Math.max(5, height - 14));
+  }
+}
+
+function drawRoofV403A(theme, amount) {
+  if (amount <= 0) return;
+  const depth = 18 + amount * 28;
+  ctx.fillStyle = "rgba(0,2,3,.88)";
+  ctx.beginPath();
+  ctx.moveTo(0, 84);
+  ctx.lineTo(WORLD.width, 84);
+  ctx.lineTo(WORLD.width, 84 + depth);
+  ctx.lineTo(WORLD.width * 0.91, 98 + depth * 0.72);
+  ctx.lineTo(WORLD.width * 0.09, 98 + depth * 0.72);
+  ctx.lineTo(0, 84 + depth);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = `rgba(${theme.glow},${0.09 + amount * 0.05})`;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(WORLD.width * 0.09, 98 + depth * 0.72);
+  ctx.lineTo(WORLD.width * 0.91, 98 + depth * 0.72);
+  ctx.stroke();
+}
+
+function drawFloodlightsV403A(theme, architecture) {
+  if (!theme.lights) return;
+  const mastInset = architecture.scale >= 0.95 ? 68 : 86;
+  for (const x of [mastInset, WORLD.width - mastInset]) {
+    ctx.fillStyle = "rgba(4,7,8,.92)";
+    ctx.fillRect(x - 4, 12, 8, 112);
+    const light = ctx.createRadialGradient(x, 25, 2, x, 25, 145 + architecture.scale * 28);
+    light.addColorStop(0, `rgba(${theme.glow},${0.30 + architecture.scale * 0.11})`);
+    light.addColorStop(1, `rgba(${theme.glow},0)`);
+    ctx.fillStyle = light;
+    ctx.fillRect(x - 170, -100, 340, 285);
+    ctx.fillStyle = `rgba(${theme.glow},.78)`;
+    ctx.fillRect(x - 30, 15, 60, 13);
+    for (let lamp = 0; lamp < 6; lamp += 1) {
+      ctx.fillStyle = "rgba(245,252,238,.72)";
+      ctx.fillRect(x - 25 + lamp * 10, 18, 5, 6);
+    }
+  }
+}
 
 function drawBackground() {
   const theme = VENUE_THEMES[state.currentStage.environment] || VENUE_THEMES.academy;
-  const sky = ctx.createLinearGradient(0, 0, 0, 360);
+  const architecture = theme.architecture;
+  const cleanBounds = goalClearBoundsV403A();
+  const quality = stadiumQualityV403A();
+
+  const sky = ctx.createLinearGradient(0, 0, 0, 370);
   sky.addColorStop(0, theme.sky[0]);
-  sky.addColorStop(0.68, theme.sky[1]);
+  sky.addColorStop(0.66, theme.sky[1]);
   sky.addColorStop(1, theme.sky[2]);
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
 
-  const stand = ctx.createLinearGradient(0, 112, 0, 350);
-  stand.addColorStop(0, theme.stand[0]);
-  stand.addColorStop(1, theme.stand[1]);
-  ctx.fillStyle = stand;
-  ctx.fillRect(0, 112, WORLD.width, 244);
+  const standTop = 112 - architecture.scale * 12;
+  const standBottom = 356;
+  drawTierShapeV403A(standTop, standBottom, Math.max(0, 92 - architecture.scale * 78), theme.stand[0], theme.stand[1]);
+  drawRoofV403A(theme, architecture.roof);
 
-  if (theme.roof) {
-    ctx.fillStyle = "rgba(0,0,0,.72)";
-    ctx.fillRect(0, 96, WORLD.width, 22);
-    ctx.fillStyle = `rgba(${theme.glow},.16)`;
-    ctx.fillRect(0, 116, WORLD.width, 2);
+  const lowerTop = 218 - architecture.scale * 24;
+  const lowerBottom = 346;
+  const lowerRows = quality === 1 ? 3 : Math.round(3 + architecture.scale * 3);
+  ctx.fillStyle = "rgba(255,255,255,.025)";
+  ctx.fillRect(0, lowerTop - 4, WORLD.width, 2);
+  drawCrowdTierV403A(theme, lowerTop, lowerBottom, lowerRows, architecture.crowdDensity, 3, cleanBounds);
+  drawAislesV403A(lowerTop, lowerBottom, architecture.aisleCount, 0.035 + architecture.scale * 0.025);
+
+  if (architecture.tiers >= 2) {
+    const concourseY = 190 - architecture.scale * 18;
+    const concourseH = architecture.concourse ? 27 + architecture.scale * 7 : 0;
+    if (concourseH) drawConcourseV403A(theme, concourseY, concourseH, architecture.bays, cleanBounds);
+    const upperBottom = concourseY - 5;
+    const upperTop = 120 - architecture.upperDepth * 22;
+    drawTierShapeV403A(upperTop, upperBottom, 34 + (1 - architecture.scale) * 34, "rgba(4,9,11,.86)", "rgba(12,21,22,.92)");
+    drawCrowdTierV403A(theme, upperTop + 12, upperBottom - 8, quality === 1 ? 2 : 3 + Math.round(architecture.upperDepth * 2), architecture.crowdDensity * 0.88, 8, cleanBounds);
+    drawAislesV403A(upperTop + 6, upperBottom - 4, Math.max(3, architecture.aisleCount - 1), 0.03 + architecture.scale * 0.02);
   }
 
-  for (let row = 0; row < theme.rows; row += 1) {
-    for (let x = 10 + row * 13; x < WORLD.width; x += 22) {
-      const alpha = 0.055 + ((x + row * 23) % 70) / 940;
-      ctx.fillStyle = `rgba(${theme.crowd},${alpha})`;
-      ctx.beginPath();
-      ctx.arc(x, 150 + row * 37 + Math.sin(x * 0.1) * 2, 3, 0, TAU);
-      ctx.fill();
-    }
+  if (architecture.tiers >= 3) {
+    const topBottom = 142;
+    const topTop = 94;
+    drawTierShapeV403A(topTop, topBottom, 86, "rgba(2,5,8,.93)", "rgba(8,13,17,.94)");
+    drawCrowdTierV403A(theme, topTop + 10, topBottom - 5, quality === 1 ? 1 : 2, architecture.crowdDensity * 0.72, 13, cleanBounds);
   }
 
-  if (theme.lights) {
-    for (const x of [80, WORLD.width - 80]) {
-      ctx.fillStyle = "rgba(4,7,8,.9)";
-      ctx.fillRect(x - 4, 18, 8, 118);
-      const light = ctx.createRadialGradient(x, 28, 2, x, 28, 125);
-      light.addColorStop(0, `rgba(${theme.glow},.38)`);
-      light.addColorStop(1, `rgba(${theme.glow},0)`);
-      ctx.fillStyle = light;
-      ctx.fillRect(x - 130, -80, 260, 250);
-      ctx.fillStyle = `rgba(${theme.glow},.72)`;
-      ctx.fillRect(x - 28, 18, 56, 13);
-    }
+  ctx.strokeStyle = "rgba(230,242,233,.11)";
+  ctx.lineWidth = 1;
+  for (const y of architecture.tiers >= 2 ? [214, 344] : [344]) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(WORLD.width, y);
+    ctx.stroke();
   }
 
-  const glow = ctx.createRadialGradient(610, 190, 0, 610, 190, 470);
-  glow.addColorStop(0, `rgba(${theme.glow},.12)`);
+  drawFloodlightsV403A(theme, architecture);
+
+  const glow = ctx.createRadialGradient(610, 190, 0, 610, 190, 500);
+  glow.addColorStop(0, `rgba(${theme.glow},${0.07 + architecture.scale * 0.045})`);
   glow.addColorStop(1, `rgba(${theme.glow},0)`);
   ctx.fillStyle = glow;
-  ctx.fillRect(80, 0, 1050, 430);
+  ctx.fillRect(60, 0, 1080, 430);
 
-  ctx.fillStyle = "rgba(1,5,3,.72)";
-  ctx.fillRect(442, 123, 316, 36);
-  ctx.strokeStyle = `rgba(${theme.glow},.32)`;
-  ctx.strokeRect(442.5, 123.5, 315, 35);
-  ctx.fillStyle = `rgba(${theme.glow},.78)`;
-  ctx.font = "900 10px system-ui";
+  const signWidth = 230 + architecture.scale * 72;
+  const signX = (WORLD.width - signWidth) / 2;
+  const signY = architecture.tiers >= 2 ? 128 : 136;
+  ctx.fillStyle = "rgba(1,5,4,.62)";
+  roundedRect(signX, signY, signWidth, 28, 5);
+  ctx.fill();
+  ctx.strokeStyle = `rgba(${theme.glow},.24)`;
+  ctx.stroke();
+  ctx.fillStyle = `rgba(${theme.glow},.72)`;
+  ctx.font = "900 9px system-ui";
   ctx.textAlign = "center";
-  ctx.fillText(state.currentStage.venue || "FOOTBALL LAB", 600, 146);
+  ctx.fillText(state.currentStage.venue || architecture.name, WORLD.width / 2, signY + 18);
+
+  window.__footballLabStadiumV403A = {
+    build: "40.3A",
+    environment: state.currentStage.environment,
+    venue: architecture.name,
+    scale: architecture.scale,
+    tiers: architecture.tiers,
+    crowdDensity: architecture.crowdDensity,
+    roof: architecture.roof,
+    concourse: architecture.concourse,
+    bays: architecture.bays,
+    quality,
+    keeperClearLane: true,
+    progression: "academy-to-summit-six-stadium-architecture"
+  };
 }
 
 function drawGoalContrastV402C() {
