@@ -11,7 +11,7 @@ import { projectWorld, projectedHeight } from "./projection-v6.js?v=32.4";
 import { sampleShotPath } from "./physics-v7.js?v=32.4";
 import { keeperForStage } from "./keepers-v14.js?v=32.4";
 
-const BUILD = "38.5.1";
+const BUILD = "38.5.2";
 const VIEWPORT = Object.freeze({ width: 1200, height: 720 });
 const TAU = Math.PI * 2;
 
@@ -548,7 +548,7 @@ function drawPremiumKeeperRig(world, pose, profile, camera) {
     motion: pose.motion || "READY",
     visualScale: 1.20,
     groundedShadow: "soft-radial",
-    wallLayering: "readability-overlay",
+    wallLayering: "scene-depth-before-wall",
     airborne: Number(world.y) > 0.02
   };
 }
@@ -603,6 +603,35 @@ function redrawBallOnTop(progress, camera, keeper) {
   ctx.closePath();
   ctx.fill();
 }
+
+function drawPremiumKeeperInScene(time) {
+  if (state.screen !== "game" || !state.currentStage) return false;
+  const progress = progressAt(time);
+  const camera = cameraForFrame(time);
+  const keeper = premiumKeeperState(progress, time);
+  const profile = keeperForStage(state.stage);
+
+  drawPremiumKeeperRig(keeper.world, keeper.pose, profile, camera);
+  window.__footballLabPremiumKeeperSceneFrameV3852 = {
+    build: BUILD,
+    time,
+    keeper,
+    profile: profile.id,
+    motion: keeper.pose?.motion || "READY",
+    airborne: Number(keeper.world?.y) > 0.02,
+    order: "goal-keeper-wall-ball"
+  };
+  window.__footballLabKeeperMotionV32 = {
+    profile: profile.id,
+    motion: keeper.pose?.motion || "READY",
+    airborne: Number(keeper.world?.y) > 0.02,
+    recovering: Boolean(progress.settle > 0),
+    outcome: state.shot?.outcome || null,
+    sceneDepth: true
+  };
+  return true;
+}
+
 function renderPremiumKeeper(time) {
   if (state.screen !== "game" || !state.currentStage) return;
   const progress = progressAt(time);
@@ -746,20 +775,22 @@ function publishRelease() {
     keeperDiveMotion: "weighted-read-commit-correct-plant-lateral-height-dive-contact-shoulder-land-slide-recover",
     keeperMotionCorrection: "38.5.1-weight-depth-lateral",
     keeperDepthModel: "goalmouth-clamped",
-    keeperWallReadability: "post-wall-overlay",
+    keeperWallReadability: "true-scene-depth-before-wall",
     keeperSleeves: "jersey-colour",
     keeperGloves: "compact-cuffed",
     keeperContactRing: "removed",
-    keeperBallLayering: "ball-redrawn-above-keeper",
+    keeperBallLayering: "normal-ball-layer-with-catch-lock",
     aimingChanged: false,
     difficultyChanged: false,
     physicsChanged: false,
     shotOutcomeChanged: false,
-    cacheGeneration: "38.5.1"
+    cacheGeneration: "38.5.2"
   });
 }
 
-patchLegacyKeeperRenderer();
+window.__footballLabPremiumKeeperSceneFrameV3852 = null;
+window.__footballLabPremiumKeeperSceneDrawV3852 = drawPremiumKeeperInScene;
+window.__footballLabKeeperPostSceneOverlayDisabledV3852 = true;
 setTimeout(publishRelease, 0);
 setTimeout(publishRelease, 900);
 window.addEventListener("footballlab:trainingstart", publishRelease);
@@ -769,15 +800,17 @@ window.addEventListener("footballlab:phasechange", (event) => {
 
 window.__footballLabKeeperVisualsV381 = Object.freeze({
   build: BUILD,
-  motionCorrection: "38.5.1-weight-depth-lateral",
+  motionCorrection: "38.5.2-true-scene-depth",
   legacyKeeperSuppressed: true,
   ovalMarkerRemoved: true,
   hardEllipseShadowRemoved: true,
   shadow: "soft-grounded-radial",
-  visualScale: 1.18,
+  visualScale: 1.20,
   readyStance: "athletic-wide-crouch",
   diveSequence: ["read", "commit", "correct", "plant", "lateral-push", "low-mid-high-dive", "contact", "shoulder-land", "slide", "recover"],
-  wallReadabilityOverlay: true,
+  wallReadabilityOverlay: false,
+  trueSceneDepth: true,
+  keeperSceneOrder: "goal-keeper-wall-ball",
   jerseySleeves: true,
   compactGloves: true,
   contactRingRemoved: true,
@@ -789,3 +822,5 @@ window.__footballLabKeeperVisualsV381 = Object.freeze({
 
 
 window.__footballLabKeeperVisualsV385 = Object.freeze({ ...window.__footballLabKeeperVisualsV381, build: BUILD, archetypeMotion: true, wrongFootAnimation: true, heightClassifiedDives: true, catchSecureBall: true, parryFollowThrough: true });
+
+window.__footballLabKeeperVisualsV3852 = Object.freeze({ ...window.__footballLabKeeperVisualsV385, build: BUILD, trueSceneDepth: true, postSceneOverlay: false, legacyCanvasMonkeyPatch: false });

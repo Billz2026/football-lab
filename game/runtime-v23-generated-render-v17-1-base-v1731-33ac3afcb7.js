@@ -932,6 +932,14 @@ function drawKeeperContactPulse(time) {
 }
 
 function drawKeeper(time) {
+  const premiumSceneDraw = window.__footballLabPremiumKeeperSceneDrawV3852;
+  if (typeof premiumSceneDraw === "function") {
+    try {
+      if (premiumSceneDraw(time)) return;
+    } catch (error) {
+      console.error("Football Lab V38.5.2 in-scene keeper failed; falling back to legacy rig", error);
+    }
+  }
   const progress = progressAt(time);
   const keeper = keeperState(progress, time);
   const keeperProfile = keeperForStage(state.stage);
@@ -1094,6 +1102,25 @@ function drawBall(time, finishShot) {
       world = sampleShotPath(state.shot.path, pathProgress) || world;
     }
     if (progress.complete) finishShot(state.animation.id);
+  }
+
+  const premiumKeeperFrame = window.__footballLabPremiumKeeperSceneFrameV3852;
+  if (
+    state.animation
+    && state.shot?.outcome === "SAVE"
+    && state.shot?.saveType === "CATCH"
+    && premiumKeeperFrame
+    && Math.abs(Number(premiumKeeperFrame.time) - Number(time)) < 0.5
+    && pathProgress >= impactRatio()
+    && premiumKeeperFrame.keeper?.pose?.catchBallWorld
+  ) {
+    const lock = smooth01((pathProgress - impactRatio()) / 0.055);
+    const held = premiumKeeperFrame.keeper.pose.catchBallWorld;
+    world = {
+      x: lerp(world.x, held.x, lock),
+      y: lerp(world.y, held.y, lock),
+      z: lerp(world.z, held.z, lock)
+    };
   }
 
   if (state.animation && pathProgress > 0.035) drawTrail(pathProgress);
