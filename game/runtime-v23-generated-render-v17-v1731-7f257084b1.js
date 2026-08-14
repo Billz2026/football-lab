@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=40.2.0";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=40.2.1";
 import { clamp, WORLD, state, ctx, canvasView, easeOutCubic } from "./core-v6.js?v=32.4";
 import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.4";
 import { projectWorld, projectSegment } from "./projection-v6.js?v=32.4";
@@ -113,19 +113,19 @@ function drawStadiumAtmosphere(time) {
   }
   ctx.restore();
 
-  const keeperBackdrop = window.__footballLabGoalBackdropV402A;
-  const fallbackHalf = 185;
+  const keeperBackdrop = window.__footballLabGoalBackdropV402B;
+  const fallbackHalf = 190;
   const cleanLeft = keeperBackdrop?.advertisingClear
-    ? clamp(keeperBackdrop.left - 12, 170, WORLD.width * 0.48)
+    ? clamp(keeperBackdrop.left - keeperBackdrop.feather * 0.22, 160, WORLD.width * 0.48)
     : WORLD.width / 2 - fallbackHalf;
   const cleanRight = keeperBackdrop?.advertisingClear
-    ? clamp(keeperBackdrop.right + 12, WORLD.width * 0.52, WORLD.width - 170)
+    ? clamp(keeperBackdrop.right + keeperBackdrop.feather * 0.22, WORLD.width * 0.52, WORLD.width - 160)
     : WORLD.width / 2 + fallbackHalf;
-  const boardY = 342;
-  const boardHeight = 22;
-  const offset = (time / 28) % 196;
+  const boardY = 348;
+  const boardHeight = 17;
+  const offset = (time / 31) % 210;
 
-  const drawSideBoard = (startX, endX) => {
+  const drawSideBoard = (startX, endX, side) => {
     const width = endX - startX;
     if (width < 48) return;
     ctx.save();
@@ -133,53 +133,59 @@ function drawStadiumAtmosphere(time) {
     ctx.rect(startX, boardY, width, boardHeight);
     ctx.clip();
 
-    const board = ctx.createLinearGradient(0, boardY, 0, boardY + boardHeight);
-    board.addColorStop(0, "rgba(2,12,7,.78)");
-    board.addColorStop(1, "rgba(1,7,4,.9)");
+    const board = ctx.createLinearGradient(startX, 0, endX, 0);
+    if (side === "left") {
+      board.addColorStop(0, "rgba(2,12,7,.58)");
+      board.addColorStop(0.72, "rgba(2,12,7,.46)");
+      board.addColorStop(1, "rgba(2,12,7,.035)");
+    } else {
+      board.addColorStop(0, "rgba(2,12,7,.035)");
+      board.addColorStop(0.28, "rgba(2,12,7,.46)");
+      board.addColorStop(1, "rgba(2,12,7,.58)");
+    }
     ctx.fillStyle = board;
     ctx.fillRect(startX, boardY, width, boardHeight);
 
     const ribbon = ctx.createLinearGradient(startX, 0, endX, 0);
-    ribbon.addColorStop(0, "rgba(45,92,58,.12)");
-    ribbon.addColorStop(0.5, "rgba(218,254,77,.24)");
-    ribbon.addColorStop(1, "rgba(45,92,58,.12)");
+    if (side === "left") {
+      ribbon.addColorStop(0, "rgba(218,254,77,.10)");
+      ribbon.addColorStop(0.76, "rgba(218,254,77,.065)");
+      ribbon.addColorStop(1, "rgba(218,254,77,0)");
+    } else {
+      ribbon.addColorStop(0, "rgba(218,254,77,0)");
+      ribbon.addColorStop(0.24, "rgba(218,254,77,.065)");
+      ribbon.addColorStop(1, "rgba(218,254,77,.10)");
+    }
     ctx.fillStyle = ribbon;
-    ctx.fillRect(startX, boardY + 1, width, 1.5);
-    ctx.fillStyle = "rgba(220,238,215,.085)";
-    ctx.fillRect(startX, boardY + boardHeight - 1, width, 1);
+    ctx.fillRect(startX, boardY + 1, width, 1);
 
-    ctx.fillStyle = "rgba(239,247,236,.50)";
-    ctx.font = "820 8px system-ui";
+    ctx.font = "780 7.4px system-ui";
     ctx.textAlign = "center";
-    for (let x = startX - 196 + offset; x < endX + 196; x += 196) {
-      ctx.fillText("FOOTBALL LAB  •  MASTER THE STRIKE", x, boardY + 15);
+    for (let textX = startX - 210 + offset; textX < endX + 210; textX += 210) {
+      const edgeDistance = side === "left" ? endX - textX : textX - startX;
+      const edgeFade = clamp(edgeDistance / 72, 0, 1);
+      if (edgeFade <= 0.04) continue;
+      ctx.fillStyle = "rgba(235,243,232," + (0.34 * edgeFade).toFixed(3) + ")";
+      ctx.fillText("FOOTBALL LAB  •  MASTER THE STRIKE", textX, boardY + 12);
     }
     ctx.restore();
   };
 
-  drawSideBoard(0, cleanLeft);
-  drawSideBoard(cleanRight, WORLD.width);
+  drawSideBoard(0, cleanLeft, "left");
+  drawSideBoard(cleanRight, WORLD.width, "right");
 
-  ctx.save();
-  ctx.strokeStyle = "rgba(218,254,77,.16)";
-  ctx.lineWidth = 1.2;
-  for (const x of [cleanLeft, cleanRight]) {
-    ctx.beginPath();
-    ctx.moveTo(x, boardY + 2);
-    ctx.lineTo(x, boardY + boardHeight - 2);
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  window.__footballLabAdvertisingV402A = {
-    build: "40.2A",
-    layout: "side-only",
+  window.__footballLabAdvertisingV402B = {
+    build: "40.2B",
+    layout: "side-only-feathered",
     cleanGoalZone: true,
+    hardDividers: false,
     cleanLeft,
     cleanRight,
     boardY,
-    boardHeight
+    boardHeight,
+    tone: "muted-low-profile"
   };
+
 }
 
 function drawGoalHighlights(time) {
