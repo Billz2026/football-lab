@@ -38,7 +38,7 @@ function saveProgress() {
 
 function challengeForStage(stage) {
   if (!stage) return "CLASSIC FREE KICK";
-  if ((stage.chapterStage || 1) === 5) return "CHAPTER FINAL";
+  if ((stage.chapterStage || 1) === 5 && Number(stage.cycle || 0) === 0) return "CHAPTER FINAL";
   if (stage.weatherId === "rain") return "WEATHER TEST";
   if ((stage.wallPlayers || 0) >= 6) return "HEAVY WALL";
   if (Math.abs(stage.ballX || 0) >= 5.5) return "WIDE ANGLE";
@@ -126,7 +126,7 @@ function updateGameIdentity() {
   document.documentElement.dataset.footballLabVenueTierV41 = identity.tier.toLowerCase();
 
   if (state.screen === "game") {
-    const reached = Math.min(SCENARIOS.length, Math.max(1, state.stage + 1));
+    const reached = Math.min(SCENARIOS.length + 1, Math.max(1, state.stage + 1));
     if (reached > progress.highestStage) {
       progress.highestStage = reached;
       saveProgress();
@@ -156,8 +156,13 @@ function updatePhaseCopy(event) {
   const identity = IDENTITIES[stage.environment] || IDENTITIES.academy;
   const help = document.getElementById("phaseHelp");
   if (help) {
-    const final = (stage.chapterStage || 1) === 5 ? "CHAPTER FINAL" : `STAGE ${stage.chapterStage || 1}/5`;
-    help.textContent = `${final} · ${identity.label}. Misses reset the streak, never your stage.`;
+    const final = (stage.chapterStage || 1) === 5 && Number(stage.cycle || 0) === 0;
+    const context = final
+      ? "CHAPTER FINAL"
+      : Number(stage.cycle || 0) > 0
+        ? `MASTERY ${Number(stage.cycle) + 1} · STAGE ${stage.chapterStage || 1}/5`
+        : `STAGE ${stage.chapterStage || 1}/5`;
+    help.textContent = `${context} · ${identity.label}. Misses reset the streak, never your stage.`;
   }
 }
 
