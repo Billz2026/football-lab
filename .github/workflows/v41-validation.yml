@@ -1,4 +1,4 @@
-name: V41 validation
+name: V42 validation
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: football-lab-v41-${{ github.event.pull_request.number || github.ref }}
+  group: football-lab-v42-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -52,13 +52,13 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          npx playwright test tests/runtime-v23.spec.js tests/campaign-v41.spec.js --reporter=line,html 2>&1 | tee playwright-output.txt
+          npx playwright test tests/runtime-v23.spec.js tests/campaign-v41.spec.js tests/character-v42.spec.js --reporter=line,html 2>&1 | tee playwright-output.txt
 
       - name: Upload validation diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v41-validation-${{ github.run_id }}
+          name: v42-validation-${{ github.run_id }}
           path: |
             playwright-output.txt
             playwright-report/
