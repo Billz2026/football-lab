@@ -38,7 +38,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/keeper-polish-v36.js?v=36.0"))
       .then(() => import("./game/keeper-realism-v36-2.js?v=36.2"))
       .then(() => import("./game/keeper-readability-v36-3.js?v=36.3"))
-      .then(() => import("./game/keeper-visuals-v38-1.js?v=38.1"))
+      .then(() => import("./game/keeper-visuals-v38-1.js?v=38.5.0"))
       .then(() => import("./game/keeper-halo-hotfix-v38-1-1.js?v=38.1.1"))
       .then(() => import("./game/flight-v33.js?v=35.1"))
       .then(() => import("./game/training-v35.js?v=35.1"))

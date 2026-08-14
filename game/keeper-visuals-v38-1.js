@@ -11,7 +11,7 @@ import { projectWorld, projectedHeight } from "./projection-v6.js?v=32.4";
 import { sampleShotPath } from "./physics-v7.js?v=32.4";
 import { keeperForStage } from "./keepers-v14.js?v=32.4";
 
-const BUILD = "38.1.0";
+const BUILD = "38.5.0";
 const VIEWPORT = Object.freeze({ width: 1200, height: 720 });
 const TAU = Math.PI * 2;
 
@@ -146,142 +146,212 @@ function premiumKeeperState(progress, time) {
   const profile = keeperForStage(state.stage);
   const plan = state.shot?.keeperPlan;
   const baseIdle = keeperWorld(state.currentStage);
-  const idle = plan?.start || {
+  const baseStart = {
     ...baseIdle,
     z: baseIdle.z + (profile.modifiers?.forwardStart || 0)
   };
+  const style = ({
+    reflex: { stance: 0.17, idleAmp: 0.068, idleMs: 560, push: 1.13, prepLead: 0.018, reachLead: 0.024, arc: 0.018, trail: 0.04, glove: 0.04 },
+    giant: { stance: 0.205, idleAmp: 0.043, idleMs: 900, push: 0.93, prepLead: -0.008, reachLead: -0.006, arc: 0.055, trail: 0.075, glove: 0.025 },
+    reader: { stance: 0.18, idleAmp: 0.048, idleMs: 760, push: 1.0, prepLead: 0.04, reachLead: 0.012, arc: 0.025, trail: 0.045, glove: 0.025 },
+    aggressive: { stance: 0.175, idleAmp: 0.07, idleMs: 650, push: 1.08, prepLead: 0.022, reachLead: 0.014, arc: 0.016, trail: 0.035, glove: 0.03 },
+    academy: { stance: 0.18, idleAmp: 0.058, idleMs: 720, push: 1.0, prepLead: 0, reachLead: 0, arc: 0.02, trail: 0.04, glove: 0.02 }
+  })[profile.id] || { stance: 0.18, idleAmp: 0.058, idleMs: 720, push: 1.0, prepLead: 0, reachLead: 0, arc: 0.02, trail: 0.04, glove: 0.02 };
 
   if (!state.animation || !plan?.contact) {
-    const settleShift = Math.sin(time / 760) * 0.075;
-    const breathe = Math.sin(time / 430) * 0.008;
+    const sway = Math.sin(time / style.idleMs) * style.idleAmp;
+    const breathe = Math.sin(time / 420) * 0.009;
+    const settle = Math.sin(time / (style.idleMs * 0.58)) * 0.012;
     return {
-      world: { ...idle, x: idle.x + settleShift },
+      world: { ...baseStart, x: baseStart.x + sway },
       pose: {
-        crouch: 0.12 + breathe,
-        torsoLean: 0,
+        crouch: 0.115 + breathe,
+        torsoLean: settle * 0.18,
         rotation: 0,
-        leftKnee: { x: -0.18, y: -0.13 },
-        rightKnee: { x: 0.18, y: -0.13 },
-        leftAnkle: { x: -0.22, y: -0.008 },
-        rightAnkle: { x: 0.22, y: -0.008 },
-        leftToe: { x: -0.28, y: 0 },
-        rightToe: { x: 0.28, y: 0 },
-        leftHand: { x: -0.39, y: -0.49 },
-        rightHand: { x: 0.39, y: -0.49 },
-        gloveScale: 1.02,
-        motion: "READY"
+        leftKnee: { x: -style.stance, y: -0.135 },
+        rightKnee: { x: style.stance, y: -0.135 },
+        leftAnkle: { x: -style.stance - 0.045, y: -0.008 },
+        rightAnkle: { x: style.stance + 0.045, y: -0.008 },
+        leftToe: { x: -style.stance - 0.11, y: 0 },
+        rightToe: { x: style.stance + 0.11, y: 0 },
+        leftHand: { x: -0.39, y: -0.49 + settle },
+        rightHand: { x: 0.39, y: -0.49 - settle },
+        gloveScale: 1.02 + style.glove * 0.25,
+        motion: "READY",
+        saveHeightClass: "SET",
+        wrongFooted: false
       }
     };
   }
 
   const flight = progress.motionFlight;
+  const contactPoint = impactRatio();
   const reactionFraction = clamp(
     plan.reaction / Math.max(0.01, plan.flightSeconds || 1),
     0.08,
     0.72
   );
-  const direction = Math.sign(plan.contact.x - idle.x || 1);
-  const prep = clamp(flight / Math.max(0.08, reactionFraction), 0, 1);
-  const setStep = Math.sin(prep * Math.PI * 3.2) * (1 - prep) * 0.035;
-  const coil = smooth01((flight - Math.max(0, reactionFraction - 0.15)) / 0.14);
-  const push = pulse01((flight - (reactionFraction - 0.05)) / 0.2);
+  const committed = plan.start || baseStart;
+  const direction = Math.sign(plan.contact.x - baseStart.x || 1);
+  const wrongFooted = Boolean(plan.wrongFooted);
+  const heightNorm = clamp(Number(plan.contact.y) / GOAL.height, 0, 1);
+  const low = smooth01(clamp((0.48 - heightNorm) / 0.34, 0, 1));
+  const high = smooth01(clamp((heightNorm - 0.54) / 0.34, 0, 1));
+  const mid = clamp(1 - Math.max(low, high), 0, 1);
+  const heightClass = high > 0.42 ? "HIGH" : low > 0.42 ? "LOW" : "MID";
+
+  const commit = smooth01(flight / Math.max(0.06, reactionFraction * 0.72));
+  const correction = wrongFooted
+    ? smooth01((flight - Math.max(0, reactionFraction - 0.1)) / 0.1)
+    : 0;
+  const committedX = lerp(baseStart.x, committed.x, commit);
+  const preLaunchX = wrongFooted
+    ? lerp(committedX, baseStart.x + direction * 0.04, correction * 0.82)
+    : committedX;
+  const coil = smooth01(
+    (flight - Math.max(0, reactionFraction - (0.14 + style.prepLead))) / 0.12
+  );
+  const plant = pulse01((flight - Math.max(0, reactionFraction - 0.105)) / 0.135);
+  const push = pulse01((flight - Math.max(0, reactionFraction - 0.025)) / 0.155) * style.push;
   const diveRaw = clamp(
-    (flight - reactionFraction) / Math.max(0.12, 0.9 - reactionFraction),
+    (flight - reactionFraction) / Math.max(0.1, contactPoint - reactionFraction),
     0,
     1
   );
-  const dive = smooth01(diveRaw);
-  const launch = smooth01(clamp((diveRaw - 0.045) / 0.955, 0, 1));
-  const contactPoint = impactRatio();
-  const land = smooth01((flight - Math.min(0.9, contactPoint + 0.008)) / 0.16);
+  const launch = smooth01(diveRaw);
+  const landStart = Math.min(0.985, contactPoint + 0.014 + high * 0.024 - low * 0.008);
+  const land = smooth01((flight - landStart) / (0.12 + high * 0.04));
   const recovery = smooth01(progress.settle);
   const saveContact = state.shot?.outcome === "SAVE"
-    ? smooth01((flight - Math.max(0.1, contactPoint - 0.028)) / 0.055)
+    ? smooth01((flight - Math.max(0.1, contactPoint - 0.026)) / 0.052)
     : 0;
   const catchHold = state.shot?.saveType === "CATCH"
-    ? smooth01((saveContact - 0.08) / 0.72)
+    ? smooth01((saveContact - 0.08) / 0.68)
     : 0;
   const parryFollow = state.shot?.saveType === "PARRY"
-    ? pulse01((flight - contactPoint) / 0.22)
+    ? pulse01((flight - contactPoint) / 0.2)
     : 0;
 
+  const bodyGap = 0.105 + high * 0.115 + low * 0.055 + (profile.id === "giant" ? 0.035 : 0);
+  const bodyTargetX = plan.contact.x - direction * bodyGap;
+  const arcHeight = Math.max(0.12, 0.22 + mid * 0.18 + high * 0.34 - low * 0.08 + style.arc);
+  const arcPulse = Math.sin(clamp(launch, 0, 1) * Math.PI * 0.72);
+  const committedZ = Number.isFinite(committed.z) ? committed.z : baseStart.z;
   const world = {
-    x: lerp(idle.x + setStep, plan.contact.x - direction * 0.075, launch),
-    y: Math.max(0, Math.sin(launch * Math.PI) * 0.43 + push * 0.09) * (1 - land * 0.94),
-    z: lerp(idle.z, plan.contact.z, launch)
+    x: lerp(preLaunchX, bodyTargetX, launch),
+    y: Math.max(0, arcPulse * arcHeight + push * (0.045 + high * 0.04)) * (1 - land * 0.96),
+    z: lerp(committedZ, plan.contact.z, launch)
   };
 
-  const reach = smooth01(clamp((diveRaw - 0.055) / 0.84, 0, 1));
+  const reach = smooth01(clamp(
+    (diveRaw - Math.max(0.02, 0.07 - style.reachLead)) / Math.max(0.72, 0.88 + style.reachLead),
+    0,
+    1
+  ));
+  const trailReach = clamp(reach * (0.88 + style.trail), 0, 1);
+  const trailOffsetX = 0.34 - high * 0.1 + low * 0.04;
+  const trailOffsetY = low * 0.015 - mid * 0.09 - high * 0.17;
   const leadHand = {
-    x: lerp(world.x + direction * 0.14, plan.contact.x, reach),
-    y: lerp(world.y + 1.31, plan.contact.y, reach),
+    x: lerp(world.x + direction * 0.13, plan.contact.x, reach),
+    y: lerp(world.y + 1.28, plan.contact.y, reach),
     z: lerp(world.z, plan.contact.z, reach)
   };
   const trailHand = {
-    x: lerp(world.x - direction * 0.11, plan.contact.x - direction * 0.25, reach * 0.9),
-    y: lerp(world.y + 1.18, plan.contact.y - 0.09, reach * 0.9),
-    z: lerp(world.z + 0.02, plan.contact.z + 0.03, reach * 0.9)
+    x: lerp(world.x - direction * 0.1, plan.contact.x - direction * trailOffsetX, trailReach),
+    y: lerp(world.y + 1.15, plan.contact.y + trailOffsetY, trailReach),
+    z: lerp(world.z + 0.025, plan.contact.z + 0.035, trailReach)
   };
   const absoluteLeftHand = direction > 0 ? trailHand : leadHand;
   const absoluteRightHand = direction > 0 ? leadHand : trailHand;
+  let catchBallWorld = null;
 
-  if (catchHold > 0) {
+  if (state.shot?.saveType === "CATCH" && saveContact > 0) {
+    const cup = smooth01(saveContact / 0.42);
     const chestTarget = {
-      x: world.x + direction * 0.035,
-      y: world.y + 1.06,
+      x: world.x + direction * 0.02,
+      y: world.y + 0.99 + high * 0.08 - low * 0.12,
       z: world.z
     };
     for (const hand of [absoluteLeftHand, absoluteRightHand]) {
-      hand.x = lerp(hand.x, chestTarget.x, catchHold * 0.74);
-      hand.y = lerp(hand.y, chestTarget.y, catchHold * 0.74);
-      hand.z = lerp(hand.z, chestTarget.z, catchHold * 0.74);
+      hand.x = lerp(hand.x, plan.contact.x, cup * 0.72);
+      hand.y = lerp(hand.y, plan.contact.y, cup * 0.72);
+      hand.z = lerp(hand.z, plan.contact.z, cup * 0.72);
+      hand.x = lerp(hand.x, chestTarget.x, catchHold * 0.86);
+      hand.y = lerp(hand.y, chestTarget.y, catchHold * 0.86);
+      hand.z = lerp(hand.z, chestTarget.z, catchHold * 0.86);
     }
+    catchBallWorld = {
+      x: lerp(plan.contact.x, chestTarget.x, catchHold * 0.9),
+      y: lerp(plan.contact.y, chestTarget.y, catchHold * 0.9),
+      z: lerp(plan.contact.z, chestTarget.z, catchHold * 0.9)
+    };
   } else if (parryFollow > 0) {
     const lead = direction > 0 ? absoluteRightHand : absoluteLeftHand;
-    lead.x += direction * parryFollow * 0.24;
-    lead.y += parryFollow * 0.065;
+    lead.x += direction * parryFollow * (0.22 + (profile.id === "reflex" ? 0.07 : 0));
+    lead.y += parryFollow * (high * 0.085 + mid * 0.045 - low * 0.018);
+    lead.z += parryFollow * 0.025;
   }
 
-  const launchRotation = direction * lerp(0, 1.15, launch);
-  const finalRotation = direction * lerp(1.15, 0.72, recovery);
+  const rotationTarget = direction * (low * 1.38 + mid * 1.1 + high * 0.86);
+  const launchRotation = rotationTarget * launch;
+  const recoveryTarget = direction * (state.shot?.saveType === "CATCH" ? 0.18 : 0.31);
+  const recoveryBlend = Math.max(recovery, land * 0.28);
   const rotation = land > 0
-    ? lerp(launchRotation, finalRotation, Math.max(land, recovery))
+    ? lerp(launchRotation, recoveryTarget, recoveryBlend)
     : launchRotation;
+
+  const stance = style.stance;
+  const lateral = direction * launch * (0.065 + low * 0.04);
+  const scissor = launch * (0.12 + low * 0.11 + high * 0.035);
+  const leftTrail = direction > 0 ? 1 : 0;
+  const rightTrail = direction < 0 ? 1 : 0;
+
+  let motion = "SET";
+  if (recovery > 0.1) motion = "RECOVER";
+  else if (land > 0.22) motion = "LAND";
+  else if (state.shot?.saveType === "CATCH" && saveContact > 0.3) motion = "CATCH_SECURE";
+  else if (parryFollow > 0.08) motion = "PARRY";
+  else if (launch > 0.12) motion = heightClass + "_DIVE";
+  else if (plant > 0.18) motion = wrongFooted ? "CORRECT_AND_PLANT" : "PLANT";
+  else if (commit > 0.18) motion = wrongFooted ? "WRONG_FOOT_COMMIT" : "READ_SET";
 
   return {
     world,
     pose: {
-      crouch: 0.105 + coil * 0.17 + land * 0.15 + recovery * 0.045 + catchHold * 0.035,
+      crouch: 0.105 + coil * 0.18 + plant * 0.055 + land * 0.16 + recovery * 0.075 + catchHold * 0.03,
       rotation,
-      torsoLean: direction * launch * 0.14,
-      chestX: direction * launch * 0.055,
+      torsoLean: direction * launch * (0.105 + low * 0.075 - high * 0.018),
+      chestX: direction * launch * (0.042 + low * 0.032),
       leftKnee: {
-        x: -0.15 - direction * launch * 0.075 - direction * push * 0.1,
-        y: -0.14 - launch * 0.06 + land * 0.055
+        x: -stance - lateral - direction * push * 0.075,
+        y: -0.14 - launch * (0.025 + high * 0.065) + land * 0.065 + (leftTrail ? -plant * 0.018 : plant * 0.025)
       },
       rightKnee: {
-        x: 0.15 - direction * launch * 0.075 + direction * push * 0.1,
-        y: -0.14 + launch * 0.03 + land * 0.055
+        x: stance - lateral + direction * push * 0.075,
+        y: -0.14 - launch * (0.02 + high * 0.035) + land * 0.065 + (rightTrail ? -plant * 0.018 : plant * 0.025)
       },
       leftAnkle: {
-        x: -0.19 - direction * launch * 0.17 - direction * push * 0.14,
-        y: -0.01 - launch * 0.1 + land * 0.045
+        x: -stance - 0.045 - direction * launch * (0.16 + low * 0.075) - direction * push * 0.115 - (leftTrail ? scissor * 0.2 : 0),
+        y: -0.01 - launch * (leftTrail ? 0.085 + high * 0.05 : 0.018 + low * 0.025) + land * 0.05
       },
       rightAnkle: {
-        x: 0.19 - direction * launch * 0.17 + direction * push * 0.14,
-        y: -0.01 + launch * 0.03 + land * 0.045
+        x: stance + 0.045 - direction * launch * (0.16 + low * 0.075) + direction * push * 0.115 + (rightTrail ? scissor * 0.2 : 0),
+        y: -0.01 - launch * (rightTrail ? 0.085 + high * 0.05 : 0.018 + low * 0.025) + land * 0.05
       },
-      leftToe: { x: -0.25 - direction * launch * 0.18, y: -0.005 },
-      rightToe: { x: 0.25 - direction * launch * 0.18, y: -0.005 },
+      leftToe: { x: -stance - 0.11 - direction * launch * (0.18 + low * 0.06), y: -0.005 },
+      rightToe: { x: stance + 0.11 - direction * launch * (0.18 + low * 0.06), y: -0.005 },
       absoluteLeftHand,
       absoluteRightHand,
-      gloveScale: state.shot?.saveType === "CATCH" ? 1.12 : 1.06,
-      motion: state.shot?.saveType || (dive > 0.08 ? "DIVE" : "SET"),
-      recovery
+      catchBallWorld,
+      gloveScale: 1.05 + style.glove + (state.shot?.saveType === "CATCH" ? 0.07 : 0),
+      motion,
+      recovery,
+      saveHeightClass: heightClass,
+      wrongFooted,
+      archetype: profile.id
     }
   };
 }
-
 function screenPoint(x, y) {
   return { x, y };
 }
@@ -472,10 +542,25 @@ function drawPremiumKeeperRig(world, pose, profile, camera) {
   };
 }
 
-function redrawBallOnTop(progress, camera) {
+function redrawBallOnTop(progress, camera, keeper) {
   if (!state.animation || !state.shot?.path?.length || progress.motionFlight <= 0) return;
-  const world = sampleShotPath(state.shot.path, progress.motionFlight);
+  let world = sampleShotPath(state.shot.path, progress.motionFlight);
   if (!world) return;
+  const impact = impactRatio();
+  if (
+    state.shot?.outcome === "SAVE"
+    && state.shot?.saveType === "CATCH"
+    && progress.motionFlight >= impact
+    && keeper?.pose?.catchBallWorld
+  ) {
+    const lock = smooth01((progress.motionFlight - impact) / 0.055);
+    const held = keeper.pose.catchBallWorld;
+    world = {
+      x: lerp(world.x, held.x, lock),
+      y: lerp(world.y, held.y, lock),
+      z: lerp(world.z, held.z, lock)
+    };
+  }
   const projected = projectWorld(world, camera, VIEWPORT);
   if (!projected.visible) return;
 
@@ -507,7 +592,6 @@ function redrawBallOnTop(progress, camera) {
   ctx.closePath();
   ctx.fill();
 }
-
 function renderPremiumKeeper(time) {
   if (state.screen !== "game" || !state.currentStage) return;
   const progress = progressAt(time);
@@ -519,7 +603,7 @@ function renderPremiumKeeper(time) {
   ctx.save();
   applyCameraFeedback(time, progress);
   drawPremiumKeeperRig(keeper.world, keeper.pose, profile, camera);
-  redrawBallOnTop(progress, camera);
+  redrawBallOnTop(progress, camera, keeper);
   ctx.restore();
 }
 
@@ -530,7 +614,7 @@ function schedulePremiumKeeperOverlay() {
     try {
       renderPremiumKeeper(performance.now());
     } catch (error) {
-      console.error("Football Lab V38.1 keeper overlay failed", error);
+      console.error("Football Lab V38.5 keeper overlay failed", error);
     }
   });
 }
@@ -648,7 +732,7 @@ function publishRelease() {
     keeperGroundShadow: "soft-radial-no-ring",
     keeperVisualScale: "base-1.18",
     keeperReadyStance: "wide-crouched-balanced",
-    keeperDiveMotion: "set-push-stretch-land-recover",
+    keeperDiveMotion: "read-commit-correct-plant-push-height-dive-contact-land-recover",
     keeperWallReadability: "post-wall-overlay",
     keeperSleeves: "jersey-colour",
     keeperGloves: "compact-cuffed",
@@ -658,7 +742,7 @@ function publishRelease() {
     difficultyChanged: false,
     physicsChanged: false,
     shotOutcomeChanged: false,
-    cacheGeneration: "38.1"
+    cacheGeneration: "38.5"
   });
 }
 
@@ -678,7 +762,7 @@ window.__footballLabKeeperVisualsV381 = Object.freeze({
   shadow: "soft-grounded-radial",
   visualScale: 1.18,
   readyStance: "athletic-wide-crouch",
-  diveSequence: ["set", "push", "stretch", "contact", "land", "recover"],
+  diveSequence: ["read", "commit", "correct", "plant", "push", "low-mid-high-dive", "contact", "land", "recover"],
   wallReadabilityOverlay: true,
   jerseySleeves: true,
   compactGloves: true,
@@ -688,3 +772,6 @@ window.__footballLabKeeperVisualsV381 = Object.freeze({
   preservesAiming: true,
   preservesDifficulty: true
 });
+
+
+window.__footballLabKeeperVisualsV385 = Object.freeze({ ...window.__footballLabKeeperVisualsV381, build: BUILD, archetypeMotion: true, wrongFootAnimation: true, heightClassifiedDives: true, catchSecureBall: true, parryFollowThrough: true });
