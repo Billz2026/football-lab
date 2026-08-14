@@ -30,7 +30,7 @@ files.base = replaceOnce(files.base, 'camera.target.x = lerp(camera.target.x, ba
 files.base = replaceOnce(files.base, 'camera.target.y = lerp(camera.target.y, ball.y, follow * 0.56);', 'camera.target.y = lerp(camera.target.y, ball.y, follow * 0.64);', "camera y follow");
 files.base = replaceOnce(files.base, 'follow * (1 - progress.motionFlight) * 0.42', 'follow * (1 - progress.motionFlight) * 0.36', "camera z target follow");
 
-// Net: carry the deformation into settle so goals visibly hit the net instead of flashing through it.
+// Net: carry deformation into settle so goals visibly hit the net.
 files.base = replaceOnce(
   files.base,
   '  const ripplePhase = state.animation && state.shot.outcome === "GOAL"\n    ? clamp((progress.motionFlight - impact) / Math.max(0.045, 1 - impact), 0, 1)\n    : 0;\n  const rippleEnergy = ripplePhase > 0\n    ? Math.sin(ripplePhase * Math.PI) * (0.42 + clamp((state.shot.speedMps || 0) / 42, 0, 1) * 0.24)\n    : 0;',
@@ -40,7 +40,7 @@ files.base = replaceOnce(
 files.base = replaceOnce(files.base, 'lineWorld({ x, y: 0.04, z: backZ - ripple * 0.42 }, { x, y: GOAL.height, z: -ripple }, 0.75, net);', 'lineWorld({ x, y: 0.04, z: backZ - ripple * 0.58 }, { x, y: GOAL.height, z: -ripple * 0.14 }, 0.82, net);', "vertical net deformation");
 files.base = replaceOnce(files.base, 'lineWorld({ x: left, y, z: 0 }, { x: right, y, z: backZ - ripple }, 0.75, net);', 'lineWorld({ x: left, y, z: -ripple * 0.08 }, { x: right, y, z: backZ - ripple * 1.08 }, 0.82, net);', "horizontal net deformation");
 
-// Ball readability: keep scale physical but establish a minimum readable match-ball silhouette.
+// Ball readability: establish a minimum readable silhouette without touching collision size.
 files.base = replaceOnce(files.base, '  const radius = clamp(projected.scale * 0.105, 3.5, 10.2);', '  const radius = clamp(projected.scale * 0.112, 4.8, 11.4);', "ball radius");
 files.base = replaceOnce(
   files.base,
@@ -51,7 +51,7 @@ files.base = replaceOnce(
 files.base = replaceOnce(files.base, '  ctx.arc(projected.x, projected.y, radius, 0, TAU);\n  ctx.fill();', '  ctx.ellipse(projected.x, projected.y, radius * squashX, radius * squashY, 0, 0, TAU);\n  ctx.fill();\n  ctx.strokeStyle = "rgba(5,13,8,.72)";\n  ctx.lineWidth = 1.05;\n  ctx.stroke();', "ball body squash and outline");
 files.base = replaceOnce(files.base, '    const px = projected.x + Math.cos(angle) * radius * 0.38;\n    const py = projected.y + Math.sin(angle) * radius * 0.38;', '    const px = projected.x + Math.cos(angle) * radius * 0.38 * squashX;\n    const py = projected.y + Math.sin(angle) * radius * 0.38 * squashY;', "ball panel squash");
 
-// Continuous curved ribbon beneath the existing ghost points makes curl readable at a glance.
+// Continuous curved ribbon beneath the existing ghost points makes curl readable.
 files.base = replaceOnce(
   files.base,
   '  const trailCount = 12 + Math.round(speed * 7);',
@@ -59,8 +59,65 @@ files.base = replaceOnce(
   "continuous flight ribbon"
 );
 
-const impactFx = `\nfunction drawShotImpactFx(time) {\n  if (!state.animation || !state.shot?.path?.length) return;\n  const outcome = state.shot.outcome;\n  if (!["GOAL", "SAVE", "POST", "BAR", "WALL"].includes(outcome)) return;\n  const progress = progressAt(time);\n  const ratio = impactRatio();\n  if (progress.motionFlight < ratio) return;\n  const flightTail = clamp((progress.motionFlight - ratio) / Math.max(0.025, 1 - ratio), 0, 1);\n  const age = progress.motionFlight < 0.999 ? flightTail * 0.24 : 0.24 + progress.settle * 0.76;\n  if (age >= 1) return;\n\n  const impactWorld = outcome === "SAVE" && state.shot.keeperPlan?.contact\n    ? state.shot.keeperPlan.contact\n    : Number.isInteger(state.shot.impactIndex)\n      ? state.shot.path[state.shot.impactIndex]\n      : state.shot.path[state.shot.path.length - 1];\n  if (!impactWorld) return;\n  const point = projectWorld(impactWorld, activeCamera, viewport);\n  if (!point.visible) return;\n\n  const palette = outcome === "SAVE" ? "156,225,255"\n    : outcome === "GOAL" ? "218,254,77"\n      : outcome === "POST" || outcome === "BAR" ? "255,235,177"\n        : "244,247,240";\n  const fade = Math.max(0, 1 - age);\n  const radius = 9 + age * (outcome === "POST" || outcome === "BAR" ? 34 : 27);\n\n  ctx.save();\n  ctx.globalCompositeOperation = "screen";\n  const glow = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius * 1.65);\n  glow.addColorStop(0, `rgba(${palette},${0.27 * fade})`);\n  glow.addColorStop(1, `rgba(${palette},0)`);\n  ctx.fillStyle = glow;\n  ctx.fillRect(point.x - radius * 2, point.y - radius * 2, radius * 4, radius * 4);\n  ctx.strokeStyle = `rgba(${palette},${0.5 * fade})`;\n  ctx.lineWidth = outcome === "SAVE" ? 1.7 : 1.35;\n  ctx.beginPath();\n  ctx.arc(point.x, point.y, radius, 0, TAU);\n  ctx.stroke();\n\n  const particleCount = outcome === "POST" || outcome === "BAR" ? 9 : outcome === "SAVE" ? 6 : 4;\n  for (let index = 0; index < particleCount; index += 1) {\n    const angle = -2.7 + index * (TAU / particleCount) + age * 0.38;\n    const distance = 8 + age * (18 + (index % 3) * 5);\n    const length = 4 + (index % 3) * 2.5;\n    ctx.strokeStyle = `rgba(${palette},${fade * (0.2 + (index % 2) * 0.12)})`;\n    ctx.lineWidth = 1.1;\n    ctx.beginPath();\n    ctx.moveTo(point.x + Math.cos(angle) * distance, point.y + Math.sin(angle) * distance);\n    ctx.lineTo(point.x + Math.cos(angle) * (distance + length), point.y + Math.sin(angle) * (distance + length));\n    ctx.stroke();\n  }\n  ctx.restore();\n}\n`;
-files.base = replaceOnce(files.base, '\nexport function drawScene(time, finishShot) {', `${impactFx}\nexport function drawScene(time, finishShot) {`, "impact fx function");
+const impactFx = [
+  '',
+  'function drawShotImpactFx(time) {',
+  '  if (!state.animation || !state.shot?.path?.length) return;',
+  '  const outcome = state.shot.outcome;',
+  '  if (!["GOAL", "SAVE", "POST", "BAR", "WALL"].includes(outcome)) return;',
+  '  const progress = progressAt(time);',
+  '  const ratio = impactRatio();',
+  '  if (progress.motionFlight < ratio) return;',
+  '  const flightTail = clamp((progress.motionFlight - ratio) / Math.max(0.025, 1 - ratio), 0, 1);',
+  '  const age = progress.motionFlight < 0.999 ? flightTail * 0.24 : 0.24 + progress.settle * 0.76;',
+  '  if (age >= 1) return;',
+  '',
+  '  const impactWorld = outcome === "SAVE" && state.shot.keeperPlan?.contact',
+  '    ? state.shot.keeperPlan.contact',
+  '    : Number.isInteger(state.shot.impactIndex)',
+  '      ? state.shot.path[state.shot.impactIndex]',
+  '      : state.shot.path[state.shot.path.length - 1];',
+  '  if (!impactWorld) return;',
+  '  const point = projectWorld(impactWorld, activeCamera, viewport);',
+  '  if (!point.visible) return;',
+  '',
+  '  const palette = outcome === "SAVE" ? "156,225,255"',
+  '    : outcome === "GOAL" ? "218,254,77"',
+  '      : outcome === "POST" || outcome === "BAR" ? "255,235,177"',
+  '        : "244,247,240";',
+  '  const fade = Math.max(0, 1 - age);',
+  '  const radius = 9 + age * (outcome === "POST" || outcome === "BAR" ? 34 : 27);',
+  '',
+  '  ctx.save();',
+  '  ctx.globalCompositeOperation = "screen";',
+  '  const glow = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius * 1.65);',
+  '  glow.addColorStop(0, "rgba(" + palette + "," + (0.27 * fade) + ")");',
+  '  glow.addColorStop(1, "rgba(" + palette + ",0)");',
+  '  ctx.fillStyle = glow;',
+  '  ctx.fillRect(point.x - radius * 2, point.y - radius * 2, radius * 4, radius * 4);',
+  '  ctx.strokeStyle = "rgba(" + palette + "," + (0.5 * fade) + ")";',
+  '  ctx.lineWidth = outcome === "SAVE" ? 1.7 : 1.35;',
+  '  ctx.beginPath();',
+  '  ctx.arc(point.x, point.y, radius, 0, TAU);',
+  '  ctx.stroke();',
+  '',
+  '  const particleCount = outcome === "POST" || outcome === "BAR" ? 9 : outcome === "SAVE" ? 6 : 4;',
+  '  for (let index = 0; index < particleCount; index += 1) {',
+  '    const angle = -2.7 + index * (TAU / particleCount) + age * 0.38;',
+  '    const distance = 8 + age * (18 + (index % 3) * 5);',
+  '    const length = 4 + (index % 3) * 2.5;',
+  '    ctx.strokeStyle = "rgba(" + palette + "," + (fade * (0.2 + (index % 2) * 0.12)) + ")";',
+  '    ctx.lineWidth = 1.1;',
+  '    ctx.beginPath();',
+  '    ctx.moveTo(point.x + Math.cos(angle) * distance, point.y + Math.sin(angle) * distance);',
+  '    ctx.lineTo(point.x + Math.cos(angle) * (distance + length), point.y + Math.sin(angle) * (distance + length));',
+  '    ctx.stroke();',
+  '  }',
+  '  ctx.restore();',
+  '}',
+  ''
+].join('\n');
+files.base = replaceOnce(files.base, '\nexport function drawScene(time, finishShot) {', impactFx + '\nexport function drawScene(time, finishShot) {', "impact fx function");
 files.base = replaceOnce(files.base, '  drawBall(time, finishShot);\n}', '  drawBall(time, finishShot);\n  drawShotImpactFx(time);\n}\n\nwindow.__footballLabBallImpactV386 = Object.freeze({ build: "38.6.0", readableBall: true, continuousCurlRibbon: true, persistentNetRipple: true, impactFx: true, physicsChanged: false, outcomeChanged: false });', "impact fx scene call");
 
 // Flight shaping remains deterministic and endpoint-preserving, but curl reads more clearly.
@@ -72,13 +129,13 @@ files.flight = replaceOnce(files.flight, '    + focus * (replay ? 0.124 : 0.088)
 files.flight = replaceOnce(files.flight, '  const settleLift = focus * (replay ? 0.35 : 0.18);', '  const settleLift = focus * (replay ? 0.3 : 0.12);', "camera settle lift");
 files.flight = replaceOnce(files.flight, '  camera: "target-biased-late-flight-push"', '  camera: "cinematic-target-biased-ball-follow",\n  readableCurl: true,\n  presentationOnly: true', "flight metadata");
 
-// Impact audio: stronger glove slap, net thump and frame ring, still synthetic/lightweight.
+// Impact audio: stronger glove slap, net thump and frame ring.
 files.audio = replaceOnce(files.audio, '    noise({ duration: 0.24, volume: 0.052, delay: delaySeconds, frequency: 2100, q: 0.48 });', '    noise({ duration: 0.28, volume: 0.064, delay: delaySeconds, frequency: 1760, q: 0.46 });\n    noise({ duration: 0.09, volume: 0.032, delay: delaySeconds + 0.012, frequency: 720, q: 0.62 });', "goal net impact audio");
 files.audio = replaceOnce(files.audio, '    noise({ duration: 0.14, volume: 0.06, delay: delaySeconds, frequency: 580, q: 0.62, pan: 0.12 });\n    tone({ frequency: 138, endFrequency: 72, duration: 0.16, type: "triangle", volume: 0.058, delay: delaySeconds });', '    noise({ duration: 0.13, volume: 0.072, delay: delaySeconds, frequency: 760, q: 0.58, pan: 0.12 });\n    noise({ duration: 0.07, volume: 0.03, delay: delaySeconds + 0.008, frequency: 1850, q: 0.9, pan: 0.12 });\n    tone({ frequency: 124, endFrequency: 64, duration: 0.17, type: "triangle", volume: 0.06, delay: delaySeconds });', "save glove impact audio");
 files.audio = replaceOnce(files.audio, '    tone({ frequency: outcome === "BAR" ? 1260 : 1040, endFrequency: 710, duration: 0.38, type: "sine", volume: 0.075, delay: delaySeconds });', '    tone({ frequency: outcome === "BAR" ? 1320 : 1080, endFrequency: 690, duration: 0.42, type: "sine", volume: 0.082, delay: delaySeconds });', "frame impact ring");
 files.audio += '\nwindow.__footballLabAudioV386 = Object.freeze({ build: "38.6.0", netImpact: true, gloveSlap: true, frameRing: true });\n';
 
-// Cache-rotate the full render/audio/flight chain so devices cannot keep V38.5.2 visuals.
+// Cache-rotate the render/audio/flight chain so Fold/desktop cannot keep old visuals.
 files.bridgeV9 = replaceOnce(files.bridgeV9, 'v=38.5.2', 'v=38.6.0', "bridge v9 cache");
 files.genV15 = replaceOnce(files.genV15, 'v=38.5.2', 'v=38.6.0', "generated v15 cache");
 files.genV17 = replaceOnce(files.genV17, 'v=38.5.2', 'v=38.6.0', "generated v17 cache");
