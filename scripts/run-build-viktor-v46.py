@@ -1,9 +1,9 @@
 """Production authoring wrapper for Viktor Kane V46.
 
 This pass keeps the validated realistic male body/rig/football animation system
-and fits the kit to the anatomical surface. Unlike the rejected first shell
-pass, seams are simplified, topology is smoothed, both lower legs/feet are
-selected symmetrically by height, and the hair conforms to the actual head.
+and fits the kit to the anatomical surface. Shirt coverage now closes the upper
+back/shoulder gap while navy sleeves overlay the fitted base. Hair follows the
+real scalp with deeper side/back coverage while keeping the face clear.
 """
 
 import importlib.util
@@ -203,37 +203,38 @@ def create_fitted_kit_and_hair(armature):
     sleeve_navy = builder.make_material("VIKTOR_Sleeve_Navy", (0.022, 0.060, 0.125), 0.55)
     sock_white = builder.make_material("VIKTOR_Sock_White", (0.88, 0.905, 0.925), 0.65)
     boot_black = builder.make_material("VIKTOR_Boot_Black", (0.010, 0.014, 0.020), 0.43)
-    blond = builder.make_material("VIKTOR_Hair", (0.44, 0.32, 0.16), 0.78)
+    blond = builder.make_material("VIKTOR_Hair", (0.53, 0.39, 0.19), 0.78)
 
+    # White fitted base intentionally reaches high enough to cover the shoulder
+    # girdle and upper back. Navy sleeve geometry overlays the upper arms, so
+    # there is no skin-coloured gap if the sleeve boundary lands between loops.
     def shirt(point):
-        x = abs(point.x)
-        torso = 0.955 <= point.z <= 1.445 and x <= 0.345
-        shoulder = 1.205 <= point.z <= 1.445 and 0.30 < x <= 0.535
-        return torso or shoulder
+        return 0.955 <= point.z <= 1.525 and abs(point.x) <= 0.555
 
     def sleeves(point):
-        return 1.185 <= point.z <= 1.445 and 0.285 <= abs(point.x) <= 0.545
+        return 1.145 <= point.z <= 1.455 and 0.285 <= abs(point.x) <= 0.590
 
     def shorts(point):
         return 0.675 <= point.z <= 1.025 and abs(point.x) <= 0.38
 
-    # Height-only lower-leg/foot gates ensure both left and right sides are
-    # covered symmetrically; the earlier X restriction caused a bare foot.
     def socks(point):
         return 0.105 <= point.z <= 0.515
 
     def boots(point):
         return point.z <= 0.170
 
+    # Blender's human base faces -Y. Keep deeper scalp/side/back coverage but
+    # avoid coating the face: the very top may wrap all around; lower hair is
+    # retained only from the crown backwards.
     def hair(point):
-        return point.z >= 1.705
+        return point.z >= 1.735 or (point.z >= 1.610 and point.y >= -0.035)
 
     _surface_shell("Viktor_Shirt", shirt, white, outward=0.012, smooth_factor=0.035, subdivide=True)
-    _surface_shell("Viktor_Sleeves_Navy", sleeves, sleeve_navy, outward=0.019, smooth_factor=0.04, subdivide=True)
+    _surface_shell("Viktor_Sleeves_Navy", sleeves, sleeve_navy, outward=0.020, smooth_factor=0.04, subdivide=True)
     _surface_shell("Viktor_Shorts", shorts, navy, outward=0.014, smooth_factor=0.035, subdivide=True)
     _surface_shell("Viktor_Socks", socks, sock_white, outward=0.012, smooth_factor=0.025, subdivide=True)
     _surface_shell("Viktor_Boots", boots, boot_black, outward=0.014, smooth_factor=0.018, subdivide=True, min_z=0.002)
-    hair_obj = _surface_shell("Viktor_Hair", hair, blond, outward=0.008, smooth_factor=0.018, subdivide=True)
+    hair_obj = _surface_shell("Viktor_Hair", hair, blond, outward=0.009, smooth_factor=0.018, subdivide=True)
     hair_obj["football_lab_attachment"] = "fitted-scalp-hair"
     return hair_obj
 
