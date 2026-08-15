@@ -63,14 +63,16 @@ test("V42.1 remains the fallback for non-V43 outfield players while Viktor uses 
         { timeout: 5000 }
       ).toBe("premium-sprite-2.5d");
     } else {
+      // V43 owns the integration boundary now. Its frame is the authoritative
+      // selected-character signal while the actual body still renders through V42.
       await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV42?.sourceCharacterId),
+        () => page.evaluate(() => window.__footballLabHeroFrameV43?.sourceCharacterId),
         { timeout: 5000 }
       ).toBe(sourceId);
       await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV42?.character),
+        () => page.evaluate(() => window.__footballLabHeroFrameV43?.renderer),
         { timeout: 5000 }
-      ).toBe(visualId);
+      ).toBe("v42-fallback");
       await expect.poll(
         () => page.evaluate(() => window.__footballLabHeroFrameV42?.build),
         { timeout: 5000 }
