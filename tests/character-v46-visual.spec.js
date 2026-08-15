@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 
 // Visual approval must come from the authoritative Football Lab camera after
 // the V46 runtime bridge is rebuilt; Blender previews are not accepted here.
-// This capture specifically evaluates the clean-topology football kit pass.
+// This capture evaluates the fitted anatomical-surface kit with smoothed seams.
 async function enterClassic(page) {
-  await page.goto("/index.html?capture=viktor-v46-clean-kit", { waitUntil: "networkidle" });
+  await page.goto("/index.html?capture=viktor-v46-fitted-surface", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
 
   await expect.poll(
