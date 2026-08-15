@@ -23,6 +23,11 @@ def cli_args():
     return parser.parse_args(argv)
 
 
+def fail(message):
+    print("VIKTOR_VERIFY_FAIL", message)
+    raise SystemExit(2)
+
+
 def read_glb_json(path):
     with open(path, "rb") as handle:
         header = handle.read(12)
@@ -46,6 +51,35 @@ def read_glb_json(path):
     fail("GLB JSON chunk missing")
 
 
+def object_world_bounds(obj):
+    points = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
+    minimum = Vector((min(p.x for p in points), min(p.y for p in points), min(p.z for p in points)))
+    maximum = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p in points)))
+    return minimum, maximum
+
+
+def print_mesh_diagnostics(meshes):
+    print("VIKTOR_MESH_BOUNDS_BEGIN")
+    for obj in meshes:
+        minimum, maximum = object_world_bounds(obj)
+        dimensions = maximum - minimum
+        print(
+            "VIKTOR_MESH_BOUND",
+            obj.name,
+            "parent=", obj.parent.name if obj.parent else None,
+            "parent_type=", obj.parent_type,
+            "location=", tuple(round(v, 5) for v in obj.location),
+            "scale=", tuple(round(v, 5) for v in obj.scale),
+            "matrix_translation=", tuple(round(v, 5) for v in obj.matrix_world.translation),
+            "min=", tuple(round(v, 5) for v in minimum),
+            "max=", tuple(round(v, 5) for v in maximum),
+            "dimensions=", tuple(round(v, 5) for v in dimensions),
+            "verts=", len(obj.data.vertices),
+            "polys=", len(obj.data.polygons),
+        )
+    print("VIKTOR_MESH_BOUNDS_END")
+
+
 def world_height(objects):
     points = []
     for obj in objects:
@@ -56,11 +90,6 @@ def world_height(objects):
     if not points:
         return 0.0
     return max(p.z for p in points) - min(p.z for p in points)
-
-
-def fail(message):
-    print("VIKTOR_VERIFY_FAIL", message)
-    raise SystemExit(2)
 
 
 def main():
@@ -89,9 +118,6 @@ def main():
     if not armatures:
         fail("no armature in GLB")
 
-    # Blender's importer may suffix imported Action datablocks with the target
-    # armature name. The browser runtime consumes the canonical GLB animation
-    # names checked above, so imported Action names are only a secondary sanity check.
     imported_actions = {action.name for action in bpy.data.actions}
     for clip in REQUIRED_CLIPS:
         if not any(name == clip or name.startswith(f"{clip}_") for name in imported_actions):
@@ -113,6 +139,7 @@ def main():
     if not skinned_meshes:
         fail("mesh is not skinned to an armature")
 
+    print_mesh_diagnostics(meshes)
     height = world_height(meshes)
     if not (1.70 <= height <= 2.02):
         fail(f"unexpected imported mesh height: {height:.3f}m")
