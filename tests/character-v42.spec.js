@@ -29,7 +29,7 @@ test("V42.1 exposes the reusable premium character roster", async ({ page }) => 
   expect(contract.directCelebrityLikenesses).toBe(false);
 });
 
-test("V42.1 renders every selectable outfield player through the refined character layer", async ({ page }) => {
+test("V42.1 remains the fallback for non-V43 outfield players while Viktor uses V43", async ({ page }) => {
   for (const [sourceId, visualId] of KICKERS) {
     await page.goto("/index.html?test=character-v42");
     await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), sourceId);
@@ -45,18 +45,37 @@ test("V42.1 renders every selectable outfield player through the refined charact
     await page.locator("#kickerConfirmV13").click();
     await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
 
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV42?.sourceCharacterId),
-      { timeout: 5000 }
-    ).toBe(sourceId);
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV42?.character),
-      { timeout: 5000 }
-    ).toBe(visualId);
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV42?.build),
-      { timeout: 5000 }
-    ).toBe("42.1.0");
+    if (sourceId === "dax-ryder") {
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV43?.sourceCharacterId),
+        { timeout: 5000 }
+      ).toBe(sourceId);
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV43?.character),
+        { timeout: 5000 }
+      ).toBe(visualId);
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV43?.build),
+        { timeout: 5000 }
+      ).toBe("43.0.0");
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV43?.renderer),
+        { timeout: 5000 }
+      ).toBe("premium-sprite-2.5d");
+    } else {
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV42?.sourceCharacterId),
+        { timeout: 5000 }
+      ).toBe(sourceId);
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV42?.character),
+        { timeout: 5000 }
+      ).toBe(visualId);
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV42?.build),
+        { timeout: 5000 }
+      ).toBe("42.1.0");
+    }
 
     await page.screenshot({
       path: `test-results/v42-${visualId}.png`,
