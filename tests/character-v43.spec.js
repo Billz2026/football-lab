@@ -1,12 +1,5 @@
 import { test, expect } from "@playwright/test";
 
-async function waitForV43Atlas(page) {
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabCharacterSpritesV43?.status),
-    { timeout: 15000 }
-  ).toBe("ready");
-}
-
 async function enterClassic(page) {
   await page.locator("#classicCard").click();
   await expect.poll(
@@ -25,59 +18,62 @@ async function enterClassic(page) {
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
 }
 
-test("V43.1 high-resolution sprite atlas loads with the approved master frames", async ({ page }) => {
-  await page.goto("/index.html?test=character-v43");
-  await waitForV43Atlas(page);
-  const atlas = await page.evaluate(() => window.__footballLabCharacterSpritesV43);
-  expect(atlas.build).toBe("43.1.0");
-  expect(atlas.atlasWidth).toBe(1024);
-  expect(atlas.atlasHeight).toBe(448);
-  expect(atlas.base64Length).toBe(97240);
-  expect(atlas.fidelity).toBe("approved-reference-high-resolution");
-  expect(atlas.frames).toEqual([
-    "viktor-idle-back",
-    "viktor-windup-side",
-    "mikkel-set",
-    "viktor-contact",
-    "mikkel-dive"
-  ]);
+async function chooseKicker(page, characterId) {
+  await page.goto("/index.html?test=character-v44");
+  await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), characterId);
+  await page.reload();
+  await enterClassic(page);
+}
+
+test("V44 removes the five-frame sprite path from live outfield rendering", async ({ page }) => {
+  await chooseKicker(page, "dax-ryder");
+
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabHeroFrameV44?.renderer),
+    { timeout: 5000 }
+  ).toBe("articulated-layered-2.5d");
+
+  const state = await page.evaluate(() => ({
+    renderer: window.__footballLabVisibleKickersV30?.renderer,
+    spriteAtlasReady: window.__footballLabVisibleKickersV30?.spriteAtlasReady,
+    staticSpriteFrames: window.__footballLabVisibleKickersV30?.staticSpriteFrames,
+    rig: window.__footballLabHeroFrameV44?.rig
+  }));
+
+  expect(state.renderer).toBe("articulated-layered-2.5d");
+  expect(state.spriteAtlasReady).toBe(false);
+  expect(state.staticSpriteFrames).toBe(false);
+  expect(state.rig).toBe("continuous-skeletal-canvas");
 });
 
-test("Viktor Kane renders through the V43.1 high-resolution 2.5D path", async ({ page }) => {
-  await page.goto("/index.html?test=character-v43-viktor");
-  await page.evaluate(() => localStorage.setItem("footballLabSelectedKickerV13", "dax-ryder"));
-  await page.reload();
-  await waitForV43Atlas(page);
+test("all four outfield characters use the articulated 2.5D rig", async ({ page }) => {
+  const roster = [
+    ["dax-ryder", "viktor-kane"],
+    ["leo-vale", "bruno-silva"],
+    ["zion-arc", "david-beckett"],
+    ["kai-mori", "wayne-redman"]
+  ];
 
-  await enterClassic(page);
-
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV43?.renderer),
-    { timeout: 5000 }
-  ).toBe("premium-sprite-2.5d");
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV43?.character),
-    { timeout: 5000 }
-  ).toBe("viktor-kane");
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV43?.build),
-    { timeout: 5000 }
-  ).toBe("43.1.0");
-
-  await page.screenshot({ path: "test-results/v43-viktor-kane.png", fullPage: true });
+  for (const [sourceId, character] of roster) {
+    await chooseKicker(page, sourceId);
+    await expect.poll(
+      () => page.evaluate(() => window.__footballLabHeroFrameV44?.renderer),
+      { timeout: 5000 }
+    ).toBe("articulated-layered-2.5d");
+    await expect.poll(
+      () => page.evaluate(() => window.__footballLabHeroFrameV44?.character),
+      { timeout: 5000 }
+    ).toBe(character);
+  }
 });
 
-test("Mikkel Storm replaces the giant keeper through the V43.1 scene-depth path", async ({ page }) => {
-  await page.goto("/index.html?test=character-v43-mikkel");
-  await page.evaluate(() => localStorage.setItem("footballLabSelectedKickerV13", "dax-ryder"));
-  await page.reload();
-  await waitForV43Atlas(page);
+test("goalkeepers remain on the continuous articulated scene-depth rig", async ({ page }) => {
+  await chooseKicker(page, "dax-ryder");
 
-  await enterClassic(page);
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabKeeperRendererV43?.build),
-    { timeout: 5000 }
-  ).toBe("43.1.0");
+    () => page.evaluate(() => window.__footballLabKeeperRendererV44?.build),
+    { timeout: 6000 }
+  ).toBe("44.0.0");
 
   await page.evaluate(async () => {
     const core = await import("/game/core-v6.js?v=32.4");
@@ -88,30 +84,12 @@ test("Mikkel Storm replaces the giant keeper through the V43.1 scene-depth path"
   });
 
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabKeeperFrameV43?.renderer),
+    () => page.evaluate(() => window.__footballLabKeeperFrameV44?.renderer),
     { timeout: 5000 }
-  ).toBe("premium-sprite-2.5d");
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabKeeperFrameV43?.character),
-    { timeout: 5000 }
-  ).toBe("mikkel-storm");
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabKeeperFrameV43?.sourceKeeperId),
-    { timeout: 5000 }
-  ).toBe("giant");
+  ).toBe("articulated-layered-2.5d");
 
-  await page.screenshot({ path: "test-results/v43-mikkel-storm.png", fullPage: true });
-});
-
-test("non-master outfield players stay safely on the V42 fallback", async ({ page }) => {
-  await page.goto("/index.html?test=character-v43-fallback");
-  await page.evaluate(() => localStorage.setItem("footballLabSelectedKickerV13", "leo-vale"));
-  await page.reload();
-  await waitForV43Atlas(page);
-
-  await enterClassic(page);
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV43?.renderer),
-    { timeout: 5000 }
-  ).toBe("v42-fallback");
+  const keeper = await page.evaluate(() => window.__footballLabKeeperFrameV44);
+  expect(keeper.character).toBe("mikkel-storm");
+  expect(keeper.staticSpriteFrames).toBe(false);
+  expect(keeper.sceneDepth).toBe(true);
 });
