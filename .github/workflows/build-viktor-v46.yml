@@ -75,6 +75,14 @@ jobs:
             -- --output "$OUT"
           ls -lh "$OUT"
 
+      - name: Preserve generated GLB for diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: viktor-kane-v46-glb-${{ github.run_id }}
+          path: game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Verify Viktor GLB contract in Blender
         shell: bash
         run: |
@@ -83,14 +91,6 @@ jobs:
           blender --background --factory-startup \
             --python "$GITHUB_WORKSPACE/scripts/verify-viktor-v46.py" \
             -- --input "$OUT"
-
-      - name: Upload technical master candidate
-        uses: actions/upload-artifact@v4
-        with:
-          name: viktor-kane-v46-glb
-          path: game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
-          if-no-files-found: error
-          retention-days: 14
 
       - name: Commit generated GLB to V46 branch
         shell: bash
