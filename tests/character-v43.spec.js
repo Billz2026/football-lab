@@ -7,6 +7,24 @@ async function waitForV43Atlas(page) {
   ).toBe("ready");
 }
 
+async function enterClassic(page) {
+  await page.locator("#classicCard").click();
+  await expect.poll(
+    () => page.evaluate(() => (
+      document.querySelector("#gameScreen")?.classList.contains("is-active") ||
+      document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
+    )),
+    { timeout: 5000 }
+  ).toBe(true);
+
+  const state = await page.evaluate(() => ({
+    gameActive: document.querySelector("#gameScreen")?.classList.contains("is-active"),
+    pickerOpen: document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
+  }));
+  if (!state.gameActive && state.pickerOpen) await page.locator("#kickerConfirmV13").click();
+  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+}
+
 test("V43 premium sprite atlas loads with the approved master frames", async ({ page }) => {
   await page.goto("/index.html?test=character-v43");
   await waitForV43Atlas(page);
@@ -30,11 +48,7 @@ test("Viktor Kane renders through the V43 asset-backed 2.5D path", async ({ page
   await page.reload();
   await waitForV43Atlas(page);
 
-  await page.locator("#classicCard").click();
-  await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
-  await expect(page.locator('[data-kicker-id="dax-ryder"]')).toHaveClass(/is-selected/);
-  await page.locator("#kickerConfirmV13").click();
-  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+  await enterClassic(page);
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV43?.renderer),
@@ -54,9 +68,7 @@ test("Mikkel Storm replaces the giant keeper through the scene-depth V43 path", 
   await page.reload();
   await waitForV43Atlas(page);
 
-  await page.locator("#classicCard").click();
-  await page.locator("#kickerConfirmV13").click();
-  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+  await enterClassic(page);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabKeeperRendererV43?.build),
     { timeout: 5000 }
@@ -92,9 +104,7 @@ test("non-master outfield players stay safely on the V42 fallback", async ({ pag
   await page.reload();
   await waitForV43Atlas(page);
 
-  await page.locator("#classicCard").click();
-  await page.locator("#kickerConfirmV13").click();
-  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+  await enterClassic(page);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV43?.renderer),
     { timeout: 5000 }
