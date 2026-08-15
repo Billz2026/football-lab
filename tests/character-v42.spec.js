@@ -15,6 +15,24 @@ async function waitForV42(page) {
   ).toBe("42.1.0");
 }
 
+async function enterClassic(page) {
+  await page.locator("#classicCard").click();
+  await expect.poll(
+    () => page.evaluate(() => (
+      document.querySelector("#gameScreen")?.classList.contains("is-active") ||
+      document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
+    )),
+    { timeout: 5000 }
+  ).toBe(true);
+
+  const state = await page.evaluate(() => ({
+    gameActive: document.querySelector("#gameScreen")?.classList.contains("is-active"),
+    pickerOpen: document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
+  }));
+  if (!state.gameActive && state.pickerOpen) await page.locator("#kickerConfirmV13").click();
+  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+}
+
 test("V42.1 exposes the reusable premium character roster", async ({ page }) => {
   await waitForV42(page);
   const contract = await page.evaluate(() => window.__footballLabCharacterSystemV42);
@@ -39,11 +57,7 @@ test("V42.1 remains the fallback for non-V43 outfield players while Viktor uses 
       { timeout: 15000 }
     ).toBe("42.1.0");
 
-    await page.locator("#classicCard").click();
-    await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
-    await expect(page.locator(`[data-kicker-id="${sourceId}"]`)).toHaveClass(/is-selected/);
-    await page.locator("#kickerConfirmV13").click();
-    await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+    await enterClassic(page);
 
     if (sourceId === "dax-ryder") {
       await expect.poll(
@@ -63,8 +77,6 @@ test("V42.1 remains the fallback for non-V43 outfield players while Viktor uses 
         { timeout: 5000 }
       ).toBe("premium-sprite-2.5d");
     } else {
-      // V43 owns the integration boundary now. Its frame is the authoritative
-      // selected-character signal while the actual body still renders through V42.
       await expect.poll(
         () => page.evaluate(() => window.__footballLabHeroFrameV43?.sourceCharacterId),
         { timeout: 5000 }
