@@ -1,9 +1,10 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=40.3.0";
-import { drawHeroCharacterV42 } from "./hero-character-v42.js?v=42.1.0";
+import { drawHeroCharacterV43 } from "./hero-character-v43.js?v=43.0.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
 import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=40.3.0";
 import { drawStadiumProgressionV41, drawCampaignPresentationV41 } from "./stadium-progression-v41.js?v=41.0.0";
+import "./character-engine-v1.js?v=1.0.0";
 
 export { resizeCanvas };
 
@@ -92,7 +93,7 @@ function drawVenueWeather(time) {
 export function drawScene(time, finishShot) {
   drawBaseWithoutLegacyKicker(time, finishShot);
   drawStadiumProgressionV41(time);
-  drawHeroCharacterV42(time);
+  drawHeroCharacterV43(time);
   drawVenueWeather(time);
   drawMatchdayImpact(time);
   drawCampaignPresentationV41(time);
@@ -102,7 +103,9 @@ export function drawScene(time, finishShot) {
     hero: 1,
     total: 1,
     character: activeCharacter().id,
-    renderer: "v42-layered-character",
+    renderer: window.__footballLabHeroFrameV43?.renderer || "v42-fallback",
+    spriteAtlasReady: Boolean(window.__footballLabCharacterSpritesV43?.ready),
+    productionCharacterMode: window.__footballLabCharacterEngineV1?.snapshot?.mode || "v42-fallback",
     time
   };
 }
@@ -116,3 +119,4 @@ window.__footballLabEnvironmentRendererV31 = true;
 window.__footballLabRendererV32 = true;
 window.__footballLabStadiumRendererV41 = true;
 window.__footballLabCharacterRendererBridgeV42 = true;
+window.__footballLabCharacterRendererBridgeV43 = true;
