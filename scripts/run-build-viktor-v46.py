@@ -1,15 +1,15 @@
-"""Run the Viktor V46 authoring module with production-clean source transforms.
+"""Production authoring wrapper for Viktor Kane V46.
 
-The Blender Studio asset bundle lays its catalogue meshes out in world space and
-keeps modelling helpers/modifiers on the source objects. Football Lab needs a
-single character centred on the origin before skinning, otherwise those library
-layout transforms get baked into the GLB and the rig is metres away from the
-body.
+This wrapper keeps the validated Blender Studio CC0 realistic male body/rig
+pipeline, but replaces the first-pass painted-on kit with separate skinned
+football garment shells. The goal is a cleaner human silhouette at gameplay
+scale without changing Football Lab physics or the animation contract.
 """
 
 import importlib.util
 import os
 
+import bmesh
 import bpy
 from mathutils import Vector
 
@@ -17,6 +17,14 @@ MODULE_PATH = os.path.join(os.path.dirname(__file__), "build-viktor-v46.py")
 spec = importlib.util.spec_from_file_location("football_lab_viktor_builder", MODULE_PATH)
 builder = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(builder)
+
+KIT_MESHES = {
+    "Viktor_Shirt",
+    "Viktor_Sleeves_Navy",
+    "Viktor_Shorts",
+    "Viktor_Socks",
+    "Viktor_Boots",
+}
 
 
 def clean_isolate_body(source):
@@ -32,16 +40,10 @@ def clean_isolate_body(source):
     body.name = "Viktor_Kane_Body"
     body.data = body.data.copy()
 
-    # Preserve the current visible object transform while severing any asset
-    # catalogue hierarchy. The subsequent normaliser deliberately removes the
-    # library-grid translation and grounds the body at Football Lab origin.
     world_matrix = body.matrix_world.copy()
     body.parent = None
     body.matrix_world = world_matrix
 
-    # Source modelling modifiers/drivers are authoring helpers, not runtime
-    # character data. Leaving them attached can pull hidden dependency meshes
-    # into the export and makes automatic skinning non-deterministic.
     for modifier in list(body.modifiers):
         body.modifiers.remove(modifier)
     for constraint in list(body.constraints):
@@ -59,8 +61,6 @@ def clean_isolate_body(source):
         except Exception as exc:
             print("VIKTOR_SHAPEKEY_CLEAN_WARNING", repr(exc))
 
-    # Delete every other source-library object. Production GLB ownership starts
-    # from this clean mesh; the Football Lab armature and hair are added later.
     for obj in list(bpy.data.objects):
         if obj is not body:
             bpy.data.objects.remove(obj, do_unlink=True)
@@ -80,7 +80,6 @@ def clean_normalise_body(body):
     body.select_set(True)
     bpy.context.view_layer.objects.active = body
 
-    # Bake source rotation/scale but not its catalogue position yet.
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
     minimum, maximum = builder.mesh_world_bounds(body)
     source_height = maximum.z - minimum.z
@@ -99,8 +98,6 @@ def clean_normalise_body(body):
     body.location.z -= minimum.z
     bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
 
-    # Football-specific mass pass. Width/depth only: target height and ground
-    # contact remain invariant.
     minimum, maximum = builder.mesh_world_bounds(body)
     height = maximum.z - minimum.z
     for vertex in body.data.vertices:
@@ -138,24 +135,123 @@ def clean_normalise_body(body):
     return body
 
 
+def skin_only_material(body):
+    body.data.materials.clear()
+    skin = builder.make_material("VIKTOR_Skin", (0.62, 0.43, 0.33), 0.72)
+    body.data.materials.append(skin)
+    for polygon in body.data.polygons:
+        polygon.material_index = 0
+    body.data.update()
+
+
+def _face_centre(face):
+    count = max(1, len(face.verts))
+    return Vector((
+        sum(v.co.x for v in face.verts) / count,
+        sum(v.co.y for v in face.verts) / count,
+        sum(v.co.z for v in face.verts) / count,
+    ))
+
+
+def _shell_from_body(name, predicate, material, outward=0.008, min_z=None):
+    body = bpy.data.objects.get("Viktor_Kane_Body")
+    if body is None:
+        raise RuntimeError("Viktor body missing while creating kit shell")
+
+    shell = body.copy()
+    shell.data = body.data.copy()
+    shell.name = name
+    shell.data.name = f"{name}_Mesh"
+    bpy.context.collection.objects.link(shell)
+
+    shell.data.materials.clear()
+    shell.data.materials.append(material)
+    for polygon in shell.data.polygons:
+        polygon.material_index = 0
+
+    bm = bmesh.new()
+    bm.from_mesh(shell.data)
+    bm.normal_update()
+
+    remove_faces = [face for face in bm.faces if not predicate(_face_centre(face))]
+    if remove_faces:
+        bmesh.ops.delete(bm, geom=remove_faces, context="FACES")
+    loose_edges = [edge for edge in bm.edges if not edge.link_faces]
+    if loose_edges:
+        bmesh.ops.delete(bm, geom=loose_edges, context="EDGES")
+    loose_verts = [vertex for vertex in bm.verts if not vertex.link_faces]
+    if loose_verts:
+        bmesh.ops.delete(bm, geom=loose_verts, context="VERTS")
+
+    bm.normal_update()
+    for vertex in bm.verts:
+        vertex.co += vertex.normal * outward
+        if min_z is not None and vertex.co.z < min_z:
+            vertex.co.z = min_z
+    bm.to_mesh(shell.data)
+    bm.free()
+    shell.data.update()
+
+    if not shell.data.polygons:
+        raise RuntimeError(f"Kit shell {name} has no faces")
+    shell["football_lab_kit_shell"] = True
+    return shell
+
+
+def _create_football_kit():
+    white = builder.make_material("VIKTOR_Kit_White", (0.90, 0.925, 0.95), 0.62)
+    navy = builder.make_material("VIKTOR_Kit_Navy", (0.018, 0.045, 0.09), 0.58)
+    navy_accent = builder.make_material("VIKTOR_Sleeve_Navy", (0.022, 0.058, 0.12), 0.56)
+    sock_white = builder.make_material("VIKTOR_Sock_White", (0.87, 0.90, 0.92), 0.66)
+    boot_black = builder.make_material("VIKTOR_Boot_Black", (0.012, 0.016, 0.022), 0.43)
+
+    def shirt(p):
+        z = p.z
+        x = abs(p.x)
+        torso = 0.96 <= z <= 1.48 and x <= 0.31
+        upper_arm = 1.18 <= z <= 1.46 and 0.25 <= x <= 0.50
+        neck_hole = z >= 1.425 and x <= 0.115
+        return (torso or upper_arm) and not neck_hole
+
+    def sleeves(p):
+        return 1.19 <= p.z <= 1.46 and 0.255 <= abs(p.x) <= 0.49
+
+    def shorts(p):
+        return 0.70 <= p.z <= 1.015 and abs(p.x) <= 0.285
+
+    def socks(p):
+        return 0.12 <= p.z <= 0.49 and abs(p.x) <= 0.18
+
+    def boots(p):
+        return p.z <= 0.155 and abs(p.x) <= 0.22
+
+    _shell_from_body("Viktor_Shirt", shirt, white, outward=0.009)
+    _shell_from_body("Viktor_Sleeves_Navy", sleeves, navy_accent, outward=0.012)
+    _shell_from_body("Viktor_Shorts", shorts, navy, outward=0.010)
+    _shell_from_body("Viktor_Socks", socks, sock_white, outward=0.008)
+    _shell_from_body("Viktor_Boots", boots, boot_black, outward=0.010, min_z=0.002)
+
+
 def corrected_add_hair(armature):
-    hair_mat = builder.make_material("VIKTOR_Hair", (0.30, 0.23, 0.12), 0.76)
+    _create_football_kit()
+
+    hair_mat = builder.make_material("VIKTOR_Hair", (0.34, 0.25, 0.13), 0.78)
     verts = []
     faces = []
-    rings = 7
-    segments = 28
-    centre = Vector((0, -0.012, 1.705))
-    rx, ry, rz = 0.108, 0.098, 0.132
+    rings = 9
+    segments = 32
+    centre = Vector((0, -0.006, 1.785))
+    rx, ry, rz = 0.117, 0.107, 0.095
 
     for ring in range(rings + 1):
-        theta = (ring / rings) * 1.18
+        theta = (ring / rings) * 1.40
         for segment in range(segments):
             phi = 2 * builder.math.pi * segment / segments
-            texture = 1.0 + 0.035 * builder.math.sin(phi * 5.0 + ring * 0.7)
+            texture = 1.0 + 0.028 * builder.math.sin(phi * 7.0 + ring * 0.85)
             verts.append((
                 centre.x + rx * texture * builder.math.sin(theta) * builder.math.cos(phi),
                 centre.y + ry * texture * builder.math.sin(theta) * builder.math.sin(phi),
-                centre.z + rz * texture * builder.math.cos(theta),
+                min(1.879, centre.z + rz * texture * builder.math.cos(theta)),
             ))
 
     for ring in range(rings):
@@ -186,8 +282,7 @@ def corrected_add_hair(armature):
 
 
 def guarded_export_glb(path):
-    # Nothing except the authored character is allowed into production export.
-    allowed = {"Viktor_Kane_Body", "Viktor_Hair", "FL_HUMANOID_V1"}
+    allowed = {"Viktor_Kane_Body", "Viktor_Hair", "FL_HUMANOID_V1", *KIT_MESHES}
     for obj in list(bpy.data.objects):
         if obj.name not in allowed:
             print("VIKTOR_EXPORT_PRUNE", obj.name, obj.type)
@@ -195,7 +290,8 @@ def guarded_export_glb(path):
 
     meshes = [obj for obj in bpy.data.objects if obj.type == "MESH"]
     armatures = [obj for obj in bpy.data.objects if obj.type == "ARMATURE"]
-    if {obj.name for obj in meshes} != {"Viktor_Kane_Body", "Viktor_Hair"}:
+    expected_meshes = {"Viktor_Kane_Body", "Viktor_Hair", *KIT_MESHES}
+    if {obj.name for obj in meshes} != expected_meshes:
         raise RuntimeError(f"Unexpected Viktor export meshes: {[obj.name for obj in meshes]}")
     if [obj.name for obj in armatures] != ["FL_HUMANOID_V1"]:
         raise RuntimeError(f"Unexpected Viktor export armatures: {[obj.name for obj in armatures]}")
@@ -206,6 +302,7 @@ def guarded_export_glb(path):
 builder_original_export = builder.export_glb
 builder.isolate_body = clean_isolate_body
 builder.normalise_body = clean_normalise_body
+builder.assign_kit_materials = skin_only_material
 builder.add_hair = corrected_add_hair
 builder.export_glb = guarded_export_glb
 builder.main()
