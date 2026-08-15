@@ -5,12 +5,12 @@ async function enterClassic(page) {
   await page.locator("#classicCard").click();
 
   await expect.poll(
-    () => page.evaluate(() => ({
-      game: document.querySelector("#gameScreen")?.classList.contains("is-active"),
-      picker: document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
-    })),
+    () => page.evaluate(() => (
+      document.querySelector("#gameScreen")?.classList.contains("is-active") ||
+      document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
+    )),
     { timeout: 8000 }
-  ).toMatchObject({ picker: expect.any(Boolean) });
+  ).toBe(true);
 
   const state = await page.evaluate(() => ({
     game: document.querySelector("#gameScreen")?.classList.contains("is-active"),
@@ -29,7 +29,7 @@ test("capture Viktor Kane V46 in the authoritative gameplay camera", async ({ pa
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
     { timeout: 20000 }
-  ).toBe("three-webgl-skinned-glb");
+  ).toBe("real-skinned-glb-3d");
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacter3DV46?.loaded?.includes("viktor-kane")),
@@ -42,6 +42,10 @@ test("capture Viktor Kane V46 in the authoritative gameplay camera", async ({ pa
     visible: window.__footballLabVisibleKickersV30
   }));
   console.log("VIKTOR_V46_CAPTURE_DIAGNOSTICS", JSON.stringify(diagnostics));
+
+  expect(diagnostics.renderer?.production3D).toBe(true);
+  expect(diagnostics.visible?.production3D).toBe(true);
+  expect(diagnostics.visible?.productionCharacterMode).toBe("real-skinned-glb-3d");
 
   await page.locator("#gameCanvas").screenshot({
     path: "test-results/viktor-v46-gameplay-ready.png"
