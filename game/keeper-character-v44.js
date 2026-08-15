@@ -3,8 +3,11 @@ import { keeperForStage } from "./keepers-v14.js?v=32.4";
 import { goalkeeperVisualProfileV42 } from "./character-profiles-v42.js?v=42.1.0";
 
 const BUILD = "44.0.0";
+const RETRY_MS = 100;
+const MAX_RETRIES = 100;
 let installed = false;
 let retryTimer = null;
+let retries = 0;
 
 function installNow() {
   if (installed) return true;
@@ -34,6 +37,8 @@ function installNow() {
   };
 
   installed = true;
+  clearTimeout(retryTimer);
+  retryTimer = null;
   window.__footballLabKeeperRendererV44 = Object.freeze({
     build: BUILD,
     renderer: "articulated-layered-2.5d",
@@ -49,11 +54,15 @@ function installNow() {
   return true;
 }
 
+function retryInstall() {
+  if (installNow() || retries >= MAX_RETRIES) return;
+  retries += 1;
+  retryTimer = setTimeout(retryInstall, RETRY_MS);
+}
+
 export function installKeeperCharacterV44() {
   if (installNow()) return true;
-  clearTimeout(retryTimer);
-  retryTimer = setTimeout(() => installNow(), 0);
-  setTimeout(() => installNow(), 600);
+  retryInstall();
   return false;
 }
 
