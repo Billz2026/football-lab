@@ -1,9 +1,21 @@
-const BUILD = "43.1.0";
-const EXPECTED_BASE64_LENGTH = 97240;
-const EXPECTED_BASE64_SHA256 = "e33dbd2f3f0799ec699fcea544d3a53cb599e4ef6a7a375343c957e55fbcebe1";
+const BUILD = "43.2.0";
+const EXPECTED_BASE64_LENGTH = 100124;
+const EXPECTED_BASE64_SHA256 = "8bbe50ce518207b849f446846769e4b4bda776c390644f42df3dc48bd43be6b3";
 
-const PART_URLS = Array.from({ length: 8 }, (_, index) =>
-  new URL(`./assets/characters/v43/masters-v43.part${index}.b64`, import.meta.url).href
+const PART_NAMES = Object.freeze([
+  "masters-v43.part0.b64",
+  "masters-v43.part1.b64",
+  "masters-v43.part2a.b64",
+  "masters-v43.part2m.b64",
+  "masters-v43.part2b.b64",
+  "masters-v43.part3.b64",
+  "masters-v43.part4.b64",
+  "masters-v43.part5.b64",
+  "masters-v43.part6.b64",
+  "masters-v43.part7.b64"
+]);
+const PART_URLS = PART_NAMES.map((name) =>
+  new URL(`./assets/characters/v43/${name}`, import.meta.url).href
 );
 
 const FRAMES = Object.freeze({
@@ -32,11 +44,12 @@ function publish() {
     build: BUILD,
     status: runtime.status,
     error: runtime.error ? String(runtime.error.message || runtime.error) : null,
-    atlas: "masters-v43-1024-q90",
+    atlas: "masters-v43-1024-q92",
     atlasWidth: runtime.width,
     atlasHeight: runtime.height,
     frameCount: Object.keys(FRAMES).length,
     frames: Object.keys(FRAMES),
+    partCount: PART_NAMES.length,
     base64Length: runtime.base64Length,
     expectedBase64Length: EXPECTED_BASE64_LENGTH,
     expectedBase64Sha256: EXPECTED_BASE64_SHA256,
@@ -47,7 +60,7 @@ function publish() {
 
 async function fetchPart(url) {
   const response = await fetch(url, { cache: "no-store" });
-  if (!response.ok) throw new Error(`V43.1 sprite atlas part failed (${response.status})`);
+  if (!response.ok) throw new Error(`V43.2 sprite atlas part failed (${response.status})`);
   return (await response.text()).trim();
 }
 
@@ -58,13 +71,13 @@ export function preloadCharacterSpritesV43() {
       const base64 = parts.join("");
       runtime.base64Length = base64.length;
       if (base64.length !== EXPECTED_BASE64_LENGTH || !base64.startsWith("UklGR")) {
-        throw new Error(`V43.1 sprite atlas payload invalid (${base64.length})`);
+        throw new Error(`V43.2 sprite atlas payload invalid (${base64.length})`);
       }
       return new Promise((resolve, reject) => {
         const image = new Image();
         image.decoding = "async";
         image.onload = () => resolve(image);
-        image.onerror = () => reject(new Error("V43.1 sprite atlas image decode failed"));
+        image.onerror = () => reject(new Error("V43.2 sprite atlas image decode failed"));
         image.src = `data:image/webp;base64,${base64}`;
       });
     })
@@ -73,7 +86,7 @@ export function preloadCharacterSpritesV43() {
       runtime.width = image.naturalWidth || image.width || 0;
       runtime.height = image.naturalHeight || image.height || 0;
       if (runtime.width !== 1024 || runtime.height !== 448) {
-        throw new Error(`V43.1 sprite atlas dimensions invalid (${runtime.width}x${runtime.height})`);
+        throw new Error(`V43.2 sprite atlas dimensions invalid (${runtime.width}x${runtime.height})`);
       }
       runtime.status = "ready";
       runtime.error = null;
@@ -85,7 +98,7 @@ export function preloadCharacterSpritesV43() {
       runtime.status = "error";
       runtime.error = error;
       publish();
-      console.error("Football Lab V43.1 sprite atlas failed", error);
+      console.error("Football Lab V43.2 sprite atlas failed", error);
       return null;
     });
   publish();
