@@ -8,9 +8,9 @@ import {
   preloadCharacterSpritesV43,
   spriteAtlasReadyV43,
   spriteAtlasStateV43
-} from "./character-sprites-v43.js?v=43.1.0";
+} from "./character-sprites-v43.js?v=43.2.0";
 
-const BUILD = "43.1.0";
+const BUILD = "43.2.0";
 const VIEW = { width: WORLD.width, height: WORLD.height };
 
 function transform() {
