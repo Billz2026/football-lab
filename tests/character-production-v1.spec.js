@@ -12,6 +12,21 @@ async function waitForProductionContract(page) {
   ).toBe("1.0.0");
 }
 
+async function enterClassic(page) {
+  await page.locator("#classicCard").click();
+  await expect.poll(
+    () => page.evaluate(() => (
+      document.querySelector("#gameScreen")?.classList.contains("is-active") ||
+      document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
+    )),
+    { timeout: 5000 }
+  ).toBe(true);
+
+  const gameActive = await page.evaluate(() => document.querySelector("#gameScreen")?.classList.contains("is-active"));
+  if (!gameActive) await page.locator("#kickerConfirmV13").click();
+  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+}
+
 test("production character contract keeps premium 3D integration gated until assets are approved", async ({ page }) => {
   await waitForProductionContract(page);
   const state = await page.evaluate(() => ({
@@ -40,22 +55,24 @@ test("production character contract keeps premium 3D integration gated until ass
   expect(state.readiness.canEnableLiveIntegration).toBe(false);
 });
 
-test("Viktor Kane remains the active production identity while the approved fallback still renders", async ({ page }) => {
+test("Viktor Kane remains the active production identity while V43 renders the approved 2.5D master", async ({ page }) => {
   await page.goto("/index.html?test=character-production-v1");
   await page.evaluate(() => localStorage.setItem("footballLabSelectedKickerV13", "dax-ryder"));
   await page.reload();
   await waitForProductionContract(page);
 
-  await page.locator("#classicCard").click();
-  await page.locator("#kickerConfirmV13").click();
-  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+  await enterClassic(page);
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterEngineV1.snapshot.activeCharacter),
     { timeout: 5000 }
   ).toBe("viktor-kane");
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV42?.character),
+    () => page.evaluate(() => window.__footballLabHeroFrameV43?.character),
     { timeout: 5000 }
   ).toBe("viktor-kane");
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabHeroFrameV43?.renderer),
+    { timeout: 5000 }
+  ).toBe("premium-sprite-2.5d");
 });
