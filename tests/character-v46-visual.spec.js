@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 
 // Visual approval must come from the authoritative Football Lab camera after
 // the V46 runtime bridge is rebuilt; Blender previews are not accepted here.
-// This capture evaluates the fitted anatomical-surface kit with smoothed seams.
+// This capture evaluates the closed-shoulder jersey and deeper fitted hair pass.
 async function enterClassic(page) {
-  await page.goto("/index.html?capture=viktor-v46-fitted-surface", { waitUntil: "networkidle" });
+  await page.goto("/index.html?capture=viktor-v46-closed-shoulder-hair", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
 
   await expect.poll(
