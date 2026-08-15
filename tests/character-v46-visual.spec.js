@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+// Visual approval must come from the authoritative Football Lab camera after
+// the V46 runtime bridge is rebuilt; Blender previews are not accepted here.
 async function enterClassic(page) {
   await page.goto("/index.html?capture=viktor-v46", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
