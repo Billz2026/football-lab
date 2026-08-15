@@ -31,6 +31,9 @@ jobs:
       - name: Install test dependencies
         run: npm install
 
+      - name: Build V46 runtime bridge
+        run: npm run build:runtime:v23
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
