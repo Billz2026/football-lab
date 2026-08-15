@@ -59,7 +59,7 @@ test("V46 only replaces V44 when an approved local GLB passes the full asset gat
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
     { timeout: 12000 }
-  ).toBe(viktorLoaded ? "three-webgl-skinned-glb" : "v44-fallback");
+  ).toBe(viktorLoaded ? "real-skinned-glb-3d" : "v44-fallback");
 
   const live = await page.evaluate(() => ({
     v46: window.__footballLabHeroFrameV46,
