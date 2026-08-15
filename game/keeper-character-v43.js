@@ -8,9 +8,9 @@ import {
   preloadCharacterSpritesV43,
   spriteAtlasReadyV43,
   spriteAtlasStateV43
-} from "./character-sprites-v43.js?v=43.0.0";
+} from "./character-sprites-v43.js?v=43.1.0";
 
-const BUILD = "43.0.0";
+const BUILD = "43.1.0";
 const VIEW = Object.freeze({ width: 1200, height: 720 });
 let installed = false;
 let originalSceneDraw = null;
@@ -137,6 +137,7 @@ function drawMikkelSprite(time, keeper, profile) {
       character: "mikkel-storm",
       sourceKeeperId: profile.id,
       renderer: "premium-sprite-2.5d",
+      fidelity: "approved-reference-high-resolution",
       motion,
       sprite: diving ? "mikkel-dive" : "mikkel-set",
       atlasReady: true,
@@ -167,9 +168,6 @@ function installNow() {
       return originalSceneDraw(time);
     }
 
-    // Preserve the exact V38.5.2 keeper movement calculation without rendering its
-    // mannequin body. This gives V43 the authoritative keeper world/pose while
-    // keeping goalkeeper AI, reaction timing, save outcome and scene depth unchanged.
     ctx.save();
     const previousAlpha = ctx.globalAlpha;
     ctx.globalAlpha = 0;
@@ -178,9 +176,7 @@ function installNow() {
     ctx.restore();
 
     const frame = window.__footballLabPremiumKeeperSceneFrameV3852;
-    if (!drawMikkelSprite(time, frame?.keeper, profile)) {
-      return originalSceneDraw(time);
-    }
+    if (!drawMikkelSprite(time, frame?.keeper, profile)) return originalSceneDraw(time);
     return result;
   };
 
@@ -188,6 +184,7 @@ function installNow() {
   window.__footballLabKeeperRendererV43 = Object.freeze({
     build: BUILD,
     renderer: "asset-backed-premium-2.5d",
+    fidelity: "approved-reference-high-resolution",
     masterGoalkeeper: "mikkel-storm",
     sourceArchetypes: ["giant", "aggressive"],
     sceneDepthPreserved: true,
