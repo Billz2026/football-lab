@@ -49,7 +49,7 @@ export const KICKERS = Object.freeze([
   }),
   Object.freeze({
     id: "zion-arc",
-    name: "DAVE BECKETT",
+    name: "DAVID BECKETT",
     nickname: "THE WHIP",
     role: "CURVE MASTER",
     number: 7,

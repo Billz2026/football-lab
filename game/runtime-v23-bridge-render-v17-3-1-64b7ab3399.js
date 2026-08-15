@@ -1,15 +1,27 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js?v=40.3.0";
-import { drawHeroKicker } from "./runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js?v=40.3.0";
+import { drawHeroCharacterV43 } from "./hero-character-v43.js?v=43.0.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
 import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=40.3.0";
 import { drawStadiumProgressionV41, drawCampaignPresentationV41 } from "./stadium-progression-v41.js?v=41.0.0";
+import "./character-engine-v1.js?v=1.0.0";
+import "./keeper-character-v43.js?v=43.0.0";
 
 export { resizeCanvas };
 
 function applyCanvasTransform() {
   const { dpr, scale, offsetX, offsetY } = canvasView;
   ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * offsetX, dpr * offsetY);
+}
+
+function drawBaseWithoutLegacyKicker(time, finishShot) {
+  const selectedCharacterId = state.characterId;
+  state.characterId = "dax-ryder";
+  try {
+    drawBaseScene(time, finishShot);
+  } finally {
+    state.characterId = selectedCharacterId;
+  }
 }
 
 function drawVenueWeather(time) {
@@ -80,20 +92,21 @@ function drawVenueWeather(time) {
 }
 
 export function drawScene(time, finishShot) {
-  drawBaseScene(time, finishShot);
+  drawBaseWithoutLegacyKicker(time, finishShot);
   drawStadiumProgressionV41(time);
-  drawHeroKicker(time);
+  drawHeroCharacterV43(time);
   drawVenueWeather(time);
   drawMatchdayImpact(time);
   drawCampaignPresentationV41(time);
 
-  const baseVisible = 0;
-  const heroVisible = 1;
   window.__footballLabVisibleKickersV30 = {
-    base: baseVisible,
-    hero: heroVisible,
-    total: baseVisible + heroVisible,
+    base: 0,
+    hero: 1,
+    total: 1,
     character: activeCharacter().id,
+    renderer: window.__footballLabHeroFrameV43?.renderer || "v42-fallback",
+    spriteAtlasReady: Boolean(window.__footballLabCharacterSpritesV43?.ready),
+    productionCharacterMode: window.__footballLabCharacterEngineV1?.snapshot?.mode || "v42-fallback",
     time
   };
 }
@@ -106,3 +119,5 @@ window.__footballLabRendererV1731 = true;
 window.__footballLabEnvironmentRendererV31 = true;
 window.__footballLabRendererV32 = true;
 window.__footballLabStadiumRendererV41 = true;
+window.__footballLabCharacterRendererBridgeV42 = true;
+window.__footballLabCharacterRendererBridgeV43 = true;
