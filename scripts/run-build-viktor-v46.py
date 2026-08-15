@@ -1,9 +1,9 @@
 """Production authoring wrapper for Viktor Kane V46.
 
-The realistic body, rig and seven football clips stay unchanged. The jersey now
-extends beyond the shoulder ridge and uses a compact crew-neck opening so no raw
-mesh cut crosses the visible upper back. Short blond hair uses the complete
-upper scalp for reliable coverage from the gameplay camera.
+The realistic body, rig and seven football clips stay unchanged. The jersey is
+fully fitted through the upper back/neck base so no skin-coloured topology gap
+is visible from the gameplay camera. Short blond hair uses the complete upper
+scalp for reliable coverage.
 """
 
 import importlib.util
@@ -206,11 +206,7 @@ def create_fitted_kit_and_hair(armature):
     blond = builder.make_material("VIKTOR_Hair", (0.53, 0.39, 0.19), 0.78)
 
     def shirt(point):
-        base = 0.955 <= point.z <= 1.585 and abs(point.x) <= 0.555
-        # Compact crew-neck opening only at the actual neck; shoulder and upper
-        # back surfaces remain covered, moving the raw boundary out of view.
-        neck_opening = point.z >= 1.515 and abs(point.x) < 0.072
-        return base and not neck_opening
+        return 0.955 <= point.z <= 1.585 and abs(point.x) <= 0.555
 
     def sleeves(point):
         return 1.145 <= point.z <= 1.455 and 0.285 <= abs(point.x) <= 0.590
@@ -224,9 +220,6 @@ def create_fitted_kit_and_hair(armature):
     def boots(point):
         return point.z <= 0.170
 
-    # A close-cropped haircut only needs the upper scalp. Using all directions
-    # at this height avoids the previous rear-camera bald patch while staying
-    # above the eyes/ears and preserving the face geometry.
     def hair(point):
         return point.z >= 1.645
 
