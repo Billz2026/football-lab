@@ -47,7 +47,7 @@ test("V42.1 exposes the reusable premium character roster", async ({ page }) => 
   expect(contract.directCelebrityLikenesses).toBe(false);
 });
 
-test("V42.1 remains the fallback for non-V43 outfield players while Viktor uses V43.1", async ({ page }) => {
+test("V42.1 remains the fallback for non-V43 outfield players while Viktor uses V43.2", async ({ page }) => {
   for (const [sourceId, visualId] of KICKERS) {
     await page.goto("/index.html?test=character-v42");
     await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), sourceId);
@@ -71,7 +71,7 @@ test("V42.1 remains the fallback for non-V43 outfield players while Viktor uses 
       await expect.poll(
         () => page.evaluate(() => window.__footballLabHeroFrameV43?.build),
         { timeout: 5000 }
-      ).toBe("43.1.0");
+      ).toBe("43.2.0");
       await expect.poll(
         () => page.evaluate(() => window.__footballLabHeroFrameV43?.renderer),
         { timeout: 5000 }
