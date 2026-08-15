@@ -96,10 +96,12 @@ jobs:
           set -euo pipefail
           git config user.name "football-lab-bot"
           git config user.email "actions@users.noreply.github.com"
+          git fetch origin agent/v46-real-3d-character-layer
+          git checkout -B agent/v46-real-3d-character-layer origin/agent/v46-real-3d-character-layer
           git add game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
           if git diff --cached --quiet; then
             echo "Generated Viktor GLB is unchanged."
             exit 0
           fi
           git commit -m "Add Viktor Kane V46 skinned 3D technical master"
-          git push origin HEAD:agent/v46-real-3d-character-layer
+          git push origin agent/v46-real-3d-character-layer
