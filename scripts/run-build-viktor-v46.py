@@ -1,9 +1,9 @@
 """Production authoring wrapper for Viktor Kane V46.
 
-This pass keeps the validated realistic male body/rig/football animation system
-and fits the kit to the anatomical surface. Shirt coverage now closes the upper
-back/shoulder gap while navy sleeves overlay the fitted base. Hair follows the
-real scalp with deeper side/back coverage while keeping the face clear.
+The realistic body, rig and seven football clips stay unchanged. The jersey now
+extends beyond the shoulder ridge and uses a compact crew-neck opening so no raw
+mesh cut crosses the visible upper back. Short blond hair uses the complete
+upper scalp for reliable coverage from the gameplay camera.
 """
 
 import importlib.util
@@ -205,11 +205,12 @@ def create_fitted_kit_and_hair(armature):
     boot_black = builder.make_material("VIKTOR_Boot_Black", (0.010, 0.014, 0.020), 0.43)
     blond = builder.make_material("VIKTOR_Hair", (0.53, 0.39, 0.19), 0.78)
 
-    # White fitted base intentionally reaches high enough to cover the shoulder
-    # girdle and upper back. Navy sleeve geometry overlays the upper arms, so
-    # there is no skin-coloured gap if the sleeve boundary lands between loops.
     def shirt(point):
-        return 0.955 <= point.z <= 1.525 and abs(point.x) <= 0.555
+        base = 0.955 <= point.z <= 1.585 and abs(point.x) <= 0.555
+        # Compact crew-neck opening only at the actual neck; shoulder and upper
+        # back surfaces remain covered, moving the raw boundary out of view.
+        neck_opening = point.z >= 1.515 and abs(point.x) < 0.072
+        return base and not neck_opening
 
     def sleeves(point):
         return 1.145 <= point.z <= 1.455 and 0.285 <= abs(point.x) <= 0.590
@@ -223,11 +224,11 @@ def create_fitted_kit_and_hair(armature):
     def boots(point):
         return point.z <= 0.170
 
-    # Blender's human base faces -Y. Keep deeper scalp/side/back coverage but
-    # avoid coating the face: the very top may wrap all around; lower hair is
-    # retained only from the crown backwards.
+    # A close-cropped haircut only needs the upper scalp. Using all directions
+    # at this height avoids the previous rear-camera bald patch while staying
+    # above the eyes/ears and preserving the face geometry.
     def hair(point):
-        return point.z >= 1.735 or (point.z >= 1.610 and point.y >= -0.035)
+        return point.z >= 1.645
 
     _surface_shell("Viktor_Shirt", shirt, white, outward=0.012, smooth_factor=0.035, subdivide=True)
     _surface_shell("Viktor_Sleeves_Navy", sleeves, sleeve_navy, outward=0.020, smooth_factor=0.04, subdivide=True)
@@ -235,7 +236,7 @@ def create_fitted_kit_and_hair(armature):
     _surface_shell("Viktor_Socks", socks, sock_white, outward=0.012, smooth_factor=0.025, subdivide=True)
     _surface_shell("Viktor_Boots", boots, boot_black, outward=0.014, smooth_factor=0.018, subdivide=True, min_z=0.002)
     hair_obj = _surface_shell("Viktor_Hair", hair, blond, outward=0.009, smooth_factor=0.018, subdivide=True)
-    hair_obj["football_lab_attachment"] = "fitted-scalp-hair"
+    hair_obj["football_lab_attachment"] = "fitted-upper-scalp-hair"
     return hair_obj
 
 
