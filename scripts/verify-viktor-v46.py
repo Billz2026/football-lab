@@ -13,6 +13,14 @@ REQUIRED_CLIPS = {
 TARGET_HEIGHT = 1.88
 GLB_MAGIC = 0x46546C67
 JSON_CHUNK = 0x4E4F534A
+KIT_MESHES = {
+    "Viktor_Shirt",
+    "Viktor_Sleeves_Navy",
+    "Viktor_Shorts",
+    "Viktor_Socks",
+    "Viktor_Boots",
+}
+AUTHORISED_MESHES = {"Viktor_Kane_Body", "Viktor_Hair", *KIT_MESHES}
 
 
 def cli_args():
@@ -83,17 +91,13 @@ def glb_mesh_bounds(gltf, node_name):
 
 
 def validate_authoritative_geometry(gltf):
-    glb_mesh_nodes = [
-        node.get("name") for node in gltf.get("nodes", []) if "mesh" in node
-    ]
-    if sorted(glb_mesh_nodes) != ["Viktor_Hair", "Viktor_Kane_Body"]:
+    glb_mesh_nodes = [node.get("name") for node in gltf.get("nodes", []) if "mesh" in node]
+    if set(glb_mesh_nodes) != AUTHORISED_MESHES or len(glb_mesh_nodes) != len(AUTHORISED_MESHES):
         fail(f"unexpected GLB mesh nodes: {glb_mesh_nodes}")
 
     body_min, body_max, body_vertices = glb_mesh_bounds(gltf, "Viktor_Kane_Body")
     hair_min, hair_max, hair_vertices = glb_mesh_bounds(gltf, "Viktor_Hair")
 
-    # glTF is Y-up. These are the exact bind-geometry bounds Three.js consumes,
-    # avoiding Blender-importer helper objects/custom bone shapes.
     height = body_max[1] - body_min[1]
     centre_x = (body_min[0] + body_max[0]) * 0.5
     centre_z = (body_min[2] + body_max[2]) * 0.5
@@ -114,16 +118,23 @@ def validate_authoritative_geometry(gltf):
         "max=", tuple(round(v, 5) for v in hair_max),
         "vertices=", hair_vertices,
     )
+    for kit_name in sorted(KIT_MESHES):
+        minimum, maximum, vertices = glb_mesh_bounds(gltf, kit_name)
+        print(
+            "VIKTOR_GLB_KIT_BOUNDS",
+            kit_name,
+            "min=", tuple(round(v, 5) for v in minimum),
+            "max=", tuple(round(v, 5) for v in maximum),
+            "vertices=", vertices,
+        )
 
     if abs(height - TARGET_HEIGHT) > 0.02:
         fail(f"Viktor GLB body height must be {TARGET_HEIGHT:.2f}m, found {height:.3f}m")
     if abs(ground) > 0.015:
         fail(f"Viktor GLB feet are not grounded: y_min={ground:.4f}")
     if abs(centre_x) > 0.04 or abs(centre_z) > 0.04:
-        fail(
-            f"Viktor GLB is not centred on origin: centre_x={centre_x:.4f}, centre_z={centre_z:.4f}"
-        )
-    if hair_min[1] < 1.45 or hair_max[1] > 1.91:
+        fail(f"Viktor GLB is not centred on origin: centre_x={centre_x:.4f}, centre_z={centre_z:.4f}")
+    if hair_min[1] < 1.45 or hair_max[1] > 1.89:
         fail(f"Viktor hair bounds are implausible: y={hair_min[1]:.3f}..{hair_max[1]:.3f}")
 
     return height
@@ -159,17 +170,13 @@ def main():
 
     meshes = [obj for obj in bpy.data.objects if obj.type == "MESH"]
     armatures = [obj for obj in bpy.data.objects if obj.type == "ARMATURE"]
-    body = bpy.data.objects.get("Viktor_Kane_Body")
-    hair = bpy.data.objects.get("Viktor_Hair")
-    if body is None or hair is None:
+    authorised_imported = [bpy.data.objects.get(name) for name in AUTHORISED_MESHES]
+    if any(obj is None for obj in authorised_imported):
         fail(f"authorised meshes missing after import; found={[obj.name for obj in meshes]}")
     if not armatures:
         fail("no armature in GLB")
 
-    # Blender 4.0 may materialise a custom armature display shape called
-    # Icosphere during import even though no such mesh/node exists in GLB JSON.
-    # The authoritative mesh-node check above guarantees it is not shipped.
-    importer_helpers = [obj.name for obj in meshes if obj.name not in {"Viktor_Kane_Body", "Viktor_Hair"}]
+    importer_helpers = [obj.name for obj in meshes if obj.name not in AUTHORISED_MESHES]
     if importer_helpers:
         print("VIKTOR_IMPORTER_HELPERS_IGNORED", importer_helpers)
 
@@ -188,12 +195,16 @@ def main():
         fail(f"missing semantic bones: {missing_bones}")
 
     skinned_meshes = []
-    for mesh in (body, hair):
+    for mesh in authorised_imported:
         if mesh.find_armature() is not None or any(mod.type == "ARMATURE" for mod in mesh.modifiers):
             skinned_meshes.append(mesh)
-    if len(skinned_meshes) != 2:
-        fail(f"body/hair not both skinned to armature: {[obj.name for obj in skinned_meshes]}")
+    if len(skinned_meshes) != len(AUTHORISED_MESHES):
+        fail(
+            "all body, hair and football kit shells must remain skinned: "
+            f"{[obj.name for obj in skinned_meshes]}"
+        )
 
+    body = bpy.data.objects["Viktor_Kane_Body"]
     body_min, body_max = object_world_bounds(body)
     body_dimensions = body_max - body_min
     imported_height_delta = abs(body_dimensions.z - glb_height)
@@ -203,12 +214,6 @@ def main():
         "parent=", body.parent.name if body.parent else None,
         "height_delta=", round(imported_height_delta, 5),
     )
-    # Blender 4.0 evaluates the imported skin in its current armature state and
-    # can report a slightly shorter object bound than the exact bind geometry in
-    # the GLB POSITION accessors. The authoritative glTF height/origin checks
-    # above remain strict; this secondary round-trip check only guards against a
-    # materially broken import. Three.js additionally normalises the loaded
-    # skinned scene to the target 1.88 m at runtime.
     if imported_height_delta > 0.05:
         fail(
             f"Blender re-import materially changed Viktor body height: GLB={glb_height:.3f}, imported={body_dimensions.z:.3f}"
@@ -224,7 +229,7 @@ def main():
     print("file", source)
     print("size_bytes", file_size)
     print("height_m", round(glb_height, 4))
-    print("authorised_meshes", [(obj.name, len(obj.data.vertices), len(obj.data.polygons)) for obj in (body, hair)])
+    print("authorised_meshes", [(obj.name, len(obj.data.vertices), len(obj.data.polygons)) for obj in authorised_imported])
     print("armatures", [obj.name for obj in armatures])
     print("glb_animations", sorted(animation_names))
     print("imported_actions", sorted(imported_actions))
