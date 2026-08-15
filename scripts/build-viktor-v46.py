@@ -112,8 +112,6 @@ def normalise_body(body):
     body.location.z -= mins.z
     bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
 
-    # Athletic footballer shaping: keep the face intact while giving the frame
-    # readable shoulder, pelvis, thigh and calf mass at gameplay distance.
     mins, maxs = mesh_world_bounds(body)
     h = maxs.z - mins.z
     for vertex in body.data.vertices:
@@ -236,8 +234,6 @@ def add_armature(body):
         bpy.ops.object.parent_set(type="ARMATURE_AUTO")
     except Exception as exc:
         print("AUTO_WEIGHT_WARNING", repr(exc))
-        # Fallback: envelope weighting still gives a genuinely skinned mesh and
-        # allows the animation contract to be validated if heat weighting fails.
         bpy.ops.object.parent_set(type="ARMATURE_ENVELOPE")
     return armature
 
@@ -275,7 +271,6 @@ def add_hair(armature):
     hair.parent = armature
     hair.parent_type = "BONE"
     hair.parent_bone = "Head"
-    # Coordinates were authored in world space; convert to head-bone local parenting.
     hair.matrix_parent_inverse = armature.matrix_world.inverted()
     return hair
 
@@ -405,6 +400,8 @@ def export_glb(path):
         kwargs["export_def_bones"] = True
     if "export_all_influences" in props:
         kwargs["export_all_influences"] = False
+    if "export_draco_mesh_compression_enable" in props:
+        kwargs["export_draco_mesh_compression_enable"] = False
     bpy.ops.export_scene.gltf(**kwargs)
     print("VIKTOR_EXPORTED", path, os.path.getsize(path))
 
@@ -420,8 +417,6 @@ def main():
     create_animations(armature)
     add_metadata(body, armature)
 
-    # Rotate the authored Blender character so glTF resolves to Football Lab's +Z forward.
-    # Blender's glTF exporter converts the Z-up scene to glTF Y-up.
     armature.rotation_euler[2] = 0.0
     body.rotation_euler[2] = 0.0
 
