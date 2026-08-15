@@ -1,17 +1,17 @@
-const BUILD = "43.0.0";
-const EXPECTED_BASE64_LENGTH = 31480;
-const EXPECTED_BASE64_SHA256 = "47b5d59247a235562f8d7a4dcf58a7e3fee6cba78231286c171f98aee272e255";
+const BUILD = "43.1.0";
+const EXPECTED_BASE64_LENGTH = 97240;
+const EXPECTED_BASE64_SHA256 = "e33dbd2f3f0799ec699fcea544d3a53cb599e4ef6a7a375343c957e55fbcebe1";
 
 const PART_URLS = Array.from({ length: 8 }, (_, index) =>
   new URL(`./assets/characters/v43/masters-v43.part${index}.b64`, import.meta.url).href
 );
 
 const FRAMES = Object.freeze({
-  "viktor-idle-back": Object.freeze({ x: 0, y: 0, w: 56, h: 164, anchorX: 0.5, anchorY: 0.985 }),
-  "viktor-windup-side": Object.freeze({ x: 55, y: 0, w: 52, h: 164, anchorX: 0.51, anchorY: 0.985 }),
-  "viktor-contact": Object.freeze({ x: 111, y: 0, w: 134, h: 195, anchorX: 0.49, anchorY: 0.965 }),
-  "mikkel-set": Object.freeze({ x: 241, y: 0, w: 65, h: 164, anchorX: 0.5, anchorY: 0.985 }),
-  "mikkel-dive": Object.freeze({ x: 0, y: 185, w: 149, h: 192, anchorX: 0.43, anchorY: 0.63 })
+  "viktor-idle-back": Object.freeze({ x: 10, y: 8, w: 79, h: 252, anchorX: 0.5, anchorY: 0.985 }),
+  "viktor-windup-side": Object.freeze({ x: 99, y: 8, w: 62, h: 255, anchorX: 0.51, anchorY: 0.985 }),
+  "mikkel-set": Object.freeze({ x: 171, y: 8, w: 92, h: 256, anchorX: 0.5, anchorY: 0.985 }),
+  "viktor-contact": Object.freeze({ x: 273, y: 8, w: 236, h: 360, anchorX: 0.49, anchorY: 0.965 }),
+  "mikkel-dive": Object.freeze({ x: 519, y: 8, w: 278, h: 339, anchorX: 0.43, anchorY: 0.63 })
 });
 
 const runtime = {
@@ -32,7 +32,7 @@ function publish() {
     build: BUILD,
     status: runtime.status,
     error: runtime.error ? String(runtime.error.message || runtime.error) : null,
-    atlas: "masters-v43-384-q75",
+    atlas: "masters-v43-1024-q90",
     atlasWidth: runtime.width,
     atlasHeight: runtime.height,
     frameCount: Object.keys(FRAMES).length,
@@ -40,13 +40,14 @@ function publish() {
     base64Length: runtime.base64Length,
     expectedBase64Length: EXPECTED_BASE64_LENGTH,
     expectedBase64Sha256: EXPECTED_BASE64_SHA256,
+    fidelity: "approved-reference-high-resolution",
     ready: runtime.status === "ready"
   });
 }
 
 async function fetchPart(url) {
-  const response = await fetch(url, { cache: "force-cache" });
-  if (!response.ok) throw new Error(`V43 sprite atlas part failed (${response.status})`);
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) throw new Error(`V43.1 sprite atlas part failed (${response.status})`);
   return (await response.text()).trim();
 }
 
@@ -57,13 +58,13 @@ export function preloadCharacterSpritesV43() {
       const base64 = parts.join("");
       runtime.base64Length = base64.length;
       if (base64.length !== EXPECTED_BASE64_LENGTH || !base64.startsWith("UklGR")) {
-        throw new Error(`V43 sprite atlas payload invalid (${base64.length})`);
+        throw new Error(`V43.1 sprite atlas payload invalid (${base64.length})`);
       }
       return new Promise((resolve, reject) => {
         const image = new Image();
         image.decoding = "async";
         image.onload = () => resolve(image);
-        image.onerror = () => reject(new Error("V43 sprite atlas image decode failed"));
+        image.onerror = () => reject(new Error("V43.1 sprite atlas image decode failed"));
         image.src = `data:image/webp;base64,${base64}`;
       });
     })
@@ -71,8 +72,8 @@ export function preloadCharacterSpritesV43() {
       runtime.image = image;
       runtime.width = image.naturalWidth || image.width || 0;
       runtime.height = image.naturalHeight || image.height || 0;
-      if (runtime.width !== 384 || runtime.height !== 384) {
-        throw new Error(`V43 sprite atlas dimensions invalid (${runtime.width}x${runtime.height})`);
+      if (runtime.width !== 1024 || runtime.height !== 448) {
+        throw new Error(`V43.1 sprite atlas dimensions invalid (${runtime.width}x${runtime.height})`);
       }
       runtime.status = "ready";
       runtime.error = null;
@@ -84,7 +85,7 @@ export function preloadCharacterSpritesV43() {
       runtime.status = "error";
       runtime.error = error;
       publish();
-      console.error("Football Lab V43 sprite atlas failed", error);
+      console.error("Football Lab V43.1 sprite atlas failed", error);
       return null;
     });
   publish();
