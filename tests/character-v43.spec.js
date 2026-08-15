@@ -25,24 +25,25 @@ async function enterClassic(page) {
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
 }
 
-test("V43 premium sprite atlas loads with the approved master frames", async ({ page }) => {
+test("V43.1 high-resolution sprite atlas loads with the approved master frames", async ({ page }) => {
   await page.goto("/index.html?test=character-v43");
   await waitForV43Atlas(page);
   const atlas = await page.evaluate(() => window.__footballLabCharacterSpritesV43);
-  expect(atlas.build).toBe("43.0.0");
-  expect(atlas.atlasWidth).toBe(384);
-  expect(atlas.atlasHeight).toBe(384);
-  expect(atlas.base64Length).toBe(31480);
+  expect(atlas.build).toBe("43.1.0");
+  expect(atlas.atlasWidth).toBe(1024);
+  expect(atlas.atlasHeight).toBe(448);
+  expect(atlas.base64Length).toBe(97240);
+  expect(atlas.fidelity).toBe("approved-reference-high-resolution");
   expect(atlas.frames).toEqual([
     "viktor-idle-back",
     "viktor-windup-side",
-    "viktor-contact",
     "mikkel-set",
+    "viktor-contact",
     "mikkel-dive"
   ]);
 });
 
-test("Viktor Kane renders through the V43 asset-backed 2.5D path", async ({ page }) => {
+test("Viktor Kane renders through the V43.1 high-resolution 2.5D path", async ({ page }) => {
   await page.goto("/index.html?test=character-v43-viktor");
   await page.evaluate(() => localStorage.setItem("footballLabSelectedKickerV13", "dax-ryder"));
   await page.reload();
@@ -58,11 +59,15 @@ test("Viktor Kane renders through the V43 asset-backed 2.5D path", async ({ page
     () => page.evaluate(() => window.__footballLabHeroFrameV43?.character),
     { timeout: 5000 }
   ).toBe("viktor-kane");
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabHeroFrameV43?.build),
+    { timeout: 5000 }
+  ).toBe("43.1.0");
 
   await page.screenshot({ path: "test-results/v43-viktor-kane.png", fullPage: true });
 });
 
-test("Mikkel Storm replaces the giant keeper through the scene-depth V43 path", async ({ page }) => {
+test("Mikkel Storm replaces the giant keeper through the V43.1 scene-depth path", async ({ page }) => {
   await page.goto("/index.html?test=character-v43-mikkel");
   await page.evaluate(() => localStorage.setItem("footballLabSelectedKickerV13", "dax-ryder"));
   await page.reload();
@@ -72,7 +77,7 @@ test("Mikkel Storm replaces the giant keeper through the scene-depth V43 path", 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabKeeperRendererV43?.build),
     { timeout: 5000 }
-  ).toBe("43.0.0");
+  ).toBe("43.1.0");
 
   await page.evaluate(async () => {
     const core = await import("/game/core-v6.js?v=32.4");
