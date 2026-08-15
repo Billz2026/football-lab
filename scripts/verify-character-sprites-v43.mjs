@@ -3,9 +3,9 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const EXPECTED_LENGTH = 31480;
-const EXPECTED_BASE64_SHA256 = "47b5d59247a235562f8d7a4dcf58a7e3fee6cba78231286c171f98aee272e255";
-const EXPECTED_BINARY_SHA256 = "d475ea61ff859107d32db03a98140d165ef7fc5470fbaa876b736a345ba671ca";
+const EXPECTED_LENGTH = 97240;
+const EXPECTED_BASE64_SHA256 = "e33dbd2f3f0799ec699fcea544d3a53cb599e4ef6a7a375343c957e55fbcebe1";
+const EXPECTED_BINARY_SHA256 = "e3d36eb4b40b4027d349eedc3a34407ccd9e4e15c22fa80461152f3468d31634";
 
 const parts = [];
 for (let index = 0; index < 8; index += 1) {
@@ -14,13 +14,13 @@ for (let index = 0; index < 8; index += 1) {
 }
 const base64 = parts.join("");
 const base64Hash = createHash("sha256").update(base64).digest("hex");
-if (base64.length !== EXPECTED_LENGTH) throw new Error(`V43 atlas base64 length ${base64.length} != ${EXPECTED_LENGTH}`);
-if (base64Hash !== EXPECTED_BASE64_SHA256) throw new Error(`V43 atlas base64 hash mismatch: ${base64Hash}`);
+if (base64.length !== EXPECTED_LENGTH) throw new Error(`V43.1 atlas base64 length ${base64.length} != ${EXPECTED_LENGTH}`);
+if (base64Hash !== EXPECTED_BASE64_SHA256) throw new Error(`V43.1 atlas base64 hash mismatch: ${base64Hash}`);
 
 const binary = Buffer.from(base64, "base64");
 const binaryHash = createHash("sha256").update(binary).digest("hex");
-if (binaryHash !== EXPECTED_BINARY_SHA256) throw new Error(`V43 atlas binary hash mismatch: ${binaryHash}`);
+if (binaryHash !== EXPECTED_BINARY_SHA256) throw new Error(`V43.1 atlas binary hash mismatch: ${binaryHash}`);
 if (binary.subarray(0, 4).toString("ascii") !== "RIFF" || binary.subarray(8, 12).toString("ascii") !== "WEBP") {
-  throw new Error("V43 atlas is not a valid WebP RIFF payload");
+  throw new Error("V43.1 atlas is not a valid WebP RIFF payload");
 }
-console.log(`V43 character atlas verified: ${binary.length} bytes, 8 payload parts.`);
+console.log(`V43.1 high-resolution character atlas verified: ${binary.length} bytes, 8 payload parts.`);
