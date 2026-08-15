@@ -8,9 +8,9 @@ import {
   preloadCharacterSpritesV43,
   spriteAtlasReadyV43,
   spriteAtlasStateV43
-} from "./character-sprites-v43.js?v=43.0.0";
+} from "./character-sprites-v43.js?v=43.1.0";
 
-const BUILD = "43.0.0";
+const BUILD = "43.1.0";
 const VIEW = { width: WORLD.width, height: WORLD.height };
 
 function transform() {
@@ -114,6 +114,7 @@ function drawViktorSprite(time) {
     character: "viktor-kane",
     sourceCharacterId: "dax-ryder",
     renderer: "premium-sprite-2.5d",
+    fidelity: "approved-reference-high-resolution",
     phase: frame.phase,
     sprite: frame.key,
     atlasReady: true,
@@ -149,6 +150,7 @@ preloadCharacterSpritesV43();
 window.__footballLabCharacterRendererV43 = Object.freeze({
   build: BUILD,
   renderer: "asset-backed-premium-2.5d",
+  fidelity: "approved-reference-high-resolution",
   masterOutfield: "viktor-kane",
   masterGoalkeeper: "mikkel-storm",
   v42Fallback: true,
