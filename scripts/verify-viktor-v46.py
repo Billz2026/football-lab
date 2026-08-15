@@ -51,45 +51,89 @@ def read_glb_json(path):
     fail("GLB JSON chunk missing")
 
 
+def glb_mesh_bounds(gltf, node_name):
+    nodes = gltf.get("nodes", [])
+    matches = [node for node in nodes if node.get("name") == node_name]
+    if len(matches) != 1:
+        fail(f"expected one GLB node named {node_name}, found {len(matches)}")
+    node = matches[0]
+    mesh_index = node.get("mesh")
+    if mesh_index is None:
+        fail(f"GLB node {node_name} has no mesh")
+    mesh = gltf.get("meshes", [])[mesh_index]
+
+    minima = [float("inf"), float("inf"), float("inf")]
+    maxima = [float("-inf"), float("-inf"), float("-inf")]
+    vertex_count = 0
+    for primitive in mesh.get("primitives", []):
+        position_accessor = primitive.get("attributes", {}).get("POSITION")
+        if position_accessor is None:
+            continue
+        accessor = gltf.get("accessors", [])[position_accessor]
+        if "min" not in accessor or "max" not in accessor:
+            fail(f"POSITION accessor for {node_name} lacks min/max bounds")
+        for axis in range(3):
+            minima[axis] = min(minima[axis], accessor["min"][axis])
+            maxima[axis] = max(maxima[axis], accessor["max"][axis])
+        vertex_count += int(accessor.get("count", 0))
+
+    if vertex_count <= 0:
+        fail(f"GLB mesh {node_name} has no POSITION vertices")
+    return minima, maxima, vertex_count
+
+
+def validate_authoritative_geometry(gltf):
+    glb_mesh_nodes = [
+        node.get("name") for node in gltf.get("nodes", []) if "mesh" in node
+    ]
+    if sorted(glb_mesh_nodes) != ["Viktor_Hair", "Viktor_Kane_Body"]:
+        fail(f"unexpected GLB mesh nodes: {glb_mesh_nodes}")
+
+    body_min, body_max, body_vertices = glb_mesh_bounds(gltf, "Viktor_Kane_Body")
+    hair_min, hair_max, hair_vertices = glb_mesh_bounds(gltf, "Viktor_Hair")
+
+    # glTF is Y-up. These are the exact geometry bounds Three.js consumes,
+    # avoiding Blender-importer helper objects/custom bone shapes.
+    height = body_max[1] - body_min[1]
+    centre_x = (body_min[0] + body_max[0]) * 0.5
+    centre_z = (body_min[2] + body_max[2]) * 0.5
+    ground = body_min[1]
+
+    print(
+        "VIKTOR_GLB_BODY_BOUNDS",
+        "min=", tuple(round(v, 5) for v in body_min),
+        "max=", tuple(round(v, 5) for v in body_max),
+        "height=", round(height, 5),
+        "centre_x=", round(centre_x, 5),
+        "centre_z=", round(centre_z, 5),
+        "vertices=", body_vertices,
+    )
+    print(
+        "VIKTOR_GLB_HAIR_BOUNDS",
+        "min=", tuple(round(v, 5) for v in hair_min),
+        "max=", tuple(round(v, 5) for v in hair_max),
+        "vertices=", hair_vertices,
+    )
+
+    if abs(height - TARGET_HEIGHT) > 0.02:
+        fail(f"Viktor GLB body height must be {TARGET_HEIGHT:.2f}m, found {height:.3f}m")
+    if abs(ground) > 0.015:
+        fail(f"Viktor GLB feet are not grounded: y_min={ground:.4f}")
+    if abs(centre_x) > 0.04 or abs(centre_z) > 0.04:
+        fail(
+            f"Viktor GLB is not centred on origin: centre_x={centre_x:.4f}, centre_z={centre_z:.4f}"
+        )
+    if hair_min[1] < 1.45 or hair_max[1] > 1.91:
+        fail(f"Viktor hair bounds are implausible: y={hair_min[1]:.3f}..{hair_max[1]:.3f}")
+
+    return height
+
+
 def object_world_bounds(obj):
     points = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
     minimum = Vector((min(p.x for p in points), min(p.y for p in points), min(p.z for p in points)))
     maximum = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p in points)))
     return minimum, maximum
-
-
-def print_mesh_diagnostics(meshes):
-    print("VIKTOR_MESH_BOUNDS_BEGIN")
-    for obj in meshes:
-        minimum, maximum = object_world_bounds(obj)
-        dimensions = maximum - minimum
-        print(
-            "VIKTOR_MESH_BOUND",
-            obj.name,
-            "parent=", obj.parent.name if obj.parent else None,
-            "parent_type=", obj.parent_type,
-            "location=", tuple(round(v, 5) for v in obj.location),
-            "scale=", tuple(round(v, 5) for v in obj.scale),
-            "matrix_translation=", tuple(round(v, 5) for v in obj.matrix_world.translation),
-            "min=", tuple(round(v, 5) for v in minimum),
-            "max=", tuple(round(v, 5) for v in maximum),
-            "dimensions=", tuple(round(v, 5) for v in dimensions),
-            "verts=", len(obj.data.vertices),
-            "polys=", len(obj.data.polygons),
-        )
-    print("VIKTOR_MESH_BOUNDS_END")
-
-
-def world_height(objects):
-    points = []
-    for obj in objects:
-        if obj.type != "MESH":
-            continue
-        for corner in obj.bound_box:
-            points.append(obj.matrix_world @ Vector(corner))
-    if not points:
-        return 0.0
-    return max(p.z for p in points) - min(p.z for p in points)
 
 
 def main():
@@ -108,15 +152,26 @@ def main():
             f"missing={missing_glb_clips}, unexpected={unexpected_glb_clips}, found={sorted(animation_names)}"
         )
 
+    glb_height = validate_authoritative_geometry(gltf)
+
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=source)
 
     meshes = [obj for obj in bpy.data.objects if obj.type == "MESH"]
     armatures = [obj for obj in bpy.data.objects if obj.type == "ARMATURE"]
-    if not meshes:
-        fail("no mesh objects in GLB")
+    body = bpy.data.objects.get("Viktor_Kane_Body")
+    hair = bpy.data.objects.get("Viktor_Hair")
+    if body is None or hair is None:
+        fail(f"authorised meshes missing after import; found={[obj.name for obj in meshes]}")
     if not armatures:
         fail("no armature in GLB")
+
+    # Blender 4.0 may materialise a custom armature display shape called
+    # Icosphere during import even though no such mesh/node exists in GLB JSON.
+    # The authoritative mesh-node check above guarantees it is not shipped.
+    importer_helpers = [obj.name for obj in meshes if obj.name not in {"Viktor_Kane_Body", "Viktor_Hair"}]
+    if importer_helpers:
+        print("VIKTOR_IMPORTER_HELPERS_IGNORED", importer_helpers)
 
     imported_actions = {action.name for action in bpy.data.actions}
     for clip in REQUIRED_CLIPS:
@@ -133,16 +188,23 @@ def main():
         fail(f"missing semantic bones: {missing_bones}")
 
     skinned_meshes = []
-    for mesh in meshes:
+    for mesh in (body, hair):
         if mesh.find_armature() is not None or any(mod.type == "ARMATURE" for mod in mesh.modifiers):
             skinned_meshes.append(mesh)
-    if not skinned_meshes:
-        fail("mesh is not skinned to an armature")
+    if len(skinned_meshes) != 2:
+        fail(f"body/hair not both skinned to armature: {[obj.name for obj in skinned_meshes]}")
 
-    print_mesh_diagnostics(meshes)
-    height = world_height(meshes)
-    if not (1.70 <= height <= 2.02):
-        fail(f"unexpected imported mesh height: {height:.3f}m")
+    body_min, body_max = object_world_bounds(body)
+    body_dimensions = body_max - body_min
+    print(
+        "VIKTOR_IMPORTED_BODY",
+        "dimensions=", tuple(round(v, 5) for v in body_dimensions),
+        "parent=", body.parent.name if body.parent else None,
+    )
+    if abs(body_dimensions.z - glb_height) > 0.03:
+        fail(
+            f"Blender re-import changed Viktor body height: GLB={glb_height:.3f}, imported={body_dimensions.z:.3f}"
+        )
 
     file_size = os.path.getsize(source)
     if file_size < 50_000:
@@ -153,8 +215,8 @@ def main():
     print("VIKTOR_VERIFY_OK")
     print("file", source)
     print("size_bytes", file_size)
-    print("height_m", round(height, 4))
-    print("meshes", [(obj.name, len(obj.data.vertices), len(obj.data.polygons)) for obj in meshes])
+    print("height_m", round(glb_height, 4))
+    print("authorised_meshes", [(obj.name, len(obj.data.vertices), len(obj.data.polygons)) for obj in (body, hair)])
     print("armatures", [obj.name for obj in armatures])
     print("glb_animations", sorted(animation_names))
     print("imported_actions", sorted(imported_actions))
