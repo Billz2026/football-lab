@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/build-viktor-v46.yml
       - scripts/build-viktor-v46.py
+      - scripts/run-build-viktor-v46.py
       - scripts/verify-viktor-v46.py
   workflow_dispatch:
 
@@ -70,7 +71,7 @@ jobs:
           OUT="$GITHUB_WORKSPACE/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb"
           mkdir -p "$(dirname "$OUT")"
           blender --background "$SOURCE_BLEND" \
-            --python "$GITHUB_WORKSPACE/scripts/build-viktor-v46.py" \
+            --python "$GITHUB_WORKSPACE/scripts/run-build-viktor-v46.py" \
             -- --output "$OUT"
           ls -lh "$OUT"
 
