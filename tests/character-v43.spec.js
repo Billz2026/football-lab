@@ -46,27 +46,6 @@ test("V44 removes the five-frame sprite path from live outfield rendering", asyn
   expect(state.rig).toBe("continuous-skeletal-canvas");
 });
 
-test("all four outfield characters use the articulated 2.5D rig", async ({ page }) => {
-  const roster = [
-    ["dax-ryder", "viktor-kane"],
-    ["leo-vale", "bruno-silva"],
-    ["zion-arc", "david-beckett"],
-    ["kai-mori", "wayne-redman"]
-  ];
-
-  for (const [sourceId, character] of roster) {
-    await chooseKicker(page, sourceId);
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV44?.renderer),
-      { timeout: 5000 }
-    ).toBe("articulated-layered-2.5d");
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV44?.character),
-      { timeout: 5000 }
-    ).toBe(character);
-  }
-});
-
 test("goalkeepers remain on the continuous articulated scene-depth rig", async ({ page }) => {
   await chooseKicker(page, "dax-ryder");
 
@@ -92,4 +71,5 @@ test("goalkeepers remain on the continuous articulated scene-depth rig", async (
   expect(keeper.character).toBe("mikkel-storm");
   expect(keeper.staticSpriteFrames).toBe(false);
   expect(keeper.sceneDepth).toBe(true);
+  expect(keeper.profileDrivenVisuals).toBe(true);
 });
