@@ -39,6 +39,9 @@ jobs:
       - name: Install test dependencies
         run: npm install
 
+      - name: Verify production character asset contract
+        run: npm run verify:characters:v1
+
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
@@ -52,7 +55,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          npx playwright test tests/runtime-v23.spec.js tests/campaign-v41.spec.js tests/character-v42.spec.js --reporter=line,html 2>&1 | tee playwright-output.txt
+          npx playwright test tests/runtime-v23.spec.js tests/campaign-v41.spec.js tests/character-v42.spec.js tests/character-production-v1.spec.js --reporter=line,html 2>&1 | tee playwright-output.txt
 
       - name: Upload validation diagnostics
         if: always()
