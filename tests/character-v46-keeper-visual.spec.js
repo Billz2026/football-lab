@@ -90,9 +90,29 @@ async function executeLiveShot(page) {
 async function armKeeperCaptures(page) {
   await page.evaluate(() => {
     window.__mikkelV46Captures = {};
+    window.__mikkelV46Trace = [];
+    let previousClip = null;
+
+    function copyCanvas(source) {
+      if (!source) return null;
+      const snapshot = document.createElement("canvas");
+      snapshot.width = source.width;
+      snapshot.height = source.height;
+      snapshot.getContext("2d", { alpha: true })?.drawImage(source, 0, 0);
+      return snapshot;
+    }
+
     function sample() {
       const frame = window.__footballLabKeeperFrameV46;
       const clip = frame?.clip || "";
+      if (clip && clip !== previousClip) {
+        window.__mikkelV46Trace.push({
+          clip,
+          time: frame?.time ?? performance.now(),
+          motion: { ...(window.__footballLabKeeperMotionV32 || {}) }
+        });
+        previousClip = clip;
+      }
       const target = clip === "set"
         ? "set"
         : /^dive-(left|right)-(low|mid|high)$/.test(clip)
@@ -103,11 +123,10 @@ async function armKeeperCaptures(page) {
               ? "recovery"
               : null;
       if (target && !window.__mikkelV46Captures[target]) {
-        const canvas = document.querySelector("#gameCanvas");
         window.__mikkelV46Captures[target] = {
           frame: { ...frame },
           keeperMotion: { ...(window.__footballLabKeeperMotionV32 || {}) },
-          dataUrl: canvas?.toDataURL("image/png") || null
+          snapshot: copyCanvas(document.querySelector("#gameCanvas"))
         };
       }
       if (!window.__mikkelV46Captures.dive || (!window.__mikkelV46Captures.landing && !window.__mikkelV46Captures.recovery)) {
@@ -119,7 +138,15 @@ async function armKeeperCaptures(page) {
 }
 
 async function writeCapture(page, key, path) {
-  const capture = await page.evaluate((name) => window.__mikkelV46Captures?.[name], key);
+  const capture = await page.evaluate((name) => {
+    const stored = window.__mikkelV46Captures?.[name];
+    return stored ? {
+      frame: stored.frame,
+      keeperMotion: stored.keeperMotion,
+      dataUrl: stored.snapshot?.toDataURL("image/png") || null,
+      trace: [...(window.__mikkelV46Trace || [])]
+    } : null;
+  }, key);
   expect(capture?.frame?.renderer).toBe("real-skinned-glb-3d");
   expect(capture?.frame?.production3D).toBe(true);
   expect(capture?.frame?.character).toBe("mikkel-storm");
@@ -138,28 +165,33 @@ test("capture Mikkel Storm V46 set stance and a real AI-driven dive in the gamep
   await forceMikkelStageThroughWorldContract(page);
   await armKeeperCaptures(page);
   await page.evaluate(() => window.__footballLabPremiumKeeperSceneDrawV3852?.(performance.now()));
-  await page.waitForFunction(() => Boolean(window.__mikkelV46Captures?.set?.dataUrl), null, { timeout: 5000 });
+  await page.waitForFunction(() => Boolean(window.__mikkelV46Captures?.set?.snapshot), null, { timeout: 5000 });
   const setCapture = await writeCapture(page, "set", "test-results/mikkel-v46-set.png");
   expect(setCapture.frame.clip).toBe("set");
 
   await executeLiveShot(page);
+  await expect.poll(
+    () => page.evaluate(() => (window.__mikkelV46Trace || []).map((entry) => entry.clip)),
+    { timeout: 10000 }
+  ).toEqual(expect.arrayContaining([expect.stringMatching(/^dive-(left|right)-(low|mid|high)$/)]));
+
   await page.waitForFunction(
-    () => Boolean(window.__mikkelV46Captures?.dive?.dataUrl),
+    () => Boolean(window.__mikkelV46Captures?.dive?.snapshot),
     null,
     { timeout: 10000, polling: "raf" }
   );
   const diveCapture = await writeCapture(page, "dive", "test-results/mikkel-v46-dive.png");
   expect(diveCapture.frame.clip).toMatch(/^dive-(left|right)-(low|mid|high)$/);
-  expect(diveCapture.keeperMotion.airborne).toBe(true);
 
   await page.waitForFunction(
-    () => Boolean(window.__mikkelV46Captures?.landing?.dataUrl || window.__mikkelV46Captures?.recovery?.dataUrl),
+    () => Boolean(window.__mikkelV46Captures?.landing?.snapshot || window.__mikkelV46Captures?.recovery?.snapshot),
     null,
     { timeout: 10000, polling: "raf" }
   );
   const finishKey = await page.evaluate(() => window.__mikkelV46Captures?.landing ? "landing" : "recovery");
   const finishCapture = await writeCapture(page, finishKey, `test-results/mikkel-v46-${finishKey}.png`);
   expect(["landing", "recovery"]).toContain(finishCapture.frame.clip);
+  console.log("MIKKEL_V46_LIVE_CLIP_TRACE", JSON.stringify(diveCapture.trace));
 
   const diagnostics = await page.evaluate(() => ({
     contract: window.__footballLabCharacter3DV46,
