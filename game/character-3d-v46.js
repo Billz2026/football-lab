@@ -453,6 +453,10 @@ function preloadBenchmarks() {
 }
 
 export function drawHeroCharacterV46(time) {
+  if (keeperInstalled && window.__footballLabPremiumKeeperSceneDrawV3852?.__footballLabV46KeeperHook !== true) {
+    keeperInstalled = false;
+    installKeeperNow();
+  }
   const entry = activeOutfieldEntry();
   const configured = entry ? loaded.get(entry.id) : null;
   if (!configured) {
@@ -516,11 +520,17 @@ function renderKeeper3D(time, frame, configured) {
 }
 
 function installKeeperNow() {
-  if (keeperInstalled) return true;
-  const original = window.__footballLabPremiumKeeperSceneDrawV3852;
-  if (typeof original !== "function") return false;
+  const current = window.__footballLabPremiumKeeperSceneDrawV3852;
+  if (keeperInstalled && current?.__footballLabV46KeeperHook === true) return true;
+  if (!window.__footballLabKeeperRendererV44) return false;
+  if (typeof current !== "function") return false;
+  if (current.__footballLabV46KeeperHook === true) {
+    keeperInstalled = true;
+    return true;
+  }
+  const original = current;
 
-  window.__footballLabPremiumKeeperSceneDrawV3852 = function footballLabKeeperSceneV46(time) {
+  const v46KeeperHook = function footballLabKeeperSceneV46(time) {
     const entry = activeKeeperEntry();
     const configured = entry ? loaded.get(entry.id) : null;
     if (!configured) {
@@ -550,6 +560,13 @@ function installKeeperNow() {
     return result;
   };
 
+  Object.defineProperty(v46KeeperHook, "__footballLabV46KeeperHook", {
+    value: true,
+    configurable: false,
+    enumerable: false,
+    writable: false
+  });
+  window.__footballLabPremiumKeeperSceneDrawV3852 = v46KeeperHook;
   keeperInstalled = true;
   return true;
 }
