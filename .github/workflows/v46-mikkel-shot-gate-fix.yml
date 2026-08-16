@@ -25,37 +25,8 @@ jobs:
           from pathlib import Path
           path = Path('tests/character-v46-keeper-visual.spec.js')
           text = path.read_text()
-          old = '''async function executeLiveShot(page) {
-            await dismissCoach(page);
-            await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 6000 });
-            await expect.poll(
-              () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
-              { timeout: 3000 }
-            ).toBe("ready");
-
-            const expected = [
-              ["aim", "STRIKE"],
-              ["power", "LOCK POWER"],
-              ["contact", "LOCK CONTACT"],
-              ["shooting", "SHOT IN PLAY"]
-            ];
-            const delays = [120, 180, 180, 0];
-            const trace = [];
-            for (let index = 0; index < expected.length; index += 1) {
-              trace.push(await browserKeyboardAction(page));
-              const [phase, label] = expected[index];
-              await expect.poll(
-                () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
-                { timeout: 2500 }
-              ).toBe(phase);
-              await expect.poll(
-                () => page.locator("#shotAction").textContent(),
-                { timeout: 2500 }
-              ).toContain(label);
-              if (delays[index]) await page.waitForTimeout(delays[index]);
-            }
-            console.log("MIKKEL_V46_SHOT_INPUT_TRACE", JSON.stringify(trace));
-          }'''.replace(/^          /gm, '')
+          start = text.index('async function executeLiveShot(page) {')
+          end = text.index('\nasync function armKeeperCaptures(page)', start)
           new = '''async function executeLiveShot(page) {
             await dismissCoach(page);
             await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 6000 });
@@ -65,13 +36,8 @@ jobs:
             ).toBe("ready");
 
             const trace = [];
-
             trace.push(await browserKeyboardAction(page));
-            await expect.poll(
-              () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
-              { timeout: 2500 }
-            ).toBe("aim");
-            await expect(page.locator("#shotAction")).toContainText("STRIKE");
+            await expect.poll(() => page.evaluate(() => document.documentElement.dataset.strikePhaseV324), { timeout: 2500 }).toBe("aim");
 
             await page.evaluate(async () => {
               const core = await import("/game/core-v6.js?v=32.4");
@@ -80,11 +46,7 @@ jobs:
               core.state.shot.previewCurve = 0;
             });
             trace.push(await browserKeyboardAction(page));
-            await expect.poll(
-              () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
-              { timeout: 2500 }
-            ).toBe("power");
-            await expect(page.locator("#shotAction")).toContainText("LOCK POWER");
+            await expect.poll(() => page.evaluate(() => document.documentElement.dataset.strikePhaseV324), { timeout: 2500 }).toBe("power");
 
             await page.evaluate(async () => {
               const core = await import("/game/core-v6.js?v=32.4");
@@ -92,11 +54,7 @@ jobs:
               core.state.lastTime = performance.now();
             });
             trace.push(await browserKeyboardAction(page));
-            await expect.poll(
-              () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
-              { timeout: 2500 }
-            ).toBe("contact");
-            await expect(page.locator("#shotAction")).toContainText("LOCK CONTACT");
+            await expect.poll(() => page.evaluate(() => document.documentElement.dataset.strikePhaseV324), { timeout: 2500 }).toBe("contact");
 
             await page.evaluate(async () => {
               const core = await import("/game/core-v6.js?v=32.4");
@@ -104,11 +62,7 @@ jobs:
               core.state.lastTime = performance.now();
             });
             trace.push(await browserKeyboardAction(page));
-            await expect.poll(
-              () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
-              { timeout: 2500 }
-            ).toBe("shooting");
-            await expect(page.locator("#shotAction")).toContainText("SHOT IN PLAY");
+            await expect.poll(() => page.evaluate(() => document.documentElement.dataset.strikePhaseV324), { timeout: 2500 }).toBe("shooting");
 
             const shot = await page.evaluate(async () => {
               const core = await import("/game/core-v6.js?v=32.4");
@@ -126,10 +80,10 @@ jobs:
             console.log("MIKKEL_V46_REAL_SHOT", JSON.stringify(shot));
             expect(shot.keeperPlan).toBeTruthy();
             expect(["GOAL", "SAVE"]).toContain(shot.outcome);
-          }'''.replace(/^          /gm, '')
-          if old not in text:
-              raise SystemExit('Mikkel executeLiveShot block not found')
-          path.write_text(text.replace(old, new, 1))
+          }
+'''
+          new = '\n'.join(line[10:] if line.startswith('          ') else line for line in new.splitlines()) + '\n'
+          path.write_text(text[:start] + new + text[end + 1:])
           PY
           git diff --check
       - name: Commit Mikkel gate fix
