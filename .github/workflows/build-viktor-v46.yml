@@ -6,6 +6,7 @@ on:
       - agent/v46-real-3d-character-layer
     paths:
       - .github/workflows/build-viktor-v46.yml
+      - .github/v46-release-trigger
       - scripts/build-viktor-v46.py
       - scripts/run-build-viktor-v46.py
       - scripts/verify-viktor-v46.py
