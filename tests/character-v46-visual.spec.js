@@ -1,8 +1,9 @@
+import fs from "node:fs";
 import { test, expect } from "@playwright/test";
 
 // Visual approval must come from the authoritative Football Lab camera after
 // the V46 runtime bridge is rebuilt; Blender previews are not accepted here.
-// This gate now proves both the approved standing model and the live strike deformation.
+// This gate proves both the approved standing model and live strike deformation.
 async function enterClassic(page) {
   await page.goto("/index.html?capture=viktor-v46-strike", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
@@ -33,19 +34,43 @@ async function dismissCoach(page) {
   }
 }
 
-async function waitForClip(page, clip, path) {
+async function armStrikeCaptures(page) {
+  await page.evaluate(() => {
+    const targets = new Set(["windup", "contact", "follow-through"]);
+    window.__v46StrikeCaptures = {};
+
+    function sample() {
+      const frame = window.__footballLabHeroFrameV46;
+      const clip = frame?.clip;
+      if (targets.has(clip) && !window.__v46StrikeCaptures[clip]) {
+        const canvas = document.querySelector("#gameCanvas");
+        window.__v46StrikeCaptures[clip] = {
+          frame: { ...frame },
+          dataUrl: canvas?.toDataURL("image/png") || null
+        };
+      }
+      if (Object.keys(window.__v46StrikeCaptures).length < targets.size) {
+        requestAnimationFrame(sample);
+      }
+    }
+    requestAnimationFrame(sample);
+  });
+}
+
+async function saveCapturedClip(page, clip, path) {
   await page.waitForFunction(
-    (expected) => window.__footballLabHeroFrameV46?.clip === expected,
+    (expected) => Boolean(window.__v46StrikeCaptures?.[expected]?.dataUrl),
     clip,
     { timeout: 8000, polling: "raf" }
   );
 
-  await page.locator("#gameCanvas").screenshot({ path });
+  const capture = await page.evaluate((expected) => window.__v46StrikeCaptures[expected], clip);
+  expect(capture?.frame?.renderer).toBe("real-skinned-glb-3d");
+  expect(capture?.frame?.production3D).toBe(true);
+  expect(capture?.frame?.clip).toBe(clip);
+  expect(capture?.dataUrl).toMatch(/^data:image\/png;base64,/);
 
-  const frame = await page.evaluate(() => window.__footballLabHeroFrameV46);
-  expect(frame?.renderer).toBe("real-skinned-glb-3d");
-  expect(frame?.production3D).toBe(true);
-  expect(frame?.clip).toBe(clip);
+  fs.writeFileSync(path, Buffer.from(capture.dataUrl.split(",")[1], "base64"));
 }
 
 async function executeLiveShot(page) {
@@ -53,15 +78,13 @@ async function executeLiveShot(page) {
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 6000 });
 
   // READY -> AIM -> POWER -> CONTACT -> SHOOTING.
-  // The short delays deliberately respect the runtime's 70 ms input lock while
-  // still exercising the real interactive shot path rather than mutating state.
-  await page.locator("#shotAction").click({ force: true });
-  await page.waitForTimeout(120);
-  await page.locator("#shotAction").click({ force: true });
-  await page.waitForTimeout(180);
-  await page.locator("#shotAction").click({ force: true });
-  await page.waitForTimeout(180);
-  await page.locator("#shotAction").click({ force: true });
+  // Space is a first-class production input handled by the same handleAction()
+  // path as pointer input, and avoids relying on a button that is intentionally
+  // hidden during parts of the compact gameplay layout.
+  for (const delay of [120, 180, 180, 0]) {
+    await page.keyboard.press("Space");
+    if (delay) await page.waitForTimeout(delay);
+  }
 }
 
 test("capture Viktor Kane V46 standing and striking in the authoritative gameplay camera", async ({ page }) => {
@@ -97,8 +120,9 @@ test("capture Viktor Kane V46 standing and striking in the authoritative gamepla
     fullPage: true
   });
 
+  await armStrikeCaptures(page);
   await executeLiveShot(page);
-  await waitForClip(page, "windup", "test-results/viktor-v46-strike-windup.png");
-  await waitForClip(page, "contact", "test-results/viktor-v46-strike-contact.png");
-  await waitForClip(page, "follow-through", "test-results/viktor-v46-strike-follow-through.png");
+  await saveCapturedClip(page, "windup", "test-results/viktor-v46-strike-windup.png");
+  await saveCapturedClip(page, "contact", "test-results/viktor-v46-strike-contact.png");
+  await saveCapturedClip(page, "follow-through", "test-results/viktor-v46-strike-follow-through.png");
 });
