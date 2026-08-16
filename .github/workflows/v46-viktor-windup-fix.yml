@@ -1,0 +1,32 @@
+name: V46 Viktor windup fix
+
+on:
+  push:
+    branches:
+      - agent/v46-real-3d-character-layer
+    paths:
+      - '.github/workflows/v46-viktor-windup-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/v46-real-3d-character-layer
+          fetch-depth: 0
+      - name: Widen visual windup window
+        run: |
+          python3 -c "from pathlib import Path; p=Path('game/character-3d-v46.js'); s=p.read_text(); old='  if (p.run < 0.55) return { clip: \"approach\", t: p.run / 0.55, p };\n  if (p.run < 0.72) return { clip: \"plant\", t: (p.run - 0.55) / 0.17, p };\n  if (p.run < 0.9) return { clip: \"windup\", t: (p.run - 0.72) / 0.18, p };\n  return { clip: \"contact\", t: (p.run - 0.9) / 0.1, p };'; new='  if (p.run < 0.5) return { clip: \"approach\", t: p.run / 0.5, p };\n  if (p.run < 0.65) return { clip: \"plant\", t: (p.run - 0.5) / 0.15, p };\n  if (p.run < 0.95) return { clip: \"windup\", t: (p.run - 0.65) / 0.3, p };\n  return { clip: \"contact\", t: (p.run - 0.95) / 0.05, p };'; assert s.count(old)==1, 'windup phase block mismatch'; p.write_text(s.replace(old,new,1))"
+          node --check game/character-3d-v46.js
+          git diff --check
+      - name: Commit Viktor visual timing fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game/character-3d-v46.js
+          git commit -m 'Make Viktor windup visibly readable'
+          git push origin HEAD:agent/v46-real-3d-character-layer
