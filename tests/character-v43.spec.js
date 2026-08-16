@@ -25,25 +25,28 @@ async function chooseKicker(page, characterId) {
   await enterClassic(page);
 }
 
-test("V44 removes the five-frame sprite path from live outfield rendering", async ({ page }) => {
+test("live outfield rendering keeps the five-frame sprite path retired after Viktor V46 promotion", async ({ page }) => {
   await chooseKicker(page, "dax-ryder");
 
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV44?.renderer),
-    { timeout: 5000 }
-  ).toBe("articulated-layered-2.5d");
+    () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
+    { timeout: 12000 }
+  ).toBe("real-skinned-glb-3d");
 
   const state = await page.evaluate(() => ({
-    renderer: window.__footballLabVisibleKickersV30?.renderer,
+    frame: window.__footballLabHeroFrameV46,
+    production3D: window.__footballLabVisibleKickersV30?.production3D,
+    productionCharacterMode: window.__footballLabVisibleKickersV30?.productionCharacterMode,
     spriteAtlasReady: window.__footballLabVisibleKickersV30?.spriteAtlasReady,
-    staticSpriteFrames: window.__footballLabVisibleKickersV30?.staticSpriteFrames,
-    rig: window.__footballLabHeroFrameV44?.rig
+    staticSpriteFrames: window.__footballLabVisibleKickersV30?.staticSpriteFrames
   }));
 
-  expect(state.renderer).toBe("articulated-layered-2.5d");
+  expect(state.frame.character).toBe("viktor-kane");
+  expect(state.frame.production3D).toBe(true);
+  expect(state.production3D).toBe(true);
+  expect(state.productionCharacterMode).toBe("real-skinned-glb-3d");
   expect(state.spriteAtlasReady).toBe(false);
   expect(state.staticSpriteFrames).toBe(false);
-  expect(state.rig).toBe("continuous-skeletal-canvas");
 });
 
 test("goalkeepers remain on the continuous articulated scene-depth rig", async ({ page }) => {
