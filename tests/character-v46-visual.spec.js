@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 
 // Visual approval must come from the authoritative Football Lab camera after
 // the V46 runtime bridge is rebuilt; Blender previews are not accepted here.
-// This capture evaluates the volumetric short-hair and textured-skin Viktor pass.
+// This gate now proves both the approved standing model and the live strike deformation.
 async function enterClassic(page) {
-  await page.goto("/index.html?capture=viktor-v46-hair-skin", { waitUntil: "networkidle" });
+  await page.goto("/index.html?capture=viktor-v46-strike", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
 
   await expect.poll(
@@ -26,7 +26,45 @@ async function enterClassic(page) {
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
 }
 
-test("capture Viktor Kane V46 in the authoritative gameplay camera", async ({ page }) => {
+async function dismissCoach(page) {
+  const skip = page.getByRole("button", { name: "SKIP TUTORIAL" });
+  if (await skip.isVisible().catch(() => false)) {
+    await skip.click({ force: true });
+  }
+}
+
+async function waitForClip(page, clip, path) {
+  await page.waitForFunction(
+    (expected) => window.__footballLabHeroFrameV46?.clip === expected,
+    clip,
+    { timeout: 8000, polling: "raf" }
+  );
+
+  await page.locator("#gameCanvas").screenshot({ path });
+
+  const frame = await page.evaluate(() => window.__footballLabHeroFrameV46);
+  expect(frame?.renderer).toBe("real-skinned-glb-3d");
+  expect(frame?.production3D).toBe(true);
+  expect(frame?.clip).toBe(clip);
+}
+
+async function executeLiveShot(page) {
+  await dismissCoach(page);
+  await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 6000 });
+
+  // READY -> AIM -> POWER -> CONTACT -> SHOOTING.
+  // The short delays deliberately respect the runtime's 70 ms input lock while
+  // still exercising the real interactive shot path rather than mutating state.
+  await page.locator("#shotAction").click({ force: true });
+  await page.waitForTimeout(120);
+  await page.locator("#shotAction").click({ force: true });
+  await page.waitForTimeout(180);
+  await page.locator("#shotAction").click({ force: true });
+  await page.waitForTimeout(180);
+  await page.locator("#shotAction").click({ force: true });
+}
+
+test("capture Viktor Kane V46 standing and striking in the authoritative gameplay camera", async ({ page }) => {
   await enterClassic(page);
 
   await expect.poll(
@@ -58,4 +96,9 @@ test("capture Viktor Kane V46 in the authoritative gameplay camera", async ({ pa
     path: "test-results/viktor-v46-full-ui-ready.png",
     fullPage: true
   });
+
+  await executeLiveShot(page);
+  await waitForClip(page, "windup", "test-results/viktor-v46-strike-windup.png");
+  await waitForClip(page, "contact", "test-results/viktor-v46-strike-contact.png");
+  await waitForClip(page, "follow-through", "test-results/viktor-v46-strike-follow-through.png");
 });
