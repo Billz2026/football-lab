@@ -3,9 +3,9 @@ import {
   setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
   renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
 } from "./core-v6.js?v=32.4";
-import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js";
-import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js";
-import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v10.js?v=10";
+import { resolveShotPhysics } from "./runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.4";
+import { resizeCanvas, drawScene } from "./runtime-v23-bridge-render-v17-3-1-64b7ab3399.js?v=40.3.0";
+import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v32.js?v=38.7.0";
 import { difficultyForStage } from "./difficulty-v9.js?v=32.4";
 import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.4";
 import { keeperForStage } from "./keepers-v14.js?v=32.4";
@@ -15,6 +15,7 @@ state.debugDiagnostics = false;
 state.presentation = null;
 state.presentationTimeout = null;
 state.impactTimer = null;
+state.contactHapticTimer = null;
 state.pendingStageAdvance = false;
 state.actionLockedUntil = 0;
 window.__footballLabDiagnostics = window.__footballLabDiagnostics || [];
@@ -25,8 +26,10 @@ let suppressActionClickUntil = 0;
 function clearPresentationTimers() {
   clearTimeout(state.presentationTimeout);
   clearTimeout(state.impactTimer);
+  clearTimeout(state.contactHapticTimer);
   state.presentationTimeout = null;
   state.impactTimer = null;
+  state.contactHapticTimer = null;
 }
 
 function clearResultBanner() {
@@ -81,13 +84,17 @@ function showStageIntro() {
     stageNumber: state.stage + 1,
     distanceYards: state.currentStage.distanceYards,
     stageName: state.currentStage.name,
+    chapterNumber: state.currentStage.chapterNumber,
+    chapterName: state.currentStage.chapterName,
+    venue: state.currentStage.venue,
+    weather: state.currentStage.weather,
     challenge: difficulty.challenge,
     keeperId: keeper.id,
     wallId: wall.id
   };
   elements.shotAction.textContent = "START STAGE";
   playStageSound();
-  state.presentationTimeout = setTimeout(prepareNextShot, 700);
+  state.presentationTimeout = setTimeout(prepareNextShot, 1100);
 }
 
 function startGame() {
@@ -134,8 +141,14 @@ function vibrate(pattern) {
 }
 
 function placementLabel(shot) {
-  const horizontal = shot.aimX < 0.33 ? "LEFT" : shot.aimX > 0.67 ? "RIGHT" : "CENTRE";
-  const vertical = shot.aimY < 0.31 ? "HIGH" : shot.aimY > 0.59 ? "LOW" : "MID";
+  const horizontal = shot.aimX < 0
+    ? "OUTSIDE LEFT"
+    : shot.aimX > 1
+      ? "OUTSIDE RIGHT"
+      : shot.aimX < 0.33 ? "LEFT" : shot.aimX > 0.67 ? "RIGHT" : "CENTRE";
+  const vertical = shot.aimY < 0
+    ? "ABOVE BAR"
+    : shot.aimY < 0.31 ? "HIGH" : shot.aimY > 0.67 ? "LOW" : "MID";
   return `${vertical} ${horizontal}`;
 }
 
@@ -151,7 +164,7 @@ function contactWindowForShot() {
   const accuracy = Number(character.stats?.accuracy) || 75;
   const composure = Number(character.stats?.composure) || 75;
   const skillBonus = (accuracy - 75) * 0.00055 + (composure - 75) * 0.00028;
-  const curvePenalty = Math.abs(state.shot?.previewCurve || state.shot?.curve || 0) * 0.036;
+  const curvePenalty = Math.abs(state.shot?.previewCurve || 0) * 0.036;
   const distancePenalty = Math.max(0, (state.currentStage.distanceYards - 20) * 0.0008);
   const modeAdjustment = state.controlMode === "guided" ? 0.038 : state.controlMode === "expert" ? -0.022 : 0;
   return Math.max(0.052, Math.min(0.175,
@@ -221,6 +234,7 @@ function buildBreakdown(shot) {
 
 function handlePresentationAction() {
   const phase = state.presentation?.phase;
+  if (phase === "result") return true;
   if (phase === "replay") {
     finishReplay(state.animation?.id);
     return true;
@@ -231,6 +245,10 @@ function handlePresentationAction() {
   }
   if (phase === "stage") {
     prepareNextShot();
+    return true;
+  }
+  if (phase === "chapter-complete") {
+    advanceAfterChapter();
     return true;
   }
   return false;
@@ -274,42 +292,41 @@ function handleAction(inputTime = performance.now()) {
     return;
   }
 
-  if (state.phase === "power") {
-    state.shot.power = state.meterValue;
-    elements.powerReadout.textContent = `${Math.round(state.shot.power * 100)}% · ${strikeQualityLabel(state.shot.power)}`;
-    state.shot.contactWindow = contactWindowForShot();
-    setPhase("contact");
-    return;
-  }
-
   if (state.phase === "aim") {
     const target = currentAimTarget();
-    Object.assign(state.shot, { aimX: target.x, aimY: target.y, curve: Number.isFinite(state.shot.previewCurve) ? state.shot.previewCurve : 0 });
+    Object.assign(state.shot, {
+      aimX: target.x,
+      aimY: target.y,
+      curve: Math.max(-1, Math.min(1, state.shot.previewCurve || 0))
+    });
     elements.aimReadout.textContent = target.label;
     elements.curveReadout.textContent = curveLabel(state.shot);
     setPhase("power");
     return;
   }
 
-  if (state.phase === "contact") {
-    const offset = state.meterValue - 0.5;
-    const window = Number(state.shot.contactWindow) || contactWindowForShot();
-    const quality = contactQualityAt(state.meterValue, window);
-    state.shot.contactTiming = state.meterValue;
-    state.shot.contactOffset = offset;
-    state.shot.contactErrorRatio = Math.abs(offset) / Math.max(0.025, window);
-    state.shot.contactQuality = quality;
-    if (elements.contactReadout) elements.contactReadout.textContent = contactLabel(quality, offset) + " · " + Math.round(quality * 100) + "%";
-    takeShot();
+  if (state.phase === "power") {
+    state.shot.power = state.meterValue;
+    state.shot.contactWindow = contactWindowForShot();
+    elements.powerReadout.textContent = `${Math.round(state.shot.power * 100)}% · ${strikeQualityLabel(state.shot.power)}`;
+    setPhase("contact");
     return;
   }
 
   if (state.phase === "contact") {
-    const window = Number(state.shot?.contactWindow) || 0.1;
-    const quality = contactQualityAt(state.meterValue, window);
+    const window = Number(state.shot.contactWindow) || contactWindowForShot();
     const offset = state.meterValue - 0.5;
-    elements.meterNumber.textContent = quality >= 0.94 ? "PERFECT" : (offset < 0 ? "EARLY" : "LATE") + " · " + Math.round(quality * 100) + "%";
-  } else if (state.phase === "curve") {
+    const quality = contactQualityAt(state.meterValue, window);
+    state.shot.contactTiming = state.meterValue;
+    state.shot.contactOffset = Math.max(-1, Math.min(1, offset / 0.5));
+    state.shot.contactErrorRatio = offset / Math.max(0.025, window);
+    state.shot.contactQuality = quality;
+    if (elements.contactReadout) elements.contactReadout.textContent = contactLabel(quality, offset);
+    takeShot();
+    return;
+  }
+
+  if (state.phase === "curve") {
     state.shot.curve = (state.meterValue - 0.5) * 2;
     elements.curveReadout.textContent = curveLabel(state.shot);
     takeShot();
@@ -336,11 +353,31 @@ function impactRatioForShot(shot) {
   return shot.outcome === "GOAL" || shot.outcome === "MISS" ? 0.96 : 0.9;
 }
 
+function cinematicFlightProgress(value) {
+  const t = Math.max(0, Math.min(1, value));
+  if (t <= 0.87) return (t / 0.87) * 0.9;
+  const u = Math.max(0, Math.min(1, (t - 0.87) / 0.13));
+  const smooth = u * u * (3 - 2 * u);
+  return 0.9 + smooth * 0.1;
+}
+
+function visualTimeRatioForPath(pathRatio) {
+  const target = Math.max(0, Math.min(1, pathRatio));
+  let low = 0;
+  let high = 1;
+  for (let index = 0; index < 16; index += 1) {
+    const mid = (low + high) / 2;
+    if (cinematicFlightProgress(mid) < target) low = mid;
+    else high = mid;
+  }
+  return (low + high) / 2;
+}
+
 function settleDurationForShot(shot) {
-  if (shot.outcome === "SAVE") return 390;
-  if (shot.outcome === "WALL") return 300;
-  if (shot.outcome === "POST" || shot.outcome === "BAR") return 310;
-  return 260;
+  if (shot.outcome === "SAVE") return 410;
+  if (shot.outcome === "WALL") return 310;
+  if (shot.outcome === "POST" || shot.outcome === "BAR") return 330;
+  return 285;
 }
 
 function takeShot() {
@@ -348,12 +385,19 @@ function takeShot() {
   clearResultBanner();
   const { flightDuration, diagnostics } = resolveShotPhysics();
   recordDiagnostics(diagnostics);
-  const runUpDuration = 560;
-  const contactHoldDuration = 140;
-  const settleDuration = settleDurationForShot(state.shot);
+  const character = activeCharacter();
+  const motionProfile = ({
+    "dax-ryder": { runUpDuration: 640, contactHoldDuration: 76, settleBonus: 45, style: "power" },
+    "leo-vale": { runUpDuration: 720, contactHoldDuration: 72, settleBonus: 70, style: "precision" },
+    "zion-arc": { runUpDuration: 680, contactHoldDuration: 74, settleBonus: 60, style: "curve" },
+    "kai-mori": { runUpDuration: 760, contactHoldDuration: 78, settleBonus: 85, style: "composure" }
+  })[character.id] || { runUpDuration: 700, contactHoldDuration: 74, settleBonus: 60, style: "balanced" };
+  const { runUpDuration, contactHoldDuration } = motionProfile;
+  const settleDuration = settleDurationForShot(state.shot) + motionProfile.settleBonus;
   const startedAt = performance.now();
   const impactRatio = impactRatioForShot(state.shot);
-  const impactDelayMs = runUpDuration + contactHoldDuration + flightDuration * impactRatio;
+  const impactTimeRatio = visualTimeRatioForPath(impactRatio);
+  const impactDelayMs = runUpDuration + contactHoldDuration + flightDuration * impactTimeRatio;
 
   state.presentation = {
     phase: "flight",
@@ -361,10 +405,14 @@ function takeShot() {
     impactAt: startedAt + impactDelayMs,
     outcome: state.shot.outcome,
     saveType: state.shot.saveType,
-    topCorner: state.shot.topCorner
+    topCorner: state.shot.topCorner,
+    impactHoldMs: 220,
+    cinematicFinalApproach: true,
+    impactTimeRatio
   };
 
   playImpactSound(state.shot.outcome, impactDelayMs / 1000);
+  state.contactHapticTimer = setTimeout(() => vibrate(12), runUpDuration + contactHoldDuration);
   state.impactTimer = setTimeout(() => {
     const patterns = {
       GOAL: 35,
@@ -386,7 +434,9 @@ function takeShot() {
     settleDuration,
     totalDuration: runUpDuration + contactHoldDuration + flightDuration + settleDuration,
     impactPlayed: false,
-    isReplay: false
+    isReplay: false,
+    motionStyle: motionProfile.style,
+    characterId: character.id
   };
   state.finishedAnimationId = null;
 }
@@ -394,7 +444,7 @@ function takeShot() {
 function scoreShot(shot) {
   shot.lifeRestored = false;
   if (shot.outcome !== "GOAL") {
-    state.misses = Math.min(MAX_LIVES, state.misses + 1);
+    state.misses += 1;
     state.streak = 0;
     state.pendingStageAdvance = false;
     return 0;
@@ -402,13 +452,6 @@ function scoreShot(shot) {
 
   state.streak += 1;
   state.bestRunStreak = Math.max(state.bestRunStreak, state.streak);
-  if (state.streak % LIFE_STREAK_TARGET === 0 && state.misses > 0) {
-    state.misses -= 1;
-    shot.lifeRestored = true;
-    window.dispatchEvent(new CustomEvent("footballlab:liferestored", {
-      detail: { lives: MAX_LIVES - state.misses, streak: state.streak }
-    }));
-  }
   const strikeBonus = shot.strikeQuality >= 0.9 ? 350 : shot.strikeQuality >= 0.68 ? 175 : 0;
   const distanceBonus = Math.max(0, state.currentStage.distanceYards - 20) * 34;
   const points = 1000
@@ -424,20 +467,30 @@ function scoreShot(shot) {
   return points;
 }
 
+function outcomeHeading(shot) {
+  return ({
+    GOAL: "GOAL",
+    SAVE: "SAVED",
+    WALL: "BLOCKED",
+    POST: "OFF THE POST",
+    BAR: "CROSSBAR",
+    MISS: "WIDE"
+  })[shot.outcome] || "SHOT COMPLETE";
+}
+
 function resultBannerForShot(shot, points) {
   if (shot.outcome === "GOAL") {
-    if (shot.lifeRestored) return `LIFE RESTORED · +${formatScore(points)}`;
-    if (shot.topCorner) return `TOP CORNER +${formatScore(points)}`;
-    if (shot.strikeQuality >= 0.9) return `PERFECT STRIKE +${formatScore(points)}`;
+    if (shot.topCorner) return `GOAL · TOP CORNER +${formatScore(points)}`;
+    if (shot.strikeQuality >= 0.9) return `GOAL · PERFECT STRIKE +${formatScore(points)}`;
     return `GOAL +${formatScore(points)}`;
   }
   return ({
-    SAVE: shot.saveType === "CATCH" ? "HELD BY KEEPER" : "PARRIED AWAY",
-    WALL: "BLOCKED BY WALL",
+    SAVE: shot.saveType === "CATCH" ? "SAVED · HELD" : "SAVED · PARRIED",
+    WALL: "BLOCKED",
     POST: "OFF THE POST",
-    BAR: "OFF THE BAR",
-    MISS: "OFF TARGET"
-  })[shot.outcome] || "NO GOAL";
+    BAR: "CROSSBAR",
+    MISS: "WIDE"
+  })[shot.outcome] || "SHOT COMPLETE";
 }
 
 function finishPrimaryShot(animationId) {
@@ -449,9 +502,14 @@ function finishPrimaryShot(animationId) {
   const miss = shot.outcome !== "GOAL";
 
   renderHud();
-  showResult(resultBannerForShot(shot, points), miss);
+  const resultMessage = resultBannerForShot(shot, points);
+  showResult(resultMessage, miss);
   setPhase("result");
-  playOutcomeSound(shot.outcome, { topCorner: shot.topCorner });
+  elements.phaseTitle.textContent = outcomeHeading(shot);
+  elements.phaseHelp.textContent = resultMessage;
+  elements.shotAction.textContent = "RESULT";
+  elements.shotAction.disabled = true;
+  playOutcomeSound(shot.outcome, { topCorner: shot.topCorner, saveType: shot.saveType });
 
   state.presentation = {
     ...state.presentation,
@@ -460,12 +518,22 @@ function finishPrimaryShot(animationId) {
     outcome: shot.outcome,
     saveType: shot.saveType,
     topCorner: shot.topCorner,
+    resultHoldMs: 760,
     breakdown: buildBreakdown(shot)
   };
 
-  const replayable = Boolean(shot.topCorner || shot.lifeRestored || ["POST", "BAR"].includes(shot.outcome));
-  if (replayable) startReplay();
-  else showBreakdown();
+  const replayable = Boolean(shot.outcome === "GOAL" && (
+    shot.topCorner
+    || shot.strikeQuality >= 0.9
+    || (Math.abs(shot.curve || 0) >= 0.68 && shot.diagnostics?.wallLane === "AROUND")
+  ));
+  state.presentationTimeout = setTimeout(() => {
+    if (state.presentation?.phase !== "result") return;
+    clearResultBanner();
+    elements.shotAction.disabled = false;
+    if (replayable) startReplay();
+    else showBreakdown();
+  }, 760);
 }
 
 function startReplay() {
@@ -497,9 +565,9 @@ function startReplay() {
     startedAt,
     runUpDuration: 1,
     contactHoldDuration: 0,
-    flightDuration: 680,
-    settleDuration: 70,
-    totalDuration: 751,
+    flightDuration: 820,
+    settleDuration: 90,
+    totalDuration: 911,
     impactPlayed: true,
     isReplay: true
   };
@@ -530,34 +598,63 @@ function showBreakdown() {
   state.presentationTimeout = setTimeout(continueAfterBreakdown, 650);
 }
 
+function beginNextStage() {
+  state.stage += 1;
+  syncStage();
+  const { keeper, wall } = announceMatchupChange();
+  renderHud();
+  const difficulty = difficultyForStage(state.stage, stageConfig());
+  state.presentation = {
+    phase: "stage",
+    startedAt: performance.now(),
+    skippable: true,
+    stageNumber: state.stage + 1,
+    distanceYards: state.currentStage.distanceYards,
+    stageName: state.currentStage.name,
+    chapterNumber: state.currentStage.chapterNumber,
+    chapterName: state.currentStage.chapterName,
+    venue: state.currentStage.venue,
+    weather: state.currentStage.weather,
+    challenge: difficulty.challenge,
+    keeperId: keeper.id,
+    wallId: wall.id
+  };
+  elements.shotAction.textContent = "START NEXT STAGE";
+  playStageSound();
+  vibrate([12, 28, 12]);
+  state.presentationTimeout = setTimeout(prepareNextShot, 1100);
+}
+
+function showChapterComplete() {
+  clearPresentationTimers();
+  state.presentation = {
+    phase: "chapter-complete",
+    startedAt: performance.now(),
+    skippable: true,
+    chapterNumber: state.currentStage.chapterNumber,
+    chapterName: state.currentStage.chapterName,
+    venue: state.currentStage.venue,
+    scoreLabel: `${formatScore(state.score)} PTS`
+  };
+  elements.shotAction.textContent = "CONTINUE JOURNEY";
+  playStageSound({ chapterComplete: true });
+  vibrate([18, 35, 18, 45, 24]);
+  state.presentationTimeout = setTimeout(advanceAfterChapter, 1650);
+}
+
+function advanceAfterChapter() {
+  if (state.presentation?.phase !== "chapter-complete") return;
+  clearPresentationTimers();
+  beginNextStage();
+}
+
 function continueAfterBreakdown() {
   if (state.presentation?.phase !== "breakdown") return;
   clearPresentationTimers();
-  if (state.misses >= MAX_LIVES) {
-    endRun();
-    return;
-  }
   if (state.pendingStageAdvance) {
-    state.stage += 1;
-    syncStage();
-    const { keeper, wall } = announceMatchupChange();
-    renderHud();
-    const difficulty = difficultyForStage(state.stage, stageConfig());
-    state.presentation = {
-      phase: "stage",
-      startedAt: performance.now(),
-      skippable: true,
-      stageNumber: state.stage + 1,
-      distanceYards: state.currentStage.distanceYards,
-      stageName: state.currentStage.name,
-      challenge: difficulty.challenge,
-      keeperId: keeper.id,
-      wallId: wall.id
-    };
-    elements.shotAction.textContent = "START NEXT STAGE";
-    playStageSound();
-    vibrate([12, 28, 12]);
-    state.presentationTimeout = setTimeout(prepareNextShot, 700);
+    const completedStage = state.stage + 1;
+    if (completedStage <= 30 && completedStage % 5 === 0) showChapterComplete();
+    else beginNextStage();
     return;
   }
   prepareNextShot();
@@ -569,7 +666,6 @@ function finishAnimation(animationId) {
 }
 
 function prepareNextShot() {
-  if (state.misses >= MAX_LIVES) return;
   resetPresentation();
   state.shot = createShot();
   syncStage();
@@ -612,7 +708,8 @@ function updateMeter(delta) {
     state.meterClock += delta;
     const modeSpeed = state.controlMode === "guided" ? 0.84 : state.controlMode === "expert" ? 1.16 : 1;
     const curvePressure = 1 + Math.abs(state.shot?.curve || 0) * 0.24;
-    const speed = (3.05 + stage.aimSpeed * 0.18) * difficulty.meter.aim * meterMultiplier("aim", state.stage) * modeSpeed * curvePressure;
+    const speed = (3.05 + stage.aimSpeed * 0.18) * difficulty.meter.aim
+      * meterMultiplier("aim", state.stage) * modeSpeed * curvePressure;
     state.meterValue = (Math.sin(state.meterClock * speed - Math.PI / 2) + 1) / 2;
   } else {
     state.meterClock += delta;
@@ -624,7 +721,14 @@ function updateMeter(delta) {
   elements.meterFill.style.width = `${percentage}%`;
   elements.meterMarker.style.left = `${percentage}%`;
 
-  if (state.phase === "curve") {
+  if (state.phase === "contact") {
+    const window = Number(state.shot?.contactWindow) || 0.1;
+    const quality = contactQualityAt(state.meterValue, window);
+    const offset = state.meterValue - 0.5;
+    elements.meterNumber.textContent = quality >= 0.94
+      ? "PERFECT"
+      : `${offset < 0 ? "EARLY" : "LATE"} · ${Math.round(quality * 100)}%`;
+  } else if (state.phase === "curve") {
     const curve = (state.meterValue - 0.5) * 2;
     elements.meterNumber.textContent = `${curve < -0.12 ? "L" : curve > 0.12 ? "R" : "C"} ${Math.round(Math.abs(curve) * 100)}%`;
   } else if (state.phase === "aim") {
@@ -671,7 +775,11 @@ function openModePreview(name) {
 
 [
   [elements.playClassic, startGame], [elements.classicCard, startGame], [elements.modalPlay, startGame], [elements.retryGame, startGame],
-  [elements.returnMenu, returnToMenu], [elements.exitGame, returnToMenu], [elements.brandButton, returnToMenu],
+  [elements.returnMenu, returnToMenu],
+  [elements.exitGame, () => window.dispatchEvent(new CustomEvent("footballlab:openfinish"))],
+  [elements.brandButton, () => state.screen === "game"
+    ? window.dispatchEvent(new CustomEvent("footballlab:openfinish"))
+    : returnToMenu()],
   [elements.howToPlay, () => openModal(elements.howModal)]
 ].forEach(([element, handler]) => element.addEventListener("click", handler));
 
@@ -711,6 +819,13 @@ window.addEventListener("footballlab:beginstrike", () => {
   handleAction(performance.now());
 });
 
+window.addEventListener("footballlab:submitrun", () => {
+  if (state.screen !== "game" || elements.gameOverModal.classList.contains("is-open")) return;
+  setPhase("ready");
+  endRun();
+  window.dispatchEvent(new CustomEvent("footballlab:runsubmitted"));
+});
+
 $$('[data-preview]').forEach((button) => button.addEventListener("click", () => openModePreview(button.dataset.preview)));
 $$('[data-close-modal]').forEach((button) => button.addEventListener("click", () => closeModal(elements.howModal)));
 $$('[data-close-preview]').forEach((button) => button.addEventListener("click", () => closeModal(elements.previewModal)));
@@ -741,6 +856,12 @@ requestAnimationFrame(frame);
 
 
 
-window.__footballLabAuthoritativeStateV46 = state;
-
-window.__footballLabRuntimeV23 = Object.freeze({ staticModules: true, generatedModuleCount: 8 });
+window.__footballLabRuntimeV23 = Object.freeze({ staticModules: true, generatedModuleCount: 9 });
+window.__footballLabExecutionV324 = Object.freeze({
+  build: "32.4.0",
+  deterministicContact: true,
+  twoStopMeter: true,
+  meterValue() { return state.meterValue; },
+  contactWindow() { return contactWindowForShot(); },
+  contactQuality(value, window = contactWindowForShot()) { return contactQualityAt(value, window); }
+});

@@ -7,8 +7,8 @@ import {
   kickerWorld, supportingPlayers
 } from "./world-v7.js?v=32.4";
 import { projectWorld, projectSegment, projectedHeight } from "./projection-v6.js?v=32.4";
-import { sampleShotPath } from "./physics-v7.js?v=7";
-import { playKickSound } from "./audio-v6.js?v=7";
+import { sampleShotPath } from "./physics-v7.js?v=32.4";
+import { playKickSound } from "./audio-v6.js?v=32.4";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { keeperForStage } from "./keepers-v14.js?v=32.4";
 import { wallForStage, buildWallLayout } from "./walls-v15.js?v=32.4";
@@ -49,6 +49,12 @@ function replayPathProgress(value) {
   return 0.82 + smooth01((t - 0.67) / 0.33) * 0.18;
 }
 
+function cinematicFlightProgress(value) {
+  const t = clamp(value, 0, 1);
+  if (t <= 0.87) return (t / 0.87) * 0.9;
+  return 0.9 + smooth01((t - 0.87) / 0.13) * 0.1;
+}
+
 function progressAt(time) {
   if (!state.animation) {
     return { elapsed: 0, run: 0, contact: 0, flight: 0, motionFlight: 0, settle: 0, complete: false, replay: false };
@@ -67,7 +73,7 @@ function progressAt(time) {
     run: clamp(elapsed / runUpDuration, 0, 1),
     contact: contactHoldDuration > 0 ? clamp((elapsed - runUpDuration) / contactHoldDuration, 0, 1) : 0,
     flight,
-    motionFlight: replay ? replayPathProgress(flight) : flight,
+    motionFlight: replay ? replayPathProgress(flight) : cinematicFlightProgress(flight),
     settle: clamp((elapsed - flightEnd) / settleDuration, 0, 1),
     complete: elapsed >= state.animation.totalDuration,
     replay
@@ -77,22 +83,50 @@ function progressAt(time) {
 function cameraForFrame(time) {
   const camera = buildCamera(state.currentStage);
   const progress = progressAt(time);
-  if (state.animation && progress.motionFlight > 0) {
-    const follow = easeOutCubic(progress.motionFlight) * 0.42;
-    camera.position.z -= follow;
-    camera.position.y -= follow * 0.05;
-    camera.target.y += follow * 0.06;
+  const reducedMotion = document.documentElement.classList.contains("reduced-motion-v22");
+  if (state.animation && progress.motionFlight > 0 && !reducedMotion) {
+    const composition = easeOutCubic(clamp((progress.motionFlight - 0.085) / 0.915, 0, 1));
+    const finalApproach = smooth01(clamp((progress.motionFlight - 0.66) / 0.34, 0, 1));
+    const ball = sampleShotPath(state.shot?.path, progress.motionFlight);
+    camera.position.z -= composition * (progress.replay ? 5.55 : 4.55) + finalApproach * (progress.replay ? 0.55 : 0.42);
+    camera.position.y += composition * 0.14;
+    camera.fovY = lerp(
+      camera.fovY,
+      progress.replay ? 25.9 : 27.9,
+      clamp(composition * 0.82 + finalApproach * 0.12, 0, 0.94)
+    );
+    if (ball) {
+      camera.target.x = lerp(camera.target.x, ball.x, clamp(composition * 0.84 + finalApproach * 0.1, 0, 0.94));
+      camera.target.y = lerp(camera.target.y, ball.y, clamp(composition * 0.72 + finalApproach * 0.12, 0, 0.9));
+      camera.target.z = lerp(camera.target.z, ball.z, composition * (1 - progress.motionFlight) * 0.26);
+    }
   }
+  window.__footballLabCameraV32 = {
+    ballFollow: Boolean(state.animation && progress.motionFlight > 0 && !reducedMotion),
+    closeFollow: true,
+    kickerClearsFrame: true,
+    finalApproachEmphasis: true,
+    impactHoldThroughSettle: true,
+    fovY: camera.fovY,
+    reducedMotion,
+    flight: progress.motionFlight
+  };
   return camera;
 }
 
 function applyCameraFeedback(time) {
-  if (!state.animation || state.animation.isReplay) return;
+  if (!state.animation || state.animation.isReplay || document.documentElement.classList.contains("reduced-motion-v22")) return;
   const progress = progressAt(time);
   const contact = clamp(progress.flight / 0.075, 0, 1);
-  if (contact <= 0 || contact >= 1) return;
-  const strength = Math.sin(contact * Math.PI) * 1.85;
-  ctx.translate(Math.sin(time * 0.13) * strength, Math.cos(time * 0.17) * strength * 0.45);
+  const impact = impactRatio();
+  const outcomeWindow = clamp((progress.motionFlight - impact) / 0.095, 0, 1);
+  const contactStrength = contact > 0 && contact < 1 ? Math.sin(contact * Math.PI) * 1.9 : 0;
+  const impactStrength = outcomeWindow > 0 && outcomeWindow < 1
+    ? Math.sin(outcomeWindow * Math.PI) * ({ GOAL: 2.6, SAVE: 2.2, POST: 3.2, BAR: 3.2, WALL: 2.5 }[state.shot?.outcome] || 0.9)
+    : 0;
+  const strength = contactStrength + impactStrength;
+  if (strength <= 0) return;
+  ctx.translate(Math.sin(time * 0.17) * strength, Math.cos(time * 0.21) * strength * 0.48);
 }
 
 function lineWorld(a, b, width = 1.6, colour = "rgba(235,255,232,.68)") {
@@ -127,73 +161,437 @@ function roundedRect(x, y, width, height, radius) {
   ctx.closePath();
 }
 
-function drawBackground() {
-  const sky = ctx.createLinearGradient(0, 0, 0, 360);
-  sky.addColorStop(0, "#06150f");
-  sky.addColorStop(0.72, "#0a281a");
-  sky.addColorStop(1, "#12321f");
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+const VENUE_THEMES = Object.freeze({
+  academy: Object.freeze({
+    sky: ["#173929", "#2f6946", "#8aac6b"], stand: ["#0c1711", "#19281e"], crowd: "220,244,207", glow: "210,249,153", lights: false,
+    architecture: Object.freeze({ name: "FOUNDATION GROUND", scale: 0.62, tiers: 1, crowdDensity: 0.48, roof: 0, concourse: false, bays: 6, aisleCount: 3, upperDepth: 0, capacityLabel: "ACADEMY GROUND" })
+  }),
+  city: Object.freeze({
+    sky: ["#1b2432", "#654a45", "#c27a51"], stand: ["#080d12", "#18212a"], crowd: "255,220,178", glow: "255,167,94", lights: true,
+    architecture: Object.freeze({ name: "BOROUGH ARENA", scale: 0.76, tiers: 2, crowdDensity: 0.62, roof: 0.38, concourse: true, bays: 8, aisleCount: 4, upperDepth: 0.36, capacityLabel: "BOROUGH END" })
+  }),
+  night: Object.freeze({
+    sky: ["#020714", "#071527", "#142b3f"], stand: ["#010409", "#08111a"], crowd: "202,228,255", glow: "102,181,255", lights: true,
+    architecture: Object.freeze({ name: "CONTINENTAL PARK", scale: 0.86, tiers: 2, crowdDensity: 0.74, roof: 0.58, concourse: true, bays: 10, aisleCount: 5, upperDepth: 0.52, capacityLabel: "CONTINENTAL STAND" })
+  }),
+  storm: Object.freeze({
+    sky: ["#081016", "#172832", "#334750"], stand: ["#03070a", "#0d171b"], crowd: "187,216,220", glow: "151,208,220", lights: true,
+    architecture: Object.freeze({ name: "TEMPEST STADIUM", scale: 0.91, tiers: 2, crowdDensity: 0.80, roof: 0.78, concourse: true, bays: 11, aisleCount: 5, upperDepth: 0.58, capacityLabel: "TEMPEST BOWL" })
+  }),
+  world: Object.freeze({
+    sky: ["#080516", "#15102b", "#2b2040"], stand: ["#020205", "#0e0b16"], crowd: "255,233,174", glow: "242,201,102", lights: true,
+    architecture: Object.freeze({ name: "CROWN ARENA", scale: 1.0, tiers: 3, crowdDensity: 0.91, roof: 0.88, concourse: true, bays: 13, aisleCount: 6, upperDepth: 0.74, capacityLabel: "WORLD STAGE" })
+  }),
+  summit: Object.freeze({
+    sky: ["#03070d", "#101d28", "#29404a"], stand: ["#010304", "#091014"], crowd: "228,245,247", glow: "194,236,239", lights: true,
+    architecture: Object.freeze({ name: "SUMMIT BOWL", scale: 1.08, tiers: 3, crowdDensity: 0.98, roof: 1, concourse: true, bays: 15, aisleCount: 7, upperDepth: 0.88, capacityLabel: "LEGENDS SUMMIT" })
+  })
+});
 
-  const stand = ctx.createLinearGradient(0, 112, 0, 350);
-  stand.addColorStop(0, "rgba(1,4,2,.92)");
-  stand.addColorStop(1, "rgba(5,12,8,.7)");
-  ctx.fillStyle = stand;
-  ctx.fillRect(0, 112, WORLD.width, 244);
+function stadiumQualityV403A() {
+  const coarse = window.matchMedia?.("(pointer: coarse)")?.matches || false;
+  const rect = elements.canvas.getBoundingClientRect();
+  const pixels = Math.max(1, rect.width * rect.height * Math.min(window.devicePixelRatio || 1, 2));
+  return coarse || pixels > 1550000 ? 1 : 2;
+}
 
-  for (let row = 0; row < 5; row += 1) {
-    for (let x = 10 + row * 13; x < WORLD.width; x += 22) {
-      const alpha = 0.065 + ((x + row * 23) % 70) / 1100;
-      ctx.fillStyle = `rgba(228,255,205,${alpha})`;
+function goalClearBoundsV403A() {
+  const left = projectWorld({ x: -GOAL.halfWidth * 1.45, y: 0.1, z: -GOAL.depth * 0.25 }, activeCamera, viewport);
+  const right = projectWorld({ x: GOAL.halfWidth * 1.45, y: 0.1, z: -GOAL.depth * 0.25 }, activeCamera, viewport);
+  if (!left?.visible || !right?.visible) return { left: WORLD.width * 0.39, right: WORLD.width * 0.61 };
+  return { left: Math.min(left.x, right.x), right: Math.max(left.x, right.x) };
+}
+
+function drawTierShapeV403A(top, bottom, inset, topColour, bottomColour) {
+  const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+  gradient.addColorStop(0, topColour);
+  gradient.addColorStop(1, bottomColour);
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.moveTo(inset, top);
+  ctx.lineTo(WORLD.width - inset, top);
+  ctx.lineTo(WORLD.width, bottom);
+  ctx.lineTo(0, bottom);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawCrowdTierV403A(theme, top, bottom, rowCount, density, seed, cleanBounds) {
+  const quality = stadiumQualityV403A();
+  const rowGap = (bottom - top) / Math.max(1, rowCount);
+  const baseSpacing = quality === 1 ? 28 : 21;
+  const spacing = baseSpacing / Math.max(0.58, density);
+  for (let row = 0; row < rowCount; row += 1) {
+    const y = top + rowGap * (row + 0.62);
+    const rowScale = 0.72 + row * 0.045;
+    for (let x = -12 + ((row + seed) % 3) * 7; x < WORLD.width + 12; x += spacing) {
+      const wave = Math.sin((x + seed * 31 + row * 19) * 0.071);
+      const jitterX = wave * 3.2;
+      const px = x + jitterX;
+      const inKeeperLane = px > cleanBounds.left && px < cleanBounds.right && y > 210;
+      const silhouetteAlpha = inKeeperLane ? 0.075 : 0.13 + ((row + seed) % 4) * 0.012;
+      const highlight = ((Math.floor(px / spacing) + row * 5 + seed) % 11 === 0) && !inKeeperLane;
+      const headR = (quality === 1 ? 2.0 : 2.35) * rowScale;
+      ctx.fillStyle = highlight ? `rgba(${theme.crowd},${0.22 * density})` : `rgba(${theme.crowd},${silhouetteAlpha * density})`;
       ctx.beginPath();
-      ctx.arc(x, 150 + row * 37 + Math.sin(x * 0.1) * 2, 3, 0, TAU);
+      ctx.arc(px, y - headR * 1.25, headR, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = inKeeperLane ? "rgba(3,8,6,.11)" : `rgba(${theme.crowd},${0.085 * density})`;
+      ctx.beginPath();
+      ctx.ellipse(px, y + headR * 0.8, headR * 1.75, headR * 1.1, 0, 0, TAU);
       ctx.fill();
     }
   }
+}
 
-  const glow = ctx.createRadialGradient(610, 190, 0, 610, 190, 470);
-  glow.addColorStop(0, "rgba(218,254,77,.11)");
-  glow.addColorStop(1, "rgba(218,254,77,0)");
+function drawAislesV403A(top, bottom, count, alpha) {
+  ctx.save();
+  ctx.strokeStyle = `rgba(220,235,226,${alpha})`;
+  ctx.lineWidth = 1.2;
+  for (let i = 1; i <= count; i += 1) {
+    const x = (WORLD.width / (count + 1)) * i;
+    const lean = (x - WORLD.width / 2) * 0.035;
+    ctx.beginPath();
+    ctx.moveTo(x - lean, top);
+    ctx.lineTo(x + lean, bottom);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawConcourseV403A(theme, y, height, bays, cleanBounds) {
+  ctx.fillStyle = "rgba(2,7,7,.78)";
+  ctx.fillRect(0, y, WORLD.width, height);
+  ctx.fillStyle = `rgba(${theme.glow},.10)`;
+  ctx.fillRect(0, y, WORLD.width, 2);
+  const bayW = WORLD.width / bays;
+  for (let i = 0; i < bays; i += 1) {
+    const x = i * bayW + bayW * 0.16;
+    const w = bayW * 0.68;
+    const centre = x + w / 2;
+    const inKeeperLane = centre > cleanBounds.left && centre < cleanBounds.right;
+    ctx.fillStyle = inKeeperLane ? "rgba(8,14,12,.48)" : `rgba(${theme.glow},.065)`;
+    ctx.fillRect(x, y + 7, w, Math.max(5, height - 14));
+  }
+}
+
+function drawRoofV403A(theme, amount) {
+  if (amount <= 0) return;
+  const depth = 18 + amount * 28;
+  ctx.fillStyle = "rgba(0,2,3,.88)";
+  ctx.beginPath();
+  ctx.moveTo(0, 84);
+  ctx.lineTo(WORLD.width, 84);
+  ctx.lineTo(WORLD.width, 84 + depth);
+  ctx.lineTo(WORLD.width * 0.91, 98 + depth * 0.72);
+  ctx.lineTo(WORLD.width * 0.09, 98 + depth * 0.72);
+  ctx.lineTo(0, 84 + depth);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = `rgba(${theme.glow},${0.09 + amount * 0.05})`;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(WORLD.width * 0.09, 98 + depth * 0.72);
+  ctx.lineTo(WORLD.width * 0.91, 98 + depth * 0.72);
+  ctx.stroke();
+}
+
+function drawFloodlightsV403A(theme, architecture) {
+  if (!theme.lights) return;
+  const mastInset = architecture.scale >= 0.95 ? 68 : 86;
+  for (const x of [mastInset, WORLD.width - mastInset]) {
+    ctx.fillStyle = "rgba(4,7,8,.92)";
+    ctx.fillRect(x - 4, 12, 8, 112);
+    const light = ctx.createRadialGradient(x, 25, 2, x, 25, 145 + architecture.scale * 28);
+    light.addColorStop(0, `rgba(${theme.glow},${0.30 + architecture.scale * 0.11})`);
+    light.addColorStop(1, `rgba(${theme.glow},0)`);
+    ctx.fillStyle = light;
+    ctx.fillRect(x - 170, -100, 340, 285);
+    ctx.fillStyle = `rgba(${theme.glow},.78)`;
+    ctx.fillRect(x - 30, 15, 60, 13);
+    for (let lamp = 0; lamp < 6; lamp += 1) {
+      ctx.fillStyle = "rgba(245,252,238,.72)";
+      ctx.fillRect(x - 25 + lamp * 10, 18, 5, 6);
+    }
+  }
+}
+
+function drawBackground() {
+  const theme = VENUE_THEMES[state.currentStage.environment] || VENUE_THEMES.academy;
+  const architecture = theme.architecture;
+  const cleanBounds = goalClearBoundsV403A();
+  const quality = stadiumQualityV403A();
+
+  const sky = ctx.createLinearGradient(0, 0, 0, 370);
+  sky.addColorStop(0, theme.sky[0]);
+  sky.addColorStop(0.66, theme.sky[1]);
+  sky.addColorStop(1, theme.sky[2]);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+
+  const standTop = 112 - architecture.scale * 12;
+  const standBottom = 356;
+  drawTierShapeV403A(standTop, standBottom, Math.max(0, 92 - architecture.scale * 78), theme.stand[0], theme.stand[1]);
+  drawRoofV403A(theme, architecture.roof);
+
+  const lowerTop = 218 - architecture.scale * 24;
+  const lowerBottom = 346;
+  const lowerRows = quality === 1 ? 3 : Math.round(3 + architecture.scale * 3);
+  ctx.fillStyle = "rgba(255,255,255,.025)";
+  ctx.fillRect(0, lowerTop - 4, WORLD.width, 2);
+  drawCrowdTierV403A(theme, lowerTop, lowerBottom, lowerRows, architecture.crowdDensity, 3, cleanBounds);
+  drawAislesV403A(lowerTop, lowerBottom, architecture.aisleCount, 0.035 + architecture.scale * 0.025);
+
+  if (architecture.tiers >= 2) {
+    const concourseY = 190 - architecture.scale * 18;
+    const concourseH = architecture.concourse ? 27 + architecture.scale * 7 : 0;
+    if (concourseH) drawConcourseV403A(theme, concourseY, concourseH, architecture.bays, cleanBounds);
+    const upperBottom = concourseY - 5;
+    const upperTop = 120 - architecture.upperDepth * 22;
+    drawTierShapeV403A(upperTop, upperBottom, 34 + (1 - architecture.scale) * 34, "rgba(4,9,11,.86)", "rgba(12,21,22,.92)");
+    drawCrowdTierV403A(theme, upperTop + 12, upperBottom - 8, quality === 1 ? 2 : 3 + Math.round(architecture.upperDepth * 2), architecture.crowdDensity * 0.88, 8, cleanBounds);
+    drawAislesV403A(upperTop + 6, upperBottom - 4, Math.max(3, architecture.aisleCount - 1), 0.03 + architecture.scale * 0.02);
+  }
+
+  if (architecture.tiers >= 3) {
+    const topBottom = 142;
+    const topTop = 94;
+    drawTierShapeV403A(topTop, topBottom, 86, "rgba(2,5,8,.93)", "rgba(8,13,17,.94)");
+    drawCrowdTierV403A(theme, topTop + 10, topBottom - 5, quality === 1 ? 1 : 2, architecture.crowdDensity * 0.72, 13, cleanBounds);
+  }
+
+  ctx.strokeStyle = "rgba(230,242,233,.11)";
+  ctx.lineWidth = 1;
+  for (const y of architecture.tiers >= 2 ? [214, 344] : [344]) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(WORLD.width, y);
+    ctx.stroke();
+  }
+
+  drawFloodlightsV403A(theme, architecture);
+
+  const glow = ctx.createRadialGradient(610, 190, 0, 610, 190, 500);
+  glow.addColorStop(0, `rgba(${theme.glow},${0.07 + architecture.scale * 0.045})`);
+  glow.addColorStop(1, `rgba(${theme.glow},0)`);
   ctx.fillStyle = glow;
-  ctx.fillRect(80, 0, 1050, 430);
+  ctx.fillRect(60, 0, 1080, 430);
+
+  const signWidth = 230 + architecture.scale * 72;
+  const signX = (WORLD.width - signWidth) / 2;
+  const signY = architecture.tiers >= 2 ? 128 : 136;
+  ctx.fillStyle = "rgba(1,5,4,.62)";
+  roundedRect(signX, signY, signWidth, 28, 5);
+  ctx.fill();
+  ctx.strokeStyle = `rgba(${theme.glow},.24)`;
+  ctx.stroke();
+  ctx.fillStyle = `rgba(${theme.glow},.72)`;
+  ctx.font = "900 9px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText(state.currentStage.venue || architecture.name, WORLD.width / 2, signY + 18);
+
+  window.__footballLabStadiumV403A = {
+    build: "40.3A",
+    environment: state.currentStage.environment,
+    venue: architecture.name,
+    scale: architecture.scale,
+    tiers: architecture.tiers,
+    crowdDensity: architecture.crowdDensity,
+    roof: architecture.roof,
+    concourse: architecture.concourse,
+    bays: architecture.bays,
+    quality,
+    keeperClearLane: true,
+    progression: "academy-to-summit-six-stadium-architecture"
+  };
+}
+
+function drawGoalContrastV402C() {
+  const leftBottom = projectWorld({ x: -GOAL.halfWidth, y: 0.02, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
+  const rightBottom = projectWorld({ x: GOAL.halfWidth, y: 0.02, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
+  const leftTop = projectWorld({ x: -GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
+  const rightTop = projectWorld({ x: GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth * 0.22 }, activeCamera, viewport);
+  const points = [leftBottom, rightBottom, leftTop, rightTop];
+  if (points.some((point) => !point?.visible)) return;
+
+  const minX = Math.min(...points.map((point) => point.x));
+  const maxX = Math.max(...points.map((point) => point.x));
+  const minY = Math.min(leftTop.y, rightTop.y);
+  const maxY = Math.max(leftBottom.y, rightBottom.y);
+  const goalSpan = Math.max(120, maxX - minX);
+  const goalHeight = Math.max(60, maxY - minY);
+  const centreX = (minX + maxX) / 2;
+  const centreY = minY + goalHeight * 0.6;
+  const radiusX = clamp(goalSpan * 0.78, 118, 250);
+  const radiusY = clamp(goalHeight * 0.92, 58, 128);
+  const feather = clamp(goalSpan * 0.16, 26, 54);
+  const left = clamp(centreX - radiusX * 0.82, 130, WORLD.width * 0.48);
+  const right = clamp(centreX + radiusX * 0.82, WORLD.width * 0.52, WORLD.width - 130);
+
+  // V40.2C: no rectangular backdrop. A very soft elliptical contrast field sits over the
+  // existing stand so the stadium remains continuous while the keeper lane stays readable.
+  ctx.save();
+  ctx.translate(centreX, centreY);
+  const scaleY = radiusY / radiusX;
+  ctx.scale(1, scaleY);
+  const shade = ctx.createRadialGradient(0, 0, 0, 0, 0, radiusX);
+  shade.addColorStop(0, "rgba(3,15,10,.115)");
+  shade.addColorStop(0.42, "rgba(3,15,10,.075)");
+  shade.addColorStop(0.72, "rgba(3,15,10,.032)");
+  shade.addColorStop(1, "rgba(3,15,10,0)");
+  ctx.fillStyle = shade;
+  ctx.beginPath();
+  ctx.arc(0, 0, radiusX, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+
+  window.__footballLabGoalContrastV402C = {
+    build: "40.2C",
+    left,
+    right,
+    centreX,
+    centreY,
+    radiusX,
+    radiusY,
+    feather,
+    goalSpan,
+    advertisingClear: true,
+    keeperContrast: "soft-radial-only",
+    treatment: "no-rectangle-continuous-stadium"
+  };
+}
+
+function pitchDetailTier() {
+  const coarse = window.matchMedia?.("(pointer: coarse)")?.matches || false;
+  const rect = elements.canvas.getBoundingClientRect();
+  const pixels = Math.max(1, rect.width * rect.height * Math.min(window.devicePixelRatio || 1, 2));
+  return coarse || pixels > 1550000 ? 1 : 2;
+}
+
+const PITCH_SURFACES = Object.freeze({
+  academy: Object.freeze({ base: "#1d6238", dark: "rgba(3,32,17,.075)", light: "rgba(225,255,204,.034)", grain: "rgba(219,247,193,.16)" }),
+  city: Object.freeze({ base: "#315d35", dark: "rgba(31,29,8,.075)", light: "rgba(255,231,178,.034)", grain: "rgba(230,225,170,.14)" }),
+  night: Object.freeze({ base: "#154735", dark: "rgba(0,16,19,.09)", light: "rgba(176,222,214,.032)", grain: "rgba(186,230,211,.13)" }),
+  storm: Object.freeze({ base: "#204f3b", dark: "rgba(4,27,28,.09)", light: "rgba(197,226,211,.03)", grain: "rgba(203,229,211,.12)" }),
+  world: Object.freeze({ base: "#285638", dark: "rgba(17,13,25,.08)", light: "rgba(244,224,174,.03)", grain: "rgba(226,220,178,.12)" }),
+  summit: Object.freeze({ base: "#214d3f", dark: "rgba(3,24,27,.085)", light: "rgba(204,238,224,.032)", grain: "rgba(204,233,220,.13)" })
+});
+
+function paintPitchLine(a, b, width = 1.6) {
+  lineWorld(a, b, width + 1.3, "rgba(4,31,17,.28)");
+  lineWorld(a, b, width, "rgba(242,255,238,.82)");
+}
+
+function turfPatch(cx, cz, radiusX, radiusZ, colour, segments = 16) {
+  const points = [];
+  for (let index = 0; index < segments; index += 1) {
+    const angle = (index / segments) * TAU;
+    points.push({
+      x: cx + Math.cos(angle) * radiusX,
+      y: 0.006,
+      z: cz + Math.sin(angle) * radiusZ
+    });
+  }
+  polygonWorld(points, colour);
 }
 
 function drawPitch() {
   const nearZ = activeCamera.position.z - 0.32;
+  const surface = PITCH_SURFACES[state.currentStage.environment] || PITCH_SURFACES.academy;
+  const quality = pitchDetailTier();
+
   polygonWorld([
     { x: -PITCH.halfWidth, y: 0, z: -4 },
     { x: PITCH.halfWidth, y: 0, z: -4 },
     { x: PITCH.halfWidth, y: 0, z: nearZ },
     { x: -PITCH.halfWidth, y: 0, z: nearZ }
-  ], "#18572f");
+  ], surface.base);
 
-  for (let z = -4, index = 0; z < nearZ; z += 4.2, index += 1) {
-    const next = Math.min(nearZ, z + 4.2);
+  // Cross-pitch mowing: broader near the camera, tighter toward goal through perspective.
+  for (let z = -4, index = 0; z < nearZ; z += 3.45, index += 1) {
+    const next = Math.min(nearZ, z + 3.45);
+    const depth = clamp((z + 4) / Math.max(1, nearZ + 4), 0, 1);
+    const fill = index % 2
+      ? surface.light.replace(/\.[0-9]+\)$/, (0.026 + depth * 0.018).toFixed(3) + ")")
+      : surface.dark.replace(/\.[0-9]+\)$/, (0.05 + depth * 0.035).toFixed(3) + ")");
     polygonWorld([
       { x: -PITCH.halfWidth, y: 0.002, z },
       { x: PITCH.halfWidth, y: 0.002, z },
       { x: PITCH.halfWidth, y: 0.002, z: next },
       { x: -PITCH.halfWidth, y: 0.002, z: next }
-    ], index % 2 ? "rgba(255,255,255,.014)" : "rgba(0,0,0,.035)");
+    ], fill);
   }
 
-  const white = "rgba(236,255,232,.66)";
-  lineWorld({ x: -PITCH.halfWidth, y: 0.015, z: 0 }, { x: PITCH.halfWidth, y: 0.015, z: 0 }, 1.6, white);
+  // Longitudinal mower passes break up the old flat horizontal-band look.
+  const laneWidth = quality === 2 ? 5.4 : 7.2;
+  for (let x = -PITCH.halfWidth, index = 0; x < PITCH.halfWidth; x += laneWidth, index += 1) {
+    const next = Math.min(PITCH.halfWidth, x + laneWidth);
+    polygonWorld([
+      { x, y: 0.003, z: -3.95 },
+      { x: next, y: 0.003, z: -3.95 },
+      { x: next, y: 0.003, z: nearZ },
+      { x, y: 0.003, z: nearZ }
+    ], index % 2 ? "rgba(255,255,232,.010)" : "rgba(0,16,8,.018)");
+  }
+
+  // Controlled goalmouth light: depth through contrast, not blanket brightness.
+  for (let z = -2.6, band = 0; z < 8.2; z += 2.7, band += 1) {
+    const next = z + 2.7;
+    const alpha = Math.max(0.008, 0.026 - band * 0.0032);
+    polygonWorld([
+      { x: -PITCH.halfWidth, y: 0.004, z },
+      { x: PITCH.halfWidth, y: 0.004, z },
+      { x: PITCH.halfWidth, y: 0.004, z: next },
+      { x: -PITCH.halfWidth, y: 0.004, z: next }
+    ], "rgba(225,255,205," + alpha.toFixed(3) + ")");
+  }
+
+  // Deterministic micro turf. No per-frame randomness, and reduced count on Fold/coarse devices.
+  const tuftCount = quality === 2 ? 72 : 30;
+  const zSpan = Math.max(12, nearZ + 3.2);
+  for (let index = 0; index < tuftCount; index += 1) {
+    const x = -PITCH.halfWidth + 0.8 + ((index * 17.31 + 3.7) % Math.max(2, PITCH.halfWidth * 2 - 1.6));
+    const z = -3.2 + ((index * 11.47 + 1.9) % zSpan);
+    const point = projectWorld({ x, y: 0.018, z }, activeCamera, viewport);
+    if (!point.visible || point.y < 290 || point.y > WORLD.height - 18) continue;
+    const depthFade = clamp((point.y - 280) / 520, 0.18, 1);
+    ctx.strokeStyle = surface.grain.replace(/\.[0-9]+\)$/, (0.05 + depthFade * 0.12).toFixed(3) + ")");
+    ctx.lineWidth = quality === 2 ? 0.75 : 0.62;
+    ctx.beginPath();
+    ctx.moveTo(point.x - 1.5 * depthFade, point.y + 0.4);
+    ctx.lineTo(point.x + 1.1 * depthFade, point.y - 1.3 * depthFade);
+    ctx.stroke();
+  }
+
+  // Wear stays localized: free-kick setup and goalmouth, never a dirty all-over texture.
+  const ballStart = ballWorld(state.currentStage);
+  turfPatch(ballStart.x, ballStart.z, 0.48, 0.29, "rgba(92,82,44,.095)", quality === 2 ? 18 : 12);
+  turfPatch(ballStart.x + 0.32, ballStart.z + 0.18, 0.35, 0.2, "rgba(214,205,139,.035)", 12);
+  turfPatch(-1.35, 0.85, 1.15, 0.72, "rgba(94,82,48,.052)", quality === 2 ? 18 : 12);
+  turfPatch(1.35, 0.85, 1.15, 0.72, "rgba(94,82,48,.052)", quality === 2 ? 18 : 12);
+  turfPatch(0, 1.8, 2.45, 1.05, "rgba(214,205,139,.018)", 18);
+
+  // Painted markings use a soft dark under-stroke so they sit on the turf rather than float above it.
+  paintPitchLine({ x: -PITCH.halfWidth, y: 0.015, z: 0 }, { x: PITCH.halfWidth, y: 0.015, z: 0 }, 1.72);
   const penalty = PITCH.penaltyHalfWidth;
-  lineWorld({ x: -penalty, y: 0.015, z: 0 }, { x: -penalty, y: 0.015, z: PITCH.penaltyDepth }, 1.55, white);
-  lineWorld({ x: penalty, y: 0.015, z: 0 }, { x: penalty, y: 0.015, z: PITCH.penaltyDepth }, 1.55, white);
-  lineWorld({ x: -penalty, y: 0.015, z: PITCH.penaltyDepth }, { x: penalty, y: 0.015, z: PITCH.penaltyDepth }, 1.55, white);
+  paintPitchLine({ x: -penalty, y: 0.015, z: 0 }, { x: -penalty, y: 0.015, z: PITCH.penaltyDepth }, 1.62);
+  paintPitchLine({ x: penalty, y: 0.015, z: 0 }, { x: penalty, y: 0.015, z: PITCH.penaltyDepth }, 1.62);
+  paintPitchLine({ x: -penalty, y: 0.015, z: PITCH.penaltyDepth }, { x: penalty, y: 0.015, z: PITCH.penaltyDepth }, 1.62);
 
   const six = PITCH.sixYardHalfWidth;
-  lineWorld({ x: -six, y: 0.018, z: 0 }, { x: -six, y: 0.018, z: PITCH.sixYardDepth }, 1.3, white);
-  lineWorld({ x: six, y: 0.018, z: 0 }, { x: six, y: 0.018, z: PITCH.sixYardDepth }, 1.3, white);
-  lineWorld({ x: -six, y: 0.018, z: PITCH.sixYardDepth }, { x: six, y: 0.018, z: PITCH.sixYardDepth }, 1.3, white);
+  paintPitchLine({ x: -six, y: 0.018, z: 0 }, { x: -six, y: 0.018, z: PITCH.sixYardDepth }, 1.42);
+  paintPitchLine({ x: six, y: 0.018, z: 0 }, { x: six, y: 0.018, z: PITCH.sixYardDepth }, 1.42);
+  paintPitchLine({ x: -six, y: 0.018, z: PITCH.sixYardDepth }, { x: six, y: 0.018, z: PITCH.sixYardDepth }, 1.42);
 
   const spot = projectWorld({ x: 0, y: 0.025, z: PITCH.penaltySpotZ }, activeCamera, viewport);
   if (spot.visible) {
-    ctx.fillStyle = white;
+    ctx.fillStyle = "rgba(5,32,18,.28)";
     ctx.beginPath();
-    ctx.arc(spot.x, spot.y, Math.max(1.2, spot.scale * 0.065), 0, TAU);
+    ctx.arc(spot.x + 0.7, spot.y + 0.8, Math.max(1.7, spot.scale * 0.076), 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = "rgba(244,255,241,.88)";
+    ctx.beginPath();
+    ctx.arc(spot.x, spot.y, Math.max(1.25, spot.scale * 0.064), 0, TAU);
     ctx.fill();
   }
 
@@ -206,8 +604,6 @@ function drawPitch() {
     };
     if (point.z >= PITCH.penaltyDepth - 0.08) arcPoints.push(point);
   }
-  ctx.strokeStyle = white;
-  ctx.lineWidth = 1.5;
   ctx.beginPath();
   let started = false;
   for (const point of arcPoints) {
@@ -216,7 +612,24 @@ function drawPitch() {
     started ? ctx.lineTo(projected.x, projected.y) : ctx.moveTo(projected.x, projected.y);
     started = true;
   }
-  if (started) ctx.stroke();
+  if (started) {
+    ctx.strokeStyle = "rgba(4,31,17,.28)";
+    ctx.lineWidth = 2.75;
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(242,255,238,.82)";
+    ctx.lineWidth = 1.52;
+    ctx.stroke();
+  }
+
+  window.__footballLabPitchV401 = {
+    build: "40.1.0",
+    surface: state.currentStage.environment || "academy",
+    mowing: "cross-cut-depth-graded",
+    grain: "deterministic-device-scaled",
+    wear: "free-kick-and-goalmouth-localized",
+    paintedLines: "understroke-plus-bright-paint",
+    quality: quality === 2 ? "full" : "fold-mobile"
+  };
 }
 
 function drawGoal(time) {
@@ -226,9 +639,23 @@ function drawGoal(time) {
   const frame = "rgba(247,255,244,.96)";
   const net = "rgba(238,255,236,.19)";
   const progress = progressAt(time);
-  const ripple = state.animation && state.shot.outcome === "GOAL" && progress.motionFlight > 0.88
-    ? Math.sin(clamp((progress.motionFlight - 0.88) / 0.12, 0, 1) * Math.PI) * 0.2
+  const impact = impactRatio();
+  const goalImpactActive = Boolean(state.animation && state.shot.outcome === "GOAL" && progress.motionFlight >= impact);
+  const impactFlightTail = goalImpactActive
+    ? clamp((progress.motionFlight - impact) / Math.max(0.028, 1 - impact), 0, 1)
     : 0;
+  const rippleClock = impactFlightTail * 0.28 + progress.settle * 0.72;
+  const speedEnergy = 0.6 + clamp((state.shot.speedMps || 0) / 42, 0, 1) * 0.42;
+  const rippleEnergy = goalImpactActive
+    ? Math.max(0, Math.exp(-rippleClock * 1.22) * speedEnergy * (0.7 + Math.cos(rippleClock * TAU * 2.15) * 0.3))
+    : 0;
+  const impactX = Number.isFinite(state.shot?.actualX) ? lerp(left, right, state.shot.actualX) : 0;
+  const impactY = Number.isFinite(state.shot?.actualY) ? GOAL.height * (1 - state.shot.actualY) : GOAL.height * 0.5;
+  const localRipple = (x, y) => {
+    const xFalloff = Math.max(0, 1 - Math.abs(x - impactX) / (GOAL.width * 0.55));
+    const yFalloff = Math.max(0, 1 - Math.abs(y - impactY) / (GOAL.height * 0.72));
+    return rippleEnergy * xFalloff * yFalloff;
+  };
 
   lineWorld({ x: left, y: 0, z: 0 }, { x: left, y: GOAL.height, z: 0 }, 3.4, frame);
   lineWorld({ x: right, y: 0, z: 0 }, { x: right, y: GOAL.height, z: 0 }, 3.4, frame);
@@ -239,12 +666,21 @@ function drawGoal(time) {
 
   for (let i = 0; i <= 10; i += 1) {
     const x = lerp(left, right, i / 10);
-    lineWorld({ x, y: 0.04, z: backZ - ripple }, { x, y: GOAL.height, z: 0 }, 0.75, net);
+    const ripple = localRipple(x, impactY);
+    lineWorld({ x, y: 0.04, z: backZ - ripple * 0.72 }, { x, y: GOAL.height, z: -ripple * 0.18 }, 0.82, net);
   }
   for (let i = 1; i < 7; i += 1) {
     const y = (GOAL.height * i) / 7;
-    lineWorld({ x: left, y, z: 0 }, { x: right, y, z: backZ - ripple }, 0.75, net);
+    const ripple = localRipple(impactX, y);
+    lineWorld({ x: left, y, z: -ripple * 0.1 }, { x: right, y, z: backZ - ripple * 1.3 }, 0.82, net);
   }
+  window.__footballLabNetV32 = {
+    localised: true,
+    active: rippleEnergy > 0,
+    impactX,
+    impactY,
+    energy: rippleEnergy
+  };
 }
 
 function drawSimplePerson(world, options = {}) {
@@ -353,21 +789,23 @@ function drawArticulated(world, pose, colours, heightMetres = 1.82) {
   ctx.rotate(rotation);
   ctx.globalAlpha = pose.alpha ?? 1;
 
-  ctx.fillStyle = "rgba(0,0,0,.22)";
+  const airborne = clamp((pose.lift || 0) / 0.14, 0, 1);
+  ctx.fillStyle = `rgba(0,0,0,${0.24 - airborne * 0.1})`;
   ctx.beginPath();
-  ctx.ellipse(0, 3 + liftPixels, h * 0.15, h * 0.038, 0, 0, TAU);
+  ctx.ellipse(0, 3 + liftPixels, h * (0.15 - airborne * 0.025), h * (0.038 - airborne * 0.008), 0, 0, TAU);
   ctx.fill();
 
   const crouch = pose.crouch || 0;
   const pelvis = screenPoint((pose.pelvisX || 0) * h, -0.335 * h + crouch * h * 0.09);
   const chest = screenPoint((pose.chestX || 0) * h, -0.635 * h + crouch * h * 0.1);
-  const headRadius = h * 0.068;
+  const headRadius = h * 0.064;
   const neckBase = screenPoint(chest.x + (pose.headX || 0) * h * 0.2, chest.y - h * 0.025);
   const head = screenPoint(neckBase.x + (pose.headX || 0) * h * 0.8, neckBase.y - h * 0.12);
-  const shoulderHalf = h * 0.118;
-  const hipHalf = h * 0.068;
-  const leftShoulder = screenPoint(chest.x - shoulderHalf, chest.y + h * 0.015);
-  const rightShoulder = screenPoint(chest.x + shoulderHalf, chest.y + h * 0.015);
+  const shoulderHalf = h * 0.112;
+  const shoulderTilt = (pose.shoulderTilt || 0) * h;
+  const hipHalf = h * 0.072;
+  const leftShoulder = screenPoint(chest.x - shoulderHalf, chest.y + h * 0.015 + shoulderTilt);
+  const rightShoulder = screenPoint(chest.x + shoulderHalf, chest.y + h * 0.015 - shoulderTilt);
   const leftHip = screenPoint(pelvis.x - hipHalf, pelvis.y);
   const rightHip = screenPoint(pelvis.x + hipHalf, pelvis.y);
 
@@ -407,7 +845,7 @@ function drawArticulated(world, pose, colours, heightMetres = 1.82) {
       : screenPoint(0.22 * h, -0.55 * h)
   );
 
-  const legWidth = Math.max(4, h * 0.052);
+  const legWidth = Math.max(3.8, h * 0.049);
   drawSegment(leftHip, leftKnee, legWidth, shorts);
   drawSegment(leftKnee, leftAnkle, legWidth * 0.86, shorts);
   drawSegment(rightHip, rightKnee, legWidth, shorts);
@@ -620,42 +1058,70 @@ function pathRatioAtWall() {
 }
 
 function wallPose(progress, index, count, hit) {
+  const centreIndex = (count - 1) / 2;
+  const direction = index < centreIndex ? -1 : 1;
+  const variant = index % 5;
+  const personality = ["brace", "face-guard", "track-ball", "duck-flinch", "late-jump"][variant];
+  const idleBias = (variant - 2) * 0.005;
   if (!state.animation) {
+    const faceGuard = variant === 1 ? 0.075 : 0;
+    const duck = variant === 3 ? 0.014 : 0;
     return {
-      crouch: 0.025,
-      leftHand: { x: -0.1, y: -0.42 },
-      rightHand: { x: 0.1, y: -0.42 }
+      personality,
+      crouch: 0.025 + (index % 3) * 0.005 + duck,
+      pelvisX: idleBias,
+      chestX: -idleBias * 0.7,
+      headX: direction * (0.007 + variant * 0.0025),
+      shoulderTilt: (variant % 2 ? 1 : -1) * 0.011,
+      leftHand: { x: -0.1 - variant * 0.006, y: -0.42 - faceGuard },
+      rightHand: { x: 0.1 + variant * 0.006, y: -0.42 - faceGuard * 0.7 + (variant === 4 ? 0.025 : 0) }
     };
   }
 
   const flight = progress.motionFlight;
   const wallProfile = wallForStage(state.stage);
   const modifiers = wallProfile.modifiers;
-  const centreIndex = (count - 1) / 2;
+  const personalityOffset = [-0.016, 0.004, -0.006, 0.014, 0.038][variant];
   const stagger = (index - centreIndex) * modifiers.staggerTiming
-    + (index % 2 === 0 ? -modifiers.alternateDelay : modifiers.alternateDelay);
-  const passRatio = clamp(pathRatioAtWall() - modifiers.jumpLead + stagger, 0.1, 0.88);
-  const anticipation = smooth01((flight - (passRatio - 0.23)) / 0.14);
-  const jump = pulse01((flight - (passRatio - 0.12)) / Math.max(0.18, modifiers.jumpWindow * 1.5));
-  const landing = pulse01((flight - (passRatio + 0.1)) / 0.3);
+    + (index % 2 === 0 ? -modifiers.alternateDelay : modifiers.alternateDelay)
+    + personalityOffset;
+  const passRatio = clamp(pathRatioAtWall() - modifiers.jumpLead + stagger, 0.1, 0.9);
+  const anticipation = smooth01((flight - (passRatio - 0.245)) / 0.15);
+  const jumpWindow = Math.max(0.19, modifiers.jumpWindow * (1.4 + variant * 0.035));
+  const jump = pulse01((flight - (passRatio - 0.112)) / jumpWindow);
+  const landing = pulse01((flight - (passRatio + 0.082 + variant * 0.011)) / (0.29 + variant * 0.017));
   const jumpPattern = modifiers.jumpPattern[index % modifiers.jumpPattern.length] || 1;
   const hitRatio = state.shot.outcome === "WALL" && Number.isInteger(state.shot.collision?.index)
     ? state.shot.collision.index / Math.max(1, state.shot.path.length - 1)
     : passRatio;
-  const hitReact = hit ? pulse01((flight - hitRatio) / 0.32) : 0;
-  const direction = index < centreIndex ? -1 : 1;
+  const hitReact = hit ? pulse01((flight - hitRatio) / 0.34) : 0;
+  const passReact = pulse01((flight - passRatio) / (0.27 + variant * 0.016)) * (hit ? 0 : 1);
+  const headTurn = smooth01(clamp((flight - passRatio) / 0.22, 0, 1));
+  const faceGuard = variant === 1 ? anticipation * 0.095 : 0;
+  const duck = variant === 3 ? anticipation * 0.04 + Math.max(0, jump) * 0.025 : 0;
+  const lateJumpScale = variant === 4 ? 0.86 : 1;
+  const trackTurn = headTurn * (variant === 2 ? 1 : variant === 4 ? 0.72 : 0.42);
+  const tuck = Math.max(0, jump) * (0.017 + variant * 0.0035);
+  const armGuard = [0, 0.055, 0.025, 0.018, 0.012][variant];
+  const lateralFlinch = passReact * direction * (0.016 + variant * 0.005);
 
   return {
-    crouch: 0.025 + anticipation * 0.13 + landing * 0.105,
-    lift: Math.max(0, jump) * 0.118 * modifiers.jumpMultiplier * jumpPattern,
-    rotation: hitReact * direction * 0.28,
-    chestX: hitReact * direction * 0.08,
-    leftKnee: { x: -0.1 - hitReact * direction * 0.025, y: -0.15 + landing * 0.035 },
-    rightKnee: { x: 0.1 - hitReact * direction * 0.025, y: -0.15 + landing * 0.035 },
-    leftAnkle: { x: -0.13, y: -0.005 + landing * 0.01 },
-    rightAnkle: { x: 0.13, y: -0.005 + landing * 0.01 },
-    leftHand: { x: -0.09 - hitReact * 0.14, y: -0.42 + anticipation * 0.055 + hitReact * 0.035 },
-    rightHand: { x: 0.09 + hitReact * 0.14, y: -0.42 + anticipation * 0.055 - hitReact * 0.02 }
+    personality,
+    crouch: 0.025 + anticipation * 0.112 + landing * (0.09 + variant * 0.009) + duck,
+    lift: Math.max(0, jump) * 0.11 * modifiers.jumpMultiplier * jumpPattern * (0.95 + variant * 0.027) * lateJumpScale,
+    rotation: hitReact * direction * 0.34 + passReact * direction * (0.04 + variant * 0.011) + trackTurn * direction * 0.022,
+    torsoLean: hitReact * direction * 0.11 + lateralFlinch + (variant === 3 ? -duck * 0.8 : 0),
+    shoulderTilt: (variant % 2 ? 1 : -1) * (0.011 + anticipation * 0.016) + hitReact * direction * 0.052,
+    chestX: hitReact * direction * 0.09 + lateralFlinch,
+    headX: direction * (0.006 + trackTurn * (0.03 + variant * 0.004)),
+    leftKnee: { x: -0.1 - hitReact * direction * 0.024 - jump * 0.007, y: -0.15 - tuck + landing * 0.034 + duck * 0.24 },
+    rightKnee: { x: 0.1 - hitReact * direction * 0.024 + jump * 0.007, y: -0.15 - tuck * 0.84 + landing * 0.034 + duck * 0.24 },
+    leftAnkle: { x: -0.13 - jump * 0.005 - landing * (variant % 2 ? 0.008 : 0), y: -0.005 - tuck * 0.42 + landing * 0.012 },
+    rightAnkle: { x: 0.13 + jump * 0.005 + landing * (variant % 2 ? 0 : 0.008), y: -0.005 - tuck * 0.36 + landing * 0.012 },
+    leftToe: { x: -0.18 - jump * 0.01 - landing * (variant === 2 ? 0.016 : 0), y: -0.002 + landing * 0.006 },
+    rightToe: { x: 0.18 + jump * 0.01 + landing * (variant === 4 ? 0.018 : 0), y: -0.002 + landing * 0.006 },
+    leftHand: { x: -0.09 - armGuard - hitReact * 0.16 - passReact * (0.024 + variant * 0.007), y: -0.42 - faceGuard - anticipation * (0.014 + variant * 0.007) + hitReact * 0.045 },
+    rightHand: { x: 0.09 + armGuard + hitReact * 0.16 + passReact * (0.024 + (4 - variant) * 0.005), y: -0.42 - faceGuard * 0.72 + (variant === 4 ? anticipation * 0.025 : -anticipation * 0.012) - hitReact * 0.025 }
   };
 }
 
@@ -703,6 +1169,11 @@ function keeperState(progress, time) {
   const contactPoint = impactRatio();
   const land = smooth01((flight - Math.min(0.9, contactPoint + 0.01)) / 0.16);
   const recovery = smooth01(progress.settle);
+  const saveContact = state.shot?.outcome === "SAVE"
+    ? smooth01((flight - Math.max(0.1, contactPoint - 0.025)) / 0.055)
+    : 0;
+  const catchHold = state.shot?.saveType === "CATCH" ? smooth01((saveContact - 0.08) / 0.72) : 0;
+  const parryFollow = state.shot?.saveType === "PARRY" ? pulse01((flight - contactPoint) / 0.22) : 0;
 
   const world = {
     x: lerp(idle.x + adjustmentStep, plan.contact.x - direction * 0.08, launch),
@@ -725,6 +1196,19 @@ function keeperState(progress, time) {
   const absoluteLeftHand = direction > 0 ? trailHand : leadHand;
   const absoluteRightHand = direction > 0 ? leadHand : trailHand;
 
+  if (catchHold > 0) {
+    const chestTarget = { x: world.x + direction * 0.035, y: world.y + 1.05, z: world.z };
+    for (const hand of [absoluteLeftHand, absoluteRightHand]) {
+      hand.x = lerp(hand.x, chestTarget.x, catchHold * 0.72);
+      hand.y = lerp(hand.y, chestTarget.y, catchHold * 0.72);
+      hand.z = lerp(hand.z, chestTarget.z, catchHold * 0.72);
+    }
+  } else if (parryFollow > 0) {
+    const lead = direction > 0 ? absoluteRightHand : absoluteLeftHand;
+    lead.x += direction * parryFollow * 0.22;
+    lead.y += parryFollow * 0.06;
+  }
+
   const launchRotation = direction * lerp(0, 1.08, launch);
   const finalRotation = direction * lerp(1.08, 0.7, recovery);
   const rotation = land > 0 ? lerp(launchRotation, finalRotation, Math.max(land, recovery)) : launchRotation;
@@ -732,7 +1216,7 @@ function keeperState(progress, time) {
   return {
     world,
     pose: {
-      crouch: 0.08 + coil * 0.16 + land * 0.16 + recovery * 0.05,
+      crouch: 0.08 + coil * 0.16 + land * 0.16 + recovery * 0.05 + catchHold * 0.035,
       rotation,
       torsoLean: direction * launch * 0.12,
       chestX: direction * launch * 0.045,
@@ -755,7 +1239,9 @@ function keeperState(progress, time) {
       absoluteLeftHand,
       absoluteRightHand,
       glove: "#f7ffd2",
-      gloveScale: 1.68
+      gloveScale: state.shot?.saveType === "CATCH" ? 1.78 : 1.68,
+      saveMotion: state.shot?.saveType || null,
+      recovery
     }
   };
 }
@@ -791,8 +1277,8 @@ function drawWall(time) {
   for (const player of sorted) {
     const hit = state.shot.outcome === "WALL" && state.shot.collision?.playerIndex === player.index;
     const variedPose = wallPose(progress, player.index, wall.players.length, hit);
-    variedPose.headX = ((player.index % 3) - 1) * 0.012;
-    variedPose.rotation = (variedPose.rotation || 0) + (player.index % 2 ? 0.012 : -0.01);
+    variedPose.headX = (variedPose.headX || 0) + ((player.index % 3) - 1) * 0.008;
+    variedPose.rotation = (variedPose.rotation || 0) + (player.index % 2 ? 0.009 : -0.008);
     drawArticulated(
       player,
       variedPose,
@@ -805,6 +1291,18 @@ function drawWall(time) {
       wallProfile.playerHeight * heightPattern[player.index % heightPattern.length]
     );
   }
+  window.__footballLabWallMotionV32 = {
+    profile: wallProfile.id,
+    reactive: true,
+    individualTiming: true,
+    individualHeadAndArmReaction: true,
+    shoulderCounterMotion: true,
+    behaviourVariants: ["brace", "face-guard", "track-ball", "duck-flinch", "late-jump"],
+    staggeredLanding: true,
+    jumping: Boolean(state.animation && progress.motionFlight > 0),
+    hitPlayer: state.shot?.collision?.playerIndex ?? null,
+    build: "39.1.0"
+  };
 }
 
 function drawKeeperContactPulse(time) {
@@ -825,6 +1323,14 @@ function drawKeeperContactPulse(time) {
 }
 
 function drawKeeper(time) {
+  const premiumSceneDraw = window.__footballLabPremiumKeeperSceneDrawV3852;
+  if (typeof premiumSceneDraw === "function") {
+    try {
+      if (premiumSceneDraw(time)) return;
+    } catch (error) {
+      console.error("Football Lab V38.5.2 in-scene keeper failed; falling back to legacy rig", error);
+    }
+  }
   const progress = progressAt(time);
   const keeper = keeperState(progress, time);
   const keeperProfile = keeperForStage(state.stage);
@@ -841,6 +1347,13 @@ function drawKeeper(time) {
     keeperProfile.visualHeight * 1.08
   );
   drawKeeperContactPulse(time);
+  window.__footballLabKeeperMotionV32 = {
+    profile: keeperProfile.id,
+    motion: state.shot?.outcome === "SAVE" ? state.shot.saveType : state.animation ? "DIVE" : "READY",
+    airborne: keeper.world.y > 0.02,
+    recovering: Boolean(progress.settle > 0),
+    outcome: state.shot?.outcome || null
+  };
 }
 
 function drawKicker(time) {
@@ -885,17 +1398,32 @@ function targetWorld() {
 
 function drawAimGuide() {
   if (state.phase !== "aim") return;
-  const start = projectWorld(ballWorld(state.currentStage), activeCamera, viewport);
-  const end = projectWorld(targetWorld(), activeCamera, viewport);
+  const guideProgress = state.controlMode === "guided" ? 0.55 : state.controlMode === "expert" ? 0 : 0.32;
+  if (guideProgress <= 0) return;
+  const startWorld = ballWorld(state.currentStage);
+  const finishWorld = targetWorld();
+  const curve = clamp(state.shot?.previewCurve || 0, -1, 1);
+  const guideWorld = {
+    x: lerp(startWorld.x, finishWorld.x, guideProgress) + curve * 0.22,
+    y: lerp(startWorld.y, finishWorld.y, guideProgress) + Math.sin(Math.PI * guideProgress) * 0.55,
+    z: lerp(startWorld.z, finishWorld.z, guideProgress)
+  };
+  const start = projectWorld(startWorld, activeCamera, viewport);
+  const end = projectWorld(guideWorld, activeCamera, viewport);
   if (!start.visible || !end.visible) return;
   ctx.save();
-  ctx.strokeStyle = "rgba(218,254,77,.13)";
-  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = "rgba(218,254,77,.28)";
+  ctx.lineWidth = 1.5;
   ctx.setLineDash([5, 8]);
   ctx.beginPath();
   ctx.moveTo(start.x, start.y);
   ctx.lineTo(end.x, end.y);
   ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "rgba(218,254,77,.5)";
+  ctx.beginPath();
+  ctx.arc(end.x, end.y, 2.4, 0, TAU);
+  ctx.fill();
   ctx.restore();
 }
 
@@ -950,6 +1478,78 @@ function drawContactBurst(time) {
   ctx.restore();
 }
 
+function drawPanelPentagon(cx, cy, radius, rotation, fillStyle) {
+  ctx.fillStyle = fillStyle;
+  ctx.beginPath();
+  for (let i = 0; i < 5; i += 1) {
+    const angle = rotation - Math.PI / 2 + i * TAU / 5;
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawPremiumMatchBall(projected, radius, pathProgress, contactImpact) {
+  const squashX = 1 + contactImpact * 0.075;
+  const squashY = 1 - contactImpact * 0.1;
+  const speed = clamp((state.shot?.speedMps || 0) / 40, 0, 1);
+  const curve = Number(state.shot?.curve) || 0;
+  const spinDirection = Math.sign(curve) || 1;
+  const rotation = pathProgress * (9.5 + speed * 8.5) * spinDirection;
+
+  ctx.save();
+  ctx.translate(projected.x, projected.y);
+  ctx.scale(squashX, squashY);
+
+  const sphere = ctx.createRadialGradient(-radius * 0.34, -radius * 0.42, radius * 0.05, 0, 0, radius);
+  sphere.addColorStop(0, "#ffffff");
+  sphere.addColorStop(0.55, "#f3f4f2");
+  sphere.addColorStop(0.82, "#d9ddda");
+  sphere.addColorStop(1, "#aeb5b0");
+  ctx.fillStyle = sphere;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius, 0, TAU);
+  ctx.fill();
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.965, 0, TAU);
+  ctx.clip();
+  ctx.rotate(rotation);
+
+  ctx.strokeStyle = "rgba(25,29,27,.20)";
+  ctx.lineWidth = Math.max(0.4, radius * 0.045);
+  for (let i = 0; i < 5; i += 1) {
+    const angle = -Math.PI / 2 + i * TAU / 5;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(angle) * radius * 0.25, Math.sin(angle) * radius * 0.25);
+    ctx.quadraticCurveTo(Math.cos(angle + 0.18) * radius * 0.48, Math.sin(angle + 0.18) * radius * 0.48, Math.cos(angle) * radius * 0.64, Math.sin(angle) * radius * 0.64);
+    ctx.stroke();
+  }
+
+  drawPanelPentagon(0, 0, radius * 0.275, 0, "#141715");
+  for (let i = 0; i < 5; i += 1) {
+    const angle = -Math.PI / 2 + i * TAU / 5;
+    const cx = Math.cos(angle) * radius * 0.68;
+    const cy = Math.sin(angle) * radius * 0.68;
+    drawPanelPentagon(cx, cy, radius * 0.165, angle + Math.PI / 5, "#1a1d1b");
+  }
+  ctx.restore();
+
+  ctx.strokeStyle = "rgba(4,8,6,.72)";
+  ctx.lineWidth = Math.max(0.65, radius * 0.078);
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.96, 0, TAU);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(255,255,255,.30)";
+  ctx.beginPath();
+  ctx.ellipse(-radius * 0.32, -radius * 0.38, radius * 0.2, radius * 0.12, -0.45, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
 function drawBall(time, finishShot) {
   const progress = progressAt(time);
   let world = ballWorld(state.currentStage);
@@ -967,57 +1567,118 @@ function drawBall(time, finishShot) {
     if (progress.complete) finishShot(state.animation.id);
   }
 
+  const premiumKeeperFrame = window.__footballLabPremiumKeeperSceneFrameV3852;
+  if (
+    state.animation
+    && state.shot?.outcome === "SAVE"
+    && state.shot?.saveType === "CATCH"
+    && premiumKeeperFrame
+    && Math.abs(Number(premiumKeeperFrame.time) - Number(time)) < 0.5
+    && pathProgress >= impactRatio()
+    && premiumKeeperFrame.keeper?.pose?.catchBallWorld
+  ) {
+    const lock = smooth01((pathProgress - impactRatio()) / 0.055);
+    const held = premiumKeeperFrame.keeper.pose.catchBallWorld;
+    world = {
+      x: lerp(world.x, held.x, lock),
+      y: lerp(world.y, held.y, lock),
+      z: lerp(world.z, held.z, lock)
+    };
+  }
+
   if (state.animation && pathProgress > 0.035) drawTrail(pathProgress);
   const projected = projectWorld(world, activeCamera, viewport);
   if (!projected.visible) return;
-  const radius = clamp(projected.scale * 0.105, 3.5, 10.2);
+  const radius = clamp(projected.scale * 0.122, 5.2, 12.2);
 
-  ctx.save();
-  ctx.globalAlpha = 0.22;
-  ctx.fillStyle = "#000";
-  ctx.beginPath();
-  ctx.ellipse(projected.x, projected.y + radius * 0.68, radius * 1.1, radius * 0.35, 0, 0, TAU);
-  ctx.fill();
-  ctx.restore();
+  const contactImpact = state.animation && ["SAVE", "POST", "BAR"].includes(state.shot?.outcome)
+    ? Math.max(0, 1 - Math.abs(pathProgress - impactRatio()) / 0.022)
+    : 0;
 
-  const gradient = ctx.createRadialGradient(
-    projected.x - radius * 0.35,
-    projected.y - radius * 0.4,
-    1,
-    projected.x,
-    projected.y,
-    radius
-  );
-  gradient.addColorStop(0, "#fff");
-  gradient.addColorStop(1, "#c7d0c6");
-  ctx.fillStyle = gradient;
-  ctx.beginPath();
-  ctx.arc(projected.x, projected.y, radius, 0, TAU);
-  ctx.fill();
-
-  ctx.fillStyle = "#172019";
-  ctx.beginPath();
-  for (let i = 0; i < 5; i += 1) {
-    const angle = -Math.PI / 2 + i * TAU / 5 + pathProgress * 12;
-    const px = projected.x + Math.cos(angle) * radius * 0.38;
-    const py = projected.y + Math.sin(angle) * radius * 0.38;
-    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-  }
-  ctx.closePath();
-  ctx.fill();
+  drawPremiumMatchBall(projected, radius, pathProgress, contactImpact);
 }
 
 function drawTrail(progress) {
-  ctx.save();
-  for (let i = 1; i <= 7; i += 1) {
-    const world = sampleShotPath(state.shot.path, clamp(progress - i * 0.019, 0, 1));
+  const speed = clamp((state.shot?.speedMps || 24) / 38, 0.55, 1.25);
+  const sampleCount = 18;
+  const step = 0.0085 + speed * 0.0035;
+  const points = [];
+  for (let index = sampleCount; index >= 1; index -= 1) {
+    const world = sampleShotPath(state.shot.path, clamp(progress - index * step, 0, 1));
     if (!world) continue;
     const projected = projectWorld(world, activeCamera, viewport);
-    if (!projected.visible) continue;
-    ctx.fillStyle = `rgba(218,254,77,${(1 - i / 8) * 0.15})`;
+    if (projected.visible) points.push(projected);
+  }
+  if (points.length < 2) return;
+
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  for (let index = 1; index < points.length; index += 1) {
+    const t = index / (points.length - 1);
+    const a = points[index - 1];
+    const b = points[index];
+    ctx.strokeStyle = "rgba(235,242,234," + (0.025 + t * 0.11).toFixed(3) + ")";
+    ctx.lineWidth = 0.45 + t * (0.75 + speed * 0.18);
     ctx.beginPath();
-    ctx.arc(projected.x, projected.y, clamp(projected.scale * 0.06, 1.7, 6), 0, TAU);
-    ctx.fill();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawShotImpactFx(time) {
+  if (!state.animation || !state.shot?.path?.length) return;
+  const outcome = state.shot.outcome;
+  if (!["GOAL", "SAVE", "POST", "BAR", "WALL"].includes(outcome)) return;
+  const progress = progressAt(time);
+  const ratio = impactRatio();
+  if (progress.motionFlight < ratio) return;
+  const flightTail = clamp((progress.motionFlight - ratio) / Math.max(0.025, 1 - ratio), 0, 1);
+  const age = progress.motionFlight < 0.999 ? flightTail * 0.24 : 0.24 + progress.settle * 0.76;
+  if (age >= 1) return;
+
+  const impactWorld = outcome === "SAVE" && state.shot.keeperPlan?.contact
+    ? state.shot.keeperPlan.contact
+    : Number.isInteger(state.shot.impactIndex)
+      ? state.shot.path[state.shot.impactIndex]
+      : state.shot.path[state.shot.path.length - 1];
+  if (!impactWorld) return;
+  const point = projectWorld(impactWorld, activeCamera, viewport);
+  if (!point.visible) return;
+
+  const palette = outcome === "SAVE" ? "156,225,255"
+    : outcome === "GOAL" ? "218,254,77"
+      : outcome === "POST" || outcome === "BAR" ? "255,235,177"
+        : "244,247,240";
+  const fade = Math.max(0, 1 - age);
+  const radius = 9 + age * (outcome === "POST" || outcome === "BAR" ? 34 : 27);
+
+  ctx.save();
+  ctx.globalCompositeOperation = "screen";
+  const glow = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius * 1.65);
+  glow.addColorStop(0, "rgba(" + palette + "," + (0.27 * fade) + ")");
+  glow.addColorStop(1, "rgba(" + palette + ",0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(point.x - radius * 2, point.y - radius * 2, radius * 4, radius * 4);
+  ctx.strokeStyle = "rgba(" + palette + "," + (0.5 * fade) + ")";
+  ctx.lineWidth = outcome === "SAVE" ? 1.7 : 1.35;
+  ctx.beginPath();
+  ctx.arc(point.x, point.y, radius, 0, TAU);
+  ctx.stroke();
+
+  const particleCount = outcome === "POST" || outcome === "BAR" ? 9 : outcome === "SAVE" ? 6 : 4;
+  for (let index = 0; index < particleCount; index += 1) {
+    const angle = -2.7 + index * (TAU / particleCount) + age * 0.38;
+    const distance = 8 + age * (18 + (index % 3) * 5);
+    const length = 4 + (index % 3) * 2.5;
+    ctx.strokeStyle = "rgba(" + palette + "," + (fade * (0.2 + (index % 2) * 0.12)) + ")";
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(point.x + Math.cos(angle) * distance, point.y + Math.sin(angle) * distance);
+    ctx.lineTo(point.x + Math.cos(angle) * (distance + length), point.y + Math.sin(angle) * (distance + length));
+    ctx.stroke();
   }
   ctx.restore();
 }
@@ -1029,23 +1690,24 @@ export function drawScene(time, finishShot) {
   applyTransform();
   applyCameraFeedback(time);
   drawBackground();
+  drawGoalContrastV402C();
   drawPitch();
   drawGoal(time);
   drawSupportingPlayers();
-  const premiumKeeperDraw = window.__footballLabPremiumKeeperSceneDrawV3852;
-  if (typeof premiumKeeperDraw === "function") {
-    const keeperHandled = premiumKeeperDraw(time);
-    if (!keeperHandled) drawKeeper(time);
-  } else {
-    drawKeeper(time);
-  }
+  drawKeeper(time);
   drawWallSprayLine();
   drawWall(time);
   drawAimGuide();
   drawTarget();
-  const heroSelected = activeCharacter().id === "dax-ryder";
-  window.__footballLabBaseKickerSuppressedV1731 = heroSelected;
-  if (!heroSelected) drawKicker(time);
+  window.__footballLabBaseKickerSuppressedV30 = true;
+  // All four specialists are rendered by the unified premium rig after the base scene.
+  // Keeping the legacy rig available but suppressed avoids duplicate players.
+
   drawContactBurst(time);
   drawBall(time, finishShot);
+  drawShotImpactFx(time);
 }
+
+window.__footballLabBallImpactV386 = Object.freeze({ build: "38.6.0", readableBall: true, continuousCurlRibbon: true, persistentNetRipple: true, impactFx: true, physicsChanged: false, outcomeChanged: false });
+
+window.__footballLabWallAnimationV39 = Object.freeze({ build: "39.0.0", anticipation: "individual", jump: "staggered", reaction: "head-arm-torso", landing: "offset", proportions: "refined" });

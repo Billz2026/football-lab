@@ -1,13 +1,14 @@
 {
   "version": 23,
   "entry": "runtime-v23-main.js",
-  "generatedAt": "2026-08-16T14:46:16.171Z",
-  "generatorCount": 5,
-  "moduleCount": 8,
+  "generatedAt": "2026-08-06T09:58:51.640Z",
+  "generatorCount": 6,
+  "moduleCount": 9,
   "modules": [
     "runtime-v23-bridge-physics-v19-f1d39f9409.js",
     "runtime-v23-bridge-render-v17-3-1-64b7ab3399.js",
     "runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js",
+    "runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js",
     "runtime-v23-generated-physics-v15-9cf6fe15a3.js",
     "runtime-v23-generated-render-v15-v1731-1b04a249af.js",
     "runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js",
@@ -16,7 +17,11 @@
   ],
   "replacements": [
     {
-      "url": "/game/main-v18.js?v=32.4",
+      "url": "/game/hero-kicker-v17-3-1.js?v=1731",
+      "filename": "runtime-v23-generated-hero-kicker-v17-3-1-7c97a59e31.js"
+    },
+    {
+      "url": "/game/main-v18.js?v=19",
       "filename": "runtime-v23-main.js"
     },
     {

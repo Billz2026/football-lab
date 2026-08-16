@@ -1,8 +1,8 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v15-v1731-1b04a249af.js?v=40.3.0";
 import { clamp, WORLD, state, ctx, canvasView, easeOutCubic } from "./core-v6.js?v=32.4";
 import { GOAL, buildCamera, ballWorld, keeperWorld } from "./world-v7.js?v=32.4";
 import { projectWorld, projectSegment } from "./projection-v6.js?v=32.4";
-import { sampleShotPath } from "./physics-v7.js?v=7";
+import { sampleShotPath } from "./physics-v7.js?v=32.4";
 import { buildWallLayout } from "./walls-v15.js?v=32.4";
 
 export { resizeCanvas };
@@ -22,6 +22,12 @@ function smooth01(value) {
   return t * t * (3 - 2 * t);
 }
 
+function cinematicFlightProgress(value) {
+  const t = clamp(value, 0, 1);
+  if (t <= 0.87) return (t / 0.87) * 0.9;
+  return 0.9 + smooth01((t - 0.87) / 0.13) * 0.1;
+}
+
 function animationProgress(time) {
   if (!state.animation) return { flight: 0, motionFlight: 0, settle: 0, replay: false };
   const elapsed = time - state.animation.startedAt;
@@ -35,7 +41,7 @@ function animationProgress(time) {
     ? flight < 0.67
       ? easeOutCubic(flight / 0.67) * 0.82
       : 0.82 + smooth01((flight - 0.67) / 0.33) * 0.18
-    : flight;
+    : cinematicFlightProgress(flight);
   return {
     flight,
     motionFlight,
@@ -107,26 +113,80 @@ function drawStadiumAtmosphere(time) {
   }
   ctx.restore();
 
-  ctx.save();
-  const ribbon = ctx.createLinearGradient(0, 0, WORLD.width, 0);
-  ribbon.addColorStop(0, "rgba(25,75,47,.2)");
-  ribbon.addColorStop(0.2, "rgba(218,254,77,.28)");
-  ribbon.addColorStop(0.5, "rgba(240,255,205,.12)");
-  ribbon.addColorStop(0.8, "rgba(218,254,77,.28)");
-  ribbon.addColorStop(1, "rgba(25,75,47,.2)");
-  ctx.fillStyle = "rgba(1,8,4,.74)";
-  ctx.fillRect(0, 330, WORLD.width, 30);
-  ctx.fillStyle = ribbon;
-  ctx.fillRect(0, 332, WORLD.width, 2);
-  ctx.fillRect(0, 356, WORLD.width, 1);
-  ctx.fillStyle = "rgba(239,247,236,.62)";
-  ctx.font = "850 9px system-ui";
-  ctx.textAlign = "center";
-  const offset = (time / 22) % 220;
-  for (let x = -220 + offset; x < WORLD.width + 220; x += 220) {
-    ctx.fillText("FOOTBALL LAB  •  MASTER THE STRIKE", x, 350);
-  }
-  ctx.restore();
+  const keeperBackdrop = window.__footballLabGoalContrastV402C;
+  const fallbackHalf = 190;
+  const cleanLeft = keeperBackdrop?.advertisingClear
+    ? clamp(keeperBackdrop.left - keeperBackdrop.feather * 0.22, 160, WORLD.width * 0.48)
+    : WORLD.width / 2 - fallbackHalf;
+  const cleanRight = keeperBackdrop?.advertisingClear
+    ? clamp(keeperBackdrop.right + keeperBackdrop.feather * 0.22, WORLD.width * 0.52, WORLD.width - 160)
+    : WORLD.width / 2 + fallbackHalf;
+  const boardY = 348;
+  const boardHeight = 17;
+  const offset = (time / 31) % 210;
+
+  const drawSideBoard = (startX, endX, side) => {
+    const width = endX - startX;
+    if (width < 48) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(startX, boardY, width, boardHeight);
+    ctx.clip();
+
+    const board = ctx.createLinearGradient(startX, 0, endX, 0);
+    if (side === "left") {
+      board.addColorStop(0, "rgba(2,12,7,.58)");
+      board.addColorStop(0.72, "rgba(2,12,7,.46)");
+      board.addColorStop(1, "rgba(2,12,7,.035)");
+    } else {
+      board.addColorStop(0, "rgba(2,12,7,.035)");
+      board.addColorStop(0.28, "rgba(2,12,7,.46)");
+      board.addColorStop(1, "rgba(2,12,7,.58)");
+    }
+    ctx.fillStyle = board;
+    ctx.fillRect(startX, boardY, width, boardHeight);
+
+    const ribbon = ctx.createLinearGradient(startX, 0, endX, 0);
+    if (side === "left") {
+      ribbon.addColorStop(0, "rgba(218,254,77,.10)");
+      ribbon.addColorStop(0.76, "rgba(218,254,77,.065)");
+      ribbon.addColorStop(1, "rgba(218,254,77,0)");
+    } else {
+      ribbon.addColorStop(0, "rgba(218,254,77,0)");
+      ribbon.addColorStop(0.24, "rgba(218,254,77,.065)");
+      ribbon.addColorStop(1, "rgba(218,254,77,.10)");
+    }
+    ctx.fillStyle = ribbon;
+    ctx.fillRect(startX, boardY + 1, width, 1);
+
+    ctx.font = "780 7.4px system-ui";
+    ctx.textAlign = "center";
+    for (let textX = startX - 210 + offset; textX < endX + 210; textX += 210) {
+      const edgeDistance = side === "left" ? endX - textX : textX - startX;
+      const edgeFade = clamp(edgeDistance / 72, 0, 1);
+      if (edgeFade <= 0.04) continue;
+      ctx.fillStyle = "rgba(235,243,232," + (0.34 * edgeFade).toFixed(3) + ")";
+      ctx.fillText("FOOTBALL LAB  •  MASTER THE STRIKE", textX, boardY + 12);
+    }
+    ctx.restore();
+  };
+
+  drawSideBoard(0, cleanLeft, "left");
+  drawSideBoard(cleanRight, WORLD.width, "right");
+
+  window.__footballLabAdvertisingV402C = {
+    build: "40.2C",
+    layout: "side-only-feathered",
+    cleanGoalZone: true,
+    hardDividers: false,
+    cleanLeft,
+    cleanRight,
+    boardY,
+    boardHeight,
+    tone: "muted-low-profile",
+    centreTreatment: "radial-no-block"
+  };
+
 }
 
 function drawGoalHighlights(time) {
@@ -311,8 +371,8 @@ export function drawScene(time, finishShot) {
   drawStadiumAtmosphere(time);
   drawGroundContactShadows(time);
   drawGoalHighlights(time);
-  drawBallEnergy(time);
-  drawContactFx(time);
+  // V38.7.2: the base premium match ball is the only rendered football.
+  // Legacy circular ball-energy and radial contact-orb passes are retired.
   drawOutcomeFocus(time);
   drawCinematicGrade(time);
 }
