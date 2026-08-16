@@ -24,14 +24,48 @@ async function dismissCoach(page) {
   await page.evaluate(() => document.activeElement?.blur?.());
 }
 
-async function forceMikkelStageThroughWorldContract(page) {
+async function enterMikkelStageThroughGameState(page) {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  const before = await page.evaluate(() => new Promise((resolve) => {
+    let frames = 0;
+    const startedAt = performance.now();
+    function tick() {
+      frames += 1;
+      if (performance.now() - startedAt >= 180) resolve({ frames, now: performance.now() });
+      else requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }));
+
   await page.evaluate(async () => {
     const core = await import("/game/core-v6.js?v=32.4");
-    const world = await import("/game/world-v6.js?v=32.4");
     core.state.stage = 4;
-    core.state.currentStage = world.scenarioForStage(4);
-    window.__footballLabPremiumKeeperSceneDrawV3852?.(performance.now());
+    core.syncStage();
+    core.setStageWind();
+    core.state.shot = core.createShot();
+    core.state.animation = null;
+    core.state.finishedAnimationId = null;
+    core.setPhase("ready");
+    core.renderHud();
+    window.dispatchEvent(new CustomEvent("footballlab:shotreset"));
   });
+
+  const after = await page.evaluate(() => new Promise((resolve) => {
+    let frames = 0;
+    const startedAt = performance.now();
+    function tick() {
+      frames += 1;
+      if (performance.now() - startedAt >= 180) resolve({ frames, now: performance.now() });
+      else requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }));
+
+  expect(before.frames).toBeGreaterThan(2);
+  expect(after.frames).toBeGreaterThan(2);
+  expect(errors).toEqual([]);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabKeeperFrameV46?.renderer),
     { timeout: 12000 }
@@ -198,9 +232,8 @@ test("capture Mikkel Storm V46 set stance and a real AI-driven dive in the gamep
     { timeout: 20000 }
   ).toBe(true);
 
-  await forceMikkelStageThroughWorldContract(page);
+  await enterMikkelStageThroughGameState(page);
   await armKeeperCaptures(page);
-  await page.evaluate(() => window.__footballLabPremiumKeeperSceneDrawV3852?.(performance.now()));
   await page.waitForFunction(() => Boolean(window.__mikkelV46Captures?.set?.snapshot), null, { timeout: 5000 });
   const setCapture = await writeCapture(page, "set", "test-results/mikkel-v46-set.png");
   expect(setCapture.frame.clip).toBe("set");
