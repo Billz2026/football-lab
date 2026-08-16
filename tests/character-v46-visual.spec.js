@@ -1,6 +1,38 @@
 import fs from "node:fs";
 import { test, expect } from "@playwright/test";
 
+async function installKeyListenerDiagnostics(page) {
+  await page.addInitScript(() => {
+    const original = EventTarget.prototype.addEventListener;
+    let nextId = 0;
+    window.__v46KeyListenerRegistrations = [];
+    window.__v46KeyListenerEvents = [];
+
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+      if (this === document && type === "keydown" && typeof listener === "function") {
+        const id = ++nextId;
+        const stack = new Error(`keydown-listener-${id}`).stack || "";
+        window.__v46KeyListenerRegistrations.push({ id, stack, options: String(options ?? "") });
+        const wrapped = function(event) {
+          const before = {
+            phase: document.documentElement.dataset.strikePhaseV324 || "",
+            label: document.querySelector("#shotAction")?.textContent?.trim() || ""
+          };
+          const result = listener.call(this, event);
+          const after = {
+            phase: document.documentElement.dataset.strikePhaseV324 || "",
+            label: document.querySelector("#shotAction")?.textContent?.trim() || ""
+          };
+          window.__v46KeyListenerEvents.push({ id, key: event.key, code: event.code, before, after });
+          return result;
+        };
+        return original.call(this, type, wrapped, options);
+      }
+      return original.call(this, type, listener, options);
+    };
+  });
+}
+
 async function enterClassic(page) {
   await page.goto("/index.html?capture=viktor-v46-strike", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
@@ -59,6 +91,7 @@ async function saveCapturedClip(page, clip, path) {
 }
 
 async function browserKeyboardAction(page) {
+  await page.evaluate(() => { window.__v46KeyListenerEvents = []; });
   const before = await page.evaluate(() => ({
     phase: document.documentElement.dataset.strikePhaseV324 || "",
     label: document.querySelector("#shotAction")?.textContent?.trim() || ""
@@ -68,7 +101,11 @@ async function browserKeyboardAction(page) {
     phase: document.documentElement.dataset.strikePhaseV324 || "",
     label: document.querySelector("#shotAction")?.textContent?.trim() || ""
   }));
-  return { before, after };
+  const diagnostic = await page.evaluate(() => ({
+    registrations: window.__v46KeyListenerRegistrations,
+    events: window.__v46KeyListenerEvents
+  }));
+  return { before, after, diagnostic };
 }
 
 async function executeLiveShot(page) {
@@ -89,7 +126,9 @@ async function executeLiveShot(page) {
   const trace = [];
 
   for (let index = 0; index < expected.length; index += 1) {
-    trace.push(await browserKeyboardAction(page));
+    const sample = await browserKeyboardAction(page);
+    trace.push(sample);
+    console.log("VIKTOR_KEY_DIAGNOSTIC", JSON.stringify(sample));
     const [phase, label] = expected[index];
     await expect.poll(
       () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
@@ -110,6 +149,7 @@ async function executeLiveShot(page) {
 }
 
 test("capture Viktor Kane V46 standing and striking in the authoritative gameplay camera", async ({ page }) => {
+  await installKeyListenerDiagnostics(page);
   await enterClassic(page);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
