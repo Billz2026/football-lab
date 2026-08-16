@@ -20,7 +20,22 @@ jobs:
           fetch-depth: 0
       - name: Widen visual windup window
         run: |
-          python3 -c "from pathlib import Path; p=Path('game/character-3d-v46.js'); s=p.read_text(); old='  if (p.run < 0.55) return { clip: \"approach\", t: p.run / 0.55, p };\n  if (p.run < 0.72) return { clip: \"plant\", t: (p.run - 0.55) / 0.17, p };\n  if (p.run < 0.9) return { clip: \"windup\", t: (p.run - 0.72) / 0.18, p };\n  return { clip: \"contact\", t: (p.run - 0.9) / 0.1, p };'; new='  if (p.run < 0.5) return { clip: \"approach\", t: p.run / 0.5, p };\n  if (p.run < 0.65) return { clip: \"plant\", t: (p.run - 0.5) / 0.15, p };\n  if (p.run < 0.95) return { clip: \"windup\", t: (p.run - 0.65) / 0.3, p };\n  return { clip: \"contact\", t: (p.run - 0.95) / 0.05, p };'; assert s.count(old)==1, 'windup phase block mismatch'; p.write_text(s.replace(old,new,1))"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('game/character-3d-v46.js')
+          s = p.read_text()
+          old = '''  if (p.run < 0.4) return { clip: "approach", t: p.run / 0.4, p };
+  if (p.run < 0.55) return { clip: "plant", t: (p.run - 0.4) / 0.15, p };
+  if (p.run < 0.9) return { clip: "windup", t: (p.run - 0.55) / 0.35, p };
+  return { clip: "contact", t: (p.run - 0.9) / 0.1, p };'''
+          new = '''  if (p.run < 0.35) return { clip: "approach", t: p.run / 0.35, p };
+  if (p.run < 0.45) return { clip: "plant", t: (p.run - 0.35) / 0.1, p };
+  if (p.run < 1) return { clip: "windup", t: (p.run - 0.45) / 0.55, p };
+  return { clip: "contact", t: 0, p };'''
+          if s.count(old) != 1:
+              raise SystemExit(f'expected current windup block once, found {s.count(old)}')
+          p.write_text(s.replace(old, new, 1))
+          PY
           node --check game/character-3d-v46.js
           git diff --check
       - name: Commit Viktor visual timing fix
