@@ -83,11 +83,19 @@ def glb_mesh_bounds(gltf, node_name):
     return minima, maxima, count
 
 
-def object_world_bounds(obj):
-    points = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
-    minimum = Vector((min(p.x for p in points), min(p.y for p in points), min(p.z for p in points)))
-    maximum = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p in points)))
-    return minimum, maximum
+def evaluated_world_bounds(obj):
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    evaluated = obj.evaluated_get(depsgraph)
+    mesh = evaluated.to_mesh()
+    try:
+        if not mesh.vertices:
+            fail(f"evaluated mesh {obj.name} has no vertices")
+        points = [evaluated.matrix_world @ vertex.co for vertex in mesh.vertices]
+        minimum = Vector((min(p.x for p in points), min(p.y for p in points), min(p.z for p in points)))
+        maximum = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p in points)))
+        return minimum, maximum
+    finally:
+        evaluated.to_mesh_clear()
 
 
 def main():
@@ -157,11 +165,25 @@ def main():
     if len(skinned) != len(AUTHORISED_MESHES):
         fail(f"all body/kit/hair meshes must remain skinned: {[obj.name for obj in skinned]}")
 
+    # Imported skinned bounds must be measured in the armature's REST pose.
+    # Measuring object.bound_box while an imported action is active reports the
+    # action-deformed silhouette and falsely shrinks/tips a diving goalkeeper.
+    for armature in armatures:
+        armature.data.pose_position = "REST"
+        if armature.animation_data:
+            armature.animation_data.action = None
+    bpy.context.scene.frame_set(0)
+    bpy.context.view_layer.update()
+
     body = bpy.data.objects["Mikkel_Storm_Body"]
-    minimum, maximum = object_world_bounds(body)
+    minimum, maximum = evaluated_world_bounds(body)
     imported_height = (maximum - minimum).z
-    if abs(imported_height - height) > 0.06:
-        fail(f"re-import changed body height: GLB={height:.3f}, imported={imported_height:.3f}")
+    imported_ground = minimum.z
+    print("MIKKEL_REIMPORT_REST", tuple(round(v, 5) for v in minimum), tuple(round(v, 5) for v in maximum), "height", imported_height)
+    if abs(imported_height - height) > 0.035:
+        fail(f"evaluated rest-pose re-import changed body height: GLB={height:.3f}, imported={imported_height:.3f}")
+    if abs(imported_ground) > 0.025:
+        fail(f"evaluated rest-pose feet are not grounded: z_min={imported_ground:.4f}")
 
     size = os.path.getsize(source)
     if size < 50_000:
