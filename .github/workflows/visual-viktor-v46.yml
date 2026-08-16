@@ -10,6 +10,12 @@ on:
       - tests/character-v46-visual.spec.js
       - game/character-3d-v46.js
       - game/render-v17-3-1.js
+      - game/core-v6.js
+      - game/strike-v32-4.js
+      - game/main-v18.js
+      - game/main-v15-2.js
+      - game/main-v11-3.js
+      - scripts/capture-runtime-v23.mjs
   workflow_dispatch:
 
 permissions:
