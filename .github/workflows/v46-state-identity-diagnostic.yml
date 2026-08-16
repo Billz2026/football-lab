@@ -1,0 +1,36 @@
+name: V46 state identity diagnostic
+
+on:
+  push:
+    branches:
+      - agent/v46-real-3d-character-layer
+    paths:
+      - '.github/workflows/v46-state-identity-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build:runtime:v23
+      - name: Inspect generated state identity
+        run: |
+          echo '--- runtime-v23-main imports/state writes ---'
+          grep -nE "from .*core-v6|state\.animation|AuthoritativeStateV46|takeShot|function takeShot" game/runtime-v23-main.js || true
+          echo '--- generated/bridge imports of core-v6 ---'
+          for f in game/runtime-v23-*.js; do
+            echo "### $f"
+            grep -nE "from .*core-v6|state\.animation|function takeShot|takeShot\(" "$f" || true
+          done
+          echo '--- core URLs in all generated modules ---'
+          grep -RnoE "core-v6\.js[^\"']*" game/runtime-v23-*.js || true
