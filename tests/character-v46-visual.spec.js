@@ -78,6 +78,7 @@ async function productionPointerAction(page) {
     const action = document.querySelector("#shotAction");
     if (!action) throw new Error("#shotAction is missing");
     const before = action.textContent?.trim() || "";
+    const beforePhase = document.documentElement.dataset.strikePhaseV324 || "";
     const event = new PointerEvent("pointerdown", {
       bubbles: true,
       cancelable: true,
@@ -91,7 +92,9 @@ async function productionPointerAction(page) {
     const dispatched = action.dispatchEvent(event);
     return {
       before,
+      beforePhase,
       after: action.textContent?.trim() || "",
+      afterPhase: document.documentElement.dataset.strikePhaseV324 || "",
       dispatched,
       frame: window.__footballLabHeroFrameV46 || null,
       lastInput: window.__footballLabLastInputSample || null
@@ -102,23 +105,38 @@ async function productionPointerAction(page) {
 async function executeLiveShot(page) {
   await dismissCoach(page);
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 6000 });
+  await expect.poll(
+    () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
+    { timeout: 3000 }
+  ).toBe("ready");
 
   // READY -> AIM -> POWER -> CONTACT -> SHOOTING.
   // These are genuine PointerEvents sent to the production #shotAction listener.
   // No state or animation clip is mutated by the test.
-  const expectedAfter = ["LOCK AIM", "LOCK POWER", "STRIKE", "RESULT"];
+  const expected = [
+    ["aim", "STRIKE"],
+    ["power", "LOCK POWER"],
+    ["contact", "LOCK CONTACT"],
+    ["shooting", "SHOT IN PLAY"]
+  ];
   const delays = [120, 180, 180, 0];
   const trace = [];
 
-  for (let index = 0; index < 4; index += 1) {
-    trace.push(await productionPointerAction(page));
-    if (index < 3) {
-      await page.waitForTimeout(delays[index]);
-      await expect.poll(
-        () => page.locator("#shotAction").textContent(),
-        { timeout: 2500 }
-      ).toContain(expectedAfter[index]);
-    }
+  for (let index = 0; index < expected.length; index += 1) {
+    const sample = await productionPointerAction(page);
+    trace.push(sample);
+    const [expectedPhase, expectedLabel] = expected[index];
+
+    await expect.poll(
+      () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
+      { timeout: 2500 }
+    ).toBe(expectedPhase);
+    await expect.poll(
+      () => page.locator("#shotAction").textContent(),
+      { timeout: 2500 }
+    ).toContain(expectedLabel);
+
+    if (delays[index]) await page.waitForTimeout(delays[index]);
   }
 
   console.log("VIKTOR_V46_STRIKE_INPUT_TRACE", JSON.stringify(trace));
