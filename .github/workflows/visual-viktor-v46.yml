@@ -48,6 +48,7 @@ jobs:
       - name: Build V46 runtime bridge
         run: npm run build:runtime:v23
 
+      # This capture is the release visual gate for the re-authored kick mechanics.
       - name: Capture Viktor in gameplay
         shell: bash
         run: |
