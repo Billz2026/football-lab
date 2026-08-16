@@ -7,7 +7,6 @@ on:
     paths:
       - game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
       - .github/workflows/visual-viktor-v46.yml
-      - .github/v46-release-trigger
       - tests/character-v46-visual.spec.js
       - game/character-3d-v46.js
       - game/render-v17-3-1.js
