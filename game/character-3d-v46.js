@@ -319,19 +319,36 @@ function outfieldProgress(time) {
 }
 
 function outfieldPhase(time) {
+  const gameState = liveState();
+  const animation = gameState.animation;
   const p = outfieldProgress(time);
-  if (!liveState().animation) return { clip: "idle", t: (time % 2400) / 2400, p };
-  if (p.replay || p.flight > 0 || p.settle > 0) {
-    if (p.flight < 0.58) return { clip: "follow-through", t: clamp(p.flight / 0.58, 0, 1), p };
-    return { clip: "recovery", t: Math.max(clamp((p.flight - 0.58) / 0.42, 0, 1), p.settle), p };
+  const animationToken = animation?.startedAt ?? null;
+  if (outfieldPhase.animationToken !== animationToken) {
+    outfieldPhase.animationToken = animationToken;
+    outfieldPhase.lastClip = null;
   }
-  if (p.contact > 0) return { clip: "contact", t: p.contact, p };
-  // Keep the authoritative 560 ms run-up unchanged, but give the kicking leg enough
-  // visual preparation to read as a real strike at gameplay frame rates.
-  if (p.run < 0.35) return { clip: "approach", t: p.run / 0.35, p };
-  if (p.run < 0.45) return { clip: "plant", t: (p.run - 0.35) / 0.1, p };
-  if (p.run < 1) return { clip: "windup", t: (p.run - 0.45) / 0.55, p };
-  return { clip: "contact", t: 0, p };
+  const frame = (clip, t) => {
+    outfieldPhase.lastClip = clip;
+    return { clip, t, p };
+  };
+
+  if (!animation) return frame("idle", (time % 2400) / 2400);
+  if (p.replay || p.flight > 0 || p.settle > 0) {
+    if (p.flight < 0.58) return frame("follow-through", clamp(p.flight / 0.58, 0, 1));
+    return frame("recovery", Math.max(clamp((p.flight - 0.58) / 0.42, 0, 1), p.settle));
+  }
+  if (p.contact > 0) {
+    // Software WebGL and low-end devices can miss the 3D wind-up window even though
+    // the authoritative 560 ms run-up is correct. Preserve gameplay timing, but never
+    // let the visible body jump directly from plant to contact.
+    if (outfieldPhase.lastClip === "plant") return frame("windup", 0.94);
+    return frame("contact", p.contact);
+  }
+  if (p.run < 0.35) return frame("approach", p.run / 0.35);
+  if (p.run < 0.45) return frame("plant", (p.run - 0.35) / 0.1);
+  if (p.run < 1) return frame("windup", (p.run - 0.45) / 0.55);
+  if (outfieldPhase.lastClip === "plant") return frame("windup", 0.94);
+  return frame("contact", 0);
 }
 
 function rootTravel(p) {
