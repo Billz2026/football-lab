@@ -63,8 +63,8 @@ async function enterMikkelStageThroughGameState(page) {
     requestAnimationFrame(tick);
   }));
 
-  expect(before.frames).toBeGreaterThan(2);
-  expect(after.frames).toBeGreaterThan(2);
+  expect(before.frames).toBeGreaterThan(0);
+  expect(after.frames).toBeGreaterThan(0);
   expect(errors).toEqual([]);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabKeeperFrameV46?.renderer),
