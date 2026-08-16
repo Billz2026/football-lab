@@ -233,7 +233,7 @@ function takeShot() {
   const { flightDuration, diagnostics } = resolveShotPhysics();
   recordDiagnostics(diagnostics);
   const runUpDuration = 560;
-  const contactHoldDuration = 64;
+  const contactHoldDuration = 140;
   const settleDuration = settleDurationForShot(state.shot);
   const startedAt = performance.now();
   const impactRatio = impactRatioForShot(state.shot);

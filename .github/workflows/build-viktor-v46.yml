@@ -1,0 +1,109 @@
+name: Build Viktor Kane V46
+
+on:
+  push:
+    branches:
+      - agent/v46-real-3d-character-layer
+    paths:
+      - .github/workflows/build-viktor-v46.yml
+      - scripts/build-viktor-v46.py
+      - scripts/run-build-viktor-v46.py
+      - scripts/verify-viktor-v46.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-lab-build-viktor-v46
+  cancel-in-progress: true
+
+jobs:
+  build-viktor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out V46 branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Install Blender and archive tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y blender unzip curl python3-numpy
+          blender --version | head -n 2
+          python3 -c 'import numpy; print("numpy", numpy.__version__)'
+
+      - name: Download Blender Studio CC0 human base meshes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/viktor-source /tmp/viktor-bundle
+          URLS=(
+            "https://download.blender.org/demo/asset-bundles/human-base-meshes/human-base-meshes-bundle-v1.4.1.zip"
+            "https://mirrors.aliyun.com/blender/demo/asset-bundles/human-base-meshes/human-base-meshes-bundle-v1.4.1.zip"
+            "https://ftp.openbsd.dk/blender/blender-demo/asset-bundles/human-base-meshes/human-base-meshes-bundle-v1.4.1.zip"
+          )
+          downloaded=0
+          for url in "${URLS[@]}"; do
+            echo "Trying ${url}"
+            if curl -L --fail --retry 2 --connect-timeout 20 --max-time 180 "$url" -o /tmp/viktor-bundle/human-base-meshes.zip; then
+              downloaded=1
+              break
+            fi
+          done
+          test "$downloaded" -eq 1
+          unzip -q /tmp/viktor-bundle/human-base-meshes.zip -d /tmp/viktor-source
+          find /tmp/viktor-source -maxdepth 4 -type f | sort | head -n 80
+          SOURCE_BLEND="$(find /tmp/viktor-source -type f -name '*.blend' | head -n 1)"
+          test -n "$SOURCE_BLEND"
+          echo "SOURCE_BLEND=$SOURCE_BLEND" >> "$GITHUB_ENV"
+          echo "Selected source library: $SOURCE_BLEND"
+
+      - name: Author Viktor Kane skinned GLB
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$GITHUB_WORKSPACE/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb"
+          mkdir -p "$(dirname "$OUT")"
+          blender --background "$SOURCE_BLEND" \
+            --python "$GITHUB_WORKSPACE/scripts/run-build-viktor-v46.py" \
+            -- --output "$OUT"
+          ls -lh "$OUT"
+
+      - name: Preserve generated GLB for diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: viktor-kane-v46-glb-${{ github.run_id }}
+          path: game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify Viktor GLB contract in Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$GITHUB_WORKSPACE/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb"
+          blender --background --factory-startup \
+            --python "$GITHUB_WORKSPACE/scripts/verify-viktor-v46.py" \
+            -- --input "$OUT"
+
+      - name: Commit generated GLB to V46 branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "football-lab-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git fetch origin agent/v46-real-3d-character-layer
+          git checkout -B agent/v46-real-3d-character-layer origin/agent/v46-real-3d-character-layer
+          git add game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
+          if git diff --cached --quiet; then
+            echo "Generated Viktor GLB is unchanged."
+            exit 0
+          fi
+          git commit -m "Add Viktor Kane V46 skinned 3D technical master"
+          git push origin agent/v46-real-3d-character-layer

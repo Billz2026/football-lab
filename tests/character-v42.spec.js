@@ -47,7 +47,7 @@ test("V42.1 exposes the reusable premium character roster", async ({ page }) => 
   expect(contract.directCelebrityLikenesses).toBe(false);
 });
 
-test("all V42 character profiles feed the V44 articulated live renderer", async ({ page }) => {
+test("V42 profiles retain V44 fallback while approved Viktor uses V46", async ({ page }) => {
   for (const [sourceId, visualId] of KICKERS) {
     await page.goto("/index.html?test=character-v44-roster");
     await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), sourceId);
@@ -59,29 +59,48 @@ test("all V42 character profiles feed the V44 articulated live renderer", async 
 
     await enterClassic(page);
 
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV44?.sourceCharacterId),
-      { timeout: 5000 }
-    ).toBe(sourceId);
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV44?.character),
-      { timeout: 5000 }
-    ).toBe(visualId);
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV44?.build),
-      { timeout: 5000 }
-    ).toBe("44.0.0");
-    await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV44?.renderer),
-      { timeout: 5000 }
-    ).toBe("articulated-layered-2.5d");
+    if (visualId === "viktor-kane") {
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
+        { timeout: 12000 }
+      ).toBe("real-skinned-glb-3d");
 
-    const frame = await page.evaluate(() => window.__footballLabHeroFrameV44);
-    expect(frame.staticSpriteFrames).toBe(false);
-    expect(frame.rig).toBe("continuous-skeletal-canvas");
+      const frame = await page.evaluate(() => window.__footballLabHeroFrameV46);
+      expect(frame.character).toBe("viktor-kane");
+      expect(frame.build).toBe("46.0.0");
+      expect(frame.production3D).toBe(true);
+    } else {
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
+        { timeout: 12000 }
+      ).toBe("v44-fallback");
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV44?.sourceCharacterId),
+        { timeout: 5000 }
+      ).toBe(sourceId);
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV44?.character),
+        { timeout: 5000 }
+      ).toBe(visualId);
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV44?.build),
+        { timeout: 5000 }
+      ).toBe("44.0.0");
+      await expect.poll(
+        () => page.evaluate(() => window.__footballLabHeroFrameV44?.renderer),
+        { timeout: 5000 }
+      ).toBe("articulated-layered-2.5d");
+
+      const frame = await page.evaluate(() => window.__footballLabHeroFrameV44);
+      expect(frame.staticSpriteFrames).toBe(false);
+      expect(frame.rig).toBe("continuous-skeletal-canvas");
+    }
+
+    const visible = await page.evaluate(() => window.__footballLabVisibleKickersV30);
+    expect(visible.staticSpriteFrames).toBe(false);
 
     await page.screenshot({
-      path: `test-results/v44-${visualId}.png`,
+      path: `test-results/live-${visualId}.png`,
       fullPage: true
     });
   }

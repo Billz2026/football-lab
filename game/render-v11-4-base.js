@@ -116,6 +116,16 @@ replaceRequired(
   "        x: 0.16 - direction * launch * 0.15 + direction * push * 0.13,\n        y: -0.01 + launch * 0.025 + land * 0.045"
 );
 
+
+// V46: replace the legacy keeper exactly where the base scene draws it so depth remains
+// goal -> keeper -> wall -> ball. The premium callback falls back to the V38 keeper
+// until a production GLB is ready; V46 wraps the same callback when Mikkel is available.
+replaceRequired(
+  "V46 keeper scene slot",
+  "  drawKeeper(time);\n  drawWallSprayLine();",
+  "  const premiumKeeperDraw = window.__footballLabPremiumKeeperSceneDrawV3852;\n  if (typeof premiumKeeperDraw === \"function\") {\n    const keeperHandled = premiumKeeperDraw(time);\n    if (!keeperHandled) drawKeeper(time);\n  } else {\n    drawKeeper(time);\n  }\n  drawWallSprayLine();"
+);
+
 // Blob modules need absolute dependency URLs because their own URL has no directory.
 source = source.replace(/from\s+"(\.\/[^"\n]+)"/g, (_, specifier) => {
   return `from "${new URL(specifier, sourceUrl).href}"`;

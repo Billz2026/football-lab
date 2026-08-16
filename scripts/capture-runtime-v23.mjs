@@ -6,6 +6,7 @@ import net from 'node:net';
 import path from 'node:path';
 import process from 'node:process';
 
+// Release-critical source: changes here intentionally retrigger both V46 character visual gates.
 const ROOT = process.cwd();
 const GAME_DIR = path.join(ROOT, 'game');
 const HOST = '127.0.0.1';
@@ -286,6 +287,7 @@ async function buildStaticRuntime({ httpModules, blobs }) {
     let source = replaceSpecifierLiterals(record.source, record.baseUrl, replacementMap);
     source = source.replace(/^\/\/# sourceURL=.*$/gm, '');
     if (filename === 'runtime-v23-main.js') {
+      source += `\nwindow.__footballLabAuthoritativeStateV46 = state;\n`;
       source += `\nwindow.__footballLabRuntimeV23 = Object.freeze({ staticModules: true, generatedModuleCount: ${modules.size} });\n`;
     }
     for (const needle of FORBIDDEN) {

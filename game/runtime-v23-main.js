@@ -807,12 +807,14 @@ elements.shotAction.style.touchAction = "manipulation";
 
 window.addEventListener("footballlab:takeplannedshot", () => {
   if (state.screen !== "game" || state.phase !== "aim" || state.animation) return;
+  state.actionLockedUntil = 0;
   suppressActionClickUntil = 0;
   handleAction(performance.now());
 });
 
 window.addEventListener("footballlab:beginstrike", () => {
   if (state.screen !== "game" || state.phase !== "aim" || state.animation) return;
+  state.actionLockedUntil = 0;
   suppressActionClickUntil = 0;
   handleAction(performance.now());
 });
