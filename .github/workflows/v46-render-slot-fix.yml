@@ -5,78 +5,35 @@ on:
     branches:
       - agent/v46-real-3d-character-layer
     paths:
-      - .github/workflows/v46-render-slot-fix.yml
+      - '.github/workflows/v46-render-slot-fix.yml'
+      - 'scripts/patch-v46-render-slot.py'
   workflow_dispatch:
 
 permissions:
   contents: write
 
-concurrency:
-  group: football-lab-v46-render-slot-fix
-  cancel-in-progress: true
-
 jobs:
-  patch-and-verify:
+  patch:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - name: Check out V46 branch
-        uses: actions/checkout@v4
-
-      - name: Patch keeper into authoritative scene slot
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          path = Path('game/render-v11-4-base.js')
-          text = path.read_text()
-          label = 'V46 keeper scene slot'
-          if label not in text:
-              marker = '// Blob modules need absolute dependency URLs because their own URL has no directory.'
-              if marker not in text:
-                  raise SystemExit('render-v11-4-base marker missing')
-              block = r'''
-// V46: replace the legacy keeper exactly where the base scene draws it so depth remains
-// goal -> keeper -> wall -> ball. The premium callback falls back to the V38 keeper
-// until a production GLB is ready; V46 wraps the same callback when Mikkel is available.
-replaceRequired(
-  "V46 keeper scene slot",
-  "  drawKeeper(time);\n  drawWallSprayLine();",
-  "  const premiumKeeperDraw = window.__footballLabPremiumKeeperSceneDrawV3852;\n  if (typeof premiumKeeperDraw === \"function\") {\n    const keeperHandled = premiumKeeperDraw(time);\n    if (!keeperHandled) drawKeeper(time);\n  } else {\n    drawKeeper(time);\n  }\n  drawWallSprayLine();"
-);
-
-'''
-              text = text.replace(marker, block + marker)
-              path.write_text(text)
-          PY
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
         with:
-          node-version: 22
-
-      - name: Install test dependencies
-        run: npm install
-
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Build V46 runtime bridge
-        run: npm run build:runtime:v23
-
-      - name: Verify keeper hook is driven by live frame loop
-        run: npx playwright test tests/v46-keeper-hook-diagnostic.spec.js --workers=1 --reporter=line
-
-      - name: Commit verified render-slot repair
-        shell: bash
+          ref: agent/v46-real-3d-character-layer
+          fetch-depth: 0
+      - name: Patch keeper into authoritative scene slot
+        run: python3 scripts/patch-v46-render-slot.py
+      - name: Validate patch
         run: |
+          grep -q 'V46 keeper scene slot' game/render-v11-4-base.js
+          git diff --check
+      - name: Commit render-slot fix
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add game/render-v11-4-base.js
-          if git diff --cached --quiet; then
-            echo 'Render-slot repair already present.'
-          else
-            git commit -m 'Drive V46 keeper from live scene render slot'
-            git push origin HEAD:agent/v46-real-3d-character-layer
-          fi
+          git commit -m 'Drive V46 keeper from live scene render slot'
+          git push origin HEAD:agent/v46-real-3d-character-layer
