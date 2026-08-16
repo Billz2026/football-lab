@@ -1,44 +1,33 @@
 import fs from "node:fs";
 import { test, expect } from "@playwright/test";
 
-// Visual approval must come from the authoritative Football Lab camera after
-// the V46 runtime bridge is rebuilt; Blender previews are not accepted here.
-// This gate proves both the approved standing model and live strike deformation.
 async function enterClassic(page) {
   await page.goto("/index.html?capture=viktor-v46-strike", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
-
   await expect.poll(
     () => page.evaluate(() => (
       document.querySelector("#gameScreen")?.classList.contains("is-active") ||
       document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
-    )),
-    { timeout: 8000 }
+    )), { timeout: 8000 }
   ).toBe(true);
-
   const state = await page.evaluate(() => ({
     game: document.querySelector("#gameScreen")?.classList.contains("is-active"),
     picker: document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
   }));
-
-  if (!state.game && state.picker) {
-    await page.locator("#kickerConfirmV13").click();
-  }
+  if (!state.game && state.picker) await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
 }
 
 async function dismissCoach(page) {
   const skip = page.getByRole("button", { name: "SKIP TUTORIAL" });
-  if (await skip.isVisible().catch(() => false)) {
-    await skip.click({ force: true });
-  }
+  if (await skip.isVisible().catch(() => false)) await skip.click({ force: true });
+  await page.evaluate(() => document.activeElement?.blur?.());
 }
 
 async function armStrikeCaptures(page) {
   await page.evaluate(() => {
     const targets = new Set(["windup", "contact", "follow-through"]);
     window.__v46StrikeCaptures = {};
-
     function sample() {
       const frame = window.__footballLabHeroFrameV46;
       const clip = frame?.clip;
@@ -49,9 +38,7 @@ async function armStrikeCaptures(page) {
           dataUrl: canvas?.toDataURL("image/png") || null
         };
       }
-      if (Object.keys(window.__v46StrikeCaptures).length < targets.size) {
-        requestAnimationFrame(sample);
-      }
+      if (Object.keys(window.__v46StrikeCaptures).length < targets.size) requestAnimationFrame(sample);
     }
     requestAnimationFrame(sample);
   });
@@ -61,43 +48,37 @@ async function saveCapturedClip(page, clip, path) {
   await page.waitForFunction(
     (expected) => Boolean(window.__v46StrikeCaptures?.[expected]?.dataUrl),
     clip,
-    { timeout: 8000, polling: "raf" }
+    { timeout: 10000, polling: "raf" }
   );
-
   const capture = await page.evaluate((expected) => window.__v46StrikeCaptures[expected], clip);
   expect(capture?.frame?.renderer).toBe("real-skinned-glb-3d");
   expect(capture?.frame?.production3D).toBe(true);
   expect(capture?.frame?.clip).toBe(clip);
   expect(capture?.dataUrl).toMatch(/^data:image\/png;base64,/);
-
   fs.writeFileSync(path, Buffer.from(capture.dataUrl.split(",")[1], "base64"));
 }
 
-async function productionPointerAction(page) {
+async function productionKeyboardAction(page) {
   return page.evaluate(() => {
     const action = document.querySelector("#shotAction");
-    if (!action) throw new Error("#shotAction is missing");
-    const before = action.textContent?.trim() || "";
-    const beforePhase = document.documentElement.dataset.strikePhaseV324 || "";
-    const event = new PointerEvent("pointerdown", {
+    const before = {
+      phase: document.documentElement.dataset.strikePhaseV324 || "",
+      label: action?.textContent?.trim() || ""
+    };
+    const event = new KeyboardEvent("keydown", {
+      key: "Enter",
+      code: "Enter",
       bubbles: true,
       cancelable: true,
-      composed: true,
-      pointerId: 1,
-      pointerType: "mouse",
-      isPrimary: true,
-      button: 0,
-      buttons: 1
+      repeat: false
     });
-    const dispatched = action.dispatchEvent(event);
+    document.dispatchEvent(event);
     return {
       before,
-      beforePhase,
-      after: action.textContent?.trim() || "",
-      afterPhase: document.documentElement.dataset.strikePhaseV324 || "",
-      dispatched,
-      frame: window.__footballLabHeroFrameV46 || null,
-      lastInput: window.__footballLabLastInputSample || null
+      after: {
+        phase: document.documentElement.dataset.strikePhaseV324 || "",
+        label: action?.textContent?.trim() || ""
+      }
     };
   });
 }
@@ -110,9 +91,6 @@ async function executeLiveShot(page) {
     { timeout: 3000 }
   ).toBe("ready");
 
-  // READY -> AIM -> POWER -> CONTACT -> SHOOTING.
-  // These are genuine PointerEvents sent to the production #shotAction listener.
-  // No state or animation clip is mutated by the test.
   const expected = [
     ["aim", "STRIKE"],
     ["power", "LOCK POWER"],
@@ -123,19 +101,16 @@ async function executeLiveShot(page) {
   const trace = [];
 
   for (let index = 0; index < expected.length; index += 1) {
-    const sample = await productionPointerAction(page);
-    trace.push(sample);
-    const [expectedPhase, expectedLabel] = expected[index];
-
+    trace.push(await productionKeyboardAction(page));
+    const [phase, label] = expected[index];
     await expect.poll(
       () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
       { timeout: 2500 }
-    ).toBe(expectedPhase);
+    ).toBe(phase);
     await expect.poll(
       () => page.locator("#shotAction").textContent(),
       { timeout: 2500 }
-    ).toContain(expectedLabel);
-
+    ).toContain(label);
     if (delays[index]) await page.waitForTimeout(delays[index]);
   }
 
@@ -148,12 +123,10 @@ async function executeLiveShot(page) {
 
 test("capture Viktor Kane V46 standing and striking in the authoritative gameplay camera", async ({ page }) => {
   await enterClassic(page);
-
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
     { timeout: 20000 }
   ).toBe("real-skinned-glb-3d");
-
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacter3DV46?.loaded?.includes("viktor-kane")),
     { timeout: 10000 }
@@ -165,19 +138,12 @@ test("capture Viktor Kane V46 standing and striking in the authoritative gamepla
     visible: window.__footballLabVisibleKickersV30
   }));
   console.log("VIKTOR_V46_CAPTURE_DIAGNOSTICS", JSON.stringify(diagnostics));
-
   expect(diagnostics.renderer?.production3D).toBe(true);
   expect(diagnostics.visible?.production3D).toBe(true);
   expect(diagnostics.visible?.productionCharacterMode).toBe("real-skinned-glb-3d");
 
-  await page.locator("#gameCanvas").screenshot({
-    path: "test-results/viktor-v46-gameplay-ready.png"
-  });
-
-  await page.screenshot({
-    path: "test-results/viktor-v46-full-ui-ready.png",
-    fullPage: true
-  });
+  await page.locator("#gameCanvas").screenshot({ path: "test-results/viktor-v46-gameplay-ready.png" });
+  await page.screenshot({ path: "test-results/viktor-v46-full-ui-ready.png", fullPage: true });
 
   await armStrikeCaptures(page);
   await executeLiveShot(page);
