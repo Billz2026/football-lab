@@ -146,6 +146,11 @@ replaceRequired(
   \`elements.shotAction.addEventListener(\\\"pointerdown\\\", (event) => {\\n  if (!event.isPrimary || (event.pointerType === \\\"mouse\\\" && event.button !== 0)) return;\\n  event.preventDefault();\\n  suppressActionClickUntil = performance.now() + 450;\\n  handleAction(event.timeStamp);\\n}, { passive: false });\\nelements.shotAction.addEventListener(\\\"click\\\", (event) => {\\n  if (performance.now() < suppressActionClickUntil) {\\n    event.preventDefault();\\n    suppressActionClickUntil = 0;\\n    return;\\n  }\\n  handleAction(event.timeStamp);\\n});\\nelements.canvas.addEventListener(\\\"pointerdown\\\", (event) => {\\n  if (!event.isPrimary || (event.pointerType === \\\"mouse\\\" && event.button !== 0)) return;\\n  event.preventDefault();\\n  handleAction(event.timeStamp);\\n}, { passive: false });\`
 );
 replaceRequired(
+  "planned strike event bridge",
+  \`elements.canvas.style.touchAction = "manipulation";\\nelements.shotAction.style.touchAction = "manipulation";\`,
+  \`elements.canvas.style.touchAction = "manipulation";\\nelements.shotAction.style.touchAction = "manipulation";\\n\\nwindow.addEventListener("footballlab:takeplannedshot", () => {\\n  if (state.screen !== "game" || state.phase !== "aim" || state.animation) return;\\n  state.actionLockedUntil = 0;\\n  suppressActionClickUntil = 0;\\n  handleAction(performance.now());\\n});\\n\\nwindow.addEventListener("footballlab:beginstrike", () => {\\n  if (state.screen !== "game" || state.phase !== "aim" || state.animation) return;\\n  state.actionLockedUntil = 0;\\n  suppressActionClickUntil = 0;\\n  handleAction(performance.now());\\n});\`
+);
+replaceRequired(
   "keyboard event timestamp",
   \`    event.preventDefault();\\n    handleAction();\\n  }\\n  if (event.key.toLowerCase() === \\\"d\\\"\`,
   \`    event.preventDefault();\\n    handleAction(event.timeStamp);\\n  }\\n  if (event.key.toLowerCase() === \\\"d\\\"\`
