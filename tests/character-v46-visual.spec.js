@@ -58,29 +58,17 @@ async function saveCapturedClip(page, clip, path) {
   fs.writeFileSync(path, Buffer.from(capture.dataUrl.split(",")[1], "base64"));
 }
 
-async function productionKeyboardAction(page) {
-  return page.evaluate(() => {
-    const action = document.querySelector("#shotAction");
-    const before = {
-      phase: document.documentElement.dataset.strikePhaseV324 || "",
-      label: action?.textContent?.trim() || ""
-    };
-    const event = new KeyboardEvent("keydown", {
-      key: "Enter",
-      code: "Enter",
-      bubbles: true,
-      cancelable: true,
-      repeat: false
-    });
-    document.dispatchEvent(event);
-    return {
-      before,
-      after: {
-        phase: document.documentElement.dataset.strikePhaseV324 || "",
-        label: action?.textContent?.trim() || ""
-      }
-    };
-  });
+async function browserKeyboardAction(page) {
+  const before = await page.evaluate(() => ({
+    phase: document.documentElement.dataset.strikePhaseV324 || "",
+    label: document.querySelector("#shotAction")?.textContent?.trim() || ""
+  }));
+  await page.keyboard.press("Enter");
+  const after = await page.evaluate(() => ({
+    phase: document.documentElement.dataset.strikePhaseV324 || "",
+    label: document.querySelector("#shotAction")?.textContent?.trim() || ""
+  }));
+  return { before, after };
 }
 
 async function executeLiveShot(page) {
@@ -101,7 +89,7 @@ async function executeLiveShot(page) {
   const trace = [];
 
   for (let index = 0; index < expected.length; index += 1) {
-    trace.push(await productionKeyboardAction(page));
+    trace.push(await browserKeyboardAction(page));
     const [phase, label] = expected[index];
     await expect.poll(
       () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
