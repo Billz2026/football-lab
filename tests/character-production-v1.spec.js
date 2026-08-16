@@ -55,7 +55,7 @@ test("production character contract keeps premium 3D integration gated until ass
   expect(state.readiness.canEnableLiveIntegration).toBe(false);
 });
 
-test("Viktor Kane remains the active production identity while V44 provides the live articulated 2.5D model", async ({ page }) => {
+test("Viktor Kane remains the active production identity and uses the approved V46 GLB", async ({ page }) => {
   await page.goto("/index.html?test=character-production-v1");
   await page.evaluate(() => localStorage.setItem("footballLabSelectedKickerV13", "dax-ryder"));
   await page.reload();
@@ -68,15 +68,19 @@ test("Viktor Kane remains the active production identity while V44 provides the 
     { timeout: 5000 }
   ).toBe("viktor-kane");
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV44?.character),
-    { timeout: 5000 }
-  ).toBe("viktor-kane");
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV44?.renderer),
-    { timeout: 5000 }
-  ).toBe("articulated-layered-2.5d");
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV44?.staticSpriteFrames),
-    { timeout: 5000 }
-  ).toBe(false);
+    () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
+    { timeout: 12000 }
+  ).toBe("real-skinned-glb-3d");
+
+  const live = await page.evaluate(() => ({
+    frame: window.__footballLabHeroFrameV46,
+    visible: window.__footballLabVisibleKickersV30
+  }));
+
+  expect(live.frame.character).toBe("viktor-kane");
+  expect(live.frame.build).toBe("46.0.0");
+  expect(live.frame.production3D).toBe(true);
+  expect(live.visible.production3D).toBe(true);
+  expect(live.visible.productionCharacterMode).toBe("real-skinned-glb-3d");
+  expect(live.visible.staticSpriteFrames).toBe(false);
 });
