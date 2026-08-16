@@ -18,7 +18,7 @@ async function enterClassic(page) {
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
 }
 
-test("V46 only replaces V44 when an approved local GLB passes the full asset gate", async ({ page }) => {
+test("V46 promotes only approved local GLBs while preserving V44 fallback for the incomplete roster", async ({ page }) => {
   await page.goto("/index.html?test=character-v46");
 
   await expect.poll(
@@ -29,12 +29,12 @@ test("V46 only replaces V44 when an approved local GLB passes the full asset gat
   await expect.poll(
     () => page.evaluate(() => {
       const contract = window.__footballLabCharacter3DV46;
-      return Boolean(contract && (
-        contract.loaded?.includes("viktor-kane") ||
-        contract.failed?.some((entry) => entry.id === "viktor-kane")
-      ) && contract.failed?.some((entry) => entry.id === "mikkel-storm"));
+      return Boolean(
+        contract?.loaded?.includes("viktor-kane") &&
+        contract?.loaded?.includes("mikkel-storm")
+      );
     }),
-    { timeout: 15000 }
+    { timeout: 20000 }
   ).toBe(true);
 
   const contract = await page.evaluate(() => window.__footballLabCharacter3DV46);
@@ -44,37 +44,42 @@ test("V46 only replaces V44 when an approved local GLB passes the full asset gat
   expect(contract.fallback).toBe("v44-articulated-2.5d");
   expect(contract.gameplayPhysicsChanged).toBe(false);
   expect(contract.keeperAIChanged).toBe(false);
-
-  const mikkelFailure = contract.failed.find((entry) => entry.id === "mikkel-storm");
-  expect(mikkelFailure?.reason).toBe("missing-local-glb");
-
-  const viktorLoaded = contract.loaded.includes("viktor-kane");
-  if (!viktorLoaded) {
-    const viktorFailure = contract.failed.find((entry) => entry.id === "viktor-kane");
-    expect(viktorFailure).toBeTruthy();
-  }
+  expect(contract.loaded).toEqual(expect.arrayContaining(["viktor-kane", "mikkel-storm"]));
+  expect(contract.failed.some((entry) => entry.id === "mikkel-storm")).toBe(false);
 
   await enterClassic(page);
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
     { timeout: 12000 }
-  ).toBe(viktorLoaded ? "real-skinned-glb-3d" : "v44-fallback");
+  ).toBe("real-skinned-glb-3d");
 
   const live = await page.evaluate(() => ({
     v46: window.__footballLabHeroFrameV46,
-    v44: window.__footballLabHeroFrameV44,
     visible: window.__footballLabVisibleKickersV30
   }));
-
-  expect(live.v46.production3D).toBe(viktorLoaded);
-  if (viktorLoaded) {
-    expect(live.visible.production3D).toBe(true);
-    expect(live.visible.productionCharacterMode).toBe("real-skinned-glb-3d");
-  } else {
-    expect(live.v44.renderer).toBe("articulated-layered-2.5d");
-    expect(live.visible.production3D).toBe(false);
-    expect(live.visible.productionCharacterMode).toBe("articulated-2.5d-fallback");
-  }
+  expect(live.v46.character).toBe("viktor-kane");
+  expect(live.v46.production3D).toBe(true);
+  expect(live.visible.production3D).toBe(true);
+  expect(live.visible.productionCharacterMode).toBe("real-skinned-glb-3d");
   expect(live.visible.staticSpriteFrames).toBe(false);
+
+  await page.evaluate(async () => {
+    const core = await import("/game/core-v6.js?v=32.4");
+    const world = await import("/game/world-v6.js?v=32.4");
+    core.state.stage = 4;
+    core.state.currentStage = world.scenarioForStage(4);
+    window.__footballLabPremiumKeeperSceneDrawV3852?.(performance.now());
+  });
+
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabKeeperFrameV46?.renderer),
+    { timeout: 12000 }
+  ).toBe("real-skinned-glb-3d");
+
+  const keeper = await page.evaluate(() => window.__footballLabKeeperFrameV46);
+  expect(keeper.character).toBe("mikkel-storm");
+  expect(keeper.build).toBe("46.0.0");
+  expect(keeper.production3D).toBe(true);
+  expect(keeper.sceneDepth).toBe(true);
 });
