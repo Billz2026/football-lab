@@ -1,232 +1,230 @@
 
 Running 1 test using 1 worker
 
-[1A[2K[1/1] tests/character-v46-keeper-visual.spec.js:194:1 › capture Mikkel Storm V46 set stance and a real AI-driven dive in the gameplay camera
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /index.html?capture=mikkel-v46-dive HTTP/1.1" 200 -
+[1A[2K[1/1] tests/character-v46-keeper-visual.spec.js:228:1 › capture Mikkel Storm V46 set stance and a real AI-driven dive in the gameplay camera
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /index.html?capture=mikkel-v46-dive HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /style.css?v=2 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/strike-v32-4.css?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /product-polish-v22.css?v=22 HTTP/1.1" 200 -
-[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/hub-v35-1.css?v=35.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /style.css?v=2 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/hub-v35-2.css?v=35.2 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /product-polish-v22.css?v=22 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/strike-v32-4.css?v=32.4 HTTP/1.1" 200 -
-[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /app.js?v=38.7.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/hub-v35-1.css?v=35.1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /app.js?v=38.7.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-main.js?v=41.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/hub-v35-2.css?v=35.2 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /sw.js?v=41.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/runtime-v23-main.js?v=41.0.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET / HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /sw.js?v=41.0.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /index.html HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /index.html HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /style.css?v=2 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET / HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /product-polish-v22.css?v=22 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /style.css?v=2 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /app.js?v=41.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /product-polish-v22.css?v=22 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/core-v6.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /app.js?v=41.0.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-bridge-physics-v19-f1d39f9409.js HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /sw.js?v=41.0.0 HTTP/1.1" 304 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js HTTP/1.1" 200 -
-[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /sw.js?v=41.0.0 HTTP/1.1" 304 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/core-v6.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/audio-v10.js?v=10 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/runtime-v23-bridge-physics-v19-f1d39f9409.js HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/difficulty-v9.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/keepers-v14.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/keepers-v14.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/characters-v13.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/audio-v10.js?v=10 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/characters-v13.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/walls-v15.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/difficulty-v9.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/world-v6.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/walls-v15.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/character-3d-v46.js?v=46.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:26] "GET /game/world-v6.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/matchday-impact-v32.js?v=40.3.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/runtime-v23-generated-physics-v15-9cf6fe15a3.js HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-generated-render-v17-v1731-7f257084b1.js HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/runtime-v23-generated-render-v17-v1731-7f257084b1.js HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/stadium-progression-v41.js?v=41.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/character-3d-v46.js?v=46.0.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/character-engine-v1.js?v=1.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/matchday-impact-v32.js?v=40.3.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-generated-physics-v15-9cf6fe15a3.js HTTP/1.1" 200 -
-[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/keeper-character-v44.js?v=44.0.0 HTTP/1.1" 200 -
-[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/world-v7.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/stadium-progression-v41.js?v=41.0.0 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/character-engine-v1.js?v=1.0.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/character-production-v1.js?v=1.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/keeper-character-v44.js?v=44.0.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/hero-character-v44.js?v=44.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/world-v7.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/projection-v6.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/projection-v6.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/physics-v7.js?v=32.4 HTTP/1.1" 200 -
-[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-generated-render-v15-v1731-1b04a249af.js HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/runtime-v23-generated-render-v15-v1731-1b04a249af.js HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/physics-v7.js?v=7 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/physics-v7.js?v=7 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/character-profiles-v42.js?v=42.1.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/character-production-v1.js?v=1.0.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/hero-character-v42.js?v=42.1.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/hero-character-v44.js?v=44.0.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/physics-v7.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/character-profiles-v42.js?v=42.1.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/audio-v6.js?v=7 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/hero-character-v42.js?v=42.1.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "HEAD /game/assets/characters/v1/goalkeeper/mikkel-storm/mikkel-storm.glb HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "HEAD /game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/audio-v6.js?v=7 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/keeper-ai-v34.js?v=35.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "HEAD /game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "HEAD /game/assets/characters/v1/goalkeeper/mikkel-storm/mikkel-storm.glb HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "HEAD /game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/keeper-ai-v34.js?v=35.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "HEAD /game/assets/characters/v1/goalkeeper/mikkel-storm/mikkel-storm.glb HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "HEAD /game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "HEAD /game/assets/characters/v1/goalkeeper/mikkel-storm/mikkel-storm.glb HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/keeper-polish-v36.js?v=36.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/runtime-v23-bridge-physics-v19-f1d39f9409.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/keeper-polish-v36.css?v=36.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/keeper-polish-v36.js?v=36.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:12] "GET /game/keeper-realism-v36-2.js?v=36.2 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/keeper-realism-v36-2.js?v=36.2 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/keeper-readability-v36-3.js?v=36.3 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/keeper-polish-v36.css?v=36.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/keeper-visuals-v38-1.js?v=40.3.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/keeper-readability-v36-3.js?v=36.3 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/keeper-visuals-v38-1.js?v=40.3.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/assets/characters/v1/goalkeeper/mikkel-storm/mikkel-storm.glb HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/flight-v33.js?v=40.3.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/flight-v33.js?v=40.3.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/training-v35.js?v=35.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/training-v35.js?v=35.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/training-v35.css?v=35.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/training-guard-v35.js?v=35.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/training-guard-v35.js?v=35.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/training-v35.css?v=35.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/hub-v35-1.js?v=35.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/hub-v35-1.js?v=35.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/polish-v10-2.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/assets/characters/v1/goalkeeper/mikkel-storm/mikkel-storm.glb HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/polish-v11-4.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/polish-v10-2.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/characters-ui-v13.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/polish-v11-4.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/keepers-ui-v14.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/characters-ui-v13.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/walls-ui-v15.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/keepers-ui-v14.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/mobile-ui-v16.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/walls-ui-v15.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /mobile-v16.css?v=16 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/mobile-ui-v16.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/mobile-shell-v16-1.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /mobile-v16.css?v=16 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /mobile-shell-v16-1.css?v=161 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/mobile-shell-v16-1.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/mobile-shell-compact-v16-1.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /mobile-shell-v16-1.css?v=161 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /mobile-shell-v16-1-compact.css?v=161 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/mobile-shell-compact-v16-1.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/visual-ui-v17.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/visual-ui-v17.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/final-aim-cleanup-v38-1-4.js?v=38.1.6 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /mobile-shell-v16-1-compact.css?v=161 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/fold-balance-cinema-v38-3-4.js?v=38.4.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/fold-balance-cinema-v38-3-4.js?v=38.4.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/fold-shell-v38-2-2.js?v=38.2.2 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/fold-shell-v38-2-2.js?v=38.2.2 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/strike-v32-4.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/final-aim-cleanup-v38-1-4.js?v=38.1.6 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /visual-v17.css?v=17 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /visual-v17.css?v=17 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/skill-balance-v37.js?v=37.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/strike-v32-4.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/input-precision-ui-v18.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/skill-balance-v37.js?v=37.0 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/refinement-release-v37-1.js?v=37.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/refinement-release-v37-1.js?v=37.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/refinement-v37-1.js?v=37.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/input-precision-ui-v18.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/progression-v20.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/refinement-v37-1.js?v=37.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/progression-v20.css?v=20 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/progression-v20.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/clarity-v21.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/progression-v20.css?v=20 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/product-polish-v22.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/clarity-v21.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/hub-v35-3.js?v=35.3 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/product-polish-v22.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/hub-v35-3.css?v=35.3 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/hub-v35-3.js?v=35.3 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/hub-v35-4.js?v=35.6.2 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/hub-v35-3.css?v=35.3 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/training-ui-v35-5.js?v=35.5 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/hub-v35-4.js?v=35.6.2 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/hub-v35-4.css?v=35.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/training-ui-v35-5.js?v=35.5 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/release-v23.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/release-v23.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/training-ui-v35-5.css?v=35.5 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/hub-v35-4.css?v=35.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/training-ui-v35-6.js?v=35.6.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/immersive-ui-v24.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/immersive-ui-v24.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/training-ui-v35-5.css?v=35.5 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/training-ui-v35-6.css?v=38.2.1 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/training-ui-v35-6.js?v=35.6.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/immersive-ui-v24.css?v=24.2 HTTP/1.1" 200 -
-[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/desktop-fit-v24-1.css?v=24.2 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/infinite-runs-v25.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/infinite-runs-v25.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/immersive-ui-v24.css?v=24.2 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/campaign-v31.js?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/desktop-fit-v24-1.css?v=24.2 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/campaign-v31.css?v=32.4 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/training-ui-v35-6.css?v=38.2.1 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/campaign-v41.js?v=41.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/campaign-v31.js?v=32.4 HTTP/1.1" 200 -
 
-[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:34:13] "GET /game/campaign-v41.css?v=41.0.0 HTTP/1.1" 200 -
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/campaign-v31.css?v=32.4 HTTP/1.1" 200 -
 
-[1A[2Ktests/character-v46-keeper-visual.spec.js:194:1 › capture Mikkel Storm V46 set stance and a real AI-driven dive in the gameplay camera
-MIKKEL_V46_SHOT_INPUT_TRACE [{"before":{"phase":"ready","label":"START SHOT"},"after":{"phase":"aim","label":"STRIKE"}},{"before":{"phase":"aim","label":"STRIKE"},"after":{"phase":"power","label":"LOCK POWER"}},{"before":{"phase":"power","label":"LOCK POWER"},"after":{"phase":"contact","label":"LOCK CONTACT"}},{"before":{"phase":"contact","label":"LOCK CONTACT"},"after":{"phase":"shooting","label":"SHOT IN PLAY"}}]
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/campaign-v41.js?v=41.0.0 HTTP/1.1" 200 -
 
-[1A[2KMIKKEL_V46_REAL_SHOT {"outcome":"SAVE","keeperPlan":{"keeperId":"giant","keeperName":"BRUNO HALE","keeperRole":"GIANT KEEPER","keeperTrait":"LONG REACH","keeperAccent":"#ffb36b","keeperTier":1,"saved":true,"saveType":"PARRY","start":{"x":0.9974,"y":0,"z":0.38},"contact":{"x":1.5826811239786824,"y":1.9194009960827059,"z":0.28},"reaction":0.132,"flightSeconds":1.0605051429615955,"reachScore":0.4710145526962398,"threshold":1.1322384556833007,"skill":0.5944068965517242,"target":{"x":1.5826811239786824,"y":1.9194009960827059,"z":0},"diveDirection":1,"reachX":3.345209208527943,"reachY":2.01212261753151,"readPredictedX":1.5877639634305742,"readFinalX":1.5826811239786824,"readErrorMetres":0.005082839451891807,"effectiveMisreadMetres":0.003705044327346399,"wrongFooted":false,"readCommitX":0.13130735197840882,"correctionDelay":0.000227166197228405,"physicsStartV36":{"x":0.9713073519784088,"y":0,"z":0.38},"physicsReactionV36":0.22295720619722836,"presentationSaveType":"TWO-HAND PARRY","presentationV36":{"build":"36.0.0","keeperId":"giant","keeperName":"BRUNO HALE","baseStart":{"x":0.94,"y":0,"z":0.38},"profile":{"wrongFooted":false,"misread":0.003705044327346399,"finalDirection":1,"wrongOffset":0,"readOffset":0.0574,"forwardStep":0,"reactionAdjustment":0.008}},"realismV362":{"build":"36.2.0","keeperId":"giant","beforeReaction":0.23095720619722837,"visualReaction":0.138,"wrongFooted":false,"outcomePreserved":"SAVE","visibleAttemptForced":false,"attemptedContact":{"x":1.5826811239786824,"y":1.9194009960827059,"z":0.28}},"readabilityV363":{"build":"36.3.0","keeperId":"giant","beforeReaction":0.138,"visualReaction":0.132,"wrongFooted":false,"outcomePreserved":"SAVE"}},"diagnostics":{"character":"VIKTOR KANE","characterTrait":"THUNDER STRIKE","goalkeeper":"BRUNO HALE","goalkeeperRole":"GIANT KEEPER","goalkeeperTrait":"LONG REACH","goalkeeperTier":1,"wallUnit":"IRON BLOCK","wallRole":"COMPACT WALL","wallTrait":"CLOSE RANKS","wallTier":1,"wallShiftMetres":0.12,"wallPlayerCount":4,"stage":5,"scenario":"left26","challenge":"FIRST TOUCH · CLEAR MORNING","powerPercent":38,"powerQuality":"UNDERHIT","strikeQuality":0.009,"speedMps":21.49,"selectedTarget":{"x":1.81,"y":1.92},"finalTarget":{"x":1.58,"y":1.92},"curvePercent":0,"curveMetres":0,"windMetres":0.01,"contactDriftMetres":{"x":-0.23,"y":0},"wallLane":"OVER","wallClearanceMetres":0.14,"keeperReactionSeconds":0.223,"keeperReachScore":0.471,"keeperThreshold":1.132,"keeperSkill":0.594,"outcome":"SAVE","reason":"The goalkeeper reached the ball and parried it.","pathDistanceMetres":26.287,"primaryDistanceMetres":22.794,"continuationDistanceMetres":3.493,"impactProgress":0.8671,"pathSpacingMetres":0.0996,"pathSpacingDeviationRatio":0.0004,"primarySpacingDeviationRatio":0.0004,"continuationSpacingDeviationRatio":0,"distanceTimedFlightMs":1447,"keeperReadModel":"early-lane-commit-correct","keeperReadPredictedX":1.588,"keeperReadFinalX":1.583,"keeperReadErrorMetres":0.005,"keeperEffectiveMisreadMetres":0.004,"keeperWrongFooted":false,"keeperReadCommitMetres":0.131,"keeperCorrectionDelaySeconds":0,"keeperReadPenalty":0,"keeperStraightReadBonus":0.012,"keeperReadOutcomeChange":null,"keeperPresentationModel":"read-set-correct-dive","keeperPresentationType":"TWO-HAND PARRY","keeperPresentationWrongFooted":false,"keeperPresentationWrongStepMetres":0,"keeperPresentationReadStepMetres":0.057,"keeperPresentationReactionSeconds":0.231,"keeperPresentationPhysicsChanged":false,"flightModel":"progressive-magnus-dip","visualCurvePeakMetres":0.057,"visualDipMetres":0.101,"keeperRealismModel":"set-push-dive-attempt","keeperVisualReactionBeforeV362":0.231,"keeperVisualReactionAfterV362":0.138,"keeperVisibleAttemptV362":false,"keeperWrongFootProtectedV362":false,"keeperOutcomeRecalculatedV362":false,"keeperReadabilityV363":true,"keeperVisualReactionBeforeV363":0.138,"keeperVisualReactionAfterV363":0.132,"keeperOutcomeRecalculatedV363":false},"aimX":0.78,"aimY":0.2,"power":0.3796532737672558,"contactQuality":0.4999293765763531}
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:27] "GET /game/campaign-v41.css?v=41.0.0 HTTP/1.1" 200 -
 
-[1A[2K  1) tests/character-v46-keeper-visual.spec.js:194:1 › capture Mikkel Storm V46 set stance and a real AI-driven dive in the gameplay camera › Expect "poll toEqual" 
+[1A[2K[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:28] code 404, message File not found
+[WebServer] 127.0.0.1 - - [16/Aug/2026 12:45:28] "HEAD /game/assets/characters/v1/goalkeeper/simon-henshaw/simon-henshaw.glb HTTP/1.1" 404 -
 
-    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+[1A[2K  1) tests/character-v46-keeper-visual.spec.js:228:1 › capture Mikkel Storm V46 set stance and a real AI-driven dive in the gameplay camera 
 
-    Expected: [32mArrayContaining [StringMatching /^dive-(left|right)-(low|mid|high)$/][39m
-    Received: [31m["set"][39m
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
 
-    Call Log:
-    - Timeout 10000ms exceeded while waiting on the predicate
+    Expected: > [32m2[39m
+    Received:   [31m2[39m
 
-      207 |
-      208 |   await executeLiveShot(page);
-    > 209 |   await expect.poll(
-          |   ^
-      210 |     () => page.evaluate(() => (window.__mikkelV46Trace || []).map((entry) => entry.clip)),
-      211 |     { timeout: 10000 }
-      212 |   ).toEqual(expect.arrayContaining([expect.stringMatching(/^dive-(left|right)-(low|mid|high)$/)]));
-        at /home/runner/work/football-lab/football-lab/tests/character-v46-keeper-visual.spec.js:209:3
+      64 |   }));
+      65 |
+    > 66 |   expect(before.frames).toBeGreaterThan(2);
+         |                         ^
+      67 |   expect(after.frames).toBeGreaterThan(2);
+      68 |   expect(errors).toEqual([]);
+      69 |   await expect.poll(
+        at enterMikkelStageThroughGameState (/home/runner/work/football-lab/football-lab/tests/character-v46-keeper-visual.spec.js:66:25)
+        at /home/runner/work/football-lab/football-lab/tests/character-v46-keeper-visual.spec.js:235:3
 
     Error Context: test-results/character-v46-keeper-visua-f9c95-dive-in-the-gameplay-camera/error-context.md
 
 
 [1A[2K  1 failed
-    tests/character-v46-keeper-visual.spec.js:194:1 › capture Mikkel Storm V46 set stance and a real AI-driven dive in the gameplay camera 
+    tests/character-v46-keeper-visual.spec.js:228:1 › capture Mikkel Storm V46 set stance and a real AI-driven dive in the gameplay camera 
