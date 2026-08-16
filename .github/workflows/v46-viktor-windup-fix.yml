@@ -20,22 +20,11 @@ jobs:
           fetch-depth: 0
       - name: Widen visual windup window
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('game/character-3d-v46.js')
-          s = p.read_text()
-          old = '''  if (p.run < 0.4) return { clip: "approach", t: p.run / 0.4, p };
-  if (p.run < 0.55) return { clip: "plant", t: (p.run - 0.4) / 0.15, p };
-  if (p.run < 0.9) return { clip: "windup", t: (p.run - 0.55) / 0.35, p };
-  return { clip: "contact", t: (p.run - 0.9) / 0.1, p };'''
-          new = '''  if (p.run < 0.35) return { clip: "approach", t: p.run / 0.35, p };
-  if (p.run < 0.45) return { clip: "plant", t: (p.run - 0.35) / 0.1, p };
-  if (p.run < 1) return { clip: "windup", t: (p.run - 0.45) / 0.55, p };
-  return { clip: "contact", t: 0, p };'''
-          if s.count(old) != 1:
-              raise SystemExit(f'expected current windup block once, found {s.count(old)}')
-          p.write_text(s.replace(old, new, 1))
-          PY
+          sed -i 's/p.run < 0.4) return { clip: "approach", t: p.run \/ 0.4/p.run < 0.35) return { clip: "approach", t: p.run \/ 0.35/' game/character-3d-v46.js
+          sed -i 's/p.run < 0.55) return { clip: "plant", t: (p.run - 0.4) \/ 0.15/p.run < 0.45) return { clip: "plant", t: (p.run - 0.35) \/ 0.1/' game/character-3d-v46.js
+          sed -i 's/p.run < 0.9) return { clip: "windup", t: (p.run - 0.55) \/ 0.35/p.run < 1) return { clip: "windup", t: (p.run - 0.45) \/ 0.55/' game/character-3d-v46.js
+          sed -i 's/return { clip: "contact", t: (p.run - 0.9) \/ 0.1, p };/return { clip: "contact", t: 0, p };/' game/character-3d-v46.js
+          grep -q 'p.run < 1) return { clip: "windup"' game/character-3d-v46.js
           node --check game/character-3d-v46.js
           git diff --check
       - name: Commit Viktor visual timing fix
