@@ -1,0 +1,40 @@
+name: Re-author Viktor V46 kick clips
+
+on:
+  push:
+    branches:
+      - agent/v46-real-3d-character-layer
+    paths:
+      - 'scripts/patch-v46-kick-clips.py'
+      - '.github/workflows/v46-kick-clip-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/v46-real-3d-character-layer
+          fetch-depth: 0
+      - name: Re-author Viktor kick clips
+        run: python3 scripts/patch-v46-kick-clips.py
+      - name: Validate patched authoring script
+        run: |
+          python3 -m py_compile scripts/build-viktor-v46.py
+          grep -q '"RightUpperLeg": (-58, 3, -5)' scripts/build-viktor-v46.py
+          git diff --check
+      - name: Commit clip repair
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add scripts/build-viktor-v46.py
+          if git diff --cached --quiet; then
+            echo 'Kick clips already repaired.'
+          else
+            git commit -m 'Re-author Viktor strike body mechanics'
+            git push origin HEAD:agent/v46-real-3d-character-layer
+          fi
