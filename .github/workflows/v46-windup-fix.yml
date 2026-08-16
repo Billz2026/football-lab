@@ -1,0 +1,40 @@
+name: Repair V46 windup timing
+
+on:
+  push:
+    branches:
+      - agent/v46-real-3d-character-layer
+    paths:
+      - 'scripts/patch-v46-windup.py'
+      - '.github/workflows/v46-windup-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/v46-real-3d-character-layer
+          fetch-depth: 0
+      - name: Patch windup timing
+        run: python3 scripts/patch-v46-windup.py
+      - name: Validate patch
+        run: |
+          grep -q 'p.run < 0.4' game/character-3d-v46.js
+          grep -q 'p.run < 0.9' game/character-3d-v46.js
+          git diff --check
+      - name: Commit windup timing repair
+        run: |
+          if git diff --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add game/character-3d-v46.js
+          git commit -m 'Give Viktor strike windup visible timing'
+          git push origin HEAD:agent/v46-real-3d-character-layer
