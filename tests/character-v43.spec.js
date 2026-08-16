@@ -49,14 +49,38 @@ test("live outfield rendering keeps the five-frame sprite path retired after Vik
   expect(state.staticSpriteFrames).toBe(false);
 });
 
-test("goalkeepers remain on the continuous articulated scene-depth rig", async ({ page }) => {
+test("Mikkel uses V46 3D while keepers without approved GLBs remain on V44", async ({ page }) => {
   await chooseKicker(page, "dax-ryder");
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabKeeperRendererV44?.build),
     { timeout: 6000 }
   ).toBe("44.0.0");
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabCharacter3DV46?.loaded?.includes("mikkel-storm")),
+    { timeout: 12000 }
+  ).toBe(true);
 
+  // Stage 0 uses the academy/SIMON HENSHAW visual profile. With no Simon GLB,
+  // the continuous articulated V44 scene-depth keeper must remain intact.
+  await page.evaluate(async () => {
+    const core = await import("/game/core-v6.js?v=32.4");
+    const world = await import("/game/world-v6.js?v=32.4");
+    core.state.stage = 0;
+    core.state.currentStage = world.scenarioForStage(0);
+    window.__footballLabPremiumKeeperSceneDrawV3852?.(performance.now());
+  });
+
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabKeeperFrameV44?.renderer),
+    { timeout: 5000 }
+  ).toBe("articulated-layered-2.5d");
+  const fallbackKeeper = await page.evaluate(() => window.__footballLabKeeperFrameV44);
+  expect(fallbackKeeper.character).toBe("simon-henshaw");
+  expect(fallbackKeeper.staticSpriteFrames).toBe(false);
+  expect(fallbackKeeper.sceneDepth).toBe(true);
+
+  // Stage 4 maps to the giant keeper and therefore the approved Mikkel master.
   await page.evaluate(async () => {
     const core = await import("/game/core-v6.js?v=32.4");
     const world = await import("/game/world-v6.js?v=32.4");
@@ -66,13 +90,13 @@ test("goalkeepers remain on the continuous articulated scene-depth rig", async (
   });
 
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabKeeperFrameV44?.renderer),
-    { timeout: 5000 }
-  ).toBe("articulated-layered-2.5d");
+    () => page.evaluate(() => window.__footballLabKeeperFrameV46?.renderer),
+    { timeout: 12000 }
+  ).toBe("real-skinned-glb-3d");
 
-  const keeper = await page.evaluate(() => window.__footballLabKeeperFrameV44);
-  expect(keeper.character).toBe("mikkel-storm");
-  expect(keeper.staticSpriteFrames).toBe(false);
-  expect(keeper.sceneDepth).toBe(true);
-  expect(keeper.profileDrivenVisuals).toBe(true);
+  const mikkel = await page.evaluate(() => window.__footballLabKeeperFrameV46);
+  expect(mikkel.character).toBe("mikkel-storm");
+  expect(mikkel.build).toBe("46.0.0");
+  expect(mikkel.production3D).toBe(true);
+  expect(mikkel.sceneDepth).toBe(true);
 });
