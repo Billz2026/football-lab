@@ -1,0 +1,97 @@
+name: V46 public activation smoke
+
+on:
+  push:
+    branches:
+      - hotfix/v46-live-render-path
+    paths:
+      - '.github/workflows/v46-public-activation-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-activation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hotfix/v46-live-render-path
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+
+      - name: Prove public Pages activates Viktor and Mikkel V46
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { chromium } from '@playwright/test';
+
+          const browser = await chromium.launch({ headless: true });
+          try {
+            const context = await browser.newContext({
+              extraHTTPHeaders: { 'Cache-Control': 'no-cache' }
+            });
+            const page = await context.newPage();
+            const errors = [];
+            page.on('pageerror', error => errors.push(error.message));
+
+            const url = 'https://billz2026.github.io/football-lab/index.html?live-v46=8489b6de';
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+
+            await page.waitForFunction(() => {
+              const contract = window.__footballLabCharacter3DV46;
+              return contract?.loaded?.includes('viktor-kane') && contract?.loaded?.includes('mikkel-storm');
+            }, null, { timeout: 30000 });
+
+            await page.locator('#classicCard').click();
+            await page.waitForFunction(() => (
+              document.querySelector('#gameScreen')?.classList.contains('is-active') ||
+              document.querySelector('#kickerSelectV13')?.classList.contains('is-open')
+            ), null, { timeout: 10000 });
+
+            const pickerOpen = await page.locator('#kickerSelectV13').evaluate(el => el.classList.contains('is-open'));
+            if (pickerOpen) await page.locator('#kickerConfirmV13').click();
+
+            await page.waitForFunction(() => (
+              window.__footballLabHeroFrameV46?.character === 'viktor-kane' &&
+              window.__footballLabHeroFrameV46?.renderer === 'real-skinned-glb-3d' &&
+              window.__footballLabVisibleKickersV30?.production3D === true
+            ), null, { timeout: 20000 });
+
+            const viktor = await page.evaluate(() => ({
+              frame: window.__footballLabHeroFrameV46,
+              visible: window.__footballLabVisibleKickersV30
+            }));
+
+            const mikkel = await page.evaluate(async () => {
+              const core = await import('/football-lab/game/core-v6.js?v=32.4');
+              const world = await import('/football-lab/game/world-v6.js?v=32.4');
+              core.state.stage = 4;
+              core.state.currentStage = world.scenarioForStage(4);
+              const hook = window.__footballLabPremiumKeeperSceneDrawV3852;
+              if (typeof hook !== 'function') throw new Error('Live keeper scene hook is unavailable');
+              hook(performance.now());
+              await new Promise(resolve => setTimeout(resolve, 250));
+              hook(performance.now());
+              return window.__footballLabKeeperFrameV46;
+            });
+
+            if (mikkel?.character !== 'mikkel-storm' || mikkel?.renderer !== 'real-skinned-glb-3d' || !mikkel?.production3D) {
+              throw new Error(`Mikkel did not activate in live production path: ${JSON.stringify(mikkel)}`);
+            }
+            if (errors.length) throw new Error(`Public page errors: ${errors.join(' | ')}`);
+
+            console.log('PUBLIC_V46_VIKTOR=' + JSON.stringify(viktor));
+            console.log('PUBLIC_V46_MIKKEL=' + JSON.stringify(mikkel));
+            console.log('PUBLIC_V46_ACTIVATION=true');
+          } finally {
+            await browser.close();
+          }
+          NODE
