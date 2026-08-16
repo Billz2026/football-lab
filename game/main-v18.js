@@ -156,7 +156,7 @@ source = source.replace(flowMarker, `${flowPatch}${flowMarker}`);
 source = source.replace(/new URL\("(\.\/[^"\n]+)", import\.meta\.url\)/g, (_, specifier) => {
   return `new URL("${new URL(specifier, sourceUrl).href}")`;
 });
-source += "\n//# sourceURL=football-lab-main-v19-generated.js\n";
+source += "\nwindow.__footballLabAuthoritativeStateV46 = state;\n//# sourceURL=football-lab-main-v19-generated.js\n";
 
 const moduleUrl = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
 try {

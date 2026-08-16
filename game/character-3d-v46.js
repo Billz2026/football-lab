@@ -35,6 +35,13 @@ const loaded = new Map();
 const loading = new Map();
 const failed = new Map();
 
+function liveState() {
+  if (typeof window !== "undefined" && window.__footballLabAuthoritativeStateV46) {
+    return window.__footballLabAuthoritativeStateV46;
+  }
+  return state;
+}
+
 function publish(status, extra = {}) {
   if (typeof window === "undefined") return;
   window.__footballLabCharacter3DV46 = Object.freeze({
@@ -286,14 +293,16 @@ function activeOutfieldEntry() {
 }
 
 function activeKeeperEntry() {
-  const source = keeperForStage(state.stage);
+  const gameState = liveState();
+  const source = keeperForStage(gameState.stage);
   return characterAssetBySourceIdV1(source.id)
     || (source.id === "aggressive" ? characterAssetV1("mikkel-storm") : null);
 }
 
 function outfieldProgress(time) {
-  if (!state.animation) return { run: 0, contact: 0, flight: 0, settle: 0, replay: false };
-  const animation = state.animation;
+  const gameState = liveState();
+  if (!gameState.animation) return { run: 0, contact: 0, flight: 0, settle: 0, replay: false };
+  const animation = gameState.animation;
   const elapsed = time - animation.startedAt;
   const runDuration = Math.max(1, animation.runUpDuration || 1);
   const contactDuration = Math.max(0, animation.contactHoldDuration || 0);
@@ -311,7 +320,7 @@ function outfieldProgress(time) {
 
 function outfieldPhase(time) {
   const p = outfieldProgress(time);
-  if (!state.animation) return { clip: "idle", t: (time % 2400) / 2400, p };
+  if (!liveState().animation) return { clip: "idle", t: (time % 2400) / 2400, p };
   if (p.replay || p.flight > 0 || p.settle > 0) {
     if (p.flight < 0.58) return { clip: "follow-through", t: clamp(p.flight / 0.58, 0, 1), p };
     return { clip: "recovery", t: Math.max(clamp((p.flight - 0.58) / 0.42, 0, 1), p.settle), p };
@@ -324,7 +333,7 @@ function outfieldPhase(time) {
 }
 
 function rootTravel(p) {
-  if (!state.animation) return 0;
+  if (!liveState().animation) return 0;
   if (p.replay) return 1;
   const t = clamp(p.run / 0.72, 0, 1);
   return t < 0.5 ? 4 * t ** 3 : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -344,6 +353,30 @@ function keeperClip(frame) {
   if (/DIVE/.test(motion)) return `dive-${side}-mid`;
   if (/WRONG_FOOT|READ_SET|PLANT/.test(motion)) return right ? "shuffle-right" : "shuffle-left";
   return "set";
+}
+
+function keeperClipFromAuthoritativePlan(time, frameClip) {
+  const gameState = liveState();
+  const animation = gameState.animation;
+  const plan = gameState.shot?.keeperPlan;
+  if (!animation || !plan || animation.isReplay) return frameClip;
+
+  const p = outfieldProgress(time);
+  if (p.flight <= 0) return frameClip;
+
+  const flightSeconds = Math.max(0.05, Number(plan.flightSeconds) || 1);
+  const reactionRatio = clamp((Number(plan.reaction) || 0.15) / flightSeconds, 0.04, 0.72);
+  const direction = Number(plan.diveDirection || ((plan.target?.x || 0) - (plan.start?.x || 0))) >= 0
+    ? "right"
+    : "left";
+  const targetY = Number(plan.contact?.y ?? plan.target?.y ?? 1.1);
+  const height = targetY >= 1.72 ? "high" : targetY <= 0.78 ? "low" : "mid";
+
+  if (p.flight < reactionRatio * 0.82) return `shuffle-${direction}`;
+  if (p.flight < 0.84) return `dive-${direction}-${height}`;
+  if (gameState.shot?.saveType === "CATCH" && p.flight < 0.94) return "catch";
+  if (p.settle < 0.46) return "landing";
+  return "recovery";
 }
 
 function scrubAction(configured, clipName, normalisedTime) {
@@ -435,15 +468,16 @@ export function drawHeroCharacterV46(time) {
     return;
   }
 
+  const gameState = liveState();
   const phase = outfieldPhase(time);
-  const world = kickerWorld(state.currentStage, rootTravel(phase.p));
-  const target = ballWorld(state.currentStage);
+  const world = kickerWorld(gameState.currentStage, rootTravel(phase.p));
+  const target = ballWorld(gameState.currentStage);
   if (!scrubAction(configured, phase.clip, phase.t)) {
     drawHeroCharacterV44(time);
     return;
   }
   faceTarget(configured.model, world, target, configured.yawOffset);
-  const cameraState = buildCamera(state.currentStage);
+  const cameraState = buildCamera(gameState.currentStage);
   renderConfigured(configured, cameraState);
 
   window.__footballLabHeroFrameV46 = Object.freeze({
@@ -460,14 +494,25 @@ export function drawHeroCharacterV46(time) {
 function renderKeeper3D(time, frame, configured) {
   const keeper = frame?.keeper;
   if (!keeper?.world || !keeper?.pose) return false;
-  const clip = keeperClip(frame);
-  const flight = outfieldProgress(time).flight;
-  const t = /set/.test(clip) ? (time % 2200) / 2200 : clamp(flight, 0, 1);
+  const gameState = liveState();
+  const frameClip = keeperClip(frame);
+  const clip = frameClip === "set"
+    ? keeperClipFromAuthoritativePlan(time, frameClip)
+    : frameClip;
+  const progress = outfieldProgress(time);
+  const flight = progress.flight;
+  const t = /set/.test(clip)
+    ? (time % 2200) / 2200
+    : /shuffle/.test(clip)
+      ? clamp(flight / 0.28, 0, 1)
+      : /landing|recovery/.test(clip)
+        ? clamp(progress.settle, 0, 1)
+        : clamp(flight, 0, 1);
   if (!scrubAction(configured, clip, t)) return false;
 
-  const target = ballWorld(state.currentStage);
+  const target = ballWorld(gameState.currentStage);
   faceTarget(configured.model, keeper.world, target, configured.yawOffset);
-  return renderConfigured(configured, buildCamera(state.currentStage));
+  return renderConfigured(configured, buildCamera(gameState.currentStage));
 }
 
 function installKeeperNow() {
