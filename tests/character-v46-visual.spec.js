@@ -73,18 +73,59 @@ async function saveCapturedClip(page, clip, path) {
   fs.writeFileSync(path, Buffer.from(capture.dataUrl.split(",")[1], "base64"));
 }
 
+async function productionPointerAction(page) {
+  return page.evaluate(() => {
+    const action = document.querySelector("#shotAction");
+    if (!action) throw new Error("#shotAction is missing");
+    const before = action.textContent?.trim() || "";
+    const event = new PointerEvent("pointerdown", {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      pointerId: 1,
+      pointerType: "mouse",
+      isPrimary: true,
+      button: 0,
+      buttons: 1
+    });
+    const dispatched = action.dispatchEvent(event);
+    return {
+      before,
+      after: action.textContent?.trim() || "",
+      dispatched,
+      frame: window.__footballLabHeroFrameV46 || null,
+      lastInput: window.__footballLabLastInputSample || null
+    };
+  });
+}
+
 async function executeLiveShot(page) {
   await dismissCoach(page);
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 6000 });
 
   // READY -> AIM -> POWER -> CONTACT -> SHOOTING.
-  // Space is a first-class production input handled by the same handleAction()
-  // path as pointer input, and avoids relying on a button that is intentionally
-  // hidden during parts of the compact gameplay layout.
-  for (const delay of [120, 180, 180, 0]) {
-    await page.keyboard.press("Space");
-    if (delay) await page.waitForTimeout(delay);
+  // These are genuine PointerEvents sent to the production #shotAction listener.
+  // No state or animation clip is mutated by the test.
+  const expectedAfter = ["LOCK AIM", "LOCK POWER", "STRIKE", "RESULT"];
+  const delays = [120, 180, 180, 0];
+  const trace = [];
+
+  for (let index = 0; index < 4; index += 1) {
+    trace.push(await productionPointerAction(page));
+    if (index < 3) {
+      await page.waitForTimeout(delays[index]);
+      await expect.poll(
+        () => page.locator("#shotAction").textContent(),
+        { timeout: 2500 }
+      ).toContain(expectedAfter[index]);
+    }
   }
+
+  console.log("VIKTOR_V46_STRIKE_INPUT_TRACE", JSON.stringify(trace));
+  await expect.poll(
+    () => page.evaluate(() => Boolean(window.__footballLabHeroFrameV46?.clip && window.__footballLabHeroFrameV46.clip !== "idle")),
+    { timeout: 3000 }
+  ).toBe(true);
 }
 
 test("capture Viktor Kane V46 standing and striking in the authoritative gameplay camera", async ({ page }) => {
