@@ -42,28 +42,17 @@ async function forceMikkelStageThroughWorldContract(page) {
   ).toBe("mikkel-storm");
 }
 
-async function productionKeyboardAction(page) {
-  return page.evaluate(() => {
-    const action = document.querySelector("#shotAction");
-    const before = {
-      phase: document.documentElement.dataset.strikePhaseV324 || "",
-      label: action?.textContent?.trim() || ""
-    };
-    document.dispatchEvent(new KeyboardEvent("keydown", {
-      key: "Enter",
-      code: "Enter",
-      bubbles: true,
-      cancelable: true,
-      repeat: false
-    }));
-    return {
-      before,
-      after: {
-        phase: document.documentElement.dataset.strikePhaseV324 || "",
-        label: action?.textContent?.trim() || ""
-      }
-    };
-  });
+async function browserKeyboardAction(page) {
+  const before = await page.evaluate(() => ({
+    phase: document.documentElement.dataset.strikePhaseV324 || "",
+    label: document.querySelector("#shotAction")?.textContent?.trim() || ""
+  }));
+  await page.keyboard.press("Enter");
+  const after = await page.evaluate(() => ({
+    phase: document.documentElement.dataset.strikePhaseV324 || "",
+    label: document.querySelector("#shotAction")?.textContent?.trim() || ""
+  }));
+  return { before, after };
 }
 
 async function executeLiveShot(page) {
@@ -83,7 +72,7 @@ async function executeLiveShot(page) {
   const delays = [120, 180, 180, 0];
   const trace = [];
   for (let index = 0; index < expected.length; index += 1) {
-    trace.push(await productionKeyboardAction(page));
+    trace.push(await browserKeyboardAction(page));
     const [phase, label] = expected[index];
     await expect.poll(
       () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
