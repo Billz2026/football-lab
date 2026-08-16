@@ -6,6 +6,7 @@ on:
       - agent/v46-real-3d-character-layer
     paths:
       - '.github/workflows/v46-runtime-state-patch.yml'
+      - 'scripts/patch-v46-runtime-state.py'
   workflow_dispatch:
 
 permissions:
