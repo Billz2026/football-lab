@@ -1,12 +1,15 @@
 """Production authoring wrapper for Viktor Kane V46.
 
-The realistic body, rig and seven football clips stay unchanged. The jersey is
-fully fitted through the upper back/neck base so no skin-coloured topology gap
-is visible from the gameplay camera. Short blond hair uses the complete upper
-scalp for reliable coverage.
+This pass keeps the validated realistic male body, FL_HUMANOID_V1 rig and seven
+football clips, while fixing the two remaining gameplay-camera defects:
+1) flat/plastic skin, by embedding a subtle UV skin base-colour texture and
+   physically restrained rough/specular response into the GLB; and
+2) bald-looking hair, by replacing the painted scalp shell with an actual
+   short, skinned, irregular blond hair volume weighted 100% to the Head bone.
 """
 
 import importlib.util
+import math
 import os
 
 import bmesh
@@ -116,9 +119,71 @@ def clean_normalise_body(body):
     return body
 
 
+def _ensure_body_uv(body):
+    if body.data.uv_layers:
+        return
+    bpy.ops.object.select_all(action="DESELECT")
+    body.select_set(True)
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project(angle_limit=1.15192, island_margin=0.02)
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def _make_skin_texture():
+    width = 128
+    height = 128
+    image = bpy.data.images.new("VIKTOR_Skin_BaseColor", width=width, height=height, alpha=False)
+    pixels = []
+    base = (0.57, 0.365, 0.255)
+    for y in range(height):
+        v = y / max(1, height - 1)
+        for x in range(width):
+            u = x / max(1, width - 1)
+            # Very small deterministic variation: enough to stop the skin
+            # reading as a single plastic colour at gameplay distance, but not
+            # enough to look dirty/freckled or reveal UV seams.
+            pore = (
+                0.012 * math.sin(u * 91.0 + v * 37.0)
+                + 0.008 * math.sin(u * 173.0 - v * 119.0)
+                + 0.006 * math.cos(u * 53.0 + v * 149.0)
+            )
+            warm = 0.006 * math.sin(v * math.pi)
+            r = max(0.0, min(1.0, base[0] + pore + warm))
+            g = max(0.0, min(1.0, base[1] + pore * 0.72 + warm * 0.45))
+            b = max(0.0, min(1.0, base[2] + pore * 0.55))
+            pixels.extend((r, g, b, 1.0))
+    image.pixels.foreach_set(pixels)
+    image.pack()
+    return image
+
+
 def skin_only_material(body):
+    _ensure_body_uv(body)
     body.data.materials.clear()
-    skin = builder.make_material("VIKTOR_Skin", (0.62, 0.43, 0.33), 0.74)
+
+    skin = bpy.data.materials.new("VIKTOR_Skin")
+    skin.use_nodes = True
+    nodes = skin.node_tree.nodes
+    links = skin.node_tree.links
+    nodes.clear()
+
+    output = nodes.new("ShaderNodeOutputMaterial")
+    bsdf = nodes.new("ShaderNodeBsdfPrincipled")
+    texture = nodes.new("ShaderNodeTexImage")
+    texture.image = _make_skin_texture()
+    texture.interpolation = "Linear"
+
+    bsdf.inputs["Roughness"].default_value = 0.66
+    if "Specular IOR Level" in bsdf.inputs:
+        bsdf.inputs["Specular IOR Level"].default_value = 0.28
+    if "Coat Weight" in bsdf.inputs:
+        bsdf.inputs["Coat Weight"].default_value = 0.015
+
+    links.new(texture.outputs["Color"], bsdf.inputs["Base Color"])
+    links.new(bsdf.outputs["BSDF"], output.inputs["Surface"])
+
     body.data.materials.append(skin)
     for polygon in body.data.polygons:
         polygon.material_index = 0
@@ -197,13 +262,82 @@ def _surface_shell(name, predicate, material, outward, smooth_factor=0.045, subd
     return shell
 
 
+def _create_short_hair_volume(armature, material):
+    # Short textured crop: the crown sits below Viktor's 1.880 m body-height
+    # contract, while the back/sides reach lower than the front hairline.
+    centre = Vector((0.0, -0.004, 1.785))
+    radius_x = 0.118
+    radius_y = 0.108
+    radius_z = 0.094
+    rings = 12
+    segments = 40
+
+    verts = [(centre.x, centre.y, 1.879)]
+    faces = []
+
+    for ring in range(1, rings + 1):
+        fraction = ring / rings
+        for segment in range(segments):
+            phi = 2.0 * math.pi * segment / segments
+            front = max(0.0, -math.sin(phi))
+            back = max(0.0, math.sin(phi))
+            theta_max = 2.03 + 0.13 * back - 0.24 * front + 0.035 * math.cos(phi * 2.0)
+            theta = fraction * theta_max
+            texture = (
+                1.0
+                + 0.020 * math.sin(phi * 9.0 + fraction * 8.0)
+                + 0.009 * math.sin(phi * 19.0 - fraction * 5.0)
+            )
+            x = centre.x + radius_x * texture * math.sin(theta) * math.cos(phi)
+            y = centre.y + radius_y * texture * math.sin(theta) * math.sin(phi)
+            z = min(1.879, centre.z + radius_z * math.cos(theta))
+            verts.append((x, y, z))
+
+    # Crown fan.
+    for segment in range(segments):
+        b = 1 + segment
+        c = 1 + (segment + 1) % segments
+        faces.append((0, b, c))
+
+    # Ring quads.
+    for ring in range(rings - 1):
+        row_a = 1 + ring * segments
+        row_b = 1 + (ring + 1) * segments
+        for segment in range(segments):
+            a = row_a + segment
+            b = row_a + (segment + 1) % segments
+            c = row_b + (segment + 1) % segments
+            d = row_b + segment
+            faces.append((a, b, c, d))
+
+    mesh = bpy.data.meshes.new("Viktor_Hair_Mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    for polygon in mesh.polygons:
+        polygon.use_smooth = True
+
+    hair = bpy.data.objects.new("Viktor_Hair", mesh)
+    bpy.context.collection.objects.link(hair)
+    hair.data.materials.append(material)
+
+    head_group = hair.vertex_groups.new(name="Head")
+    head_group.add(list(range(len(mesh.vertices))), 1.0, "REPLACE")
+    modifier = hair.modifiers.new(name="FL_Hair_Skin", type="ARMATURE")
+    modifier.object = armature
+    modifier.use_vertex_groups = True
+
+    hair["football_lab_attachment"] = "skinned-short-blond-hair-volume"
+    hair["football_lab_skinning"] = "head-bone-100pct"
+    return hair
+
+
 def create_fitted_kit_and_hair(armature):
     white = builder.make_material("VIKTOR_Kit_White", (0.91, 0.93, 0.95), 0.62)
     navy = builder.make_material("VIKTOR_Kit_Navy", (0.018, 0.045, 0.09), 0.57)
     sleeve_navy = builder.make_material("VIKTOR_Sleeve_Navy", (0.022, 0.060, 0.125), 0.55)
     sock_white = builder.make_material("VIKTOR_Sock_White", (0.88, 0.905, 0.925), 0.65)
     boot_black = builder.make_material("VIKTOR_Boot_Black", (0.010, 0.014, 0.020), 0.43)
-    blond = builder.make_material("VIKTOR_Hair", (0.53, 0.39, 0.19), 0.78)
+    blond = builder.make_material("VIKTOR_Hair", (0.56, 0.39, 0.15), 0.84)
 
     def shirt(point):
         return 0.955 <= point.z <= 1.585 and abs(point.x) <= 0.555
@@ -220,17 +354,12 @@ def create_fitted_kit_and_hair(armature):
     def boots(point):
         return point.z <= 0.170
 
-    def hair(point):
-        return point.z >= 1.645
-
     _surface_shell("Viktor_Shirt", shirt, white, outward=0.012, smooth_factor=0.035, subdivide=True)
     _surface_shell("Viktor_Sleeves_Navy", sleeves, sleeve_navy, outward=0.020, smooth_factor=0.04, subdivide=True)
     _surface_shell("Viktor_Shorts", shorts, navy, outward=0.014, smooth_factor=0.035, subdivide=True)
     _surface_shell("Viktor_Socks", socks, sock_white, outward=0.012, smooth_factor=0.025, subdivide=True)
     _surface_shell("Viktor_Boots", boots, boot_black, outward=0.014, smooth_factor=0.018, subdivide=True, min_z=0.002)
-    hair_obj = _surface_shell("Viktor_Hair", hair, blond, outward=0.009, smooth_factor=0.018, subdivide=True)
-    hair_obj["football_lab_attachment"] = "fitted-upper-scalp-hair"
-    return hair_obj
+    return _create_short_hair_volume(armature, blond)
 
 
 def guarded_export_glb(path):
