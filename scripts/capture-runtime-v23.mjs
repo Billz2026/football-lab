@@ -6,6 +6,7 @@ import net from 'node:net';
 import path from 'node:path';
 import process from 'node:process';
 
+// Release-critical source: changes here intentionally retrigger both V46 character visual gates.
 const ROOT = process.cwd();
 const GAME_DIR = path.join(ROOT, 'game');
 const HOST = '127.0.0.1';
