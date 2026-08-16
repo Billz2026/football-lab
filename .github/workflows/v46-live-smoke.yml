@@ -1,0 +1,63 @@
+name: V46 public live smoke
+
+on:
+  push:
+    branches:
+      - agent/v46-real-3d-character-layer
+    paths:
+      - .github/workflows/v46-live-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out exact merged V46 release
+        uses: actions/checkout@v4
+        with:
+          ref: 99e042d5f81afcf67a092d1e43c1caa2fab8ba17
+          fetch-depth: 1
+
+      - name: Verify public GitHub Pages serves exact V46 release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://billz2026.github.io/football-lab'
+          BUST='99e042d5'
+          FILES=(
+            'index.html'
+            'game/character-3d-v46.js'
+            'game/runtime-v23-main.js'
+            'game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb'
+            'game/assets/characters/v1/goalkeeper/mikkel-storm/mikkel-storm.glb'
+          )
+
+          mkdir -p /tmp/football-lab-live
+          for path in "${FILES[@]}"; do
+            out="/tmp/football-lab-live/$(basename "$path")"
+            echo "Fetching $BASE/$path?release=$BUST"
+            curl --fail --silent --show-error --location \
+              --retry 5 --retry-delay 2 --retry-all-errors \
+              -H 'Cache-Control: no-cache' \
+              "$BASE/$path?release=$BUST" -o "$out"
+            local_hash="$(sha256sum "$path" | awk '{print $1}')"
+            live_hash="$(sha256sum "$out" | awk '{print $1}')"
+            live_bytes="$(wc -c < "$out")"
+            echo "$path"
+            echo "  local=$local_hash"
+            echo "  live =$live_hash"
+            echo "  bytes=$live_bytes"
+            test "$local_hash" = "$live_hash"
+          done
+
+          grep -q '46.0.0' /tmp/football-lab-live/character-3d-v46.js
+          grep -q 'viktor-kane' /tmp/football-lab-live/character-3d-v46.js
+          grep -q 'mikkel-storm' /tmp/football-lab-live/character-3d-v46.js
+          grep -q 'footballlab:beginstrike' /tmp/football-lab-live/runtime-v23-main.js
+          grep -q 'state.actionLockedUntil = 0' /tmp/football-lab-live/runtime-v23-main.js
+
+          echo 'PUBLIC_V46_EXACT_RELEASE_MATCH=true'
