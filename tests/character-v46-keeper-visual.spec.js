@@ -4,15 +4,12 @@ import { test, expect } from "@playwright/test";
 async function enterClassic(page) {
   await page.goto("/index.html?capture=mikkel-v46-dive", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
-
   await expect.poll(
     () => page.evaluate(() => (
       document.querySelector("#gameScreen")?.classList.contains("is-active") ||
       document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
-    )),
-    { timeout: 8000 }
+    )), { timeout: 8000 }
   ).toBe(true);
-
   const state = await page.evaluate(() => ({
     game: document.querySelector("#gameScreen")?.classList.contains("is-active"),
     picker: document.querySelector("#kickerSelectV13")?.classList.contains("is-open")
@@ -24,6 +21,7 @@ async function enterClassic(page) {
 async function dismissCoach(page) {
   const skip = page.getByRole("button", { name: "SKIP TUTORIAL" });
   if (await skip.isVisible().catch(() => false)) await skip.click({ force: true });
+  await page.evaluate(() => document.activeElement?.blur?.());
 }
 
 async function forceMikkelStageThroughWorldContract(page) {
@@ -34,7 +32,6 @@ async function forceMikkelStageThroughWorldContract(page) {
     core.state.currentStage = world.scenarioForStage(4);
     window.__footballLabPremiumKeeperSceneDrawV3852?.(performance.now());
   });
-
   await expect.poll(
     () => page.evaluate(() => window.__footballLabKeeperFrameV46?.renderer),
     { timeout: 12000 }
@@ -45,27 +42,26 @@ async function forceMikkelStageThroughWorldContract(page) {
   ).toBe("mikkel-storm");
 }
 
-async function productionPointerAction(page) {
+async function productionKeyboardAction(page) {
   return page.evaluate(() => {
     const action = document.querySelector("#shotAction");
-    if (!action) throw new Error("#shotAction is missing");
-    const beforePhase = document.documentElement.dataset.strikePhaseV324 || "";
-    const before = action.textContent?.trim() || "";
-    action.dispatchEvent(new PointerEvent("pointerdown", {
+    const before = {
+      phase: document.documentElement.dataset.strikePhaseV324 || "",
+      label: action?.textContent?.trim() || ""
+    };
+    document.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "Enter",
+      code: "Enter",
       bubbles: true,
       cancelable: true,
-      composed: true,
-      pointerId: 2,
-      pointerType: "mouse",
-      isPrimary: true,
-      button: 0,
-      buttons: 1
+      repeat: false
     }));
     return {
-      beforePhase,
       before,
-      afterPhase: document.documentElement.dataset.strikePhaseV324 || "",
-      after: action.textContent?.trim() || ""
+      after: {
+        phase: document.documentElement.dataset.strikePhaseV324 || "",
+        label: action?.textContent?.trim() || ""
+      }
     };
   });
 }
@@ -73,6 +69,10 @@ async function productionPointerAction(page) {
 async function executeLiveShot(page) {
   await dismissCoach(page);
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 6000 });
+  await expect.poll(
+    () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
+    { timeout: 3000 }
+  ).toBe("ready");
 
   const expected = [
     ["aim", "STRIKE"],
@@ -82,9 +82,8 @@ async function executeLiveShot(page) {
   ];
   const delays = [120, 180, 180, 0];
   const trace = [];
-
   for (let index = 0; index < expected.length; index += 1) {
-    trace.push(await productionPointerAction(page));
+    trace.push(await productionKeyboardAction(page));
     const [phase, label] = expected[index];
     await expect.poll(
       () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
@@ -96,7 +95,6 @@ async function executeLiveShot(page) {
     ).toContain(label);
     if (delays[index]) await page.waitForTimeout(delays[index]);
   }
-
   console.log("MIKKEL_V46_SHOT_INPUT_TRACE", JSON.stringify(trace));
 }
 
@@ -115,7 +113,6 @@ async function armKeeperCaptures(page) {
             : clip === "recovery"
               ? "recovery"
               : null;
-
       if (target && !window.__mikkelV46Captures[target]) {
         const canvas = document.querySelector("#gameCanvas");
         window.__mikkelV46Captures[target] = {
@@ -124,7 +121,6 @@ async function armKeeperCaptures(page) {
           dataUrl: canvas?.toDataURL("image/png") || null
         };
       }
-
       if (!window.__mikkelV46Captures.dive || (!window.__mikkelV46Captures.landing && !window.__mikkelV46Captures.recovery)) {
         requestAnimationFrame(sample);
       }
@@ -145,7 +141,6 @@ async function writeCapture(page, key, path) {
 
 test("capture Mikkel Storm V46 set stance and a real AI-driven dive in the gameplay camera", async ({ page }) => {
   await enterClassic(page);
-
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacter3DV46?.loaded?.includes("mikkel-storm")),
     { timeout: 20000 }
@@ -153,15 +148,12 @@ test("capture Mikkel Storm V46 set stance and a real AI-driven dive in the gamep
 
   await forceMikkelStageThroughWorldContract(page);
   await armKeeperCaptures(page);
-
-  // Force one more authoritative scene draw after capture arming so the set stance is preserved.
   await page.evaluate(() => window.__footballLabPremiumKeeperSceneDrawV3852?.(performance.now()));
   await page.waitForFunction(() => Boolean(window.__mikkelV46Captures?.set?.dataUrl), null, { timeout: 5000 });
   const setCapture = await writeCapture(page, "set", "test-results/mikkel-v46-set.png");
   expect(setCapture.frame.clip).toBe("set");
 
   await executeLiveShot(page);
-
   await page.waitForFunction(
     () => Boolean(window.__mikkelV46Captures?.dive?.dataUrl),
     null,
@@ -183,10 +175,8 @@ test("capture Mikkel Storm V46 set stance and a real AI-driven dive in the gamep
   const diagnostics = await page.evaluate(() => ({
     contract: window.__footballLabCharacter3DV46,
     keeper: window.__footballLabKeeperFrameV46,
-    motion: window.__footballLabKeeperMotionV32,
-    lastShot: window.__footballLabLastShot
+    motion: window.__footballLabKeeperMotionV32
   }));
   console.log("MIKKEL_V46_VISUAL_DIAGNOSTICS", JSON.stringify(diagnostics));
-
   await page.screenshot({ path: "test-results/mikkel-v46-full-ui.png", fullPage: true });
 });
