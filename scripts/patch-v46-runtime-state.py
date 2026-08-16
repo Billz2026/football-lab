@@ -1,17 +1,17 @@
 from pathlib import Path
 
 capture = Path('scripts/capture-runtime-v23.mjs')
-text = capture.read_text()
-old = '''    if (filename === 'runtime-v23-main.js') {
-      source += `\nwindow.__footballLabRuntimeV23 = Object.freeze({ staticModules: true, generatedModuleCount: ${modules.size} });\n`;
-    }'''
-new = '''    if (filename === 'runtime-v23-main.js') {
-      source += `\nwindow.__footballLabAuthoritativeStateV46 = state;\n`;
-      source += `window.__footballLabRuntimeV23 = Object.freeze({ staticModules: true, generatedModuleCount: ${modules.size} });\n`;
-    }'''
-if old not in text:
-    raise SystemExit('runtime-v23 final-state insertion point missing')
-capture.write_text(text.replace(old, new, 1))
+lines = capture.read_text().splitlines()
+needle = 'window.__footballLabRuntimeV23 = Object.freeze'
+insert = '      source += `\\nwindow.__footballLabAuthoritativeStateV46 = state;\\n`;'
+indices = [i for i, line in enumerate(lines) if needle in line]
+if len(indices) != 1:
+    raise SystemExit(f'expected one runtime-v23 final assignment, found {len(indices)}')
+idx = indices[0]
+if any('__footballLabAuthoritativeStateV46 = state' in line for line in lines):
+    raise SystemExit('capture script already publishes authoritative V46 state')
+lines.insert(idx, insert)
+capture.write_text('\n'.join(lines) + '\n')
 
 main11 = Path('game/main-v11-3.js')
 text = main11.read_text()
