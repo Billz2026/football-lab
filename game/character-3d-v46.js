@@ -328,10 +328,10 @@ function outfieldPhase(time) {
   if (p.contact > 0) return { clip: "contact", t: p.contact, p };
   // Keep the authoritative 560 ms run-up unchanged, but give the kicking leg enough
   // visual preparation to read as a real strike at gameplay frame rates.
-  if (p.run < 0.4) return { clip: "approach", t: p.run / 0.4, p };
-  if (p.run < 0.55) return { clip: "plant", t: (p.run - 0.4) / 0.15, p };
-  if (p.run < 0.9) return { clip: "windup", t: (p.run - 0.55) / 0.35, p };
-  return { clip: "contact", t: (p.run - 0.9) / 0.1, p };
+  if (p.run < 0.35) return { clip: "approach", t: p.run / 0.35, p };
+  if (p.run < 0.45) return { clip: "plant", t: (p.run - 0.35) / 0.1, p };
+  if (p.run < 1) return { clip: "windup", t: (p.run - 0.45) / 0.55, p };
+  return { clip: "contact", t: 0, p };
 }
 
 function rootTravel(p) {
