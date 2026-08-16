@@ -23,7 +23,8 @@ jobs:
         run: python3 scripts/patch-v46-animation-bridge.py
       - name: Verify patch markers
         run: |
-          grep -q '__footballLabAuthoritativeStateV46 = state' game/main-v18.js
+          grep -q '__footballLabAuthoritativeStateV46 = state' game/main-v11-3.js
+          ! grep -q 'source += "\\nwindow.__footballLabAuthoritativeStateV46 = state' game/main-v18.js
           grep -q 'keeperClipFromAuthoritativePlan' game/character-3d-v46.js
           grep -q 'const gameState = liveState();' game/character-3d-v46.js
       - name: Commit bridge fix
@@ -34,6 +35,6 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add game/main-v18.js game/character-3d-v46.js
-          git commit -m 'Fix V46 live animation state bridge'
+          git add game/main-v18.js game/main-v11-3.js
+          git commit -m 'Fix V46 authoritative state publication'
           git push origin HEAD:agent/v46-real-3d-character-layer
