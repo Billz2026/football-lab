@@ -20,7 +20,7 @@ jobs:
           ref: agent/v46-real-3d-character-layer
           fetch-depth: 0
 
-      - name: Preserve visible windup and contact on slow frames
+      - name: Preserve visible contact on slow frames
         shell: bash
         run: |
           python3 - <<'PY'
@@ -28,25 +28,18 @@ jobs:
 
           path = Path('game/character-3d-v46.js')
           text = path.read_text()
-          old = '''  if (p.replay || p.flight > 0 || p.settle > 0) {
-            if (p.flight < 0.58) return frame("follow-through", clamp(p.flight / 0.58, 0, 1));
-            return frame("recovery", Math.max(clamp((p.flight - 0.58) / 0.42, 0, 1), p.settle));
-          }
-          '''
-          new = '''  if (p.replay || p.flight > 0 || p.settle > 0) {
-            // Preserve the strike silhouette when a slow render frame jumps across one or
-            // more short animation windows. This is presentation-only: gameplay clocks,
-            // ball physics and shot timing remain authoritative and unchanged.
-            if (outfieldPhase.lastClip === "plant") return frame("windup", 0.94);
-            if (outfieldPhase.lastClip === "windup") return frame("contact", 0.94);
-            if (p.flight < 0.58) return frame("follow-through", clamp(p.flight / 0.58, 0, 1));
-            return frame("recovery", Math.max(clamp((p.flight - 0.58) / 0.42, 0, 1), p.settle));
-          }
-          '''
-          if new not in text:
-              if old not in text:
-                  raise SystemExit('Expected V46 flight transition block not found')
-              path.write_text(text.replace(old, new, 1))
+          needle = '    if (p.flight < 0.58) return frame("follow-through", clamp(p.flight / 0.58, 0, 1));'
+          guard = '    if (outfieldPhase.lastClip === "windup") return frame("contact", 0.94);'
+          if guard not in text:
+              if needle not in text:
+                  raise SystemExit('Expected V46 follow-through line not found')
+              replacement = (
+                  '    if (outfieldPhase.lastClip === "plant") return frame("windup", 0.94);\n'
+                  + guard + '\n'
+                  + needle
+              )
+              text = text.replace(needle, replacement, 1)
+              path.write_text(text)
           PY
 
       - name: Validate targeted patch
