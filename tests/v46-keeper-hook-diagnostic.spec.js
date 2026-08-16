@@ -39,14 +39,14 @@ test("trace V46 keeper hook ownership through a real SAVE", async ({ page }) => 
     window.__keeperHookDiag = { calls: 0, samples: [] };
     const original = window.__footballLabPremiumKeeperSceneDrawV3852;
     window.__keeperHookDiag.initialV46 = original?.__footballLabV46KeeperHook === true;
-    window.__footballLabPremiumKeeperSceneDrawV3852 = function diagnosticKeeperHook(time) {
+    const diagnosticKeeperHook = function diagnosticKeeperHook(time) {
       window.__keeperHookDiag.calls += 1;
       const result = original(time);
-      if (window.__keeperHookDiag.samples.length < 160) {
+      if (window.__keeperHookDiag.samples.length < 220) {
         const s = window.__footballLabAuthoritativeStateV46;
+        const frame = window.__footballLabKeeperFrameV46;
         window.__keeperHookDiag.samples.push({
           time,
-          v46Owner: original?.__footballLabV46KeeperHook === true,
           animation: s?.animation ? {
             startedAt: s.animation.startedAt,
             runUpDuration: s.animation.runUpDuration,
@@ -60,11 +60,13 @@ test("trace V46 keeper hook ownership through a real SAVE", async ({ page }) => 
             diveDirection: s.shot.keeperPlan.diveDirection,
             targetY: s.shot.keeperPlan.contact?.y ?? s.shot.keeperPlan.target?.y
           } : null,
-          frame: window.__footballLabKeeperFrameV46 ? { ...window.__footballLabKeeperFrameV46 } : null
+          frame: frame ? { clip: frame.clip, time: frame.time, renderer: frame.renderer, character: frame.character } : null
         });
       }
       return result;
     };
+    Object.defineProperty(diagnosticKeeperHook, "__footballLabV46KeeperHook", { value: true });
+    window.__footballLabPremiumKeeperSceneDrawV3852 = diagnosticKeeperHook;
   });
 
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 6000 });
@@ -88,7 +90,7 @@ test("trace V46 keeper hook ownership through a real SAVE", async ({ page }) => 
     core.state.lastTime = performance.now();
   });
   await press(page, "shooting");
-  await page.waitForTimeout(2400);
+  await page.waitForTimeout(2300);
 
   const diag = await page.evaluate(() => window.__keeperHookDiag);
   console.log("V46_KEEPER_HOOK_DIAG", JSON.stringify(diag));
