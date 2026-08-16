@@ -1,12 +1,15 @@
 import {
   $, $$, formatScore, profile, state, elements, createShot, saveProfile, renderProfile,
-  setStageWind, showScreen, openModal, closeModal, setPhase, idealPower, currentAimTarget,
-  renderHud, showResult, stageConfig, strikeQualityLabel, syncStage
+  setStageWind, showScreen, openModal, closeModal, setPhase, idealPower,
+  renderHud, showResult, stageConfig, strikeQualityLabel, syncStage, MAX_LIVES, LIFE_STREAK_TARGET
 } from "./core-v6.js?v=32.4";
-import { resolveShotPhysics } from "./physics-v9.js?v=9";
-import { resizeCanvas, drawScene } from "./render-v11-3.js?v=113";
+import { resolveShotPhysics } from "./physics-v19.js?v=19";
+import { resizeCanvas, drawScene } from "./render-v17-3-1.js?v=1731";
 import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v10.js?v=10";
 import { difficultyForStage } from "./difficulty-v9.js?v=32.4";
+import { activeCharacter, meterMultiplier } from "./characters-v13.js?v=32.4";
+import { keeperForStage } from "./keepers-v14.js?v=32.4";
+import { wallForStage } from "./walls-v15.js?v=32.4";
 
 state.debugDiagnostics = false;
 state.presentation = null;
@@ -17,6 +20,7 @@ state.actionLockedUntil = 0;
 window.__footballLabDiagnostics = window.__footballLabDiagnostics || [];
 
 let gamepadWasPressed = false;
+let suppressActionClickUntil = 0;
 
 function clearPresentationTimers() {
   clearTimeout(state.presentationTimeout);
@@ -53,11 +57,51 @@ function resetShotReadouts() {
   elements.curveReadout.textContent = "—";
 }
 
+function announceMatchupChange() {
+  const keeper = keeperForStage(state.stage);
+  const wall = wallForStage(state.stage);
+  state.keeperId = keeper.id;
+  state.wallId = wall.id;
+  window.dispatchEvent(new CustomEvent("footballlab:keeperchange", { detail: keeper }));
+  window.dispatchEvent(new CustomEvent("footballlab:wallchange", { detail: wall }));
+  return { keeper, wall };
+}
+
+function showStageIntro() {
+  clearPresentationTimers();
+  const { keeper, wall } = announceMatchupChange();
+  const difficulty = difficultyForStage(state.stage, stageConfig());
+  const startedAt = performance.now();
+  state.presentation = {
+    phase: "stage",
+    startedAt,
+    skippable: true,
+    stageNumber: state.stage + 1,
+    distanceYards: state.currentStage.distanceYards,
+    stageName: state.currentStage.name,
+    chapterNumber: state.currentStage.chapterNumber,
+    chapterName: state.currentStage.chapterName,
+    venue: state.currentStage.venue,
+    weather: state.currentStage.weather,
+    challenge: difficulty.challenge,
+    keeperId: keeper.id,
+    wallId: wall.id
+  };
+  elements.shotAction.textContent = "START STAGE";
+  playStageSound();
+  state.presentationTimeout = setTimeout(prepareNextShot, 1100);
+}
+
 function startGame() {
   resetPresentation();
   resetShotReadouts();
   [elements.howModal, elements.previewModal, elements.gameOverModal].forEach(closeModal);
   Object.assign(state, {
+    characterId: activeCharacter().id,
+    keeperId: keeperForStage(0).id,
+    wallId: wallForStage(0).id,
+    maxLives: MAX_LIVES,
+    lifeStreakTarget: LIFE_STREAK_TARGET,
     score: 0,
     streak: 0,
     bestRunStreak: 0,
@@ -73,6 +117,7 @@ function startGame() {
   showScreen("game");
   renderHud();
   requestAnimationFrame(resizeCanvas);
+  showStageIntro();
 }
 
 function returnToMenu() {
@@ -186,9 +231,8 @@ function handleAction() {
   }
 
   if (state.phase === "aim") {
-    const target = currentAimTarget();
-    Object.assign(state.shot, { aimX: target.x, aimY: target.y });
-    elements.aimReadout.textContent = target.label;
+    state.shot.aimX = state.meterValue;
+    elements.aimReadout.textContent = `${Math.round(state.shot.aimX * 100)}%`;
     setPhase("curve");
     return;
   }
@@ -233,7 +277,7 @@ function takeShot() {
   const { flightDuration, diagnostics } = resolveShotPhysics();
   recordDiagnostics(diagnostics);
   const runUpDuration = 560;
-  const contactHoldDuration = 64;
+  const contactHoldDuration = 140;
   const settleDuration = settleDurationForShot(state.shot);
   const startedAt = performance.now();
   const impactRatio = impactRatioForShot(state.shot);
@@ -393,185 +437,111 @@ function finishReplay(animationId) {
 function showBreakdown() {
   clearPresentationTimers();
   restoreReplayState();
-  state.animation = null;
+  const shot = state.shot;
   state.presentation = {
     ...state.presentation,
     phase: "breakdown",
-    startedAt: performance.now(),
+    shownAt: performance.now(),
     skippable: true,
-    breakdown: state.presentation?.breakdown || buildBreakdown(state.shot)
+    breakdown: buildBreakdown(shot)
   };
-  elements.shotAction.textContent = "CONTINUE";
-  state.presentationTimeout = setTimeout(continueAfterBreakdown, 2200);
+  elements.shotAction.textContent = state.pendingStageAdvance ? "CONTINUE" : "RETRY";
+  const breakdown = state.presentation.breakdown;
+  if (breakdown?.reason) {
+    elements.phaseTitle.textContent = breakdown.title;
+    elements.phaseHelp.textContent = breakdown.reason;
+  }
+  window.dispatchEvent(new CustomEvent("footballlab:breakdown", { detail: breakdown }));
 }
 
 function continueAfterBreakdown() {
-  if (state.presentation?.phase !== "breakdown") return;
   clearPresentationTimers();
-  if (state.misses >= 3) {
-    endRun();
-    return;
-  }
   if (state.pendingStageAdvance) {
     state.stage += 1;
+    state.pendingStageAdvance = false;
     syncStage();
-    renderHud();
-    const difficulty = difficultyForStage(state.stage, stageConfig());
-    state.presentation = {
-      phase: "stage",
-      startedAt: performance.now(),
-      skippable: true,
-      stageNumber: state.stage + 1,
-      distanceYards: state.currentStage.distanceYards,
-      stageName: state.currentStage.name,
-      challenge: difficulty.challenge
-    };
-    elements.shotAction.textContent = "START NEXT STAGE";
-    playStageSound();
-    vibrate([12, 28, 12]);
-    state.presentationTimeout = setTimeout(prepareNextShot, 1180);
+    setStageWind();
+    showStageIntro();
     return;
   }
   prepareNextShot();
 }
 
+function prepareNextShot() {
+  clearPresentationTimers();
+  restoreReplayState();
+  state.shot = createShot();
+  state.animation = null;
+  state.finishedAnimationId = null;
+  resetShotReadouts();
+  renderHud();
+  setPhase("ready");
+  announceMatchupChange();
+  window.dispatchEvent(new CustomEvent("footballlab:shotreset"));
+}
+
 function finishAnimation(animationId) {
-  if (state.presentation?.phase === "replay") finishReplay(animationId);
+  if (!state.animation) return;
+  if (state.animation.isReplay) finishReplay(animationId);
   else finishPrimaryShot(animationId);
 }
 
-function prepareNextShot() {
-  if (state.misses >= 3) return;
-  resetPresentation();
-  state.shot = createShot();
-  syncStage();
-  setStageWind();
-  resetShotReadouts();
-  setPhase("ready");
-  renderHud();
-}
-
-function endRun() {
-  resetPresentation();
-  clearResultBanner();
-  const previousBest = profile.highScore;
-  profile.highScore = Math.max(profile.highScore, state.score);
-  profile.bestStreak = Math.max(profile.bestStreak, state.bestRunStreak);
-  profile.xp += Math.max(50, Math.round(state.score * 0.08));
-  saveProfile();
-  elements.finalScore.textContent = formatScore(state.score);
-  elements.finalStage.textContent = String(state.stage + 1);
-  elements.finalStreak.textContent = String(state.bestRunStreak);
-  elements.finalBest.textContent = formatScore(profile.highScore);
-  elements.gameOverTitle.textContent = state.score > previousBest ? "NEW PERSONAL BEST" : "FULL TIME";
-  openModal(elements.gameOverModal);
-}
-
-function updateMeter(delta) {
-  if (!["power", "aim", "curve"].includes(state.phase)) return;
-  const stage = stageConfig();
-  const difficulty = difficultyForStage(state.stage, stage);
-
-  if (state.phase === "power") {
-    state.meterClock += delta;
-    const speed = (3.35 + stage.aimSpeed * 0.18) * difficulty.meter.power;
-    state.meterValue = (Math.sin(state.meterClock * speed - Math.PI / 2) + 1) / 2;
-  } else if (state.phase === "aim") {
-    state.meterClock += delta * difficulty.meter.aim;
-    state.meterValue = currentAimTarget().x;
-  } else {
-    state.meterClock += delta;
-    const speed = (2.78 + stage.aimSpeed * 0.2) * difficulty.meter.curve;
-    state.meterValue = (Math.sin(state.meterClock * speed) + 1) / 2;
-  }
-
-  const percentage = state.meterValue * 100;
-  elements.meterFill.style.width = `${percentage}%`;
-  elements.meterMarker.style.left = `${percentage}%`;
-
-  if (state.phase === "curve") {
-    const curve = (state.meterValue - 0.5) * 2;
-    elements.meterNumber.textContent = `${curve < -0.12 ? "L" : curve > 0.12 ? "R" : "C"} ${Math.round(Math.abs(curve) * 100)}%`;
-  } else if (state.phase === "aim") {
-    elements.meterNumber.textContent = currentAimTarget().label;
-  } else {
-    elements.meterNumber.textContent = `${strikeQualityLabel(state.meterValue)} ${Math.round(percentage)}%`;
-  }
-}
-
-function pollGamepad() {
-  const pads = navigator.getGamepads?.() || [];
-  const pad = [...pads].find(Boolean);
-  const pressed = Boolean(pad && (pad.buttons[0]?.pressed || pad.buttons[9]?.pressed));
-  if (pressed && !gamepadWasPressed) handleAction();
+function checkGamepadAction() {
+  const gamepads = navigator.getGamepads?.() || [];
+  const gamepad = [...gamepads].find(Boolean);
+  const pressed = Boolean(gamepad?.buttons?.[0]?.pressed);
+  if (pressed && !gamepadWasPressed) handleAction(performance.now());
   gamepadWasPressed = pressed;
 }
 
 function frame(time) {
-  const delta = Math.min((time - state.lastTime) / 1000, 0.05);
+  const dt = Math.min((time - state.lastTime) / 1000, 0.05);
   state.lastTime = time;
-  pollGamepad();
-  if (state.screen === "game") {
-    updateMeter(delta);
-    drawScene(time, finishAnimation);
-  }
+  state.meterClock += dt * 0.78 * meterMultiplier();
+  updateMeter(dt);
+  checkGamepadAction();
+  drawScene(time, finishAnimation);
   requestAnimationFrame(frame);
 }
 
-function openModePreview(name) {
-  const content = name === "Road to Glory" ? {
-    title: "ROAD TO GLORY",
-    copy: "A lightweight career built around the same arcade shooting engine—not an unrealistic full football simulator.",
-    items: ["Create and develop one player", "Five career chapters and rival encounters", "Power, accuracy, curve and composure upgrades", "Scenario objectives, rewards and unlockable venues"]
-  } : {
-    title: "SCORE ATTACK",
-    copy: "A short repeatable mode designed specifically for high scores and weekly competition.",
-    items: ["Sixty-second rounds", "Streak multiplier and bonus-time targets", "Personal and weekly high scores", "Identical daily conditions for every player"]
-  };
-  elements.previewTitle.textContent = content.title;
-  elements.previewCopy.textContent = content.copy;
-  elements.previewList.innerHTML = content.items.map((item) => `<div>${item}</div>`).join("");
-  openModal(elements.previewModal);
-}
-
-[
-  [elements.playClassic, startGame], [elements.classicCard, startGame], [elements.modalPlay, startGame], [elements.retryGame, startGame],
-  [elements.returnMenu, returnToMenu], [elements.exitGame, returnToMenu], [elements.brandButton, returnToMenu],
-  [elements.howToPlay, () => openModal(elements.howModal)]
-].forEach(([element, handler]) => element.addEventListener("click", handler));
-
-elements.shotAction.addEventListener("click", handleAction);
-elements.canvas.addEventListener("pointerdown", (event) => {
+elements.shotAction.addEventListener("pointerdown", (event) => {
+  if (event.button !== 0 && event.pointerType !== "touch") return;
   event.preventDefault();
-  handleAction();
-}, { passive: false });
-elements.canvas.style.touchAction = "manipulation";
-elements.shotAction.style.touchAction = "manipulation";
-
-$$('[data-preview]').forEach((button) => button.addEventListener("click", () => openModePreview(button.dataset.preview)));
-$$('[data-close-modal]').forEach((button) => button.addEventListener("click", () => closeModal(elements.howModal)));
-$$('[data-close-preview]').forEach((button) => button.addEventListener("click", () => closeModal(elements.previewModal)));
-
-document.addEventListener("keydown", (event) => {
-  if (event.repeat) return;
-  if ((event.code === "Space" || event.code === "Enter") && state.screen === "game" && !elements.gameOverModal.classList.contains("is-open")) {
+  suppressActionClickUntil = performance.now() + 550;
+  handleAction(event.timeStamp);
+});
+elements.shotAction.addEventListener("click", (event) => {
+  if (performance.now() < suppressActionClickUntil) {
     event.preventDefault();
-    handleAction();
+    event.stopImmediatePropagation();
+    return;
   }
-  if (event.key.toLowerCase() === "d" && state.screen === "game") {
-    state.debugDiagnostics = !state.debugDiagnostics;
-    console.info(`Football Lab diagnostics ${state.debugDiagnostics ? "enabled" : "disabled"}.`);
-  }
-  if (event.key === "Escape") {
-    closeModal(elements.howModal);
-    closeModal(elements.previewModal);
+  handleAction(event.timeStamp);
+});
+elements.shotAction.addEventListener("touchend", (event) => {
+  event.preventDefault();
+});
+elements.playClassic.addEventListener("click", startGame);
+elements.classicCard?.addEventListener("click", startGame);
+elements.howToPlay.addEventListener("click", () => openModal(elements.howModal));
+elements.modalPlay.addEventListener("click", startGame);
+elements.exitGame.addEventListener("click", returnToMenu);
+elements.retryGame.addEventListener("click", startGame);
+elements.returnMenu.addEventListener("click", returnToMenu);
+elements.brandButton.addEventListener("click", returnToMenu);
+document.addEventListener("keydown", (event) => {
+  if ((event.code === "Space" || event.code === "Enter") && !event.repeat) {
+    event.preventDefault();
+    handleAction(event.timeStamp);
   }
 });
 
-window.addEventListener("resize", resizeCanvas);
-if ("ResizeObserver" in window) new ResizeObserver(resizeCanvas).observe(elements.canvas);
-
-syncStage();
 renderProfile();
+showScreen("menu");
 renderHud();
+setPhase("ready");
+resizeCanvas();
 requestAnimationFrame(frame);
+//# sourceURL=football-lab-main-v19-generated.js
+
+export const __footballLabMainV18 = Object.freeze({ build: "18.0.0", source: "main-v15-2" });
