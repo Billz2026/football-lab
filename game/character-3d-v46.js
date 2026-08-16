@@ -326,9 +326,11 @@ function outfieldPhase(time) {
     return { clip: "recovery", t: Math.max(clamp((p.flight - 0.58) / 0.42, 0, 1), p.settle), p };
   }
   if (p.contact > 0) return { clip: "contact", t: p.contact, p };
-  if (p.run < 0.55) return { clip: "approach", t: p.run / 0.55, p };
-  if (p.run < 0.72) return { clip: "plant", t: (p.run - 0.55) / 0.17, p };
-  if (p.run < 0.9) return { clip: "windup", t: (p.run - 0.72) / 0.18, p };
+  // Keep the authoritative 560 ms run-up unchanged, but give the kicking leg enough
+  // visual preparation to read as a real strike at gameplay frame rates.
+  if (p.run < 0.4) return { clip: "approach", t: p.run / 0.4, p };
+  if (p.run < 0.55) return { clip: "plant", t: (p.run - 0.4) / 0.15, p };
+  if (p.run < 0.9) return { clip: "windup", t: (p.run - 0.55) / 0.35, p };
   return { clip: "contact", t: (p.run - 0.9) / 0.1, p };
 }
 
