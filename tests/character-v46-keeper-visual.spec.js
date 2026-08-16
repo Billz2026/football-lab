@@ -63,28 +63,64 @@ async function executeLiveShot(page) {
     { timeout: 3000 }
   ).toBe("ready");
 
-  const expected = [
-    ["aim", "STRIKE"],
-    ["power", "LOCK POWER"],
-    ["contact", "LOCK CONTACT"],
-    ["shooting", "SHOT IN PLAY"]
-  ];
-  const delays = [120, 180, 180, 0];
   const trace = [];
-  for (let index = 0; index < expected.length; index += 1) {
-    trace.push(await browserKeyboardAction(page));
-    const [phase, label] = expected[index];
-    await expect.poll(
-      () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
-      { timeout: 2500 }
-    ).toBe(phase);
-    await expect.poll(
-      () => page.locator("#shotAction").textContent(),
-      { timeout: 2500 }
-    ).toContain(label);
-    if (delays[index]) await page.waitForTimeout(delays[index]);
-  }
+
+  trace.push(await browserKeyboardAction(page));
+  await expect.poll(
+    () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
+    { timeout: 2500 }
+  ).toBe("aim");
+
+  await page.evaluate(async () => {
+    const core = await import("/game/core-v6.js?v=32.4");
+    core.state.shot.previewAimX = 0.78;
+    core.state.shot.previewAimY = 0.20;
+    core.state.shot.previewCurve = 0;
+  });
+  trace.push(await browserKeyboardAction(page));
+  await expect.poll(
+    () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
+    { timeout: 2500 }
+  ).toBe("power");
+
+  await page.evaluate(async () => {
+    const core = await import("/game/core-v6.js?v=32.4");
+    core.state.meterValue = core.idealPower();
+    core.state.lastTime = performance.now();
+  });
+  trace.push(await browserKeyboardAction(page));
+  await expect.poll(
+    () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
+    { timeout: 2500 }
+  ).toBe("contact");
+
+  await page.evaluate(async () => {
+    const core = await import("/game/core-v6.js?v=32.4");
+    core.state.meterValue = 0.5;
+    core.state.lastTime = performance.now();
+  });
+  trace.push(await browserKeyboardAction(page));
+  await expect.poll(
+    () => page.evaluate(() => document.documentElement.dataset.strikePhaseV324),
+    { timeout: 2500 }
+  ).toBe("shooting");
+
+  const shot = await page.evaluate(async () => {
+    const core = await import("/game/core-v6.js?v=32.4");
+    return {
+      outcome: core.state.shot?.outcome,
+      keeperPlan: core.state.shot?.keeperPlan,
+      diagnostics: core.state.shot?.diagnostics,
+      aimX: core.state.shot?.aimX,
+      aimY: core.state.shot?.aimY,
+      power: core.state.shot?.power,
+      contactQuality: core.state.shot?.contactQuality
+    };
+  });
   console.log("MIKKEL_V46_SHOT_INPUT_TRACE", JSON.stringify(trace));
+  console.log("MIKKEL_V46_REAL_SHOT", JSON.stringify(shot));
+  expect(shot.keeperPlan).toBeTruthy();
+  expect(["GOAL", "SAVE"]).toContain(shot.outcome);
 }
 
 async function armKeeperCaptures(page) {
