@@ -8,6 +8,7 @@ import { resizeCanvas, drawScene } from "./render-v11-3.js?v=113";
 import { unlockAudio, playImpactSound, playOutcomeSound, playStageSound } from "./audio-v10.js?v=10";
 import { difficultyForStage } from "./difficulty-v9.js?v=32.4";
 
+window.__footballLabAuthoritativeStateV46 = state;
 state.debugDiagnostics = false;
 state.presentation = null;
 state.presentationTimeout = null;
