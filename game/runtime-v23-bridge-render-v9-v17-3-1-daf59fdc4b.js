@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js?v=40.2.2";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-1-base-v1731-33ac3afcb7.js";
 import { WORLD, state, ctx } from "./core-v6.js?v=32.4";
 
 export { resizeCanvas };
@@ -88,62 +88,9 @@ function drawDiagnostics() {
   ctx.restore();
 }
 
-function drawBaseSceneWithoutCircularAimRing(time, finishShot) {
-  if (state.screen !== "game" || state.phase !== "aim") {
-    drawBaseScene(time, finishShot);
-    return;
-  }
-
-  const ownArcDescriptor = Object.getOwnPropertyDescriptor(ctx, "arc");
-  const originalArc = ctx.arc;
-  let blocked = 0;
-
-  const filteredArc = function filteredArc(x, y, radius, startAngle, endAngle, counterclockwise) {
-    const stroke = String(this.strokeStyle || "").replace(/\s+/g, "").toLowerCase();
-    const isLimeAimStroke = stroke.includes("218,254,77") || stroke.includes("#dafe4d");
-    const isTargetCircle = Number(x) === 0
-      && Number(y) === 0
-      && Number(radius) >= 6
-      && Number(radius) <= 13
-      && isLimeAimStroke;
-
-    if (isTargetCircle) {
-      blocked += 1;
-      return;
-    }
-
-    return originalArc.call(this, x, y, radius, startAngle, endAngle, counterclockwise);
-  };
-
-  Object.defineProperty(ctx, "arc", {
-    configurable: true,
-    writable: true,
-    value: filteredArc
-  });
-
-  try {
-    drawBaseScene(time, finishShot);
-  } finally {
-    if (ownArcDescriptor) Object.defineProperty(ctx, "arc", ownArcDescriptor);
-    else delete ctx.arc;
-    window.__footballLabAimCircleSourceGuardV3815 = {
-      build: "38.1.5",
-      blockedThisFrame: blocked,
-      circularTargetRing: false,
-      aimingMechanicsChanged: false
-    };
-  }
-}
-
 export function drawScene(time, finishShot) {
-  drawBaseSceneWithoutCircularAimRing(time, finishShot);
+  drawBaseScene(time, finishShot);
   drawDiagnostics();
 }
 
 window.__footballLabDiagnosticRendererV1731 = true;
-window.__footballLabAimCircleSourceGuardV3815 = {
-  build: "38.1.5",
-  blockedThisFrame: 0,
-  circularTargetRing: false,
-  aimingMechanicsChanged: false
-};

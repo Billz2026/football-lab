@@ -1,4 +1,4 @@
-import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js?v=40.3.0";
+import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-bridge-render-v9-v17-3-1-daf59fdc4b.js";
 import { clamp, formatScore, WORLD, state, ctx } from "./core-v6.js?v=32.4";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { keeperForStage } from "./keepers-v14.js?v=32.4";
@@ -57,80 +57,24 @@ function drawImpactFeedback(time) {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
 
-  // V38.8: no result typography during the impact hold. The normal result banner is authoritative.
+  const titleDelay = presentation.outcome === "SAVE" ? 175 : 145;
+  if (elapsed > titleDelay) {
+    const titleProgress = clamp((elapsed - titleDelay) / 245, 0, 1);
+    const scale = 0.86 + titleProgress * 0.14;
+    const alpha = Math.min(1, titleProgress * 2.4) * (1 - clamp((elapsed - 465) / 145, 0, 1));
+    ctx.globalAlpha = alpha;
+    ctx.translate(WORLD.width * 0.5, WORLD.height * 0.31);
+    ctx.scale(scale, scale);
+    ctx.textAlign = "center";
+    ctx.font = "1000 58px system-ui";
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = "rgba(2,7,4,.7)";
+    const title = resultTitle(presentation.outcome, presentation.saveType, presentation.topCorner);
+    ctx.strokeText(title, 0, 0);
+    ctx.fillStyle = palette.primary;
+    ctx.fillText(title, 0, 0);
+  }
   ctx.restore();
-}
-
-function outcomeStingTitleV402D(presentation) {
-  if (presentation.outcome === "GOAL") return "GOAL";
-  if (presentation.outcome === "SAVE") return presentation.saveType === "CATCH" ? "SAVED · HELD" : "SAVED · PARRIED";
-  if (presentation.outcome === "POST") return "OFF THE POST";
-  if (presentation.outcome === "BAR") return "CROSSBAR";
-  if (presentation.outcome === "WALL") return "BLOCKED";
-  return "WIDE";
-}
-
-function outcomeStingAccentV402D(presentation) {
-  if (presentation.outcome === "GOAL") return activeCharacter().accent || "#dafe4d";
-  if (presentation.outcome === "SAVE") return "#74dcff";
-  if (presentation.outcome === "POST" || presentation.outcome === "BAR") return "#f7fbf5";
-  if (presentation.outcome === "WALL") return "#f5c67a";
-  return "#ff8e8e";
-}
-
-function drawOutcomeStingV402D(time) {
-  const presentation = state.presentation;
-  if (presentation?.phase !== "result" || !Number.isFinite(presentation.resultAt)) return;
-  const hold = Math.max(620, Number(presentation.resultHoldMs) || 760);
-  const elapsed = time - presentation.resultAt;
-  if (elapsed < 0 || elapsed > hold) return;
-
-  const enter = clamp(elapsed / 105, 0, 1);
-  const exit = 1 - clamp((elapsed - (hold - 155)) / 155, 0, 1);
-  const alpha = Math.min(enter, exit);
-  const title = outcomeStingTitleV402D(presentation);
-  const accent = outcomeStingAccentV402D(presentation);
-  const width = clamp(255 + title.length * 22, 360, 650);
-  const height = 104;
-  const x = (WORLD.width - width) / 2;
-  const y = WORLD.height * 0.275;
-
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.shadowColor = "rgba(0,0,0,.52)";
-  ctx.shadowBlur = 28;
-  ctx.shadowOffsetY = 12;
-  ctx.fillStyle = "rgba(3,10,7,.82)";
-  roundedPanel(x, y, width, height, 18);
-  ctx.fill();
-  ctx.shadowColor = "transparent";
-
-  ctx.strokeStyle = accent + "b8";
-  ctx.lineWidth = 1.6;
-  roundedPanel(x + 0.8, y + 0.8, width - 1.6, height - 1.6, 18);
-  ctx.stroke();
-
-  ctx.fillStyle = accent;
-  roundedPanel(x + 20, y + 14, width - 40, 4, 2);
-  ctx.fill();
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "rgba(240,247,238,.54)";
-  ctx.font = "900 9px system-ui";
-  ctx.fillText("SHOT RESULT", WORLD.width / 2, y + 38);
-  ctx.fillStyle = "#f8fcf6";
-  ctx.font = title.length > 12 ? "1000 36px system-ui" : "1000 44px system-ui";
-  ctx.fillText(title, WORLD.width / 2, y + 80);
-  ctx.restore();
-
-  window.__footballLabOutcomeStingV402D = {
-    build: "40.2D",
-    title,
-    phase: presentation.phase,
-    visible: true,
-    elapsed,
-    hold
-  };
 }
 
 function drawReplayOverlay() {
@@ -226,17 +170,14 @@ function drawStageTransition(time) {
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
   ctx.textAlign = "center";
   ctx.fillStyle = "#dafe4d";
-  ctx.font = "900 11px system-ui";
-  ctx.fillText(`CHAPTER ${presentation.chapterNumber || 1} · ${presentation.chapterName || "CLASSIC KICKS"}`, WORLD.width / 2, WORLD.height * 0.33);
-  ctx.fillStyle = "rgba(239,247,236,.68)";
-  ctx.font = "900 12px system-ui";
+  ctx.font = "900 13px system-ui";
   ctx.fillText(`STAGE ${String(presentation.stageNumber).padStart(2, "0")} · ${presentation.distanceYards} YDS`, WORLD.width / 2, WORLD.height * 0.39);
   ctx.fillStyle = "#f7fbf5";
   ctx.font = "1000 44px system-ui";
   ctx.fillText(presentation.stageName, WORLD.width / 2, WORLD.height * 0.49);
-  ctx.fillStyle = "#dafe4d";
-  ctx.font = "900 12px system-ui";
-  ctx.fillText(`${presentation.venue || "FOOTBALL LAB"} · ${presentation.weather || "MATCH CONDITIONS"}`, WORLD.width / 2, WORLD.height * 0.56);
+  ctx.fillStyle = "rgba(239,247,236,.7)";
+  ctx.font = "800 15px system-ui";
+  ctx.fillText(presentation.challenge, WORLD.width / 2, WORLD.height * 0.56);
   ctx.fillStyle = "rgba(218,254,77,.72)";
   ctx.font = "800 10px system-ui";
   ctx.fillText("TAP TO START", WORLD.width / 2, WORLD.height * 0.88);
@@ -384,7 +325,6 @@ function drawWallStageCard(time) {
 export function drawScene(time, finishAnimation) {
   drawBaseScene(time, finishAnimation);
   drawImpactFeedback(time);
-  drawOutcomeStingV402D(time);
   drawReplayOverlay();
   drawBreakdown(time);
   drawStageTransition(time);
