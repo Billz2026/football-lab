@@ -29,14 +29,29 @@ async function armStrikeCaptures(page) {
   await page.evaluate(() => {
     const targets = new Set(["windup", "contact", "follow-through"]);
     window.__v46StrikeCaptures = {};
+    window.__v46StrikeTrace = [];
+    let previousClip = null;
+
+    function copyCanvas(source) {
+      if (!source) return null;
+      const snapshot = document.createElement("canvas");
+      snapshot.width = source.width;
+      snapshot.height = source.height;
+      snapshot.getContext("2d", { alpha: true })?.drawImage(source, 0, 0);
+      return snapshot;
+    }
+
     function sample() {
       const frame = window.__footballLabHeroFrameV46;
-      const clip = frame?.clip;
+      const clip = frame?.clip || "";
+      if (clip && clip !== previousClip) {
+        window.__v46StrikeTrace.push({ clip, time: frame?.time ?? performance.now() });
+        previousClip = clip;
+      }
       if (targets.has(clip) && !window.__v46StrikeCaptures[clip]) {
-        const canvas = document.querySelector("#gameCanvas");
         window.__v46StrikeCaptures[clip] = {
           frame: { ...frame },
-          dataUrl: canvas?.toDataURL("image/png") || null
+          snapshot: copyCanvas(document.querySelector("#gameCanvas"))
         };
       }
       if (Object.keys(window.__v46StrikeCaptures).length < targets.size) requestAnimationFrame(sample);
@@ -47,16 +62,24 @@ async function armStrikeCaptures(page) {
 
 async function saveCapturedClip(page, clip, path) {
   await page.waitForFunction(
-    (expected) => Boolean(window.__v46StrikeCaptures?.[expected]?.dataUrl),
+    (expected) => Boolean(window.__v46StrikeCaptures?.[expected]?.snapshot),
     clip,
     { timeout: 10000, polling: "raf" }
   );
-  const capture = await page.evaluate((expected) => window.__v46StrikeCaptures[expected], clip);
+  const capture = await page.evaluate((expected) => {
+    const stored = window.__v46StrikeCaptures?.[expected];
+    return stored ? {
+      frame: stored.frame,
+      dataUrl: stored.snapshot?.toDataURL("image/png") || null,
+      trace: [...(window.__v46StrikeTrace || [])]
+    } : null;
+  }, clip);
   expect(capture?.frame?.renderer).toBe("real-skinned-glb-3d");
   expect(capture?.frame?.production3D).toBe(true);
   expect(capture?.frame?.clip).toBe(clip);
   expect(capture?.dataUrl).toMatch(/^data:image\/png;base64,/);
   fs.writeFileSync(path, Buffer.from(capture.dataUrl.split(",")[1], "base64"));
+  return capture;
 }
 
 async function phaseSnapshot(page) {
@@ -124,7 +147,14 @@ test("capture Viktor Kane V46 standing and striking in the authoritative gamepla
 
   await armStrikeCaptures(page);
   await executeLiveShot(page);
-  await saveCapturedClip(page, "windup", "test-results/viktor-v46-strike-windup.png");
+
+  await expect.poll(
+    () => page.evaluate(() => (window.__v46StrikeTrace || []).map((entry) => entry.clip)),
+    { timeout: 10000 }
+  ).toEqual(expect.arrayContaining(["windup", "contact", "follow-through"]));
+
+  const windup = await saveCapturedClip(page, "windup", "test-results/viktor-v46-strike-windup.png");
   await saveCapturedClip(page, "contact", "test-results/viktor-v46-strike-contact.png");
   await saveCapturedClip(page, "follow-through", "test-results/viktor-v46-strike-follow-through.png");
+  console.log("VIKTOR_V46_LIVE_CLIP_TRACE", JSON.stringify(windup.trace));
 });
