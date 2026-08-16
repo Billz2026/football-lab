@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 
 // Visual approval must come from the authoritative Football Lab camera after
 // the V46 runtime bridge is rebuilt; Blender previews are not accepted here.
-// This capture evaluates the compact crew-neck and full upper-scalp hair pass.
+// This capture evaluates the latest compact crew-neck and full upper-scalp hair pass.
 async function enterClassic(page) {
-  await page.goto("/index.html?capture=viktor-v46-crew-neck-upper-scalp", { waitUntil: "networkidle" });
+  await page.goto("/index.html?capture=viktor-v46-latest-visual", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
 
   await expect.poll(
