@@ -7,6 +7,7 @@ on:
     paths:
       - game/assets/characters/v1/goalkeeper/mikkel-storm/mikkel-storm.glb
       - .github/workflows/visual-mikkel-v46.yml
+      - .github/v46-release-trigger
       - tests/character-v46-keeper-visual.spec.js
       - game/character-3d-v46.js
       - game/keeper-visuals-v38-1.js
