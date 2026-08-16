@@ -334,6 +334,8 @@ function outfieldPhase(time) {
 
   if (!animation) return frame("idle", (time % 2400) / 2400);
   if (p.replay || p.flight > 0 || p.settle > 0) {
+    if (outfieldPhase.lastClip === "plant") return frame("windup", 0.94);
+    if (outfieldPhase.lastClip === "windup") return frame("contact", 0.94);
     if (p.flight < 0.58) return frame("follow-through", clamp(p.flight / 0.58, 0, 1));
     return frame("recovery", Math.max(clamp((p.flight - 0.58) / 0.42, 0, 1), p.settle));
   }
