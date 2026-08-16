@@ -287,6 +287,7 @@ async function buildStaticRuntime({ httpModules, blobs }) {
     let source = replaceSpecifierLiterals(record.source, record.baseUrl, replacementMap);
     source = source.replace(/^\/\/# sourceURL=.*$/gm, '');
     if (filename === 'runtime-v23-main.js') {
+      source += `\nwindow.__footballLabAuthoritativeStateV46 = state;\n`;
       source += `\nwindow.__footballLabRuntimeV23 = Object.freeze({ staticModules: true, generatedModuleCount: ${modules.size} });\n`;
     }
     for (const needle of FORBIDDEN) {
