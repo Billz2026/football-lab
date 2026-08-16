@@ -54,6 +54,9 @@ jobs:
           name: viktor-v46-visual-gate-${{ github.run_id }}
           path: |
             test-results/viktor-v46-gameplay-ready.png
+            test-results/viktor-v46-strike-windup.png
+            test-results/viktor-v46-strike-contact.png
+            test-results/viktor-v46-strike-follow-through.png
             test-results/viktor-v46-full-ui-ready.png
             viktor-v46-visual-output.txt
           if-no-files-found: warn
