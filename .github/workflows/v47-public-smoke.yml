@@ -1,0 +1,123 @@
+name: V47 public mobile smoke
+
+on:
+  push:
+    branches:
+      - agent/v47-viktor-striker-rebuild
+    paths:
+      - .github/workflows/v47-public-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+
+      - name: Verify public V47 asset and renderer
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from '@playwright/test';
+
+          const browser = await chromium.launch({ headless: true });
+          try {
+            const context = await browser.newContext({
+              viewport: { width: 393, height: 844 },
+              deviceScaleFactor: 3,
+              isMobile: true,
+              hasTouch: true,
+              extraHTTPHeaders: { 'Cache-Control': 'no-cache' }
+            });
+            const page = await context.newPage();
+            const pageErrors = [];
+            page.on('pageerror', error => pageErrors.push(error.message));
+
+            const release = '2f2e9ab9';
+            const url = `https://billz2026.github.io/football-lab/index.html?v47=${release}`;
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+
+            const glbMeta = await page.evaluate(async (releaseId) => {
+              const response = await fetch(`/football-lab/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb?v47=${releaseId}`, {
+                cache: 'no-store'
+              });
+              if (!response.ok) throw new Error(`GLB fetch failed: ${response.status}`);
+              const bytes = new Uint8Array(await response.arrayBuffer());
+              const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+              if (view.getUint32(0, true) !== 0x46546c67) throw new Error('Public asset is not a GLB');
+              const jsonLength = view.getUint32(12, true);
+              const jsonType = view.getUint32(16, true);
+              if (jsonType !== 0x4e4f534a) throw new Error('Public GLB JSON chunk missing');
+              const jsonBytes = bytes.slice(20, 20 + jsonLength);
+              const gltf = JSON.parse(new TextDecoder().decode(jsonBytes).replace(/[\u0000\s]+$/g, ''));
+              const body = gltf.nodes?.find(node => node.name === 'Viktor_Kane_Body');
+              return {
+                bytes: bytes.byteLength,
+                extras: body?.extras || {},
+                animations: (gltf.animations || []).map(item => item.name),
+              };
+            }, release);
+
+            if (glbMeta.extras.football_lab_build !== '47.0.0') {
+              throw new Error(`Public Viktor is not V47: ${JSON.stringify(glbMeta)}`);
+            }
+            if (glbMeta.extras.football_lab_art_revision !== 'V47') {
+              throw new Error(`Public Viktor art revision mismatch: ${JSON.stringify(glbMeta)}`);
+            }
+            if (glbMeta.extras.football_lab_visual_archetype !== 'elite-english-striker') {
+              throw new Error(`Public Viktor archetype mismatch: ${JSON.stringify(glbMeta)}`);
+            }
+
+            await page.waitForFunction(() => window.__footballLabCharacter3DV46?.loaded?.includes('viktor-kane'), null, { timeout: 30000 });
+            await page.locator('#classicCard').click();
+            await page.waitForFunction(() => (
+              document.querySelector('#gameScreen')?.classList.contains('is-active') ||
+              document.querySelector('#kickerSelectV13')?.classList.contains('is-open')
+            ), null, { timeout: 10000 });
+
+            const pickerOpen = await page.locator('#kickerSelectV13').evaluate(el => el.classList.contains('is-open')).catch(() => false);
+            if (pickerOpen) await page.locator('#kickerConfirmV13').click();
+            const skip = page.getByRole('button', { name: 'SKIP TUTORIAL' });
+            if (await skip.isVisible().catch(() => false)) await skip.click({ force: true });
+
+            await page.waitForFunction(() => (
+              window.__footballLabHeroFrameV46?.character === 'viktor-kane' &&
+              window.__footballLabHeroFrameV46?.renderer === 'real-skinned-glb-3d' &&
+              window.__footballLabHeroFrameV46?.production3D === true
+            ), null, { timeout: 20000 });
+
+            const runtime = await page.evaluate(() => ({
+              frame: window.__footballLabHeroFrameV46,
+              visible: window.__footballLabVisibleKickersV30,
+              loaded: window.__footballLabCharacter3DV46?.loaded,
+            }));
+
+            if (pageErrors.length) throw new Error(`Public page errors: ${pageErrors.join(' | ')}`);
+            await page.screenshot({ path: 'v47-public-mobile.png', fullPage: true });
+
+            console.log('PUBLIC_V47_GLB=' + JSON.stringify(glbMeta));
+            console.log('PUBLIC_V47_RUNTIME=' + JSON.stringify(runtime));
+            console.log('PUBLIC_V47_LIVE=true');
+          } finally {
+            await browser.close();
+          }
+          NODE
+
+      - name: Upload public V47 proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v47-public-mobile-${{ github.run_id }}
+          path: v47-public-mobile.png
+          if-no-files-found: warn
+          retention-days: 7
