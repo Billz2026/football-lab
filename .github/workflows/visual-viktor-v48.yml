@@ -43,7 +43,7 @@ jobs:
       - name: Verify committed production runtime
         run: npm run verify:runtime:v23
 
-      - name: Capture V48.2 desktop strike and mobile standing view
+      - name: Capture V48.3 desktop strike and mobile standing view
         shell: bash
         run: |
           set -o pipefail
@@ -52,7 +52,7 @@ jobs:
             tests/character-v48-mobile-visual.spec.js \
             --workers=1 --reporter=line 2>&1 | tee viktor-v48-visual-output.txt
 
-      - name: Upload V48.2 visual evidence
+      - name: Upload V48.3 visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -68,4 +68,4 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-# V48.2 certification runs against the committed art-quality GLB.
+# V48.3 certification runs against the committed inherited-surface GLB.
