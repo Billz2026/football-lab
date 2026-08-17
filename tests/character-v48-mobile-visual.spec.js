@@ -35,16 +35,18 @@ test.use({
   hasTouch: true,
 });
 
-test("V48.3 Viktor reads as the inherited-surface polished striker from the real mobile gameplay camera", async ({ page }) => {
+test("V48.4 Viktor reads as the final inherited-surface striker candidate from the real mobile gameplay camera", async ({ page }) => {
   const glb = readGlbJson(fs.readFileSync("game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb"));
   const body = glb.nodes.find(node => node.name === "Viktor_Kane_Body");
-  expect(body?.extras?.football_lab_build).toBe("48.3.0");
-  expect(body?.extras?.football_lab_art_revision).toBe("V48.3");
+  expect(body?.extras?.football_lab_build).toBe("48.4.0");
+  expect(body?.extras?.football_lab_art_revision).toBe("V48.4");
   expect(body?.extras?.football_lab_visual_archetype).toBe("premium-elite-english-striker");
   expect(body?.extras?.football_lab_gameplay_camera_polish).toBe(true);
   expect(body?.extras?.football_lab_inherited_surface_only_polish).toBe(true);
   expect(body?.extras?.football_lab_floating_overlay_geometry).toBe(false);
-  expect(body?.extras?.football_lab_clean_kit_edges).toBe(true);
+  expect(body?.extras?.football_lab_face_material_mask).toBe(false);
+  expect(body?.extras?.football_lab_integrated_face_sculpt).toBe(true);
+  expect(body?.extras?.football_lab_contiguous_sleeve_shell).toBe(true);
   expect(body?.extras?.football_lab_smoothed_boot_forefoot).toBe(true);
 
   await enterClassic(page);
@@ -62,7 +64,7 @@ test("V48.3 Viktor reads as the inherited-surface polished striker from the real
     visible: window.__footballLabVisibleKickersV30,
     contract: window.__footballLabCharacter3DV46,
   }));
-  console.log("VIKTOR_V48_3_MOBILE_DIAGNOSTICS", JSON.stringify(diagnostics));
+  console.log("VIKTOR_V48_4_MOBILE_DIAGNOSTICS", JSON.stringify(diagnostics));
   expect(diagnostics.frame?.production3D).toBe(true);
   expect(diagnostics.visible?.production3D).toBe(true);
 
