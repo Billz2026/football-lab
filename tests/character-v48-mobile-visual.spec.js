@@ -35,15 +35,16 @@ test.use({
   hasTouch: true,
 });
 
-test("V48.1 Viktor reads as the premium striker from the real mobile gameplay camera", async ({ page }) => {
+test("V48.2 Viktor reads as the art-quality striker from the real mobile gameplay camera", async ({ page }) => {
   const glb = readGlbJson(fs.readFileSync("game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb"));
   const body = glb.nodes.find(node => node.name === "Viktor_Kane_Body");
-  expect(body?.extras?.football_lab_build).toBe("48.1.0");
-  expect(body?.extras?.football_lab_art_revision).toBe("V48.1");
+  expect(body?.extras?.football_lab_build).toBe("48.2.0");
+  expect(body?.extras?.football_lab_art_revision).toBe("V48.2");
   expect(body?.extras?.football_lab_visual_archetype).toBe("premium-elite-english-striker");
   expect(body?.extras?.football_lab_gameplay_camera_polish).toBe(true);
-  expect(body?.extras?.football_lab_boot_coverage_fix).toBe(true);
-  expect(body?.extras?.football_lab_rear_kit_orientation_fix).toBe(true);
+  expect(body?.extras?.football_lab_clean_kit_edges).toBe(true);
+  expect(body?.extras?.football_lab_enclosed_boot_overlay).toBe(true);
+  expect(body?.extras?.football_lab_corrected_hairline).toBe(true);
 
   await enterClassic(page);
   await expect.poll(
@@ -60,7 +61,7 @@ test("V48.1 Viktor reads as the premium striker from the real mobile gameplay ca
     visible: window.__footballLabVisibleKickersV30,
     contract: window.__footballLabCharacter3DV46,
   }));
-  console.log("VIKTOR_V48_1_MOBILE_DIAGNOSTICS", JSON.stringify(diagnostics));
+  console.log("VIKTOR_V48_2_MOBILE_DIAGNOSTICS", JSON.stringify(diagnostics));
   expect(diagnostics.frame?.production3D).toBe(true);
   expect(diagnostics.visible?.production3D).toBe(true);
 
