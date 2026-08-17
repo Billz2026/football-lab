@@ -122,6 +122,11 @@ async function executeLiveShot(page) {
 }
 
 test("capture Viktor Kane V46 standing and striking in the authoritative gameplay camera", async ({ page }) => {
+  // V47's denser production GLB makes PNG encoding slower on GitHub's software
+  // WebGL runner. This extends only the visual evidence test budget; all clip
+  // state assertions and their individual timeouts remain unchanged.
+  test.setTimeout(60000);
+
   await enterClassic(page);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
