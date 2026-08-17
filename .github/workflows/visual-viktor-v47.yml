@@ -67,3 +67,5 @@ jobs:
             viktor-v47-visual-output.txt
           if-no-files-found: warn
           retention-days: 14
+
+# trigger: rebuilt V47 asset is ready for visual capture
