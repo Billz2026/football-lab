@@ -87,7 +87,7 @@ def main():
     mins, maxs = world_bounds(meshes)
     centre = (mins + maxs) * 0.5
     height = maxs.z - mins.z
-    target = Vector((centre.x, centre.y, mins.z + height * 0.55))
+    target = Vector((centre.x, centre.y, mins.z + height * 0.52))
 
     scene = bpy.context.scene
     try:
@@ -109,7 +109,6 @@ def main():
 
     scene.world.color = (0.035, 0.04, 0.05)
 
-    # Neutral review floor.
     bpy.ops.mesh.primitive_plane_add(size=12, location=(centre.x, centre.y, mins.z - 0.003))
     floor = bpy.context.active_object
     floor_mat = bpy.data.materials.new("Review_Floor")
@@ -127,13 +126,14 @@ def main():
     camera = bpy.data.objects.new("ReviewCamera", camera_data)
     bpy.context.collection.objects.link(camera)
     scene.camera = camera
-    camera.data.lens = 68
+    camera.data.lens = 62
 
-    distance = height * 1.55
+    # Wider framing than the first audit so crown and boots are both visible.
+    distance = height * 1.78
     views = {
-        "front": Vector((centre.x, centre.y - distance, mins.z + height * 0.58)),
-        "three-quarter": Vector((centre.x - distance * 0.62, centre.y - distance * 0.82, mins.z + height * 0.61)),
-        "rear": Vector((centre.x, centre.y + distance, mins.z + height * 0.58)),
+        "front": Vector((centre.x, centre.y - distance, mins.z + height * 0.55)),
+        "three-quarter": Vector((centre.x - distance * 0.62, centre.y - distance * 0.82, mins.z + height * 0.57)),
+        "rear": Vector((centre.x, centre.y + distance, mins.z + height * 0.55)),
     }
 
     for name, location in views.items():
