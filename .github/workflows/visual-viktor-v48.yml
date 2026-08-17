@@ -67,3 +67,5 @@ jobs:
             viktor-v48-visual-output.txt
           if-no-files-found: warn
           retention-days: 14
+
+# V48 certification capture is intentionally triggered after the bot-authored GLB commit.
