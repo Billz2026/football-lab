@@ -7,7 +7,7 @@ on:
     paths:
       - game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
       - .github/workflows/visual-viktor-v48.yml
-      - tests/character-v47-mobile-visual.spec.js
+      - tests/character-v48-mobile-visual.spec.js
       - tests/character-v46-visual.spec.js
       - game/character-3d-v46.js
       - game/render-v17-3-1.js
@@ -43,16 +43,16 @@ jobs:
       - name: Verify committed production runtime
         run: npm run verify:runtime:v23
 
-      - name: Capture V48 desktop strike and mobile standing view
+      - name: Capture V48.1 desktop strike and mobile standing view
         shell: bash
         run: |
           set -o pipefail
           npx playwright test \
             tests/character-v46-visual.spec.js \
-            tests/character-v47-mobile-visual.spec.js \
+            tests/character-v48-mobile-visual.spec.js \
             --workers=1 --reporter=line 2>&1 | tee viktor-v48-visual-output.txt
 
-      - name: Upload V48 visual evidence
+      - name: Upload V48.1 visual evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -62,10 +62,10 @@ jobs:
             test-results/viktor-v46-strike-windup.png
             test-results/viktor-v46-strike-contact.png
             test-results/viktor-v46-strike-follow-through.png
-            test-results/viktor-v47-mobile-gameplay.png
-            test-results/viktor-v47-mobile-full-ui.png
+            test-results/viktor-v48-mobile-gameplay.png
+            test-results/viktor-v48-mobile-full-ui.png
             viktor-v48-visual-output.txt
           if-no-files-found: warn
           retention-days: 14
 
-# V48 certification capture is intentionally triggered after the bot-authored GLB commit.
+# V48.1 certification: corrected rear kit orientation and restored full boot coverage.
