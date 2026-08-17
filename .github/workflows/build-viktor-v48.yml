@@ -1,0 +1,158 @@
+name: Build Viktor Kane V48
+
+on:
+  push:
+    branches:
+      - agent/v48-viktor-premium-polish
+    paths:
+      - .github/workflows/build-viktor-v48.yml
+      - scripts/run-build-viktor-v48.py
+      - scripts/run-build-viktor-v47.py
+      - scripts/run-build-viktor-v47-1.py
+      - scripts/run-build-viktor-v47-2.py
+      - scripts/run-build-viktor-v47-3.py
+      - scripts/run-build-viktor-v47-4.py
+      - scripts/build-viktor-v46.py
+      - scripts/verify-viktor-v46.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-lab-build-viktor-v48
+  cancel-in-progress: true
+
+jobs:
+  build-viktor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out V48 branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Install Blender and archive tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y blender unzip curl python3-numpy
+          blender --version | head -n 2
+          python3 -c 'import numpy; print("numpy", numpy.__version__)'
+
+      - name: Download Blender Studio CC0 human base meshes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/viktor-source /tmp/viktor-bundle
+          URLS=(
+            "https://download.blender.org/demo/asset-bundles/human-base-meshes/human-base-meshes-bundle-v1.4.1.zip"
+            "https://mirrors.aliyun.com/blender/demo/asset-bundles/human-base-meshes/human-base-meshes-bundle-v1.4.1.zip"
+            "https://ftp.openbsd.dk/blender/blender-demo/asset-bundles/human-base-meshes/human-base-meshes-bundle-v1.4.1.zip"
+          )
+          downloaded=0
+          for url in "${URLS[@]}"; do
+            echo "Trying ${url}"
+            if curl -L --fail --retry 2 --connect-timeout 20 --max-time 180 "$url" -o /tmp/viktor-bundle/human-base-meshes.zip; then
+              downloaded=1
+              break
+            fi
+          done
+          test "$downloaded" -eq 1
+          unzip -q /tmp/viktor-bundle/human-base-meshes.zip -d /tmp/viktor-source
+          SOURCE_BLEND="$(find /tmp/viktor-source -type f -name '*.blend' | head -n 1)"
+          test -n "$SOURCE_BLEND"
+          echo "SOURCE_BLEND=$SOURCE_BLEND" >> "$GITHUB_ENV"
+          echo "Selected source library: $SOURCE_BLEND"
+
+      - name: Author Viktor Kane V48 premium GLB
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$GITHUB_WORKSPACE/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb"
+          mkdir -p "$(dirname "$OUT")"
+          blender --background "$SOURCE_BLEND" \
+            --python "$GITHUB_WORKSPACE/scripts/run-build-viktor-v48.py" \
+            -- --output "$OUT"
+          ls -lh "$OUT"
+
+      - name: Preserve generated V48 GLB for diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: viktor-kane-v48-glb-${{ github.run_id }}
+          path: game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify production GLB contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$GITHUB_WORKSPACE/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb"
+          blender --background --factory-startup \
+            --python "$GITHUB_WORKSPACE/scripts/verify-viktor-v46.py" \
+            -- --input "$OUT"
+
+      - name: Verify V48 metadata survives export
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, struct
+          path = 'game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb'
+          with open(path, 'rb') as f:
+              f.read(12)
+              length, chunk_type = struct.unpack('<II', f.read(8))
+              data = f.read(length)
+          gltf = json.loads(data.decode('utf-8').rstrip(' \t\r\n\x00'))
+          nodes = {node.get('name'): node for node in gltf.get('nodes', [])}
+          body = nodes.get('Viktor_Kane_Body', {})
+          extras = body.get('extras', {})
+          print('V48_BODY_EXTRAS', extras)
+          assert extras.get('football_lab_build') == '48.0.0', extras
+          assert extras.get('football_lab_art_revision') == 'V48', extras
+          assert extras.get('football_lab_visual_archetype') == 'premium-elite-english-striker', extras
+          assert extras.get('football_lab_gameplay_camera_polish') is True, extras
+          PY
+
+      - name: Commit generated GLB to latest V48 branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          BRANCH='agent/v48-viktor-premium-polish'
+          ASSET='game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb'
+          SNAPSHOT='/tmp/viktor-kane-v48.glb'
+          cp "$ASSET" "$SNAPSHOT"
+          test -s "$SNAPSHOT"
+
+          git config user.name "football-lab-bot"
+          git config user.email "actions@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            echo "V48 asset commit attempt $attempt"
+            git fetch origin "$BRANCH"
+            git reset --hard "origin/$BRANCH"
+            cp "$SNAPSHOT" "$ASSET"
+            git add "$ASSET"
+
+            if git diff --cached --quiet; then
+              echo "Generated Viktor V48 GLB is already present on the latest branch."
+              exit 0
+            fi
+
+            git commit -m "Build Viktor Kane V48 premium model"
+            if git push origin "HEAD:$BRANCH"; then
+              echo "V48 GLB committed successfully."
+              exit 0
+            fi
+
+            echo "Remote advanced during asset commit; retrying on latest head."
+            git reset --hard HEAD~1
+            sleep 2
+          done
+
+          echo "Unable to commit verified V48 GLB after three fast-forward attempts." >&2
+          exit 1
