@@ -35,7 +35,7 @@ jobs:
           python3 -c 'import numpy; print("numpy", numpy.__version__)'
           ldconfig -p | grep -E 'libEGL\.so\.1|libGL\.so\.1'
 
-      - name: Render neutral V48.3 review angles
+      - name: Render neutral V48.4 review angles
         shell: bash
         run: |
           set -euo pipefail
@@ -46,7 +46,7 @@ jobs:
             --input "$GITHUB_WORKSPACE/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb" \
             --output-dir "$GITHUB_WORKSPACE/review-viktor-v48"
 
-      - name: Upload neutral V48.3 model review
+      - name: Upload neutral V48.4 model review
         uses: actions/upload-artifact@v4
         with:
           name: viktor-v48-neutral-review-${{ github.run_id }}
