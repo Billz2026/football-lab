@@ -19,15 +19,21 @@ marker = "builder.main()"
 if marker not in source:
     raise RuntimeError("V47.1 builder entry point not found")
 
-namespace = {
+# V47.1 itself executes the V47 base builder inside a nested dictionary named
+# `namespace`. Functions such as create_v47_kit_and_hair() retain that nested
+# dictionary as their globals. We therefore need both levels here: the outer
+# namespace owns V47.1's correction helpers, while base_globals owns the V47
+# kit function that actually resolves `_create_scalp_hair` at runtime.
+v471_globals = {
     "__file__": BASE_PATH,
     "__name__": "football_lab_v47_1_base",
 }
-exec(compile(source.rsplit(marker, 1)[0], BASE_PATH, "exec"), namespace)
+exec(compile(source.rsplit(marker, 1)[0], BASE_PATH, "exec"), v471_globals)
 
-builder = namespace["builder"]
-_ellipsoid_mesh = namespace["_ellipsoid_mesh"]
-_ensure_armature_modifier = namespace["_ensure_armature_modifier"]
+builder = v471_globals["builder"]
+base_globals = v471_globals["namespace"]
+_ellipsoid_mesh = v471_globals["_ellipsoid_mesh"]
+_ensure_armature_modifier = v471_globals["_ensure_armature_modifier"]
 
 
 def v472_scalp_hair(armature, material):
@@ -41,7 +47,7 @@ def v472_scalp_hair(armature, material):
 
     # Main cropped crown. Lower centre + slightly deeper radius extends the
     # sides/back down toward the scalp while keeping the highest point below
-    # 1.89 m. Expected top is ~1.883 m.
+    # 1.89 m. Expected top is ~1.883 m and lower edge ~1.715 m.
     _ellipsoid_mesh(
         vertices,
         faces,
@@ -83,9 +89,10 @@ def v472_scalp_hair(armature, material):
     return hair
 
 
-# V47.1's create_v47_kit_and_hair resolves _create_scalp_hair in this shared
-# namespace at call time, so this replacement keeps all other verified V47.1
-# authoring behaviour intact.
-namespace["_create_scalp_hair"] = v472_scalp_hair
+# `create_v47_kit_and_hair` was defined in the nested V47 base namespace, so
+# replace the symbol there. The V47.1 body/boot corrections remain active via
+# builder.normalise_body and the outer helper patching already performed when
+# the V47.1 prefix executed above.
+base_globals["_create_scalp_hair"] = v472_scalp_hair
 
 builder.main()
