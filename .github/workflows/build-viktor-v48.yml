@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/build-viktor-v48.yml
       - scripts/run-build-viktor-v48.py
+      - scripts/run-build-viktor-v48-1.py
       - scripts/run-build-viktor-v47.py
       - scripts/run-build-viktor-v47-1.py
       - scripts/run-build-viktor-v47-2.py
@@ -68,21 +69,21 @@ jobs:
           echo "SOURCE_BLEND=$SOURCE_BLEND" >> "$GITHUB_ENV"
           echo "Selected source library: $SOURCE_BLEND"
 
-      - name: Author Viktor Kane V48 premium GLB
+      - name: Author Viktor Kane V48.1 premium GLB
         shell: bash
         run: |
           set -euo pipefail
           OUT="$GITHUB_WORKSPACE/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb"
           mkdir -p "$(dirname "$OUT")"
           blender --background "$SOURCE_BLEND" \
-            --python "$GITHUB_WORKSPACE/scripts/run-build-viktor-v48.py" \
+            --python "$GITHUB_WORKSPACE/scripts/run-build-viktor-v48-1.py" \
             -- --output "$OUT"
           ls -lh "$OUT"
 
-      - name: Preserve generated V48 GLB for diagnostics
+      - name: Preserve generated V48.1 GLB for diagnostics
         uses: actions/upload-artifact@v4
         with:
-          name: viktor-kane-v48-glb-${{ github.run_id }}
+          name: viktor-kane-v48-1-glb-${{ github.run_id }}
           path: game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
           if-no-files-found: error
           retention-days: 14
@@ -96,7 +97,7 @@ jobs:
             --python "$GITHUB_WORKSPACE/scripts/verify-viktor-v46.py" \
             -- --input "$OUT"
 
-      - name: Verify V48 metadata survives export
+      - name: Verify V48.1 metadata survives export
         shell: bash
         run: |
           set -euo pipefail
@@ -111,11 +112,13 @@ jobs:
           nodes = {node.get('name'): node for node in gltf.get('nodes', [])}
           body = nodes.get('Viktor_Kane_Body', {})
           extras = body.get('extras', {})
-          print('V48_BODY_EXTRAS', extras)
-          assert extras.get('football_lab_build') == '48.0.0', extras
-          assert extras.get('football_lab_art_revision') == 'V48', extras
+          print('V48_1_BODY_EXTRAS', extras)
+          assert extras.get('football_lab_build') == '48.1.0', extras
+          assert extras.get('football_lab_art_revision') == 'V48.1', extras
           assert extras.get('football_lab_visual_archetype') == 'premium-elite-english-striker', extras
           assert extras.get('football_lab_gameplay_camera_polish') is True, extras
+          assert extras.get('football_lab_boot_coverage_fix') is True, extras
+          assert extras.get('football_lab_rear_kit_orientation_fix') is True, extras
           PY
 
       - name: Commit generated GLB to latest V48 branch head
@@ -124,7 +127,7 @@ jobs:
           set -euo pipefail
           BRANCH='agent/v48-viktor-premium-polish'
           ASSET='game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb'
-          SNAPSHOT='/tmp/viktor-kane-v48.glb'
+          SNAPSHOT='/tmp/viktor-kane-v48-1.glb'
           cp "$ASSET" "$SNAPSHOT"
           test -s "$SNAPSHOT"
 
@@ -132,20 +135,20 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
 
           for attempt in 1 2 3; do
-            echo "V48 asset commit attempt $attempt"
+            echo "V48.1 asset commit attempt $attempt"
             git fetch origin "$BRANCH"
             git reset --hard "origin/$BRANCH"
             cp "$SNAPSHOT" "$ASSET"
             git add "$ASSET"
 
             if git diff --cached --quiet; then
-              echo "Generated Viktor V48 GLB is already present on the latest branch."
+              echo "Generated Viktor V48.1 GLB is already present on the latest branch."
               exit 0
             fi
 
-            git commit -m "Build Viktor Kane V48 premium model"
+            git commit -m "Build Viktor Kane V48.1 corrected model"
             if git push origin "HEAD:$BRANCH"; then
-              echo "V48 GLB committed successfully."
+              echo "V48.1 GLB committed successfully."
               exit 0
             fi
 
@@ -154,5 +157,5 @@ jobs:
             sleep 2
           done
 
-          echo "Unable to commit verified V48 GLB after three fast-forward attempts." >&2
+          echo "Unable to commit verified V48.1 GLB after three fast-forward attempts." >&2
           exit 1
