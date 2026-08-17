@@ -25,14 +25,15 @@ jobs:
       - name: Check out V48 branch
         uses: actions/checkout@v4
 
-      - name: Install Blender and GLB import dependency
+      - name: Install Blender and headless render dependencies
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y blender python3-numpy
+          sudo apt-get install -y blender python3-numpy libegl1 libgl1
           blender --version | head -n 2
           python3 -c 'import numpy; print("numpy", numpy.__version__)'
+          ldconfig -p | grep -E 'libEGL\.so\.1|libGL\.so\.1'
 
       - name: Render neutral V48.1 review angles
         shell: bash
