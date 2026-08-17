@@ -50,7 +50,7 @@ jobs:
           npx playwright test \
             tests/character-v46-visual.spec.js \
             tests/character-v47-mobile-visual.spec.js \
-            --reporter=line 2>&1 | tee viktor-v47-visual-output.txt
+            --workers=1 --reporter=line 2>&1 | tee viktor-v47-visual-output.txt
 
       - name: Upload V47 visual evidence
         if: always()
@@ -68,4 +68,4 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-# trigger: rebuilt V47 asset is ready for visual capture
+# V47.2 visual certification runs serially to avoid GPU contention.
