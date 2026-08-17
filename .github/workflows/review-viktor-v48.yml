@@ -1,0 +1,53 @@
+name: Review Viktor Kane V48 model
+
+on:
+  push:
+    branches:
+      - agent/v48-viktor-premium-polish
+    paths:
+      - .github/workflows/review-viktor-v48.yml
+      - scripts/render-viktor-v48-review.py
+      - game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: football-lab-viktor-v48-model-review
+  cancel-in-progress: true
+
+jobs:
+  render-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out V48 branch
+        uses: actions/checkout@v4
+
+      - name: Install Blender
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y blender
+          blender --version | head -n 2
+
+      - name: Render neutral V48.1 review angles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p review-viktor-v48
+          blender --background --factory-startup \
+            --python "$GITHUB_WORKSPACE/scripts/render-viktor-v48-review.py" \
+            -- \
+            --input "$GITHUB_WORKSPACE/game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb" \
+            --output-dir "$GITHUB_WORKSPACE/review-viktor-v48"
+
+      - name: Upload neutral model review
+        uses: actions/upload-artifact@v4
+        with:
+          name: viktor-v48-neutral-review-${{ github.run_id }}
+          path: review-viktor-v48/*.png
+          if-no-files-found: error
+          retention-days: 14
