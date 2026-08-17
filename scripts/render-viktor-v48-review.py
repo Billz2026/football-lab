@@ -101,7 +101,10 @@ def main():
     scene.render.film_transparent = False
 
     if hasattr(scene, "view_settings"):
-        scene.view_settings.look = "Medium High Contrast"
+        try:
+            scene.view_settings.look = "AgX - Medium High Contrast"
+        except Exception:
+            pass
         scene.view_settings.exposure = 0.0
 
     scene.world.color = (0.035, 0.04, 0.05)
