@@ -1,0 +1,69 @@
+name: Viktor V48 visual gate
+
+on:
+  push:
+    branches:
+      - agent/v48-viktor-premium-polish
+    paths:
+      - game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
+      - .github/workflows/visual-viktor-v48.yml
+      - tests/character-v47-mobile-visual.spec.js
+      - tests/character-v46-visual.spec.js
+      - game/character-3d-v46.js
+      - game/render-v17-3-1.js
+      - game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: football-lab-viktor-v48-visual
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Check out V48 branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install test dependencies
+        run: npm install
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify committed production runtime
+        run: npm run verify:runtime:v23
+
+      - name: Capture V48 desktop strike and mobile standing view
+        shell: bash
+        run: |
+          set -o pipefail
+          npx playwright test \
+            tests/character-v46-visual.spec.js \
+            tests/character-v47-mobile-visual.spec.js \
+            --workers=1 --reporter=line 2>&1 | tee viktor-v48-visual-output.txt
+
+      - name: Upload V48 visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: viktor-v48-visual-gate-${{ github.run_id }}
+          path: |
+            test-results/viktor-v46-gameplay-ready.png
+            test-results/viktor-v46-strike-windup.png
+            test-results/viktor-v46-strike-contact.png
+            test-results/viktor-v46-strike-follow-through.png
+            test-results/viktor-v47-mobile-gameplay.png
+            test-results/viktor-v47-mobile-full-ui.png
+            viktor-v48-visual-output.txt
+          if-no-files-found: warn
+          retention-days: 14
