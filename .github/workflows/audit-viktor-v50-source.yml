@@ -1,0 +1,57 @@
+name: Audit Viktor V50 source character
+
+on:
+  push:
+    branches:
+      - agent/v48-viktor-premium-polish
+    paths:
+      - .github/workflows/audit-viktor-v50-source.yml
+      - scripts/audit-viktor-v50-source.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+
+      - name: Install Blender and render dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y blender python3-numpy libegl1 libgl1 curl
+
+      - name: Download audited CC0 Quaternius reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://raw.githubusercontent.com/Seyamalam/blood-league-kickoff/main/public/assets/vendor/quaternius/night-striker.glb'
+          curl -L --fail --retry 2 "$URL" -o /tmp/quaternius-night-striker.glb
+          test -s /tmp/quaternius-night-striker.glb
+          echo 'a466828c67a4acc9b2413212ce6d9cde235e3aed9b675680c14fd9673858f118  /tmp/quaternius-night-striker.glb' | sha256sum -c -
+          ls -lh /tmp/quaternius-night-striker.glb
+
+      - name: Render and inspect candidate source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p v50-source-audit
+          blender --background --factory-startup \
+            --python "$GITHUB_WORKSPACE/scripts/audit-viktor-v50-source.py" \
+            -- \
+            --input /tmp/quaternius-night-striker.glb \
+            --output-dir "$GITHUB_WORKSPACE/v50-source-audit"
+
+      - name: Upload V50 source audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: viktor-v50-source-audit-${{ github.run_id }}
+          path: v50-source-audit/*
+          if-no-files-found: error
+          retention-days: 14
