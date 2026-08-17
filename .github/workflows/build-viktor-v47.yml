@@ -112,18 +112,44 @@ jobs:
           assert extras.get('football_lab_visual_archetype') == 'elite-english-striker', extras
           PY
 
-      - name: Commit generated GLB to V47 branch
+      - name: Commit generated GLB to latest V47 branch head
         shell: bash
         run: |
           set -euo pipefail
+          ASSET='game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb'
+          SNAPSHOT='/tmp/viktor-kane-v47.glb'
+
+          # Preserve the verified binary outside the worktree before moving to
+          # the latest remote head. This prevents later test/workflow commits
+          # from invalidating a completed Blender build.
+          cp "$ASSET" "$SNAPSHOT"
+          test -s "$SNAPSHOT"
+
           git config user.name "football-lab-bot"
           git config user.email "actions@users.noreply.github.com"
-          git fetch origin agent/v47-viktor-striker-rebuild
-          git checkout -B agent/v47-viktor-striker-rebuild origin/agent/v47-viktor-striker-rebuild
-          git add game/assets/characters/v1/outfield/viktor-kane/viktor-kane.glb
-          if git diff --cached --quiet; then
-            echo "Generated Viktor V47 GLB is unchanged."
-            exit 0
-          fi
-          git commit -m "Rebuild Viktor Kane as V47 elite striker model"
-          git push origin agent/v47-viktor-striker-rebuild
+
+          for attempt in 1 2 3; do
+            echo "V47 asset commit attempt $attempt"
+            git fetch origin agent/v47-viktor-striker-rebuild
+            git reset --hard origin/agent/v47-viktor-striker-rebuild
+            cp "$SNAPSHOT" "$ASSET"
+            git add "$ASSET"
+
+            if git diff --cached --quiet; then
+              echo "Generated Viktor V47 GLB is already present on the latest branch."
+              exit 0
+            fi
+
+            git commit -m "Rebuild Viktor Kane as V47 elite striker model"
+            if git push origin HEAD:agent/v47-viktor-striker-rebuild; then
+              echo "V47 GLB committed successfully."
+              exit 0
+            fi
+
+            echo "Remote advanced during asset commit; retrying on latest head."
+            git reset --hard HEAD~1
+            sleep 2
+          done
+
+          echo "Unable to commit verified V47 GLB after three fast-forward attempts." >&2
+          exit 1
