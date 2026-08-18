@@ -5,11 +5,11 @@ async function waitForProductionContract(page) {
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterProductionV1?.build),
     { timeout: 15000 }
-  ).toBe("1.0.0");
+  ).toBe("1.0.1");
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterEngineV1?.build),
     { timeout: 15000 }
-  ).toBe("1.0.0");
+  ).toBe("1.0.1");
 }
 
 async function enterClassic(page) {
@@ -27,7 +27,7 @@ async function enterClassic(page) {
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
 }
 
-test("production character contract keeps premium 3D integration gated until assets are approved", async ({ page }) => {
+test("production character contract keeps premium 3D integration gated and records Viktor arcade fallback", async ({ page }) => {
   await waitForProductionContract(page);
   const state = await page.evaluate(() => ({
     contract: window.__footballLabCharacterProductionV1,
@@ -41,6 +41,7 @@ test("production character contract keeps premium 3D integration gated until ass
   expect(state.contract.masterGoalkeeper).toBe("mikkel-storm");
   expect(state.contract.assetCount).toBe(8);
   expect(state.contract.liveIntegration).toBe(false);
+  expect(state.contract.liveArcadeFallback).toContain("viktor-kane");
   expect(state.contract.explicitApprovalRequired).toBe(true);
   expect(state.contract.directCelebrityLikenesses).toBe(false);
 
@@ -55,7 +56,7 @@ test("production character contract keeps premium 3D integration gated until ass
   expect(state.readiness.canEnableLiveIntegration).toBe(false);
 });
 
-test("Viktor Kane remains the active production identity and uses the approved V46 GLB", async ({ page }) => {
+test("Viktor Kane remains the active identity but uses the shared arcade renderer live", async ({ page }) => {
   await page.goto("/index.html?test=character-production-v1");
   await page.evaluate(() => localStorage.setItem("footballLabSelectedKickerV13", "dax-ryder"));
   await page.reload();
@@ -70,17 +71,17 @@ test("Viktor Kane remains the active production identity and uses the approved V
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
     { timeout: 12000 }
-  ).toBe("real-skinned-glb-3d");
+  ).toBe("v44-fallback");
 
   const live = await page.evaluate(() => ({
     frame: window.__footballLabHeroFrameV46,
     visible: window.__footballLabVisibleKickersV30
   }));
 
-  expect(live.frame.character).toBe("viktor-kane");
+  expect(live.frame.character).toBe("dax-ryder");
   expect(live.frame.build).toBe("46.0.0");
-  expect(live.frame.production3D).toBe(true);
-  expect(live.visible.production3D).toBe(true);
-  expect(live.visible.productionCharacterMode).toBe("real-skinned-glb-3d");
+  expect(live.frame.production3D).toBe(false);
+  expect(live.visible.production3D).toBe(false);
+  expect(live.visible.productionCharacterMode).toBe("articulated-2.5d-fallback");
   expect(live.visible.staticSpriteFrames).toBe(false);
 });
