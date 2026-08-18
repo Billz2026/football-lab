@@ -1,24 +1,27 @@
 const freeze = (value) => Object.freeze(value);
 
+// V50 arcade proportions: readable silhouettes beat anatomical realism.
+// Heads, shoulders, gloves and lower-leg mass are deliberately a little larger
+// so players remain identifiable at the fixed gameplay camera distance.
 const BODY_PRESETS = freeze({
-  balanced: freeze({ height: 1.02, shoulder: 1.02, chest: 1.0, waist: 0.98, thigh: 1.0, calf: 1.0, head: 1.0 }),
-  lean: freeze({ height: 1.0, shoulder: 0.95, chest: 0.93, waist: 0.91, thigh: 0.91, calf: 0.93, head: 0.98 }),
-  elegant: freeze({ height: 1.015, shoulder: 0.98, chest: 0.95, waist: 0.93, thigh: 0.95, calf: 0.95, head: 0.98 }),
-  compactPower: freeze({ height: 0.965, shoulder: 1.07, chest: 1.08, waist: 1.03, thigh: 1.1, calf: 1.07, head: 1.02 }),
-  keeperPower: freeze({ height: 1.09, shoulder: 1.12, chest: 1.1, waist: 1.0, thigh: 1.05, calf: 1.05, head: 1.0 }),
-  keeperGrace: freeze({ height: 1.07, shoulder: 1.0, chest: 0.98, waist: 0.95, thigh: 0.98, calf: 0.98, head: 0.99 }),
-  keeperLean: freeze({ height: 1.06, shoulder: 0.98, chest: 0.95, waist: 0.92, thigh: 0.94, calf: 0.96, head: 0.98 }),
-  keeperClassic: freeze({ height: 1.045, shoulder: 1.06, chest: 1.05, waist: 1.0, thigh: 1.03, calf: 1.02, head: 1.01 })
+  balanced: freeze({ height: 1.02, shoulder: 1.04, chest: 1.02, waist: 0.97, thigh: 1.03, calf: 1.04, head: 1.09 }),
+  lean: freeze({ height: 1.0, shoulder: 0.98, chest: 0.96, waist: 0.92, thigh: 0.96, calf: 0.99, head: 1.08 }),
+  elegant: freeze({ height: 1.015, shoulder: 1.0, chest: 0.98, waist: 0.94, thigh: 0.98, calf: 1.0, head: 1.08 }),
+  compactPower: freeze({ height: 0.965, shoulder: 1.1, chest: 1.11, waist: 1.04, thigh: 1.12, calf: 1.11, head: 1.11 }),
+  keeperPower: freeze({ height: 1.09, shoulder: 1.15, chest: 1.12, waist: 1.02, thigh: 1.08, calf: 1.09, head: 1.08 }),
+  keeperGrace: freeze({ height: 1.07, shoulder: 1.04, chest: 1.0, waist: 0.96, thigh: 1.01, calf: 1.03, head: 1.07 }),
+  keeperLean: freeze({ height: 1.06, shoulder: 1.02, chest: 0.98, waist: 0.93, thigh: 0.98, calf: 1.01, head: 1.07 }),
+  keeperClassic: freeze({ height: 1.045, shoulder: 1.1, chest: 1.08, waist: 1.01, thigh: 1.06, calf: 1.06, head: 1.09 })
 });
 
 const OUTFIELD_KIT = freeze({
-  shirt: "#eef2f1",
+  shirt: "#f5f7f4",
   shirtLight: "#ffffff",
-  shirtShadow: "#9aa9aa",
-  shorts: "#10243d",
-  shortsLight: "#1f4167",
-  socks: "#f4f7f5",
-  trim: "#245a8d",
+  shirtShadow: "#d2dad8",
+  shorts: "#132b49",
+  shortsLight: "#244b78",
+  socks: "#f7f8f4",
+  trim: "#2a92c9",
   collar: "#173b60"
 });
 
@@ -27,53 +30,53 @@ export const OUTFIELD_VISUALS_V42 = freeze({
     id: "viktor-kane",
     displayName: "VIKTOR KANE",
     number: 10,
-    inspiration: "elite English centre-forward presence without direct likeness",
+    inspiration: "tall composed arcade centre-forward",
     body: BODY_PRESETS.balanced,
-    skin: freeze({ base: "#e7b08e", light: "#f4c5a5", shadow: "#bd795c" }),
-    hair: freeze({ style: "textured-crop", base: "#d8b76e", light: "#efd494", shadow: "#8c6f40", volume: 1.02 }),
-    face: freeze({ shape: "strong-jaw", jaw: 1.06, stubble: 0.14 }),
+    skin: freeze({ base: "#e6ad89", light: "#f1bea0", shadow: "#c57c5e" }),
+    hair: freeze({ style: "textured-crop", base: "#b89558", light: "#d4b875", shadow: "#735a36", volume: 1.0 }),
+    face: freeze({ shape: "strong-jaw", jaw: 1.04, stubble: 0.08 }),
     kit: OUTFIELD_KIT,
-    boots: freeze({ base: "#f7f8f5", secondary: "#c8d0ce", accent: "#dafe4d" }),
-    motion: freeze({ stance: "composed", stride: 1.0, plant: 1.02, followThrough: 1.0, aggression: 0.42 })
+    boots: freeze({ base: "#11161a", secondary: "#303940", accent: "#e7f54b" }),
+    motion: freeze({ stance: "composed", stride: 1.0, plant: 1.04, followThrough: 1.04, aggression: 0.48 })
   }),
   "leo-vale": freeze({
     id: "bruno-silva",
     displayName: "BRUNO SILVA",
     number: 8,
-    inspiration: "intense Portuguese playmaker energy without direct likeness",
+    inspiration: "quick technical arcade playmaker",
     body: BODY_PRESETS.lean,
-    skin: freeze({ base: "#d69b74", light: "#eab08a", shadow: "#a9674c" }),
-    hair: freeze({ style: "sharp-textured", base: "#34251f", light: "#5b4033", shadow: "#17110f", volume: 0.94 }),
-    face: freeze({ shape: "angular", jaw: 0.96, stubble: 0.28 }),
+    skin: freeze({ base: "#d49972", light: "#e6ae87", shadow: "#a9684d" }),
+    hair: freeze({ style: "sharp-textured", base: "#34251f", light: "#5a4034", shadow: "#17110f", volume: 0.92 }),
+    face: freeze({ shape: "angular", jaw: 0.97, stubble: 0.12 }),
     kit: OUTFIELD_KIT,
-    boots: freeze({ base: "#101518", secondary: "#38464e", accent: "#58cdf7" }),
-    motion: freeze({ stance: "alert", stride: 1.05, plant: 0.96, followThrough: 0.96, aggression: 0.58 })
+    boots: freeze({ base: "#101518", secondary: "#33434c", accent: "#4fd4ff" }),
+    motion: freeze({ stance: "alert", stride: 1.06, plant: 0.98, followThrough: 0.98, aggression: 0.62 })
   }),
   "zion-arc": freeze({
     id: "david-beckett",
     displayName: "DAVID BECKETT",
     number: 7,
-    inspiration: "iconic English set-piece elegance without direct likeness",
+    inspiration: "smooth set-piece arcade specialist",
     body: BODY_PRESETS.elegant,
-    skin: freeze({ base: "#e1aa82", light: "#f0c09b", shadow: "#b77357" }),
-    hair: freeze({ style: "refined-swept", base: "#9c7b54", light: "#c7a878", shadow: "#5b4532", volume: 1.0 }),
-    face: freeze({ shape: "defined-cheek", jaw: 1.01, stubble: 0.22 }),
+    skin: freeze({ base: "#dfa780", light: "#edbc98", shadow: "#b87458" }),
+    hair: freeze({ style: "refined-swept", base: "#8f704e", light: "#b99b6d", shadow: "#55412f", volume: 0.98 }),
+    face: freeze({ shape: "defined-cheek", jaw: 1.0, stubble: 0.1 }),
     kit: OUTFIELD_KIT,
-    boots: freeze({ base: "#f8f4ef", secondary: "#cfc6be", accent: "#d2a451" }),
-    motion: freeze({ stance: "elegant", stride: 0.99, plant: 1.0, followThrough: 1.1, aggression: 0.34 })
+    boots: freeze({ base: "#f5f1ea", secondary: "#cfc5b9", accent: "#d7a84c" }),
+    motion: freeze({ stance: "elegant", stride: 0.99, plant: 1.0, followThrough: 1.12, aggression: 0.38 })
   }),
   "kai-mori": freeze({
     id: "wayne-redman",
     displayName: "WAYNE REDMAN",
     number: 9,
-    inspiration: "compact English power-forward intensity without direct likeness",
+    inspiration: "compact power-forward arcade bruiser",
     body: BODY_PRESETS.compactPower,
-    skin: freeze({ base: "#dfaa87", light: "#efbea0", shadow: "#b36f55" }),
-    hair: freeze({ style: "short-practical", base: "#49372b", light: "#705542", shadow: "#241a15", volume: 0.86 }),
-    face: freeze({ shape: "broad-brow", jaw: 1.08, stubble: 0.08 }),
+    skin: freeze({ base: "#dda682", light: "#ecba99", shadow: "#b16e54" }),
+    hair: freeze({ style: "short-practical", base: "#49372b", light: "#6b5140", shadow: "#241a15", volume: 0.84 }),
+    face: freeze({ shape: "broad-brow", jaw: 1.07, stubble: 0.05 }),
     kit: OUTFIELD_KIT,
-    boots: freeze({ base: "#101315", secondary: "#3c4247", accent: "#8f73d9" }),
-    motion: freeze({ stance: "grounded", stride: 0.94, plant: 1.12, followThrough: 1.03, aggression: 0.82 })
+    boots: freeze({ base: "#101315", secondary: "#3a4147", accent: "#9b78e6" }),
+    motion: freeze({ stance: "grounded", stride: 0.94, plant: 1.14, followThrough: 1.06, aggression: 0.86 })
   })
 });
 
@@ -82,53 +85,53 @@ export const GOALKEEPER_VISUALS_V42 = freeze({
     id: "mikkel-storm",
     displayName: "MIKKEL STORM",
     number: 1,
-    inspiration: "dominant Scandinavian goalkeeper presence without direct likeness",
+    inspiration: "big commanding arcade goalkeeper",
     body: BODY_PRESETS.keeperPower,
-    skin: freeze({ base: "#e0a984", light: "#efbea0", shadow: "#ae6e53" }),
-    hair: freeze({ style: "short-commanding", base: "#9f8459", light: "#c7ad77", shadow: "#5d4b36", volume: 0.94 }),
-    face: freeze({ shape: "rugged-square", jaw: 1.12, stubble: 0.2 }),
-    kit: freeze({ shirt: "#1d7d48", shirtShadow: "#0d3f29", shorts: "#102b20", socks: "#173a2b", trim: "#dafe4d" }),
-    gloves: freeze({ base: "#f2f4ef", palm: "#c7d0cb", accent: "#dafe4d", scale: 1.08 }),
-    motion: freeze({ stanceWidth: 1.08, explosiveness: 1.08, reachStyle: "commanding", recovery: 0.96 })
+    skin: freeze({ base: "#dfa681", light: "#edba99", shadow: "#ae6d52" }),
+    hair: freeze({ style: "short-commanding", base: "#8d744f", light: "#b59a6a", shadow: "#55442f", volume: 0.92 }),
+    face: freeze({ shape: "rugged-square", jaw: 1.1, stubble: 0.08 }),
+    kit: freeze({ shirt: "#d63f66", shirtShadow: "#8e2442", shorts: "#f1f2ed", socks: "#d63f66", trim: "#ffffff" }),
+    gloves: freeze({ base: "#ffffff", palm: "#cfd4d0", accent: "#f3dc55", scale: 1.18 }),
+    motion: freeze({ stanceWidth: 1.1, explosiveness: 1.1, reachStyle: "commanding", recovery: 0.96 })
   }),
   "rafael-dantas": freeze({
     id: "rafael-dantas",
     displayName: "RAFAEL DANTAS",
     number: 12,
-    inspiration: "calm Brazilian shot-stopper elegance without direct likeness",
+    inspiration: "calm fluid arcade shot-stopper",
     body: BODY_PRESETS.keeperGrace,
     skin: freeze({ base: "#76513c", light: "#936b52", shadow: "#4c3228" }),
-    hair: freeze({ style: "short-clean", base: "#1f1816", light: "#3a2c28", shadow: "#0e0b0a", volume: 0.88 }),
-    face: freeze({ shape: "calm-long", jaw: 0.98, stubble: 0.04 }),
-    kit: freeze({ shirt: "#222a60", shirtShadow: "#121633", shorts: "#15193e", socks: "#20265a", trim: "#78a9ff" }),
-    gloves: freeze({ base: "#f7f7f4", palm: "#d6d8d5", accent: "#78a9ff", scale: 1.03 }),
-    motion: freeze({ stanceWidth: 1.0, explosiveness: 0.98, reachStyle: "fluid", recovery: 1.04 })
+    hair: freeze({ style: "short-clean", base: "#1f1816", light: "#3a2c28", shadow: "#0e0b0a", volume: 0.86 }),
+    face: freeze({ shape: "calm-long", jaw: 0.98, stubble: 0.02 }),
+    kit: freeze({ shirt: "#2455a4", shirtShadow: "#15336a", shorts: "#f0f2ed", socks: "#2455a4", trim: "#ffffff" }),
+    gloves: freeze({ base: "#ffffff", palm: "#d6d8d5", accent: "#68bcff", scale: 1.13 }),
+    motion: freeze({ stanceWidth: 1.02, explosiveness: 1.0, reachStyle: "fluid", recovery: 1.04 })
   }),
   "diego-varela": freeze({
     id: "diego-varela",
     displayName: "DIEGO VARELA",
     number: 13,
-    inspiration: "modern Spanish reflex goalkeeper energy without direct likeness",
+    inspiration: "fast reflex arcade goalkeeper",
     body: BODY_PRESETS.keeperLean,
-    skin: freeze({ base: "#d39a74", light: "#e6b08a", shadow: "#a5664b" }),
-    hair: freeze({ style: "dark-modern", base: "#2b211e", light: "#4e3931", shadow: "#130f0e", volume: 0.94 }),
-    face: freeze({ shape: "slim-sharp", jaw: 0.94, stubble: 0.34 }),
-    kit: freeze({ shirt: "#652f7e", shirtShadow: "#33163f", shorts: "#2a1234", socks: "#4b205e", trim: "#e3b4ff" }),
-    gloves: freeze({ base: "#e9edf0", palm: "#bcc5ca", accent: "#e3b4ff", scale: 1.0 }),
-    motion: freeze({ stanceWidth: 0.96, explosiveness: 1.12, reachStyle: "elastic", recovery: 1.08 })
+    skin: freeze({ base: "#d09871", light: "#e2ad87", shadow: "#a4654a" }),
+    hair: freeze({ style: "dark-modern", base: "#2b211e", light: "#4e3931", shadow: "#130f0e", volume: 0.9 }),
+    face: freeze({ shape: "slim-sharp", jaw: 0.95, stubble: 0.12 }),
+    kit: freeze({ shirt: "#6e3fa1", shirtShadow: "#43245f", shorts: "#f0f2ed", socks: "#6e3fa1", trim: "#ffffff" }),
+    gloves: freeze({ base: "#ffffff", palm: "#c8ced1", accent: "#e5b7ff", scale: 1.12 }),
+    motion: freeze({ stanceWidth: 0.98, explosiveness: 1.14, reachStyle: "elastic", recovery: 1.08 })
   }),
   "simon-henshaw": freeze({
     id: "simon-henshaw",
     displayName: "SIMON HENSHAW",
     number: 22,
-    inspiration: "classic English goalkeeper authority without direct likeness",
+    inspiration: "classic safe-hands arcade goalkeeper",
     body: BODY_PRESETS.keeperClassic,
-    skin: freeze({ base: "#dea783", light: "#edbb9d", shadow: "#ae6f56" }),
-    hair: freeze({ style: "classic-long", base: "#7a5c43", light: "#9f7c5d", shadow: "#493528", volume: 1.06 }),
-    face: freeze({ shape: "mature-classic", jaw: 1.05, stubble: 0.12, moustache: 0.72 }),
-    kit: freeze({ shirt: "#2a5e69", shirtShadow: "#143139", shorts: "#17343b", socks: "#214a53", trim: "#f0d7a2" }),
-    gloves: freeze({ base: "#f3eee1", palm: "#d0c7b5", accent: "#f0d7a2", scale: 1.04 }),
-    motion: freeze({ stanceWidth: 1.04, explosiveness: 0.96, reachStyle: "classic", recovery: 1.0 })
+    skin: freeze({ base: "#dca480", light: "#eab895", shadow: "#ae6e54" }),
+    hair: freeze({ style: "classic-long", base: "#72553f", light: "#987558", shadow: "#453226", volume: 1.02 }),
+    face: freeze({ shape: "mature-classic", jaw: 1.04, stubble: 0.05, moustache: 0.55 }),
+    kit: freeze({ shirt: "#23826c", shirtShadow: "#135344", shorts: "#f0f2ed", socks: "#23826c", trim: "#ffffff" }),
+    gloves: freeze({ base: "#ffffff", palm: "#d2cabc", accent: "#f0d179", scale: 1.14 }),
+    motion: freeze({ stanceWidth: 1.06, explosiveness: 0.98, reachStyle: "classic", recovery: 1.0 })
   })
 });
 
@@ -150,9 +153,12 @@ export function goalkeeperVisualProfileV42(keeperId) {
 }
 
 export const CHARACTER_SYSTEM_V42 = freeze({
-  build: "42.1.0",
-  rendererTarget: "layered-2.5d-skeletal",
-  artDirection: "premium-stylised-realism",
+  build: "50.0.0-arcade-profile",
+  rendererTarget: "modern-arcade-articulated-2.5d",
+  artDirection: "modern-arcade-football",
+  realismRequired: false,
+  readabilityPriority: true,
+  exaggeratedSilhouettes: true,
   sharedOutfieldKit: true,
   outfieldCount: 4,
   goalkeeperCount: 4,
