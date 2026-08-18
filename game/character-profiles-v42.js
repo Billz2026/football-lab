@@ -124,13 +124,13 @@ export const GOALKEEPER_VISUALS_V42 = freeze({
     id: "simon-henshaw",
     displayName: "SIMON HENSHAW",
     number: 22,
-    inspiration: "classic safe-hands arcade goalkeeper",
+    inspiration: "classic high-contrast arcade goalkeeper",
     body: BODY_PRESETS.keeperClassic,
     skin: freeze({ base: "#dca480", light: "#eab895", shadow: "#ae6e54" }),
     hair: freeze({ style: "classic-long", base: "#72553f", light: "#987558", shadow: "#453226", volume: 1.02 }),
     face: freeze({ shape: "mature-classic", jaw: 1.04, stubble: 0.05, moustache: 0.55 }),
-    kit: freeze({ shirt: "#23826c", shirtShadow: "#135344", shorts: "#f0f2ed", socks: "#23826c", trim: "#ffffff" }),
-    gloves: freeze({ base: "#ffffff", palm: "#d2cabc", accent: "#f0d179", scale: 1.14 }),
+    kit: freeze({ shirt: "#c93b68", shirtShadow: "#7a203e", shorts: "#f4f4ef", socks: "#171b22", trim: "#ffffff" }),
+    gloves: freeze({ base: "#ffffff", palm: "#d4d6d2", accent: "#f2d64d", scale: 1.16 }),
     motion: freeze({ stanceWidth: 1.06, explosiveness: 0.98, reachStyle: "classic", recovery: 1.0 })
   })
 });
