@@ -3,8 +3,6 @@ name: V46 validation
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
