@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 async function enterClassic(page) {
-  await page.goto("/index.html?capture=arcade-v50", { waitUntil: "networkidle" });
+  await page.goto("/index.html?capture=arcade-v51", { waitUntil: "networkidle" });
   await page.locator("#classicCard").click();
   await expect.poll(
     () => page.evaluate(() => (
@@ -26,10 +26,11 @@ async function phaseSnapshot(page) {
     return {
       phase: core.state.phase,
       label: document.querySelector("#shotAction")?.textContent?.trim() || "",
-      hero: window.__footballLabHeroFrameV50 || null,
+      hero: window.__footballLabHeroFrameV51 || null,
       visible: window.__footballLabVisibleKickersV30 || null,
       keeper: window.__footballLabKeeperFrameV44 || null,
-      system: window.__footballLabArcadeCharacterSystemV50 || null
+      system: window.__footballLabArcadeCharacterSystemV51 || null,
+      profiles: window.__footballLabCharacterSystemV42 || null
     };
   });
 }
@@ -52,14 +53,14 @@ async function executeShot(page) {
   }
 }
 
-test("V50 uses lightweight arcade characters for the player and goalkeeper", async ({ page }) => {
+test("V51 uses polished lightweight arcade characters for player and goalkeeper", async ({ page }) => {
   test.setTimeout(45000);
   await enterClassic(page);
 
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabHeroFrameV50?.renderer),
+    () => page.evaluate(() => window.__footballLabHeroFrameV51?.renderer),
     { timeout: 10000 }
-  ).toBe("modern-arcade-articulated-2.5d");
+  ).toBe("polished-modern-arcade-articulated-2.5d");
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabKeeperFrameV44?.renderer),
@@ -69,17 +70,23 @@ test("V50 uses lightweight arcade characters for the player and goalkeeper", asy
   const ready = await phaseSnapshot(page);
   expect(ready.hero?.production3D).toBe(false);
   expect(ready.visible?.production3D).toBe(false);
-  expect(ready.visible?.productionCharacterMode).toBe("modern-arcade-articulated-2.5d");
+  expect(ready.visible?.productionCharacterMode).toBe("polished-modern-arcade-articulated-2.5d");
   expect(ready.system?.realismRequired).toBe(false);
   expect(ready.system?.glbRequired).toBe(false);
+  expect(ready.system?.lockedStyleRules?.simpleFaces).toBe(true);
+  expect(ready.system?.lockedStyleRules?.athleticExaggeration).toBe(true);
+  expect(ready.system?.lockedStyleRules?.highContrastKits).toBe(true);
+  expect(ready.profiles?.build).toBe("51.0.0-arcade-profile");
+  expect(ready.profiles?.largerHeadsForReadability).toBe(true);
+  expect(ready.profiles?.oversizedKeeperGloves).toBe(true);
 
-  await page.locator("#gameCanvas").screenshot({ path: "test-results/arcade-v50-ready.png" });
-  await page.screenshot({ path: "test-results/arcade-v50-full-ui.png", fullPage: true });
+  await page.locator("#gameCanvas").screenshot({ path: "test-results/arcade-v51-ready.png" });
+  await page.screenshot({ path: "test-results/arcade-v51-full-ui.png", fullPage: true });
 
   await executeShot(page);
   await page.waitForTimeout(180);
   const strike = await phaseSnapshot(page);
-  expect(strike.hero?.renderer).toBe("modern-arcade-articulated-2.5d");
+  expect(strike.hero?.renderer).toBe("polished-modern-arcade-articulated-2.5d");
   expect(strike.hero?.phase).not.toBe("idle");
-  await page.locator("#gameCanvas").screenshot({ path: "test-results/arcade-v50-strike.png" });
+  await page.locator("#gameCanvas").screenshot({ path: "test-results/arcade-v51-strike.png" });
 });
