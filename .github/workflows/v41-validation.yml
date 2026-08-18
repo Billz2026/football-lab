@@ -46,9 +46,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'drawArcadeHeroCharacterV50' game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
-          grep -q 'arcade-character-v50.js' game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
-          grep -q '__footballLabArcadeCharacterRendererV50 = true' game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          grep -q 'drawArcadeHeroCharacterV51' game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          grep -q 'arcade-character-v51.js' game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          grep -q '__footballLabArcadeCharacterRendererV51 = true' game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+          grep -q 'polished-modern-arcade-articulated-2.5d' game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
           if grep -q 'character-3d-v46.js' game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js; then
             echo 'Legacy V46 GLB renderer is still wired into the live static bridge.' >&2
             exit 1
