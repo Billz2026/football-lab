@@ -1,5 +1,5 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./render-v17-v1731.js?v=1731";
-import { drawArcadeHeroCharacterV50 } from "./arcade-character-v50.js?v=50.0.0";
+import { drawArcadeHeroCharacterV51 } from "./arcade-character-v51.js?v=51.0.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
 import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=40.3.0";
@@ -93,20 +93,20 @@ function drawVenueWeather(time) {
 export function drawScene(time, finishShot) {
   drawBaseWithoutLegacyKicker(time, finishShot);
   drawStadiumProgressionV41(time);
-  drawArcadeHeroCharacterV50(time);
+  drawArcadeHeroCharacterV51(time);
   drawVenueWeather(time);
   drawMatchdayImpact(time);
   drawCampaignPresentationV41(time);
 
-  const arcade = window.__footballLabHeroFrameV50;
+  const arcade = window.__footballLabHeroFrameV51;
   window.__footballLabVisibleKickersV30 = {
     base: 0,
     hero: 1,
     total: 1,
     character: activeCharacter().id,
-    renderer: arcade?.renderer || "modern-arcade-articulated-2.5d",
+    renderer: arcade?.renderer || "polished-modern-arcade-articulated-2.5d",
     spriteAtlasReady: false,
-    productionCharacterMode: "modern-arcade-articulated-2.5d",
+    productionCharacterMode: "polished-modern-arcade-articulated-2.5d",
     production3D: false,
     realismRequired: false,
     staticSpriteFrames: false,
@@ -126,3 +126,4 @@ window.__footballLabCharacterRendererBridgeV42 = true;
 window.__footballLabCharacterRendererBridgeV43 = true;
 window.__footballLabCharacterRendererBridgeV44 = true;
 window.__footballLabArcadeCharacterRendererV50 = true;
+window.__footballLabArcadeCharacterRendererV51 = true;
