@@ -30,7 +30,8 @@ async function phaseSnapshot(page) {
       visible: window.__footballLabVisibleKickersV30 || null,
       keeper: window.__footballLabKeeperFrameV44 || null,
       system: window.__footballLabArcadeCharacterSystemV51 || null,
-      profiles: window.__footballLabCharacterSystemV42 || null
+      profiles: window.__footballLabCharacterSystemV42 || null,
+      geometry: window.__footballLabCharacterRendererV42 || null
     };
   });
 }
@@ -69,6 +70,7 @@ test("V51 uses polished lightweight arcade characters for player and goalkeeper"
 
   const ready = await phaseSnapshot(page);
   expect(ready.hero?.production3D).toBe(false);
+  expect(ready.hero?.geometryPass).toBe("rounded-athletic-v51.1");
   expect(ready.visible?.production3D).toBe(false);
   expect(ready.visible?.productionCharacterMode).toBe("polished-modern-arcade-articulated-2.5d");
   expect(ready.system?.realismRequired).toBe(false);
@@ -76,10 +78,16 @@ test("V51 uses polished lightweight arcade characters for player and goalkeeper"
   expect(ready.system?.lockedStyleRules?.simpleFaces).toBe(true);
   expect(ready.system?.lockedStyleRules?.athleticExaggeration).toBe(true);
   expect(ready.system?.lockedStyleRules?.highContrastKits).toBe(true);
+  expect(ready.system?.lockedStyleRules?.roundedShirtSilhouette).toBe(true);
+  expect(ready.system?.lockedStyleRules?.balancedStrikePose).toBe(true);
   expect(ready.profiles?.build).toBe("51.0.0-arcade-profile");
   expect(ready.profiles?.largerHeadsForReadability).toBe(true);
   expect(ready.profiles?.oversizedKeeperGloves).toBe(true);
+  expect(ready.geometry?.roundedAthleticGeometry).toBe(true);
+  expect(ready.geometry?.enlargedBootsAndHands).toBe(true);
 
+  // Allow the chapter title card to clear so the evidence frame shows the actual characters.
+  await page.waitForTimeout(1300);
   await page.locator("#gameCanvas").screenshot({ path: "test-results/arcade-v51-ready.png" });
   await page.screenshot({ path: "test-results/arcade-v51-full-ui.png", fullPage: true });
 
