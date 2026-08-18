@@ -1,11 +1,11 @@
-// Football Lab V41 stadium and campaign progression cache reset
-const CACHE_NAME = "football-lab-shell-v41-0-0";
+// Football Lab V48 penalty training expansion cache reset
+const CACHE_NAME = "football-lab-shell-v48-0-0";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
-  "./app.js?v=41.0.0"
+  "./app.js?v=48.0.0"
 ];
 
 async function refreshCoreCache() {
