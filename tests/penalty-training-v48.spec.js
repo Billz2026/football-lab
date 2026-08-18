@@ -1,17 +1,21 @@
 import { test, expect } from "@playwright/test";
 
-test("V48 exposes playable penalty training from the hub", async ({ page }) => {
+test("V48 keeps playable penalty practice inside the Training Ground", async ({ page }) => {
   await page.goto("/");
   await page.waitForFunction(() => window.__footballLabPenaltyTrainingV48?.build?.startsWith("48.0"));
 
-  const penaltyTile = page.locator(".hub-mode-penalties");
-  await expect(penaltyTile).toBeEnabled();
-  await expect(penaltyTile.locator(".hub-mode-status")).toHaveText("TRAINING LIVE");
-
-  await penaltyTile.click();
+  const trainingTile = page.locator(".hub-mode-training");
+  await expect(trainingTile).toBeEnabled();
+  await trainingTile.click();
 
   const modal = page.locator("#trainingModalV35");
   await expect(modal).toHaveClass(/is-open/);
+
+  const penaltyActivity = modal.locator(".training-activity-v35", { hasText: "PENALTIES" });
+  await expect(penaltyActivity).toBeEnabled();
+  await expect(penaltyActivity).toContainText("PLAYABLE NOW");
+  await penaltyActivity.click();
+
   await expect(page.locator("#trainingStartV35")).toHaveText("START PENALTY TRAINING");
   await expect(page.locator("#trainingDistanceV35")).toHaveValue("12");
   await expect(page.locator("#trainingWallCountV35")).toHaveValue("0");
