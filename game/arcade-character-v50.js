@@ -1,4 +1,4 @@
-import { drawHeroCharacterV44 } from "./hero-character-v44.js?v=44.0.0";
+import { drawHeroCharacterV44 } from "./hero-character-v44.js?v=51.1.0";
 
 const BUILD = "50.0.0";
 
