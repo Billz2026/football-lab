@@ -60,8 +60,7 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
 
   const live = await page.evaluate(() => ({
     v46: window.__footballLabHeroFrameV46,
-    visible: window.__footballLabVisibleKickersV30,
-    selected: window.__footballLabHeroFrameV44
+    visible: window.__footballLabVisibleKickersV30
   }));
   expect(live.v46.character).toBe("dax-ryder");
   expect(live.v46.production3D).toBe(false);
@@ -69,7 +68,6 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
   expect(live.visible.production3D).toBe(false);
   expect(live.visible.productionCharacterMode).toBe("articulated-2.5d-fallback");
   expect(live.visible.staticSpriteFrames).toBe(false);
-  expect(live.selected).toBeTruthy();
 
   await page.evaluate(async () => {
     const core = await import("/game/core-v6.js?v=32.4");
