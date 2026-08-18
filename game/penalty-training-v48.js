@@ -259,3 +259,5 @@ window.__footballLabPenaltyTrainingV48 = Object.freeze({
   careerRecordsAffected: false,
   hudOwnership: "post-listener-animation-frame"
 });
+
+await import("./penalty-shootout-v49.js?v=49.0.0");
