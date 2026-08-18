@@ -1,0 +1,53 @@
+import { test, expect } from "@playwright/test";
+
+test("V48 exposes playable penalty training from the hub", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForFunction(() => window.__footballLabPenaltyTrainingV48?.build?.startsWith("48.0"));
+
+  const penaltyTile = page.locator(".hub-mode-penalties");
+  await expect(penaltyTile).toBeEnabled();
+  await expect(penaltyTile.locator(".hub-mode-status")).toHaveText("TRAINING LIVE");
+
+  await penaltyTile.click();
+
+  const modal = page.locator("#trainingModalV35");
+  await expect(modal).toHaveClass(/is-open/);
+  await expect(page.locator("#trainingStartV35")).toHaveText("START PENALTY TRAINING");
+  await expect(page.locator("#trainingDistanceV35")).toHaveValue("12");
+  await expect(page.locator("#trainingWallCountV35")).toHaveValue("0");
+  await expect(page.locator("#trainingWindV35")).toHaveValue("off");
+
+  await page.locator("#trainingStartV35").click();
+
+  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+  await expect(page.locator("#stageNumber")).toContainText("PENALTY TRAINING");
+  await expect(page.locator("#stageNumber")).toContainText("12 YDS");
+  await expect(page.locator("#stageName")).toHaveText("ONE VS ONE · PENALTY SPOT");
+  await expect(page.locator(".training-session-chip-v35")).toContainText("PENALTY TRAINING");
+  await expect(page.locator(".training-session-mode-v355")).toHaveText("PENALTY TRAINING");
+
+  const scenario = await page.evaluate(() => {
+    const value = globalThis.__footballLabTrainingScenario;
+    return {
+      id: value?.id,
+      training: value?.training,
+      trainingPenalty: value?.trainingPenalty,
+      distanceYards: value?.distanceYards,
+      ballX: value?.ballX,
+      wallPlayers: value?.wallPlayers,
+      wind: value?.wind,
+      windVariance: value?.windVariance
+    };
+  });
+
+  expect(scenario).toEqual({
+    id: "training-penalty",
+    training: true,
+    trainingPenalty: true,
+    distanceYards: 12,
+    ballX: 0,
+    wallPlayers: 0,
+    wind: 0,
+    windVariance: 0
+  });
+});
