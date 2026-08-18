@@ -4,6 +4,7 @@ async function startDuel(page, difficulty = "pro", keeper = "reader") {
   await page.goto("/");
   await page.waitForFunction(() => window.__footballLabPenaltyShootoutV49?.build === "49.0.0");
   await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.0.0");
+  await page.waitForFunction(() => window.__footballLabPenaltyDuelTransitionGuardV51?.build === "51.0.1");
   await page.locator(".hub-mode-penalties").click();
   await page.locator("#shootoutDifficultyV49").selectOption(difficulty);
   await page.locator("#shootoutKeeperV49").selectOption(keeper);
@@ -59,15 +60,19 @@ test("V51 player penalties use placement, run-up and one composure strike instea
 test("V51 alternates into a playable CPU kick with user goalkeeper control", async ({ page }) => {
   await startDuel(page, "world", "reader");
 
-  await page.evaluate(async () => {
+  const transition = await page.evaluate(async () => {
     const core = await import("/game/core-v6.js?v=32.4");
     core.state.shot.outcome = "GOAL";
     delete core.state.shot.__duelCountedV51;
     window.dispatchEvent(new CustomEvent("footballlab:phasechange", { detail: { phase: "result" } }));
+    return window.__footballLabPenaltyDuelTransitionGuardV51.snapshot();
   });
+  expect(transition.transitionActive).toBe(true);
+  await expect(page.locator("html")).toHaveClass(/penalty-duel-transition-v51/);
 
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn), { timeout: 5000 }).toBe("cpu");
   await expect(page.locator("html")).toHaveClass(/is-defending-v51/);
+  await expect(page.locator("html")).not.toHaveClass(/penalty-duel-transition-v51/);
   await expect(page.locator("#penaltyDefenseV51")).toBeVisible();
   await expect(page.locator("#defenseDifficultyV51")).toHaveText("WORLD CLASS");
   await expect(page.locator("[data-v51-shift]")).toHaveCount(3);
