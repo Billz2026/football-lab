@@ -22,6 +22,10 @@ async function chooseKicker(page, characterId) {
   await page.goto("/index.html?test=character-v44");
   await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), characterId);
   await page.reload();
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabCharacter3DV46?.build),
+    { timeout: 15000 }
+  ).toBe("46.0.0");
   await enterClassic(page);
 }
 
