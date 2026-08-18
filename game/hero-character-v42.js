@@ -2,9 +2,9 @@ import { clamp, lerp, WORLD, state, ctx, canvasView, easeInOutCubic, easeOutCubi
 import { buildCamera, kickerWorld, ballWorld } from "./world-v7.js?v=32.4";
 import { projectedHeight, projectWorld } from "./projection-v6.js?v=32.4";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
-import { outfieldVisualProfileV42 } from "./character-profiles-v42.js?v=42.1.0";
+import { outfieldVisualProfileV42 } from "./character-profiles-v42.js?v=51.0.0";
 
-const BUILD = "42.1.0";
+const BUILD = "51.1.0";
 const VIEW = { width: WORLD.width, height: WORLD.height };
 const TAU = Math.PI * 2;
 const P = (x, y) => ({ x, y });
@@ -54,34 +54,34 @@ const idle = {
   lh: P(-.205, -.37), rh: P(.205, -.37)
 };
 const step = {
-  phase: "final-step", crouch: .06, pelvisX: .012, chestX: -.022, lean: -.105, rotate: -.03, shoulder: -.02,
-  lk: P(-.145, -.18), rk: P(.145, -.255), la: P(-.215, -.008), ra: P(.195, -.12),
-  lt: P(-.275, -.004), rt: P(.265, -.09), le: P(-.245, -.535), re: P(.245, -.575),
-  lh: P(-.305, -.42), rh: P(.305, -.46)
+  phase: "final-step", crouch: .052, pelvisX: .012, chestX: -.018, lean: -.09, rotate: -.026, shoulder: -.018,
+  lk: P(-.14, -.18), rk: P(.14, -.248), la: P(-.205, -.008), ra: P(.185, -.105),
+  lt: P(-.265, -.004), rt: P(.25, -.078), le: P(-.225, -.525), re: P(.225, -.555),
+  lh: P(-.28, -.405), rh: P(.28, -.445)
 };
 const windup = {
-  phase: "wind-up", crouch: .082, pelvisX: .024, chestX: -.045, lean: -.16, rotate: -.05, shoulder: -.04,
-  lk: P(-.155, -.17), rk: P(.19, -.315), la: P(-.22, -.008), ra: P(.23, -.205),
-  lt: P(-.285, -.004), rt: P(.3, -.17), le: P(-.285, -.535), re: P(.285, -.605),
-  lh: P(-.35, -.395), rh: P(.355, -.505)
+  phase: "wind-up", crouch: .07, pelvisX: .022, chestX: -.038, lean: -.135, rotate: -.043, shoulder: -.034,
+  lk: P(-.15, -.17), rk: P(.175, -.3), la: P(-.215, -.008), ra: P(.215, -.188),
+  lt: P(-.278, -.004), rt: P(.282, -.155), le: P(-.255, -.515), re: P(.255, -.575),
+  lh: P(-.31, -.39), rh: P(.315, -.49)
 };
 const contact = {
-  phase: "contact", crouch: .055, pelvisX: -.004, chestX: .04, lean: -.03, rotate: .04, shoulder: .047,
-  lk: P(-.155, -.17), rk: P(.052, -.25), la: P(-.218, -.008), ra: P(-.026, -.245),
-  lt: P(-.285, -.004), rt: P(-.105, -.22), le: P(-.278, -.475), re: P(.305, -.535),
-  lh: P(-.345, -.35), rh: P(.37, -.42)
+  phase: "contact", crouch: .05, pelvisX: -.004, chestX: .035, lean: -.018, rotate: .035, shoulder: .04,
+  lk: P(-.15, -.17), rk: P(.045, -.25), la: P(-.212, -.008), ra: P(-.018, -.238),
+  lt: P(-.275, -.004), rt: P(-.095, -.215), le: P(-.235, -.472), re: P(.25, -.515),
+  lh: P(-.295, -.355), rh: P(.305, -.405)
 };
 const follow = {
-  phase: "follow-through", crouch: .03, pelvisX: -.03, chestX: .067, lean: .085, rotate: .08, shoulder: .068,
-  lk: P(-.12, -.18), rk: P(-.04, -.31), la: P(-.195, -.008), ra: P(-.2, -.33),
-  lt: P(-.26, -.004), rt: P(-.3, -.3), le: P(-.22, -.415), re: P(.275, -.475),
-  lh: P(-.27, -.29), rh: P(.355, -.37)
+  phase: "follow-through", crouch: .028, pelvisX: -.027, chestX: .055, lean: .068, rotate: .065, shoulder: .052,
+  lk: P(-.115, -.18), rk: P(-.012, -.292), la: P(-.19, -.008), ra: P(-.135, -.27),
+  lt: P(-.252, -.004), rt: P(-.22, -.245), le: P(-.195, -.42), re: P(.23, -.46),
+  lh: P(-.24, -.315), rh: P(.29, -.365)
 };
 const recoverStep = {
-  phase: "recovery-step", crouch: .042, pelvisX: -.022, chestX: .024, lean: .028, rotate: .03, shoulder: .016,
-  lk: P(-.125, -.19), rk: P(.025, -.22), la: P(-.19, -.008), ra: P(.095, -.02),
-  lt: P(-.255, -.004), rt: P(.165, -.005), le: P(-.205, -.465), re: P(.225, -.485),
-  lh: P(-.255, -.35), rh: P(.285, -.39)
+  phase: "recovery-step", crouch: .038, pelvisX: -.02, chestX: .02, lean: .022, rotate: .024, shoulder: .014,
+  lk: P(-.12, -.19), rk: P(.025, -.22), la: P(-.18, -.008), ra: P(.09, -.02),
+  lt: P(-.245, -.004), rt: P(.16, -.005), le: P(-.195, -.465), re: P(.21, -.48),
+  lh: P(-.245, -.35), rh: P(.27, -.385)
 };
 const neutral = { ...idle, phase: "recovery-neutral", crouch: .027, lean: 0, rotate: .004 };
 
@@ -103,13 +103,13 @@ function runPose(run, time, profile) {
     const leftLift = Math.max(0, s);
     const rightLift = Math.max(0, -s);
     return {
-      phase: "approach", crouch: .028 + Math.abs(s) * .018, pelvisX: s * .016, chestX: -s * .011,
-      lean: -.042 - t * (.07 + profile.motion.aggression * .012), rotate: s * .018, shoulder: -s * .022,
-      lk: P(-.095 - s * .077, -.205 - leftLift * .07), rk: P(.095 + s * .077, -.205 - rightLift * .07),
-      la: P(-.118 - s * .105, -.012 - leftLift * .04), ra: P(.118 + s * .105, -.012 - rightLift * .04),
-      lt: P(-.16 - s * .11, -.004 - leftLift * .03), rt: P(.16 + s * .11, -.004 - rightLift * .03),
-      le: P(-.18 + s * .052, -.52 - s * .023), re: P(.18 + s * .052, -.52 + s * .023),
-      lh: P(-.225 + s * .074, -.375 - s * .038), rh: P(.225 + s * .074, -.375 + s * .038),
+      phase: "approach", crouch: .027 + Math.abs(s) * .016, pelvisX: s * .015, chestX: -s * .01,
+      lean: -.038 - t * (.06 + profile.motion.aggression * .01), rotate: s * .016, shoulder: -s * .018,
+      lk: P(-.092 - s * .07, -.205 - leftLift * .065), rk: P(.092 + s * .07, -.205 - rightLift * .065),
+      la: P(-.115 - s * .095, -.012 - leftLift * .036), ra: P(.115 + s * .095, -.012 - rightLift * .036),
+      lt: P(-.158 - s * .1, -.004 - leftLift * .027), rt: P(.158 + s * .1, -.004 - rightLift * .027),
+      le: P(-.175 + s * .045, -.515 - s * .02), re: P(.175 + s * .045, -.515 + s * .02),
+      lh: P(-.215 + s * .064, -.38 - s * .032), rh: P(.215 + s * .064, -.38 + s * .032),
       breathe: Math.sin(time / 480) * .003
     };
   }
@@ -125,24 +125,24 @@ function personalisePose(source, profile) {
   const phase = source.phase || "idle";
   const result = {
     ...source,
-    crouch: source.crouch * (0.98 + aggression * .07),
-    lean: source.lean * (0.98 + aggression * .09),
-    rotate: source.rotate * (/follow|recovery-step/.test(phase) ? followBoost : 1),
-    shoulder: source.shoulder * (0.98 + aggression * .07),
+    crouch: source.crouch * (0.98 + aggression * .06),
+    lean: source.lean * (0.98 + aggression * .075),
+    rotate: source.rotate * (/follow|recovery-step/.test(phase) ? Math.min(1.12, followBoost) : 1),
+    shoulder: source.shoulder * (0.98 + aggression * .06),
     lk: { ...source.lk }, rk: { ...source.rk }, la: { ...source.la }, ra: { ...source.ra },
     lt: { ...source.lt }, rt: { ...source.rt }, le: { ...source.le }, re: { ...source.re },
     lh: { ...source.lh }, rh: { ...source.rh }
   };
   if (/final-step|wind-up|contact/.test(phase)) {
-    result.la.x *= plantBoost;
-    result.lt.x *= plantBoost;
+    result.la.x *= Math.min(1.1, plantBoost);
+    result.lt.x *= Math.min(1.1, plantBoost);
   }
   return result;
 }
 
 function currentPose(p, time, profile) {
   let pose;
-  if (!state.animation) pose = { ...idle, crouch: idle.crouch + Math.sin(time / 520) * .006 };
+  if (!state.animation) pose = { ...idle, crouch: idle.crouch + Math.sin(time / 520) * .005 };
   else if (p.replay) {
     if (p.flight < .22) pose = blend(contact, follow, smooth(p.flight / .22));
     else if (p.flight < .5) pose = { ...follow, phase: "follow-through-hold" };
@@ -170,30 +170,30 @@ function softLimb(a, b, widthA, widthB, colourA, colourB, highlight = .12) {
   const length = Math.max(1, Math.hypot(dx, dy));
   const nx = -dy / length;
   const ny = dx / length;
-  const bend = Math.min(widthA, widthB) * .13;
+  const bend = Math.min(widthA, widthB) * .09;
   const buildPath = (pad = 0) => {
     ctx.beginPath();
     ctx.moveTo(a.x + nx * (widthA * .5 + pad), a.y + ny * (widthA * .5 + pad));
     ctx.bezierCurveTo(
       a.x + dx * .28 + nx * bend, a.y + dy * .28 + ny * bend,
-      a.x + dx * .72 + nx * bend * .35, a.y + dy * .72 + ny * bend * .35,
+      a.x + dx * .72 + nx * bend * .24, a.y + dy * .72 + ny * bend * .24,
       b.x + nx * (widthB * .5 + pad), b.y + ny * (widthB * .5 + pad)
     );
-    ctx.quadraticCurveTo(b.x + dx * .025, b.y + dy * .025, b.x - nx * (widthB * .5 + pad), b.y - ny * (widthB * .5 + pad));
+    ctx.quadraticCurveTo(b.x + dx * .018, b.y + dy * .018, b.x - nx * (widthB * .5 + pad), b.y - ny * (widthB * .5 + pad));
     ctx.bezierCurveTo(
-      a.x + dx * .72 - nx * bend * .25, a.y + dy * .72 - ny * bend * .25,
-      a.x + dx * .28 - nx * bend * .65, a.y + dy * .28 - ny * bend * .65,
+      a.x + dx * .72 - nx * bend * .22, a.y + dy * .72 - ny * bend * .22,
+      a.x + dx * .28 - nx * bend * .45, a.y + dy * .28 - ny * bend * .45,
       a.x - nx * (widthA * .5 + pad), a.y - ny * (widthA * .5 + pad)
     );
     ctx.closePath();
   };
-  buildPath(Math.max(.8, Math.min(widthA, widthB) * .08));
-  ctx.fillStyle = "rgba(1,6,8,.32)";
+  buildPath(Math.max(.7, Math.min(widthA, widthB) * .065));
+  ctx.fillStyle = "rgba(1,6,8,.28)";
   ctx.fill();
   buildPath();
   const gradient = ctx.createLinearGradient(a.x - nx * widthA, a.y - ny * widthA, a.x + nx * widthA, a.y + ny * widthA);
   gradient.addColorStop(0, colourB);
-  gradient.addColorStop(.45, colourA);
+  gradient.addColorStop(.42, colourA);
   gradient.addColorStop(.8, colourA);
   gradient.addColorStop(1, colourB);
   ctx.fillStyle = gradient;
@@ -201,10 +201,11 @@ function softLimb(a, b, widthA, widthB, colourA, colourB, highlight = .12) {
   ctx.save();
   ctx.globalAlpha = highlight;
   ctx.strokeStyle = "#fff";
-  ctx.lineWidth = Math.max(.7, Math.min(widthA, widthB) * .055);
+  ctx.lineCap = "round";
+  ctx.lineWidth = Math.max(.7, Math.min(widthA, widthB) * .05);
   ctx.beginPath();
-  ctx.moveTo(a.x + nx * widthA * .22, a.y + ny * widthA * .22);
-  ctx.lineTo(b.x + nx * widthB * .18, b.y + ny * widthB * .18);
+  ctx.moveTo(a.x + nx * widthA * .2, a.y + ny * widthA * .2);
+  ctx.lineTo(b.x + nx * widthB * .16, b.y + ny * widthB * .16);
   ctx.stroke();
   ctx.restore();
 }
@@ -216,7 +217,7 @@ function skinJoint(point, radius, profile) {
   g.addColorStop(1, profile.skin.shadow);
   ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.ellipse(point.x, point.y, radius, radius * .82, 0, 0, TAU);
+  ctx.ellipse(point.x, point.y, radius, radius * .88, 0, 0, TAU);
   ctx.fill();
 }
 
@@ -224,36 +225,57 @@ function drawBoot(ankle, toe, width, profile) {
   const dx = toe.x - ankle.x;
   const dy = toe.y - ankle.y;
   const length = Math.max(1, Math.hypot(dx, dy));
-  const nx = -dy / length;
-  const ny = dx / length;
-  const heel = mix(ankle, toe, .02);
-  const front = mix(ankle, toe, 1.13);
-  const half = width * .43;
+  const ux = dx / length;
+  const uy = dy / length;
+  const nx = -uy;
+  const ny = ux;
+  const heel = mix(ankle, toe, -.02);
+  const front = mix(ankle, toe, 1.19);
+  const half = width * .52;
+  const angle = Math.atan2(dy, dx);
+
   ctx.save();
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
   ctx.fillStyle = "rgba(0,0,0,.22)";
   ctx.beginPath();
-  ctx.ellipse((heel.x + front.x) * .5, (heel.y + front.y) * .5 + width * .2, length * .55, width * .27, Math.atan2(dy, dx), 0, TAU);
+  ctx.ellipse((heel.x + front.x) * .5 + nx * width * .03, (heel.y + front.y) * .5 + ny * width * .03 + width * .16, length * .61, width * .31, angle, 0, TAU);
   ctx.fill();
+
   const g = ctx.createLinearGradient(heel.x, heel.y, front.x, front.y);
   g.addColorStop(0, profile.boots.secondary);
-  g.addColorStop(.34, profile.boots.base);
-  g.addColorStop(.78, profile.boots.base);
+  g.addColorStop(.24, profile.boots.base);
+  g.addColorStop(.76, profile.boots.base);
   g.addColorStop(1, profile.boots.secondary);
   ctx.fillStyle = g;
+  ctx.strokeStyle = "rgba(2,7,10,.58)";
+  ctx.lineWidth = Math.max(1, width * .07);
   ctx.beginPath();
-  ctx.moveTo(heel.x + nx * half, heel.y + ny * half);
-  ctx.quadraticCurveTo(front.x + nx * half * .76, front.y + ny * half * .76, front.x + nx * half * .42, front.y + ny * half * .42);
-  ctx.lineTo(front.x - nx * half * .55, front.y - ny * half * .55);
-  ctx.quadraticCurveTo(heel.x - nx * half, heel.y - ny * half, heel.x - nx * half, heel.y - ny * half);
+  ctx.moveTo(heel.x + nx * half * .76, heel.y + ny * half * .76);
+  ctx.quadraticCurveTo(heel.x - ux * width * .12 + nx * half, heel.y - uy * width * .12 + ny * half, front.x + nx * half * .62, front.y + ny * half * .62);
+  ctx.quadraticCurveTo(front.x + ux * width * .18, front.y + uy * width * .18, front.x - nx * half * .5, front.y - ny * half * .5);
+  ctx.quadraticCurveTo(heel.x - nx * half * .84, heel.y - ny * half * .84, heel.x + nx * half * .76, heel.y + ny * half * .76);
   ctx.closePath();
   ctx.fill();
+  ctx.stroke();
+
   ctx.strokeStyle = profile.boots.accent;
-  ctx.lineWidth = Math.max(1, width * .085);
-  const stripeA = mix(heel, front, .36);
-  const stripeB = mix(heel, front, .72);
+  ctx.globalAlpha = .82;
+  ctx.lineWidth = Math.max(1.1, width * .1);
+  const stripeA = mix(heel, front, .38);
+  const stripeB = mix(heel, front, .69);
   ctx.beginPath();
-  ctx.moveTo(stripeA.x - nx * half * .38, stripeA.y - ny * half * .38);
-  ctx.lineTo(stripeB.x - nx * half * .27, stripeB.y - ny * half * .27);
+  ctx.moveTo(stripeA.x - nx * half * .28, stripeA.y - ny * half * .28);
+  ctx.lineTo(stripeB.x - nx * half * .18, stripeB.y - ny * half * .18);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = "rgba(255,255,255,.14)";
+  ctx.lineWidth = Math.max(.8, width * .05);
+  ctx.beginPath();
+  ctx.moveTo(heel.x + nx * half * .35, heel.y + ny * half * .35);
+  ctx.lineTo(front.x + nx * half * .25, front.y + ny * half * .25);
   ctx.stroke();
   ctx.restore();
 }
@@ -261,79 +283,92 @@ function drawBoot(ankle, toe, width, profile) {
 function drawShorts(pelvis, leftHip, rightHip, leftKnee, rightKnee, h, profile) {
   const body = profile.body;
   const topY = pelvis.y - h * .058;
-  const hemY = pelvis.y + h * .082;
-  const halfWaist = h * .074 * body.waist;
-  const outer = h * .105 * body.thigh;
-  const inner = h * .025;
+  const hemY = pelvis.y + h * .078;
+  const halfWaist = h * .077 * body.waist;
+  const outer = h * .104 * body.thigh;
+  const inner = h * .022;
   const g = ctx.createLinearGradient(pelvis.x - outer, topY, pelvis.x + outer, hemY);
   g.addColorStop(0, profile.kit.shorts);
   g.addColorStop(.48, profile.kit.shortsLight || profile.kit.shorts);
   g.addColorStop(1, profile.kit.shorts);
   ctx.fillStyle = g;
+  ctx.strokeStyle = "rgba(1,8,14,.34)";
+  ctx.lineWidth = Math.max(.8, h * .0045);
+  ctx.lineJoin = "round";
   ctx.beginPath();
   ctx.moveTo(pelvis.x - halfWaist, topY);
-  ctx.quadraticCurveTo(pelvis.x, topY - h * .01, pelvis.x + halfWaist, topY);
-  ctx.lineTo(rightHip.x + outer * .62, hemY);
-  ctx.lineTo(pelvis.x + inner, hemY + h * .008);
-  ctx.lineTo(pelvis.x, pelvis.y + h * .035);
-  ctx.lineTo(pelvis.x - inner, hemY + h * .008);
-  ctx.lineTo(leftHip.x - outer * .62, hemY);
+  ctx.quadraticCurveTo(pelvis.x, topY - h * .008, pelvis.x + halfWaist, topY);
+  ctx.quadraticCurveTo(rightHip.x + outer * .58, pelvis.y + h * .025, rightHip.x + outer * .54, hemY);
+  ctx.quadraticCurveTo(pelvis.x + inner * 1.2, hemY + h * .008, pelvis.x, pelvis.y + h * .034);
+  ctx.quadraticCurveTo(pelvis.x - inner * 1.2, hemY + h * .008, leftHip.x - outer * .54, hemY);
+  ctx.quadraticCurveTo(leftHip.x - outer * .58, pelvis.y + h * .025, pelvis.x - halfWaist, topY);
   ctx.closePath();
   ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,.12)";
-  ctx.lineWidth = Math.max(.8, h * .0045);
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(255,255,255,.18)";
+  ctx.lineWidth = Math.max(.8, h * .004);
   ctx.beginPath();
-  ctx.moveTo(pelvis.x - halfWaist * .88, topY + h * .008);
-  ctx.lineTo(pelvis.x + halfWaist * .88, topY + h * .008);
+  ctx.moveTo(pelvis.x - halfWaist * .82, topY + h * .008);
+  ctx.lineTo(pelvis.x + halfWaist * .82, topY + h * .008);
   ctx.stroke();
 }
 
 function drawTorso(chest, pelvis, h, pose, profile) {
   const body = profile.body;
-  const shoulder = h * .115 * body.shoulder;
-  const waist = h * .073 * body.waist;
-  const topY = chest.y - h * .04;
-  const bottomY = pelvis.y + h * .038;
-  const skew = pose.lean * h * .12;
-  const leftShoulder = P(chest.x - shoulder, chest.y + pose.shoulder * h + h * .002);
-  const rightShoulder = P(chest.x + shoulder, chest.y - pose.shoulder * h + h * .002);
+  const shoulder = h * .111 * body.shoulder;
+  const waist = h * .076 * body.waist;
+  const topY = chest.y - h * .038;
+  const bottomY = pelvis.y + h * .034;
+  const skew = pose.lean * h * .105;
+  const leftShoulder = P(chest.x - shoulder, chest.y + pose.shoulder * h + h * .005);
+  const rightShoulder = P(chest.x + shoulder, chest.y - pose.shoulder * h + h * .005);
+  const upperLeft = P(leftShoulder.x + h * .026, leftShoulder.y - h * .006);
+  const upperRight = P(rightShoulder.x - h * .026, rightShoulder.y - h * .006);
   const g = ctx.createLinearGradient(chest.x - shoulder, topY, chest.x + shoulder, bottomY);
   g.addColorStop(0, profile.kit.shirtShadow);
-  g.addColorStop(.22, profile.kit.shirt);
+  g.addColorStop(.2, profile.kit.shirt);
   g.addColorStop(.5, profile.kit.shirtLight || profile.kit.shirt);
-  g.addColorStop(.78, profile.kit.shirt);
+  g.addColorStop(.8, profile.kit.shirt);
   g.addColorStop(1, profile.kit.shirtShadow);
+
   ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,.22)";
-  ctx.shadowBlur = Math.max(1.5, h * .012);
+  ctx.shadowColor = "rgba(0,0,0,.18)";
+  ctx.shadowBlur = Math.max(1.2, h * .008);
   ctx.fillStyle = g;
+  ctx.strokeStyle = "rgba(5,15,25,.30)";
+  ctx.lineWidth = Math.max(.8, h * .0045);
+  ctx.lineJoin = "round";
   ctx.beginPath();
-  ctx.moveTo(leftShoulder.x + h * .012, leftShoulder.y);
-  ctx.quadraticCurveTo(chest.x - shoulder * .55, topY - h * .018, chest.x - h * .035, topY - h * .022);
-  ctx.quadraticCurveTo(chest.x, topY - h * .032, chest.x + h * .035, topY - h * .022);
-  ctx.quadraticCurveTo(chest.x + shoulder * .55, topY - h * .018, rightShoulder.x - h * .012, rightShoulder.y);
-  ctx.quadraticCurveTo(chest.x + shoulder * 1.02, chest.y + h * .055, pelvis.x + waist + skew, bottomY);
-  ctx.quadraticCurveTo(pelvis.x, bottomY + h * .014, pelvis.x - waist + skew, bottomY);
-  ctx.quadraticCurveTo(chest.x - shoulder * 1.02, chest.y + h * .055, leftShoulder.x + h * .012, leftShoulder.y);
+  ctx.moveTo(upperLeft.x, upperLeft.y);
+  ctx.quadraticCurveTo(chest.x - shoulder * .56, topY - h * .02, chest.x - h * .035, topY - h * .02);
+  ctx.quadraticCurveTo(chest.x, topY - h * .029, chest.x + h * .035, topY - h * .02);
+  ctx.quadraticCurveTo(chest.x + shoulder * .56, topY - h * .02, upperRight.x, upperRight.y);
+  ctx.quadraticCurveTo(rightShoulder.x + h * .004, chest.y + h * .052, pelvis.x + waist + skew, bottomY);
+  ctx.quadraticCurveTo(pelvis.x + waist * .42 + skew, bottomY + h * .011, pelvis.x + skew, bottomY + h * .01);
+  ctx.quadraticCurveTo(pelvis.x - waist * .42 + skew, bottomY + h * .011, pelvis.x - waist + skew, bottomY);
+  ctx.quadraticCurveTo(leftShoulder.x - h * .004, chest.y + h * .052, upperLeft.x, upperLeft.y);
   ctx.closePath();
   ctx.fill();
+  ctx.stroke();
   ctx.restore();
 
   ctx.strokeStyle = profile.kit.collar || profile.kit.trim;
-  ctx.lineWidth = Math.max(1, h * .007);
+  ctx.lineWidth = Math.max(1.1, h * .007);
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(chest.x - h * .029, topY - h * .012);
-  ctx.quadraticCurveTo(chest.x, topY + h * .018, chest.x + h * .029, topY - h * .012);
+  ctx.moveTo(chest.x - h * .029, topY - h * .01);
+  ctx.quadraticCurveTo(chest.x, topY + h * .016, chest.x + h * .029, topY - h * .01);
   ctx.stroke();
 
   const centre = mix(chest, pelvis, .5);
   ctx.fillStyle = profile.kit.collar || profile.kit.trim;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = `750 ${Math.max(5.5, h * .03)}px system-ui`;
-  ctx.fillText(profile.displayName.split(" ").at(-1).slice(0, 10), centre.x + skew * .25, centre.y - h * .038);
-  ctx.font = `900 ${Math.max(9, h * .078)}px system-ui`;
-  ctx.fillText(String(profile.number), centre.x + skew * .3, centre.y + h * .022);
+  ctx.font = `800 ${Math.max(5.8, h * .031)}px system-ui`;
+  ctx.fillText(profile.displayName.split(" ").at(-1).slice(0, 10), centre.x + skew * .22, centre.y - h * .039);
+  ctx.font = `900 ${Math.max(9.5, h * .079)}px system-ui`;
+  ctx.fillText(String(profile.number), centre.x + skew * .25, centre.y + h * .022);
 }
 
 function drawBackHead(head, h, profile) {
@@ -341,11 +376,11 @@ function drawBackHead(head, h, profile) {
   const jawFactor = profile.face.jaw || 1;
   const headScale = profile.body.head || 1;
   const rx = h * .052 * headScale * (shape === "broad-brow" ? 1.06 : shape === "angular" ? .96 : 1);
-  const ry = h * .066 * headScale;
-  const neckWidth = h * .038 * (profile.body.chest || 1);
+  const ry = h * .065 * headScale;
+  const neckWidth = h * .039 * (profile.body.chest || 1);
   const neckTop = P(head.x, head.y + ry * .55);
-  const neckBottom = P(head.x, head.y + ry * 1.35);
-  softLimb(neckTop, neckBottom, neckWidth * .82, neckWidth, profile.skin.base, profile.skin.shadow, .06);
+  const neckBottom = P(head.x, head.y + ry * 1.3);
+  softLimb(neckTop, neckBottom, neckWidth * .84, neckWidth, profile.skin.base, profile.skin.shadow, .06);
 
   ctx.fillStyle = profile.skin.shadow;
   ctx.beginPath(); ctx.ellipse(head.x - rx * .92, head.y + ry * .03, rx * .15, ry * .25, -.08, 0, TAU); ctx.fill();
@@ -356,6 +391,8 @@ function drawBackHead(head, h, profile) {
   skin.addColorStop(.62, profile.skin.base);
   skin.addColorStop(1, profile.skin.shadow);
   ctx.fillStyle = skin;
+  ctx.strokeStyle = "rgba(73,44,31,.22)";
+  ctx.lineWidth = Math.max(.7, h * .0035);
   ctx.beginPath();
   ctx.moveTo(head.x - rx * .7, head.y - ry * .72);
   ctx.quadraticCurveTo(head.x - rx, head.y - ry * .08, head.x - rx * (.72 + (jawFactor - 1) * .45), head.y + ry * .48);
@@ -365,6 +402,7 @@ function drawBackHead(head, h, profile) {
   ctx.quadraticCurveTo(head.x, head.y - ry * 1.0, head.x - rx * .7, head.y - ry * .72);
   ctx.closePath();
   ctx.fill();
+  ctx.stroke();
 
   const hairG = ctx.createLinearGradient(head.x - rx, head.y - ry, head.x + rx, head.y);
   hairG.addColorStop(0, profile.hair.shadow);
@@ -404,7 +442,8 @@ function drawBackHead(head, h, profile) {
   ctx.fill();
 
   ctx.strokeStyle = profile.hair.light;
-  ctx.globalAlpha = .16;
+  ctx.globalAlpha = .18;
+  ctx.lineCap = "round";
   ctx.lineWidth = Math.max(.7, h * .0035);
   ctx.beginPath();
   ctx.moveTo(head.x - rx * .42, top + ry * .17);
@@ -414,7 +453,7 @@ function drawBackHead(head, h, profile) {
 }
 
 function drawHand(point, h, profile, angle = 0) {
-  const radius = h * .018;
+  const radius = h * .023;
   ctx.save();
   ctx.translate(point.x, point.y);
   ctx.rotate(angle);
@@ -423,8 +462,21 @@ function drawHand(point, h, profile, angle = 0) {
   g.addColorStop(.65, profile.skin.base);
   g.addColorStop(1, profile.skin.shadow);
   ctx.fillStyle = g;
+  ctx.strokeStyle = "rgba(75,43,31,.24)";
+  ctx.lineWidth = Math.max(.7, h * .0035);
   ctx.beginPath();
-  ctx.ellipse(0, 0, radius * .68, radius, 0, 0, TAU);
+  ctx.ellipse(0, 0, radius * .72, radius, 0, 0, TAU);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawSockCuff(point, h, profile) {
+  ctx.save();
+  ctx.translate(point.x, point.y);
+  ctx.fillStyle = profile.kit.trim;
+  ctx.beginPath();
+  ctx.roundRect(-h * .022, -h * .005, h * .044, h * .01, h * .004);
   ctx.fill();
   ctx.restore();
 }
@@ -461,66 +513,63 @@ function drawCharacter(world, pose, time, character, profile, p) {
 
   const pelvis = P(pose.pelvisX * h, -.365 * h + pose.crouch * h * .07);
   const chest = P(pose.chestX * h, -.67 * h + pose.crouch * h * .08);
-  const shoulderHalf = h * .112 * body.shoulder;
+  const shoulderHalf = h * .11 * body.shoulder;
   const hipHalf = h * .066 * body.waist;
   const shoulderTilt = pose.shoulder * h;
-  const leftShoulder = P(chest.x - shoulderHalf, chest.y + h * .013 + shoulderTilt);
-  const rightShoulder = P(chest.x + shoulderHalf, chest.y + h * .013 - shoulderTilt);
+  const leftShoulder = P(chest.x - shoulderHalf, chest.y + h * .016 + shoulderTilt);
+  const rightShoulder = P(chest.x + shoulderHalf, chest.y + h * .016 - shoulderTilt);
   const leftHip = P(pelvis.x - hipHalf, pelvis.y);
   const rightHip = P(pelvis.x + hipHalf, pelvis.y);
   const q = (point) => P(point.x * h, point.y * h);
   const leftKnee = q(pose.lk), rightKnee = q(pose.rk), leftAnkle = q(pose.la), rightAnkle = q(pose.ra);
   const leftToe = q(pose.lt), rightToe = q(pose.rt), leftElbow = q(pose.le), rightElbow = q(pose.re);
   const leftHand = q(pose.lh), rightHand = q(pose.rh);
-  const head = P(chest.x + pose.lean * h * .017, chest.y - h * .145);
+  const head = P(chest.x + pose.lean * h * .014, chest.y - h * .146);
 
   ctx.fillStyle = "rgba(0,0,0,.2)";
   ctx.beginPath();
-  ctx.ellipse(0, 5, h * (pose.phase.includes("follow") ? .2 : .17), h * .032, -pose.rotate * .15, 0, TAU);
+  ctx.ellipse(0, 5, h * (pose.phase.includes("follow") ? .19 : .165), h * .03, -pose.rotate * .15, 0, TAU);
   ctx.fill();
 
-  const thighWidth = Math.max(6, h * .058 * body.thigh);
-  const kneeWidth = Math.max(5, h * .047 * body.thigh);
-  const calfWidth = Math.max(4.5, h * .043 * body.calf);
-  const leftShortHem = mix(leftHip, leftKnee, .27);
-  const rightShortHem = mix(rightHip, rightKnee, .27);
-  const leftSockTop = mix(leftKnee, leftAnkle, .37);
-  const rightSockTop = mix(rightKnee, rightAnkle, .37);
+  const thighWidth = Math.max(6.5, h * .061 * body.thigh);
+  const kneeWidth = Math.max(5.5, h * .049 * body.thigh);
+  const calfWidth = Math.max(5, h * .047 * body.calf);
+  const leftShortHem = mix(leftHip, leftKnee, .29);
+  const rightShortHem = mix(rightHip, rightKnee, .29);
+  const leftSockTop = mix(leftKnee, leftAnkle, .39);
+  const rightSockTop = mix(rightKnee, rightAnkle, .39);
 
-  softLimb(leftHip, leftShortHem, thighWidth * 1.02, thighWidth * .98, profile.kit.shorts, profile.kit.shortsLight || profile.kit.shorts, .08);
-  softLimb(rightHip, rightShortHem, thighWidth * 1.02, thighWidth * .98, profile.kit.shorts, profile.kit.shortsLight || profile.kit.shorts, .08);
-  softLimb(leftShortHem, leftKnee, thighWidth * .88, kneeWidth, profile.skin.base, profile.skin.shadow, .11);
-  softLimb(rightShortHem, rightKnee, thighWidth * .88, kneeWidth, profile.skin.base, profile.skin.shadow, .11);
-  skinJoint(leftKnee, kneeWidth * .42, profile);
-  skinJoint(rightKnee, kneeWidth * .42, profile);
-  softLimb(leftKnee, leftSockTop, kneeWidth * .88, calfWidth * 1.04, profile.skin.base, profile.skin.shadow, .1);
-  softLimb(rightKnee, rightSockTop, kneeWidth * .88, calfWidth * 1.04, profile.skin.base, profile.skin.shadow, .1);
-  softLimb(leftSockTop, leftAnkle, calfWidth * 1.04, calfWidth * .76, profile.kit.socks, "#d8dfdc", .18);
-  softLimb(rightSockTop, rightAnkle, calfWidth * 1.04, calfWidth * .76, profile.kit.socks, "#d8dfdc", .18);
-  ctx.strokeStyle = profile.kit.trim;
-  ctx.lineWidth = Math.max(1, h * .007);
-  for (const sockTop of [leftSockTop, rightSockTop]) {
-    ctx.beginPath();
-    ctx.moveTo(sockTop.x - h * .021, sockTop.y);
-    ctx.lineTo(sockTop.x + h * .021, sockTop.y);
-    ctx.stroke();
-  }
-  drawBoot(leftAnkle, leftToe, thighWidth * .72, profile);
-  drawBoot(rightAnkle, rightToe, thighWidth * .72, profile);
+  softLimb(leftHip, leftShortHem, thighWidth * 1.02, thighWidth * .98, profile.kit.shorts, profile.kit.shortsLight || profile.kit.shorts, .07);
+  softLimb(rightHip, rightShortHem, thighWidth * 1.02, thighWidth * .98, profile.kit.shorts, profile.kit.shortsLight || profile.kit.shorts, .07);
+  softLimb(leftShortHem, leftKnee, thighWidth * .9, kneeWidth * 1.02, profile.skin.base, profile.skin.shadow, .1);
+  softLimb(rightShortHem, rightKnee, thighWidth * .9, kneeWidth * 1.02, profile.skin.base, profile.skin.shadow, .1);
+  skinJoint(leftKnee, kneeWidth * .5, profile);
+  skinJoint(rightKnee, kneeWidth * .5, profile);
+  softLimb(leftKnee, leftSockTop, kneeWidth * .98, calfWidth * 1.08, profile.skin.base, profile.skin.shadow, .09);
+  softLimb(rightKnee, rightSockTop, kneeWidth * .98, calfWidth * 1.08, profile.skin.base, profile.skin.shadow, .09);
+  softLimb(leftSockTop, leftAnkle, calfWidth * 1.12, calfWidth * .9, profile.kit.socks, "#d7dfdd", .16);
+  softLimb(rightSockTop, rightAnkle, calfWidth * 1.12, calfWidth * .9, profile.kit.socks, "#d7dfdd", .16);
+  drawSockCuff(leftSockTop, h, profile);
+  drawSockCuff(rightSockTop, h, profile);
+  drawBoot(leftAnkle, leftToe, thighWidth * .9, profile);
+  drawBoot(rightAnkle, rightToe, thighWidth * .9, profile);
 
   drawShorts(pelvis, leftHip, rightHip, leftKnee, rightKnee, h, profile);
 
-  const upperArmWidth = Math.max(4.5, h * .043 * body.chest);
-  const leftSleeveEnd = mix(leftShoulder, leftElbow, .24);
-  const rightSleeveEnd = mix(rightShoulder, rightElbow, .24);
-  softLimb(leftShoulder, leftSleeveEnd, upperArmWidth * 1.12, upperArmWidth, profile.kit.shirt, profile.kit.shirtShadow, .12);
-  softLimb(rightShoulder, rightSleeveEnd, upperArmWidth * 1.12, upperArmWidth, profile.kit.shirt, profile.kit.shirtShadow, .12);
-  softLimb(leftSleeveEnd, leftElbow, upperArmWidth * .74, upperArmWidth * .6, profile.skin.base, profile.skin.shadow, .11);
-  softLimb(rightSleeveEnd, rightElbow, upperArmWidth * .74, upperArmWidth * .6, profile.skin.base, profile.skin.shadow, .11);
-  softLimb(leftElbow, leftHand, upperArmWidth * .58, upperArmWidth * .43, profile.skin.base, profile.skin.shadow, .11);
-  softLimb(rightElbow, rightHand, upperArmWidth * .58, upperArmWidth * .43, profile.skin.base, profile.skin.shadow, .11);
-
+  // Torso first, then sleeves on top: this creates a clean manufactured shirt silhouette
+  // instead of the old pointed shoulder join.
   drawTorso(chest, pelvis, h, pose, profile);
+
+  const upperArmWidth = Math.max(5.2, h * .046 * body.chest);
+  const leftSleeveEnd = mix(leftShoulder, leftElbow, .29);
+  const rightSleeveEnd = mix(rightShoulder, rightElbow, .29);
+  softLimb(leftShoulder, leftSleeveEnd, upperArmWidth * 1.24, upperArmWidth * 1.08, profile.kit.shirt, profile.kit.shirtShadow, .11);
+  softLimb(rightShoulder, rightSleeveEnd, upperArmWidth * 1.24, upperArmWidth * 1.08, profile.kit.shirt, profile.kit.shirtShadow, .11);
+  softLimb(leftSleeveEnd, leftElbow, upperArmWidth * .78, upperArmWidth * .67, profile.skin.base, profile.skin.shadow, .1);
+  softLimb(rightSleeveEnd, rightElbow, upperArmWidth * .78, upperArmWidth * .67, profile.skin.base, profile.skin.shadow, .1);
+  softLimb(leftElbow, leftHand, upperArmWidth * .66, upperArmWidth * .5, profile.skin.base, profile.skin.shadow, .1);
+  softLimb(rightElbow, rightHand, upperArmWidth * .66, upperArmWidth * .5, profile.skin.base, profile.skin.shadow, .1);
+
   drawHand(leftHand, h, profile, -.12);
   drawHand(rightHand, h, profile, .12);
   drawBackHead(head, h, profile);
@@ -561,9 +610,12 @@ export function drawHeroCharacterV42(time) {
 
 window.__footballLabCharacterRendererV42 = Object.freeze({
   build: BUILD,
-  renderer: "layered-2.5d-skeletal",
-  artDirection: "premium-stylised-realism",
+  renderer: "polished-layered-2.5d-skeletal",
+  artDirection: "premium-modern-arcade-football",
   rearViewGameplayModel: true,
   modularProfiles: true,
+  roundedAthleticGeometry: true,
+  enlargedBootsAndHands: true,
+  balancedStrikeSilhouette: true,
   outfieldCharacters: 4
 });
