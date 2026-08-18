@@ -7,12 +7,12 @@ const KICKERS = [
   ["kai-mori", "wayne-redman"]
 ];
 
-async function waitForV42(page) {
-  await page.goto("/index.html?test=character-v42");
+async function waitForArcadeSystem(page) {
+  await page.goto("/index.html?test=character-arcade-roster");
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterSystemV42?.build),
     { timeout: 15000 }
-  ).toBe("42.1.0");
+  ).toBe("50.0.0-arcade-profile");
 }
 
 async function enterClassic(page) {
@@ -31,13 +31,19 @@ async function enterClassic(page) {
   }));
   if (!state.gameActive && state.pickerOpen) await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+
+  const skip = page.getByRole("button", { name: "SKIP TUTORIAL" });
+  if (await skip.isVisible().catch(() => false)) await skip.click({ force: true });
 }
 
-test("V42.1 exposes the reusable premium character roster", async ({ page }) => {
-  await waitForV42(page);
+test("V50 exposes the reusable arcade character roster", async ({ page }) => {
+  await waitForArcadeSystem(page);
   const contract = await page.evaluate(() => window.__footballLabCharacterSystemV42);
-  expect(contract.rendererTarget).toBe("layered-2.5d-skeletal");
-  expect(contract.artDirection).toBe("premium-stylised-realism");
+  expect(contract.rendererTarget).toBe("modern-arcade-articulated-2.5d");
+  expect(contract.artDirection).toBe("modern-arcade-football");
+  expect(contract.realismRequired).toBe(false);
+  expect(contract.readabilityPriority).toBe(true);
+  expect(contract.exaggeratedSilhouettes).toBe(true);
   expect(contract.sharedOutfieldKit).toBe(true);
   expect(contract.outfieldCount).toBe(4);
   expect(contract.goalkeeperCount).toBe(4);
@@ -47,60 +53,36 @@ test("V42.1 exposes the reusable premium character roster", async ({ page }) => 
   expect(contract.directCelebrityLikenesses).toBe(false);
 });
 
-test("V42 profiles retain V44 fallback while approved Viktor uses V46", async ({ page }) => {
+test("all four outfield characters use the same live arcade renderer", async ({ page }) => {
   for (const [sourceId, visualId] of KICKERS) {
-    await page.goto("/index.html?test=character-v44-roster");
+    await page.goto("/index.html?test=character-arcade-roster-live");
     await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), sourceId);
     await page.reload();
+
     await expect.poll(
       () => page.evaluate(() => window.__footballLabCharacterSystemV42?.build),
       { timeout: 15000 }
-    ).toBe("42.1.0");
+    ).toBe("50.0.0-arcade-profile");
 
     await enterClassic(page);
 
-    if (visualId === "viktor-kane") {
-      await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
-        { timeout: 12000 }
-      ).toBe("real-skinned-glb-3d");
+    await expect.poll(
+      () => page.evaluate(() => window.__footballLabHeroFrameV50?.character),
+      { timeout: 10000 }
+    ).toBe(visualId);
 
-      const frame = await page.evaluate(() => window.__footballLabHeroFrameV46);
-      expect(frame.character).toBe("viktor-kane");
-      expect(frame.build).toBe("46.0.0");
-      expect(frame.production3D).toBe(true);
-    } else {
-      await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
-        { timeout: 12000 }
-      ).toBe("v44-fallback");
-      await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV44?.sourceCharacterId),
-        { timeout: 5000 }
-      ).toBe(sourceId);
-      await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV44?.character),
-        { timeout: 5000 }
-      ).toBe(visualId);
-      await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV44?.build),
-        { timeout: 5000 }
-      ).toBe("44.0.0");
-      await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV44?.renderer),
-        { timeout: 5000 }
-      ).toBe("articulated-layered-2.5d");
-
-      const frame = await page.evaluate(() => window.__footballLabHeroFrameV44);
-      expect(frame.staticSpriteFrames).toBe(false);
-      expect(frame.rig).toBe("continuous-skeletal-canvas");
-    }
+    const frame = await page.evaluate(() => window.__footballLabHeroFrameV50);
+    expect(frame.renderer).toBe("modern-arcade-articulated-2.5d");
+    expect(frame.production3D).toBe(false);
+    expect(frame.rig).toBe("continuous-skeletal-canvas");
 
     const visible = await page.evaluate(() => window.__footballLabVisibleKickersV30);
+    expect(visible.productionCharacterMode).toBe("modern-arcade-articulated-2.5d");
+    expect(visible.production3D).toBe(false);
     expect(visible.staticSpriteFrames).toBe(false);
 
     await page.screenshot({
-      path: `test-results/live-${visualId}.png`,
+      path: `test-results/arcade-live-${visualId}.png`,
       fullPage: true
     });
   }
