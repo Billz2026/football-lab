@@ -25,13 +25,13 @@ async function chooseKicker(page, characterId) {
   await enterClassic(page);
 }
 
-test("live outfield rendering keeps the five-frame sprite path retired after Viktor V46 promotion", async ({ page }) => {
+test("live Viktor rendering uses the shared articulated arcade path with sprite frames retired", async ({ page }) => {
   await chooseKicker(page, "dax-ryder");
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
     { timeout: 12000 }
-  ).toBe("real-skinned-glb-3d");
+  ).toBe("v44-fallback");
 
   const state = await page.evaluate(() => ({
     frame: window.__footballLabHeroFrameV46,
@@ -41,10 +41,10 @@ test("live outfield rendering keeps the five-frame sprite path retired after Vik
     staticSpriteFrames: window.__footballLabVisibleKickersV30?.staticSpriteFrames
   }));
 
-  expect(state.frame.character).toBe("viktor-kane");
-  expect(state.frame.production3D).toBe(true);
-  expect(state.production3D).toBe(true);
-  expect(state.productionCharacterMode).toBe("real-skinned-glb-3d");
+  expect(state.frame.character).toBe("dax-ryder");
+  expect(state.frame.production3D).toBe(false);
+  expect(state.production3D).toBe(false);
+  expect(state.productionCharacterMode).toBe("articulated-2.5d-fallback");
   expect(state.spriteAtlasReady).toBe(false);
   expect(state.staticSpriteFrames).toBe(false);
 });
