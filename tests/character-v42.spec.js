@@ -12,7 +12,7 @@ async function waitForArcadeSystem(page) {
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterSystemV42?.build),
     { timeout: 15000 }
-  ).toBe("50.0.0-arcade-profile");
+  ).toBe("51.0.0-arcade-profile");
 }
 
 async function enterClassic(page) {
@@ -36,14 +36,19 @@ async function enterClassic(page) {
   if (await skip.isVisible().catch(() => false)) await skip.click({ force: true });
 }
 
-test("V50 exposes the reusable arcade character roster", async ({ page }) => {
+test("V51 exposes the reusable polished arcade character roster", async ({ page }) => {
   await waitForArcadeSystem(page);
   const contract = await page.evaluate(() => window.__footballLabCharacterSystemV42);
-  expect(contract.rendererTarget).toBe("modern-arcade-articulated-2.5d");
-  expect(contract.artDirection).toBe("modern-arcade-football");
+  expect(contract.rendererTarget).toBe("polished-modern-arcade-articulated-2.5d");
+  expect(contract.artDirection).toBe("premium-modern-arcade-football");
   expect(contract.realismRequired).toBe(false);
   expect(contract.readabilityPriority).toBe(true);
   expect(contract.exaggeratedSilhouettes).toBe(true);
+  expect(contract.largerHeadsForReadability).toBe(true);
+  expect(contract.athleticShoulderLanguage).toBe(true);
+  expect(contract.chunkierLowerLegReadability).toBe(true);
+  expect(contract.oversizedKeeperGloves).toBe(true);
+  expect(contract.highContrastKits).toBe(true);
   expect(contract.sharedOutfieldKit).toBe(true);
   expect(contract.outfieldCount).toBe(4);
   expect(contract.goalkeeperCount).toBe(4);
@@ -53,7 +58,7 @@ test("V50 exposes the reusable arcade character roster", async ({ page }) => {
   expect(contract.directCelebrityLikenesses).toBe(false);
 });
 
-test("all four outfield characters use the same live arcade renderer", async ({ page }) => {
+test("all four outfield characters use the same live V51 arcade renderer", async ({ page }) => {
   for (const [sourceId, visualId] of KICKERS) {
     await page.goto("/index.html?test=character-arcade-roster-live");
     await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), sourceId);
@@ -62,22 +67,22 @@ test("all four outfield characters use the same live arcade renderer", async ({ 
     await expect.poll(
       () => page.evaluate(() => window.__footballLabCharacterSystemV42?.build),
       { timeout: 15000 }
-    ).toBe("50.0.0-arcade-profile");
+    ).toBe("51.0.0-arcade-profile");
 
     await enterClassic(page);
 
     await expect.poll(
-      () => page.evaluate(() => window.__footballLabHeroFrameV50?.character),
+      () => page.evaluate(() => window.__footballLabHeroFrameV51?.character),
       { timeout: 10000 }
     ).toBe(visualId);
 
-    const frame = await page.evaluate(() => window.__footballLabHeroFrameV50);
-    expect(frame.renderer).toBe("modern-arcade-articulated-2.5d");
+    const frame = await page.evaluate(() => window.__footballLabHeroFrameV51);
+    expect(frame.renderer).toBe("polished-modern-arcade-articulated-2.5d");
     expect(frame.production3D).toBe(false);
     expect(frame.rig).toBe("continuous-skeletal-canvas");
 
     const visible = await page.evaluate(() => window.__footballLabVisibleKickersV30);
-    expect(visible.productionCharacterMode).toBe("modern-arcade-articulated-2.5d");
+    expect(visible.productionCharacterMode).toBe("polished-modern-arcade-articulated-2.5d");
     expect(visible.production3D).toBe(false);
     expect(visible.staticSpriteFrames).toBe(false);
 
