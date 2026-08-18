@@ -11,8 +11,9 @@ export function shootoutDecision(playerResults = [], opponentResults = []) {
   const opponentGoals = goals(opponentResults);
   const playerRemaining = Math.max(0, REGULATION_KICKS - playerTaken);
   const opponentRemaining = Math.max(0, REGULATION_KICKS - opponentTaken);
+  const stillInRegulation = playerTaken <= REGULATION_KICKS && opponentTaken <= REGULATION_KICKS;
 
-  if (playerGoals > opponentGoals + opponentRemaining) {
+  if (stillInRegulation && playerGoals > opponentGoals + opponentRemaining) {
     return {
       complete: true,
       winner: "player",
@@ -25,7 +26,7 @@ export function shootoutDecision(playerResults = [], opponentResults = []) {
     };
   }
 
-  if (opponentGoals > playerGoals + playerRemaining) {
+  if (stillInRegulation && opponentGoals > playerGoals + playerRemaining) {
     return {
       complete: true,
       winner: "opponent",
