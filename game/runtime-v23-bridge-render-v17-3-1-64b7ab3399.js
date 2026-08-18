@@ -1,10 +1,9 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./runtime-v23-generated-render-v17-v1731-7f257084b1.js";
-import { drawHeroCharacterV46 } from "./character-3d-v46.js?v=46.0.0";
+import { drawArcadeHeroCharacterV50 } from "./arcade-character-v50.js?v=50.0.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
 import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=40.3.0";
 import { drawStadiumProgressionV41, drawCampaignPresentationV41 } from "./stadium-progression-v41.js?v=41.0.0";
-import "./character-engine-v1.js?v=1.0.0";
 import "./keeper-character-v44.js?v=44.0.0";
 
 export { resizeCanvas };
@@ -94,22 +93,22 @@ function drawVenueWeather(time) {
 export function drawScene(time, finishShot) {
   drawBaseWithoutLegacyKicker(time, finishShot);
   drawStadiumProgressionV41(time);
-  drawHeroCharacterV46(time);
+  drawArcadeHeroCharacterV50(time);
   drawVenueWeather(time);
   drawMatchdayImpact(time);
   drawCampaignPresentationV41(time);
 
-  const v46 = window.__footballLabHeroFrameV46;
-  const production3D = Boolean(v46?.production3D);
+  const arcade = window.__footballLabHeroFrameV50;
   window.__footballLabVisibleKickersV30 = {
     base: 0,
     hero: 1,
     total: 1,
     character: activeCharacter().id,
-    renderer: v46?.renderer || window.__footballLabHeroFrameV44?.renderer || "articulated-layered-2.5d",
+    renderer: arcade?.renderer || "modern-arcade-articulated-2.5d",
     spriteAtlasReady: false,
-    productionCharacterMode: production3D ? "real-skinned-glb-3d" : "articulated-2.5d-fallback",
-    production3D,
+    productionCharacterMode: "modern-arcade-articulated-2.5d",
+    production3D: false,
+    realismRequired: false,
     staticSpriteFrames: false,
     time
   };
@@ -126,4 +125,4 @@ window.__footballLabStadiumRendererV41 = true;
 window.__footballLabCharacterRendererBridgeV42 = true;
 window.__footballLabCharacterRendererBridgeV43 = true;
 window.__footballLabCharacterRendererBridgeV44 = true;
-window.__footballLabCharacterRendererBridgeV46 = true;
+window.__footballLabArcadeCharacterRendererV50 = true;
