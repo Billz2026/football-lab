@@ -1,7 +1,7 @@
-import { drawArcadeHeroCharacterV50 } from "./arcade-character-v50.js?v=50.0.0";
+import { drawArcadeHeroCharacterV50 } from "./arcade-character-v50.js?v=51.1.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 
-const BUILD = "51.0.0";
+const BUILD = "51.1.0";
 
 export function drawArcadeHeroCharacterV51(time) {
   drawArcadeHeroCharacterV50(time);
@@ -22,7 +22,8 @@ export function drawArcadeHeroCharacterV51(time) {
     silhouetteTarget: "hero-readable",
     kitSeparation: "high-contrast",
     proportions: "stylised-athletic",
-    oversizedReadabilityFeatures: Object.freeze(["head", "boots", "keeper-gloves"]),
+    geometryPass: "rounded-athletic-v51.1",
+    oversizedReadabilityFeatures: Object.freeze(["head", "boots", "hands", "keeper-gloves"]),
     staticSpriteFrames: false,
     production3D: false,
     phase: motion?.phase || legacyFrame?.phase || "idle",
@@ -43,6 +44,9 @@ export const ARCADE_CHARACTER_SYSTEM_V51 = Object.freeze({
     athleticExaggeration: true,
     highContrastKits: true,
     chunkierBoots: true,
+    largerHands: true,
+    roundedShirtSilhouette: true,
+    balancedStrikePose: true,
     largerGoalkeeperGloves: true,
     fixedCameraReadability: true
   }),
