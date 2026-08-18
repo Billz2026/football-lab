@@ -18,7 +18,7 @@ async function enterClassic(page) {
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
 }
 
-test("V46 promotes only approved local GLBs while preserving V44 fallback for the incomplete roster", async ({ page }) => {
+test("V46 keeps the production keeper GLB but renders Viktor through the shared arcade fallback", async ({ page }) => {
   await page.goto("/index.html?test=character-v46");
 
   await expect.poll(
@@ -37,31 +37,36 @@ test("V46 promotes only approved local GLBs while preserving V44 fallback for th
     { timeout: 20000 }
   ).toBe(true);
 
-  const contract = await page.evaluate(() => window.__footballLabCharacter3DV46);
-  expect(contract.target).toBe("real-skinned-glb-human");
-  expect(contract.renderer).toBe("three-webgl-offscreen-composite");
-  expect(contract.localAssetsOnly).toBe(true);
-  expect(contract.fallback).toBe("v44-articulated-2.5d");
-  expect(contract.gameplayPhysicsChanged).toBe(false);
-  expect(contract.keeperAIChanged).toBe(false);
-  expect(contract.loaded).toEqual(expect.arrayContaining(["viktor-kane", "mikkel-storm"]));
-  expect(contract.failed.some((entry) => entry.id === "mikkel-storm")).toBe(false);
+  const contract = await page.evaluate(() => ({
+    v46: window.__footballLabCharacter3DV46,
+    production: window.__footballLabCharacterProductionV1
+  }));
+  expect(contract.v46.target).toBe("real-skinned-glb-human");
+  expect(contract.v46.renderer).toBe("three-webgl-offscreen-composite");
+  expect(contract.v46.localAssetsOnly).toBe(true);
+  expect(contract.v46.fallback).toBe("v44-articulated-2.5d");
+  expect(contract.v46.gameplayPhysicsChanged).toBe(false);
+  expect(contract.v46.keeperAIChanged).toBe(false);
+  expect(contract.v46.loaded).toEqual(expect.arrayContaining(["viktor-kane", "mikkel-storm"]));
+  expect(contract.v46.failed.some((entry) => entry.id === "mikkel-storm")).toBe(false);
+  expect(contract.production.liveArcadeFallback).toContain("viktor-kane");
 
   await enterClassic(page);
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
     { timeout: 12000 }
-  ).toBe("real-skinned-glb-3d");
+  ).toBe("v44-fallback");
 
   const live = await page.evaluate(() => ({
     v46: window.__footballLabHeroFrameV46,
     visible: window.__footballLabVisibleKickersV30
   }));
-  expect(live.v46.character).toBe("viktor-kane");
-  expect(live.v46.production3D).toBe(true);
-  expect(live.visible.production3D).toBe(true);
-  expect(live.visible.productionCharacterMode).toBe("real-skinned-glb-3d");
+  expect(live.v46.character).toBe("dax-ryder");
+  expect(live.v46.production3D).toBe(false);
+  expect(live.visible.character).toBe("dax-ryder");
+  expect(live.visible.production3D).toBe(false);
+  expect(live.visible.productionCharacterMode).toBe("articulated-2.5d-fallback");
   expect(live.visible.staticSpriteFrames).toBe(false);
 
   await page.evaluate(async () => {

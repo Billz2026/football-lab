@@ -47,7 +47,7 @@ test("V42.1 exposes the reusable premium character roster", async ({ page }) => 
   expect(contract.directCelebrityLikenesses).toBe(false);
 });
 
-test("V42 profiles retain V44 fallback while approved Viktor uses V46", async ({ page }) => {
+test("all live outfield profiles use the shared V44 articulated arcade renderer", async ({ page }) => {
   for (const [sourceId, visualId] of KICKERS) {
     await page.goto("/index.html?test=character-v44-roster");
     await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), sourceId);
@@ -59,21 +59,17 @@ test("V42 profiles retain V44 fallback while approved Viktor uses V46", async ({
 
     await enterClassic(page);
 
-    if (visualId === "viktor-kane") {
-      await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
-        { timeout: 12000 }
-      ).toBe("real-skinned-glb-3d");
+    await expect.poll(
+      () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
+      { timeout: 12000 }
+    ).toBe("v44-fallback");
 
+    if (visualId === "viktor-kane") {
       const frame = await page.evaluate(() => window.__footballLabHeroFrameV46);
-      expect(frame.character).toBe("viktor-kane");
+      expect(frame.character).toBe(sourceId);
       expect(frame.build).toBe("46.0.0");
-      expect(frame.production3D).toBe(true);
+      expect(frame.production3D).toBe(false);
     } else {
-      await expect.poll(
-        () => page.evaluate(() => window.__footballLabHeroFrameV46?.renderer),
-        { timeout: 12000 }
-      ).toBe("v44-fallback");
       await expect.poll(
         () => page.evaluate(() => window.__footballLabHeroFrameV44?.sourceCharacterId),
         { timeout: 5000 }
@@ -97,6 +93,8 @@ test("V42 profiles retain V44 fallback while approved Viktor uses V46", async ({
     }
 
     const visible = await page.evaluate(() => window.__footballLabVisibleKickersV30);
+    expect(visible.production3D).toBe(false);
+    expect(visible.productionCharacterMode).toBe("articulated-2.5d-fallback");
     expect(visible.staticSpriteFrames).toBe(false);
 
     await page.screenshot({

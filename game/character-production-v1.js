@@ -1,6 +1,6 @@
 const freeze = (value) => Object.freeze(value);
 
-export const CHARACTER_PRODUCTION_BUILD_V1 = "1.0.0";
+export const CHARACTER_PRODUCTION_BUILD_V1 = "1.0.1";
 export const CHARACTER_ASSET_ROOT_V1 = "./assets/characters/v1";
 
 const OUTFIELD_CLIPS = freeze([
@@ -63,6 +63,7 @@ function asset(id, sourceId, kind, options = {}) {
     benchmark: Boolean(options.benchmark),
     referenceStatus: "approved",
     productionStatus: "awaiting-glb",
+    liveRenderer: options.liveRenderer || "3d-auto",
     model: `${base}/${id}.glb`,
     lods: freeze([
       `${base}/${id}-lod1.glb`,
@@ -77,6 +78,7 @@ function asset(id, sourceId, kind, options = {}) {
 export const CHARACTER_ASSETS_V1 = freeze({
   "viktor-kane": asset("viktor-kane", "dax-ryder", "outfield", {
     benchmark: true,
+    liveRenderer: "arcade-v44",
     visualIdentity: {
       build: "tall-balanced-athletic",
       hair: "short-textured-blonde",
@@ -84,7 +86,7 @@ export const CHARACTER_ASSETS_V1 = freeze({
       kit: "football-lab-white-navy",
       role: "master-outfield"
     },
-    notes: "Approved master outfield reference. Human-realistic anatomy and original face are mandatory."
+    notes: "Approved master outfield reference retained for asset work. Live gameplay intentionally uses the shared V44 arcade renderer for roster consistency."
   }),
   "bruno-silva": asset("bruno-silva", "leo-vale", "outfield", {
     visualIdentity: {
@@ -154,7 +156,9 @@ export const CHARACTER_ASSETS_V1 = freeze({
 });
 
 const BY_SOURCE_ID = new Map(
-  Object.values(CHARACTER_ASSETS_V1).map((entry) => [entry.sourceId, entry])
+  Object.values(CHARACTER_ASSETS_V1)
+    .filter((entry) => entry.liveRenderer !== "arcade-v44")
+    .map((entry) => [entry.sourceId, entry])
 );
 
 export function characterAssetV1(id) {
@@ -177,6 +181,7 @@ export const CHARACTER_PRODUCTION_CONTRACT_V1 = freeze({
   masterOutfield: "viktor-kane",
   masterGoalkeeper: "mikkel-storm",
   liveIntegration: false,
+  liveArcadeFallback: ["viktor-kane"],
   fallbackRenderer: "v42.1-layered-canvas",
   assetCount: Object.keys(CHARACTER_ASSETS_V1).length,
   explicitApprovalRequired: true,
