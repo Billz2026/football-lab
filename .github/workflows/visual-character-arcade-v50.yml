@@ -1,0 +1,61 @@
+name: Arcade Character V50 visual gate
+
+on:
+  push:
+    branches:
+      - agent/arcade-character-pivot
+    paths:
+      - game/arcade-character-v50.js
+      - game/render-v17-3-1.js
+      - game/runtime-v23-bridge-render-v17-3-1-64b7ab3399.js
+      - game/character-profiles-v42.js
+      - game/hero-character-v42.js
+      - game/hero-character-v44.js
+      - game/keeper-character-v44.js
+      - tests/character-arcade-v50-visual.spec.js
+      - .github/workflows/visual-character-arcade-v50.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: football-lab-arcade-character-v50
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out arcade branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install test dependencies
+        run: npm install
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify static runtime
+        run: npm run verify:runtime:v23
+
+      - name: Capture arcade player and keeper
+        run: npx playwright test tests/character-arcade-v50-visual.spec.js --workers=1 --reporter=line
+
+      - name: Upload arcade visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arcade-character-v50-${{ github.run_id }}
+          path: |
+            test-results/arcade-v50-ready.png
+            test-results/arcade-v50-strike.png
+            test-results/arcade-v50-full-ui.png
+          if-no-files-found: warn
+          retention-days: 14
