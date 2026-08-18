@@ -1,5 +1,5 @@
-// Football Lab V48 penalty training expansion cache reset
-const CACHE_NAME = "football-lab-shell-v48-0-0";
+// Football Lab V49 competitive penalty shootout cache reset
+const CACHE_NAME = "football-lab-shell-v49-0-0";
 const CORE_ASSETS = [
   "./",
   "./index.html",

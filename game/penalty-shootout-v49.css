@@ -1,0 +1,35 @@
+.penalty-shootout-setup-v49,.penalty-shootout-result-v49{width:min(680px,100%)}
+.penalty-shootout-grid-v49{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+.penalty-shootout-field-v49{display:grid;gap:7px;text-align:left}
+.penalty-shootout-field-v49 span,.shootout-score-label-v49,.shootout-status-v49{font:900 9px/1 system-ui;letter-spacing:.13em;color:rgba(244,247,240,.58)}
+.penalty-shootout-field-v49 select{width:100%;min-height:46px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#101914;color:#f4f7f0;padding:0 12px;font:800 12px system-ui}
+.penalty-shootout-rules-v49{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 20px}
+.penalty-shootout-rules-v49 div{padding:12px;border:1px solid rgba(218,254,77,.14);border-radius:10px;background:rgba(218,254,77,.04);text-align:center}
+.penalty-shootout-rules-v49 strong{display:block;color:#dafe4d;font:1000 11px/1.1 system-ui}
+.penalty-shootout-rules-v49 small{display:block;margin-top:5px;color:rgba(244,247,240,.58);font:750 9px/1.25 system-ui}
+.penalty-shootout-actions-v49{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.shootout-scoreboard-v49{display:none;border:1px solid rgba(218,254,77,.18);border-radius:12px;background:linear-gradient(145deg,rgba(218,254,77,.06),rgba(0,0,0,.13));padding:13px;margin-bottom:12px}
+.penalty-shootout-active-v49 .shootout-scoreboard-v49{display:grid;gap:11px}
+.shootout-score-head-v49{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.shootout-score-head-v49 strong{font:1000 12px/1 system-ui;color:#dafe4d;letter-spacing:.06em}
+.shootout-score-row-v49{display:grid;grid-template-columns:86px 1fr 30px;gap:8px;align-items:center}
+.shootout-score-row-v49>strong{font:1000 10px/1 system-ui;letter-spacing:.08em;color:#f4f7f0}
+.shootout-markers-v49{display:flex;flex-wrap:wrap;gap:5px}
+.shootout-kick-v49{display:grid;place-items:center;width:22px;height:22px;border:1px solid rgba(255,255,255,.13);border-radius:50%;font:1000 10px/1 system-ui;color:rgba(244,247,240,.35);background:rgba(255,255,255,.025)}
+.shootout-kick-v49.is-goal{color:#07110b;background:#dafe4d;border-color:#dafe4d}
+.shootout-kick-v49.is-miss{color:#fff;background:rgba(255,92,112,.18);border-color:rgba(255,92,112,.6)}
+.shootout-kick-v49.is-sudden{border-style:dashed}
+.shootout-score-row-v49>b{font:1000 20px/1 system-ui;color:#fff;text-align:right}
+.shootout-last-v49{min-height:15px;color:rgba(244,247,240,.72);font:800 9px/1.35 system-ui;letter-spacing:.06em}
+.penalty-shootout-active-v49 #trainingSessionBarV355,.penalty-shootout-active-v49 #trainingToolsV355,.penalty-shootout-active-v49 #trainingEditV35,.penalty-shootout-active-v49 #finishRunV25{display:none!important}
+.penalty-shootout-active-v49 .training-session-chip-v35{border-color:rgba(218,254,77,.34);background:rgba(7,17,11,.86)}
+.penalty-shootout-result-score-v49{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;margin:22px 0;padding:18px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(0,0,0,.17)}
+.penalty-shootout-result-score-v49 div{display:grid;gap:5px;text-align:center}
+.penalty-shootout-result-score-v49 span{font:850 9px/1 system-ui;color:rgba(244,247,240,.52);letter-spacing:.12em}
+.penalty-shootout-result-score-v49 strong{font:1000 34px/1 system-ui;color:#f4f7f0}
+.penalty-shootout-result-score-v49 b{font:1000 13px/1 system-ui;color:#dafe4d}
+.penalty-shootout-record-v49{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.penalty-shootout-record-v49 div{padding:11px 8px;border-radius:10px;background:rgba(255,255,255,.035);text-align:center}
+.penalty-shootout-record-v49 span{display:block;font:800 8px/1 system-ui;letter-spacing:.1em;color:rgba(244,247,240,.48)}
+.penalty-shootout-record-v49 strong{display:block;margin-top:6px;font:1000 18px/1 system-ui;color:#dafe4d}
+@media(max-width:650px){.penalty-shootout-grid-v49,.penalty-shootout-actions-v49{grid-template-columns:1fr}.penalty-shootout-rules-v49{grid-template-columns:1fr 1fr}.shootout-score-row-v49{grid-template-columns:68px 1fr 24px}.penalty-shootout-record-v49{grid-template-columns:1fr 1fr}.penalty-shootout-result-score-v49{gap:8px;padding:14px}.penalty-shootout-result-score-v49 strong{font-size:28px}}
