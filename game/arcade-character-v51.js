@@ -12,8 +12,8 @@ export function drawArcadeHeroCharacterV51(time) {
 
   window.__footballLabHeroFrameV51 = Object.freeze({
     build: BUILD,
-    character: character?.id || legacyFrame?.character || null,
-    sourceCharacterId: character?.id || legacyFrame?.sourceCharacterId || null,
+    character: legacyFrame?.character || character?.id || null,
+    sourceCharacterId: legacyFrame?.sourceCharacterId || character?.id || null,
     renderer: "polished-modern-arcade-articulated-2.5d",
     rig: "continuous-skeletal-canvas",
     artDirection: "premium-modern-arcade-football",
