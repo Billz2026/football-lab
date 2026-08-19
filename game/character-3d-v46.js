@@ -15,7 +15,6 @@ const THREE_URL = `https://esm.sh/three@${THREE_VERSION}`;
 const GLTF_LOADER_URL = `https://esm.sh/three@${THREE_VERSION}/examples/jsm/loaders/GLTFLoader.js`;
 const VIEW_ASPECT = WORLD.width / WORLD.height;
 const MODEL_FORWARD_AXIS = "+Z";
-const ASSET_TIMEOUT_MS = 2500;
 
 let runtimePromise = null;
 let runtime = null;
@@ -64,24 +63,6 @@ function publish(status, extra = {}) {
 function assetUrl(entry) {
   if (!entry?.model) return null;
   return new URL(entry.model, import.meta.url).href;
-}
-
-async function assetExists(url) {
-  if (!url) return false;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), ASSET_TIMEOUT_MS);
-  try {
-    const response = await fetch(url, {
-      method: "HEAD",
-      cache: "no-store",
-      signal: controller.signal
-    });
-    return response.ok;
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timeout);
-  }
 }
 
 async function ensureRuntime() {
@@ -255,13 +236,13 @@ async function loadEntry(entry) {
   if (loading.has(entry.id)) return loading.get(entry.id);
 
   const promise = (async () => {
-    const url = assetUrl(entry);
-    if (!(await assetExists(url))) {
+    if (!entry.bundledModel) {
       failed.set(entry.id, "missing-local-glb");
       publish("fallback-missing-assets");
       return null;
     }
 
+    const url = assetUrl(entry);
     const { GLTFLoader } = await ensureRuntime();
     const loader = new GLTFLoader();
     const gltf = await loader.loadAsync(url);
@@ -460,19 +441,6 @@ function renderConfigured(configured, cameraState) {
   return true;
 }
 
-function preloadBenchmarks() {
-  for (const entry of [characterAssetV1("viktor-kane"), characterAssetV1("mikkel-storm")]) {
-    const url = assetUrl(entry);
-    assetExists(url).then((exists) => {
-      if (exists) loadEntry(entry);
-      else {
-        failed.set(entry.id, "missing-local-glb");
-        publish("fallback-missing-assets");
-      }
-    });
-  }
-}
-
 export function drawHeroCharacterV46(time) {
   if (keeperInstalled && window.__footballLabPremiumKeeperSceneDrawV3852?.__footballLabV46KeeperHook !== true) {
     keeperInstalled = false;
@@ -600,7 +568,6 @@ function retryKeeperInstall() {
 
 export function installCharacter3DV46() {
   publish("asset-gated-fallback");
-  preloadBenchmarks();
   retryKeeperInstall();
 }
 

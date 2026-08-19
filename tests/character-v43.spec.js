@@ -60,10 +60,7 @@ test("Mikkel uses V46 3D while keepers without approved GLBs remain on V44", asy
     () => page.evaluate(() => window.__footballLabKeeperRendererV44?.build),
     { timeout: 6000 }
   ).toBe("44.0.0");
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabCharacter3DV46?.loaded?.includes("mikkel-storm")),
-    { timeout: 12000 }
-  ).toBe(true);
+  expect(await page.evaluate(() => window.__footballLabCharacter3DV46?.loaded)).not.toContain("mikkel-storm");
 
   // Stage 0 uses the academy/SIMON HENSHAW visual profile. With no Simon GLB,
   // the continuous articulated V44 scene-depth keeper must remain intact.
@@ -93,6 +90,10 @@ test("Mikkel uses V46 3D while keepers without approved GLBs remain on V44", asy
     window.__footballLabPremiumKeeperSceneDrawV3852?.(performance.now());
   });
 
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabCharacter3DV46?.loaded?.includes("mikkel-storm")),
+    { timeout: 12000 }
+  ).toBe(true);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabKeeperFrameV46?.renderer),
     { timeout: 12000 }

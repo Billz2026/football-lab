@@ -19,6 +19,12 @@ async function enterClassic(page) {
 }
 
 test("V46 keeps the production keeper GLB but renders Viktor through the shared arcade fallback", async ({ page }) => {
+  const glbRequests = [];
+  const threeRequests = [];
+  page.on("request", (request) => {
+    if (request.url().endsWith(".glb")) glbRequests.push({ url: request.url(), method: request.method() });
+    if (request.url().startsWith("https://esm.sh/three@")) threeRequests.push(request.url());
+  });
   await page.goto("/index.html?test=character-v46");
 
   await expect.poll(
@@ -26,16 +32,7 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
     { timeout: 15000 }
   ).toBe("46.0.0");
 
-  await expect.poll(
-    () => page.evaluate(() => {
-      const contract = window.__footballLabCharacter3DV46;
-      return Boolean(
-        contract?.loaded?.includes("viktor-kane") &&
-        contract?.loaded?.includes("mikkel-storm")
-      );
-    }),
-    { timeout: 20000 }
-  ).toBe(true);
+  await page.waitForFunction(() => window.__footballLabReleaseV480?.build === "48.0.0");
 
   const contract = await page.evaluate(() => ({
     v46: window.__footballLabCharacter3DV46,
@@ -47,9 +44,11 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
   expect(contract.v46.fallback).toBe("v44-articulated-2.5d");
   expect(contract.v46.gameplayPhysicsChanged).toBe(false);
   expect(contract.v46.keeperAIChanged).toBe(false);
-  expect(contract.v46.loaded).toEqual(expect.arrayContaining(["viktor-kane", "mikkel-storm"]));
+  expect(contract.v46.loaded).toEqual([]);
   expect(contract.v46.failed.some((entry) => entry.id === "mikkel-storm")).toBe(false);
   expect(contract.production.liveArcadeFallback).toContain("viktor-kane");
+  expect(glbRequests).toEqual([]);
+  expect(threeRequests).toEqual([]);
 
   await enterClassic(page);
 
@@ -68,6 +67,7 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
   expect(live.visible.production3D).toBe(false);
   expect(live.visible.productionCharacterMode).toBe("articulated-2.5d-fallback");
   expect(live.visible.staticSpriteFrames).toBe(false);
+  expect(glbRequests.some((request) => request.url.includes("viktor-kane"))).toBe(false);
 
   await page.evaluate(async () => {
     const core = await import("/game/core-v6.js?v=32.4");
@@ -87,4 +87,8 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
   expect(keeper.build).toBe("46.0.0");
   expect(keeper.production3D).toBe(true);
   expect(keeper.sceneDepth).toBe(true);
+  expect(glbRequests).toHaveLength(1);
+  expect(glbRequests[0].url).toContain("mikkel-storm.glb");
+  expect(glbRequests[0].method).toBe("GET");
+  expect(threeRequests.length).toBeGreaterThan(0);
 });
