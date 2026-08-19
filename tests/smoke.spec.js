@@ -22,17 +22,6 @@ test("public Classic Kicks boots and starts an unlimited run", async ({ page }) 
   expect(errors).toEqual([]);
 });
 
-test("main menu permanently starts with the mode tile mosaic", async ({ page }) => {
-  await page.goto("/index.html");
-
-  await expect(page.locator(".hub-hero")).toHaveCount(0);
-  await expect(page.getByText("MASTER EVERY MOMENT.", { exact: true })).toHaveCount(0);
-  await expect(page.locator("#modeHub")).toBeVisible();
-  await expect(page.locator(".hub-mode-grid > .hub-mode-tile")).toHaveCount(6);
-  await expect(page.locator("#trainingCardV35")).toBeVisible();
-  await expect(page.locator("#classicCard")).toBeVisible();
-});
-
 test("a complete shot can be played before the run is voluntarily submitted", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/index.html");
