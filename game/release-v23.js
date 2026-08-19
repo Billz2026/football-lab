@@ -43,7 +43,7 @@ window.__footballLabReleaseV25 = Object.freeze({
   legacySourceExecution: false
 });
 
-document.documentElement.dataset.footballLabBuild = BUILD;
+document.documentElement.dataset.footballLabRuntimeReleaseBuild = BUILD;
 document.documentElement.dataset.footballLabRuntime = "static-es-modules";
 
 if (window.__footballLabRecoverySeenV1731 === undefined) {
