@@ -29,7 +29,36 @@ let composureFrame = 0;
 let composureStartedAt = 0;
 let defense = null;
 let defenseTimer = 0;
+let defenseFrame = 0;
 let recordCommitted = false;
+
+function clearDefenseScheduling() {
+  clearTimeout(defenseTimer);
+  cancelAnimationFrame(defenseFrame);
+  defenseTimer = 0;
+  defenseFrame = 0;
+}
+
+function scheduleCpuStrike(runUpMs) {
+  cancelAnimationFrame(defenseFrame);
+  let elapsed = 0;
+  let previous = 0;
+  const advance = (time) => {
+    if (!active || duel?.turn !== "cpu" || !defense || defense.resolved || duel.complete) {
+      defenseFrame = 0;
+      return;
+    }
+    if (previous) elapsed += Math.min(time - previous, 50);
+    previous = time;
+    if (elapsed >= runUpMs) {
+      defenseFrame = 0;
+      cpuStrike();
+      return;
+    }
+    defenseFrame = requestAnimationFrame(advance);
+  };
+  defenseFrame = requestAnimationFrame(advance);
+}
 
 function ensureStylesheet() {
   if (document.querySelector('link[data-penalty-duel-v51]')) return;
@@ -357,7 +386,7 @@ function chooseCounterZone(committed, roll) {
 
 function startDefenseTurn() {
   if (!active || !duel || duel.complete) return;
-  stopComposureMeter(); clearTimeout(defenseTimer);
+  stopComposureMeter(); clearDefenseScheduling();
   duel.turn = "cpu"; attackZone = null;
   const cfg = difficulty(); const index = duel.opponentResults.length;
   const plannedZone = zoneForRoll(deterministic(duel.seed, 100 + index * 11));
@@ -386,7 +415,7 @@ function beginCpuRunUp() {
   document.getElementById("defenseCpuV51")?.classList.add("is-running");
   document.querySelectorAll("[data-v51-dive]").forEach((button) => { button.disabled = false; });
   document.getElementById("defenseTimingV51").textContent = "DIVE ON THE STRIKE";
-  defenseTimer = setTimeout(cpuStrike, cfg.runUpMs);
+  scheduleCpuStrike(cfg.runUpMs);
 }
 
 function cpuStrike() {
@@ -479,7 +508,7 @@ function commitRecord() {
 
 function completeDuel(decision) {
   if (!duel || duel.complete) return;
-  clearTimeout(defenseTimer); stopComposureMeter(); duel.complete = true; duel.decision = decision; duel.turn = "complete"; commitRecord(); renderScoreboard(decision.winner === "player" ? "SHOOTOUT WON" : "SHOOTOUT LOST");
+  clearDefenseScheduling(); stopComposureMeter(); duel.complete = true; duel.decision = decision; duel.turn = "complete"; commitRecord(); renderScoreboard(decision.winner === "player" ? "SHOOTOUT WON" : "SHOOTOUT LOST");
   document.documentElement.classList.remove("is-defending-v51");
   const modal = ensureResultModal(); const won = decision.winner === "player"; const sudden = Math.max(0, Math.max(duel.playerResults.length, duel.opponentResults.length) - REGULATION_KICKS);
   document.getElementById("duelResultTitleV51").textContent = won ? "SHOOTOUT WON." : "SHOOTOUT LOST.";
@@ -503,7 +532,7 @@ function activateDuel() {
 }
 
 function cleanupDuel() {
-  clearTimeout(defenseTimer); stopComposureMeter(); active = false; duel = null; defense = null; attackZone = null; recordCommitted = false;
+  clearDefenseScheduling(); stopComposureMeter(); active = false; duel = null; defense = null; attackZone = null; recordCommitted = false;
   const root = document.documentElement; root.classList.remove("penalty-duel-v51", "is-defending-v51", "is-high-pressure-v51"); delete root.dataset.duelAttackV51;
   hideModal(ensureResultModal());
 }
