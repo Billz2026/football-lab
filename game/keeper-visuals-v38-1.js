@@ -759,7 +759,7 @@ function patchLegacyKeeperRenderer() {
 }
 
 function publishRelease() {
-  document.documentElement.dataset.footballLabBuild = "38.1";
+  document.documentElement.dataset.footballLabKeeperVisualsBuild = "38.1";
   const badge = document.querySelector(".build-badge-v22");
   if (badge) {
     badge.textContent = "V38.1";
