@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="./product-polish-v22.css?v=22" />
   <link rel="stylesheet" href="./game/strike-v32-4.css?v=32.4" />
   <link rel="stylesheet" href="./game/hub-v35-1.css?v=35.1" />
-  <link rel="stylesheet" href="./game/hub-v35-2.css?v=35.2" />
+  <link rel="stylesheet" href="./game/hub-v35-2.css?v=35.2.1" />
 </head>
 <body>
   <a class="skip-link-v22" href="#modeHub">Skip to game modes</a>
@@ -63,20 +63,12 @@
     </header>
 
     <main>
-      <section class="screen screen-menu is-active" id="menuScreen" tabindex="-1" aria-labelledby="menuTitle">
+      <section class="screen screen-menu is-active" id="menuScreen" tabindex="-1" aria-label="Football Lab game modes">
         <div class="hub-shell" id="hubHome">
-          <section class="hub-hero" aria-labelledby="menuTitle">
-            <div class="hub-eyebrow">FOOTBALL SKILLS PLATFORM</div>
-            <h1 id="menuTitle">MASTER EVERY MOMENT.</h1>
-            <p class="hub-hero-copy">Choose a football discipline, build your technique and keep improving. Free Training and Classic Free Kicks are playable now; the hub is built to expand into penalties, corners, finishing and match situations.</p>
-            <div class="hub-hero-actions">
-              <span class="hub-hero-chip"><b>2</b> PLAYABLE MODES</span>
-              <span class="hub-hero-chip"><b>16–45</b> YARD TRAINING</span>
-              <span class="hub-hero-chip"><b>∞</b> PRACTICE ATTEMPTS</span>
-              <button class="button button-secondary hub-how-button" id="howToPlay" type="button">HOW TO PLAY</button>
-            </div>
+          <div class="hub-menu-utilities" aria-hidden="true">
+            <button class="button button-secondary hub-how-button" id="howToPlay" type="button">HOW TO PLAY</button>
             <button id="playClassic" type="button" hidden aria-hidden="true" tabindex="-1">PLAY CLASSIC</button>
-          </section>
+          </div>
 
           <section class="hub-profile-strip" id="hubProfile" aria-label="Player profile summary">
             <div class="hub-profile-id">
@@ -94,12 +86,7 @@
             </div>
           </section>
 
-          <section class="hub-modes-section" id="modeHub" aria-labelledby="modesTitle">
-            <div class="hub-section-heading">
-              <div><span class="section-label">PLAY FOOTBALL LAB</span><h2 id="modesTitle">CHOOSE YOUR MODE.</h2></div>
-              <p>Select the football activity first. Player, keeper and session choices now live inside the mode instead of cluttering the homepage.</p>
-            </div>
-
+          <section class="hub-modes-section" id="modeHub" aria-label="Choose a game mode">
             <div class="hub-mode-grid">
               <button class="hub-mode-tile hub-mode-primary hub-mode-training" id="trainingCardV35" type="button">
                 <span class="hub-mode-number">01 · TRAINING GROUND</span>
