@@ -45,7 +45,7 @@ jobs:
 
       - name: Install Chromium
         timeout-minutes: 10
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Verify committed V46 production render bridge
         shell: bash
