@@ -10,6 +10,7 @@
     "verify:build:32.3": "node scripts/verify-build-32-3.mjs",
     "verify:build:32.4": "node scripts/verify-build-32-4.mjs",
     "verify:characters:v1": "node scripts/verify-character-assets-v1.mjs",
+    "test:ci": "playwright test --config=playwright.ci.config.js",
     "test:browser": "playwright test"
   },
   "devDependencies": {
