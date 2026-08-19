@@ -6,7 +6,7 @@ async function openPowerKicker(page, viewport = { width: 884, height: 1100 }) {
   await page.setViewportSize(viewport);
   await page.goto("/index.html?v=173");
   await expect.poll(() => page.evaluate(() => window.__footballLabMainV173 === true), { timeout: 20000 }).toBe(true);
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
