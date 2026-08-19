@@ -11,6 +11,17 @@ const FORBIDDEN_RUNTIME_PATHS = [
   "/game/hero-kicker-v17-3-1.js"
 ];
 
+test("main menu permanently starts with the mode tile mosaic", async ({ page }) => {
+  await page.goto("/index.html");
+
+  await expect(page.locator(".hub-hero")).toHaveCount(0);
+  await expect(page.getByText("MASTER EVERY MOMENT.", { exact: true })).toHaveCount(0);
+  await expect(page.locator("#modeHub")).toBeVisible();
+  await expect(page.locator(".hub-mode-grid > .hub-mode-tile")).toHaveCount(6);
+  await expect(page.locator("#trainingCardV35")).toBeVisible();
+  await expect(page.locator("#classicCard")).toBeVisible();
+});
+
 test("V23 boots from static modules without browser-time source execution", async ({ page }) => {
   const errors = [];
   const requestedPaths = [];
