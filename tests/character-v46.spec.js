@@ -32,7 +32,7 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
     { timeout: 15000 }
   ).toBe("46.0.0");
 
-  await page.waitForFunction(() => window.__footballLabReleaseV480?.build === "48.0.0");
+  await page.waitForFunction(() => window.__footballLabReleaseV511?.build === "51.1.0");
 
   const contract = await page.evaluate(() => ({
     v46: window.__footballLabCharacter3DV46,
