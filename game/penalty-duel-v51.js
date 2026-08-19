@@ -2,7 +2,7 @@ import { clamp, state, elements, syncStage } from "./core-v6.js?v=32.4";
 import { keeperById } from "./keepers-v14.js?v=32.4";
 import { shootoutDecision, shootoutPhaseLabel, goalCount, REGULATION_KICKS } from "./penalty-shootout-rules-v49.js?v=49.0.0";
 
-const BUILD = "51.0.0";
+const BUILD = "51.1.0";
 const RECORD_KEY = "footballLabPenaltyShootoutRecordV49";
 const PENALTY_CAMERA = Object.freeze({ sideOffset: 0, backDistance: 7.15, height: 1.82, fovY: 34.5, targetHeight: 1.11 });
 const ZONES = Object.freeze([
@@ -64,7 +64,7 @@ function ensureStylesheet() {
   if (document.querySelector('link[data-penalty-duel-v51]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "./game/penalty-duel-v51.css?v=51.0.0";
+  link.href = `./game/penalty-duel-v51.css?v=${BUILD}`;
   link.dataset.penaltyDuelV51 = "true";
   document.head.appendChild(link);
 }
@@ -563,8 +563,8 @@ function handleKeys(event) {
 function publishRelease() {
   const old = window.__footballLabReleaseV490 || window.__footballLabReleaseV480; if (!old) return false;
   const release = Object.freeze({ ...old, build: BUILD, penaltyExperience: "full-player-vs-cpu-alternating-duel", penaltyAttack: "six-zone-runup-single-composure-strike", penaltyDefense: "user-controlled-goalkeeper-cpu-kicks", penaltyCpuDifficulty: "academy-pro-elite-world-class-behavioural", penaltyCpuBehaviour: "runup-cues-disguise-early-keeper-read", penaltyKeeperControl: "shuffle-plus-six-zone-dive-timing", penaltyOpponentSimulation: "retired-from-live-v51", cacheGeneration: BUILD });
-  window.__footballLabReleaseV510 = release; document.documentElement.dataset.footballLabBuild = BUILD;
-  const badge = document.querySelector(".build-badge-v22"); if (badge) { badge.textContent = "V51.0"; badge.title = `Football Lab build ${BUILD}`; }
+  window.__footballLabReleaseV510 = release; window.__footballLabReleaseV511 = release; window.__footballLabReleaseCurrent = release; document.documentElement.dataset.footballLabBuild = BUILD;
+  const badge = document.querySelector(".build-badge-v22"); if (badge) { badge.textContent = "V51.1"; badge.title = `Football Lab build ${BUILD}`; }
   const version = document.querySelector(".settings-version-v22 strong"); if (version) version.textContent = BUILD;
   return true;
 }
