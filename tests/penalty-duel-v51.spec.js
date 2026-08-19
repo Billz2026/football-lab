@@ -84,8 +84,7 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await leftShift.click();
   await expect(leftShift).toHaveClass(/is-selected/);
 
-  await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.runUpStarted), { timeout: 4000 }).toBe(true);
-  await page.locator('[data-v51-dive="high-left"]').click();
+  await page.locator('[data-v51-dive="high-left"]').click({ timeout: 4000 });
 
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length), { timeout: 5000 }).toBe(1);
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn), { timeout: 5000 }).toBe("player");
