@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("V49 exposes a competitive penalty shootout from the hub", async ({ page }) => {
+test("V49 rules power the competitive V51 penalty duel from the hub", async ({ page }) => {
   await page.goto("/");
   await page.waitForFunction(() => window.__footballLabPenaltyShootoutV49?.build === "49.0.0");
 
@@ -20,7 +20,7 @@ test("V49 exposes a competitive penalty shootout from the hub", async ({ page })
 
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
   await expect(page.locator("html")).toHaveClass(/penalty-shootout-active-v49/);
-  await expect(page.locator("#stageNumber")).toContainText("PENALTY SHOOTOUT");
+  await expect(page.locator("#stageNumber")).toContainText("PENALTY DUEL");
   await expect(page.locator("#shootoutScoreboardV49")).toBeVisible();
   await expect(page.locator(".training-session-chip-v35")).toContainText("PENALTY SHOOTOUT");
 
