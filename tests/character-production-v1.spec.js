@@ -5,11 +5,11 @@ async function waitForProductionContract(page) {
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterProductionV1?.build),
     { timeout: 15000 }
-  ).toBe("1.0.1");
+  ).toBe("1.0.2");
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterEngineV1?.build),
     { timeout: 15000 }
-  ).toBe("1.0.1");
+  ).toBe("1.0.2");
 }
 
 async function enterClassic(page) {

@@ -62,6 +62,9 @@ for (const [id, entry] of Object.entries(CHARACTER_ASSETS_V1)) {
 
   const modelPath = localPath(entry.model);
   const exists = await fileExists(modelPath);
+  if (entry.bundledModel !== exists) {
+    errors.push(`${id}: bundledModel=${entry.bundledModel} does not match filesystem availability (${exists})`);
+  }
   if (entry.productionStatus === "ready") {
     if (!exists) {
       errors.push(`${id}: marked ready but ${entry.model} is missing`);

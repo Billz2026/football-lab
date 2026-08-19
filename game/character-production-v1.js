@@ -1,6 +1,6 @@
 const freeze = (value) => Object.freeze(value);
 
-export const CHARACTER_PRODUCTION_BUILD_V1 = "1.0.1";
+export const CHARACTER_PRODUCTION_BUILD_V1 = "1.0.2";
 export const CHARACTER_ASSET_ROOT_V1 = "./assets/characters/v1";
 
 const OUTFIELD_CLIPS = freeze([
@@ -61,6 +61,7 @@ function asset(id, sourceId, kind, options = {}) {
     sourceId,
     kind,
     benchmark: Boolean(options.benchmark),
+    bundledModel: Boolean(options.bundledModel),
     referenceStatus: "approved",
     productionStatus: "awaiting-glb",
     liveRenderer: options.liveRenderer || "3d-auto",
@@ -78,6 +79,7 @@ function asset(id, sourceId, kind, options = {}) {
 export const CHARACTER_ASSETS_V1 = freeze({
   "viktor-kane": asset("viktor-kane", "dax-ryder", "outfield", {
     benchmark: true,
+    bundledModel: true,
     liveRenderer: "arcade-v44",
     visualIdentity: {
       build: "tall-balanced-athletic",
@@ -117,6 +119,7 @@ export const CHARACTER_ASSETS_V1 = freeze({
   }),
   "mikkel-storm": asset("mikkel-storm", "giant", "goalkeeper", {
     benchmark: true,
+    bundledModel: true,
     visualIdentity: {
       build: "tall-physically-imposing",
       hair: "short-light-brown-blonde",
