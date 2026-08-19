@@ -9,6 +9,9 @@
 
 /* V35.2: denser console-style hub inspired by premium football menus. */
 .hub-shell{padding-top:0}
+.hub-menu-utilities{display:none}
+#menuScreen .hub-profile-strip{display:none}
+#menuScreen .hub-modes-section{margin-top:10px}
 .hub-hero{
   min-height:168px;
   padding:26px clamp(24px,3.2vw,42px);
