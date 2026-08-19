@@ -80,8 +80,12 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await expect(page.locator("#stageName")).toHaveText("YOU ARE THE GOALKEEPER");
 
   const leftShift = page.locator('[data-v51-shift="left"]');
-  await expect(leftShift).toBeEnabled();
-  await leftShift.click();
+  await page.waitForFunction(() => {
+    const button = document.querySelector('[data-v51-shift="left"]');
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+    button.click();
+    return true;
+  }, null, { polling: "raf", timeout: 4000 });
   await expect(leftShift).toHaveClass(/is-selected/);
 
   await page.waitForFunction(() => {
