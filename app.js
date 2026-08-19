@@ -1,7 +1,9 @@
-// Football Lab V48 penalty training expansion
+// Football Lab V51.1 release and cache contract
+const RELEASE_BUILD = "51.1.0";
+
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
-  navigator.serviceWorker.register("./sw.js?v=48.0.0", {
+  navigator.serviceWorker.register(`./sw.js?v=${RELEASE_BUILD}`, {
     scope: "./",
     updateViaCache: "none"
   })
@@ -67,16 +69,16 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/campaign-v31.js?v=32.4"))
       .then(() => import("./game/campaign-v41.js?v=41.0.0"))
       .then(() => {
-        document.documentElement.dataset.footballLabBuild = "48.0.0";
+        document.documentElement.dataset.footballLabBuild = RELEASE_BUILD;
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V48.0";
-          badge.title = "Football Lab build 48.0.0";
+          badge.textContent = "V51.1";
+          badge.title = `Football Lab build ${RELEASE_BUILD}`;
         }
         const version = document.querySelector(".settings-version-v22 strong");
-        if (version) version.textContent = "48.0.0";
+        if (version) version.textContent = RELEASE_BUILD;
         const release = Object.freeze({
-          build: "48.0.0",
+          build: RELEASE_BUILD,
           shell: "premium-asymmetric-console-mosaic",
           navigation: "play-training-profile-in-settings",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
@@ -148,7 +150,7 @@ const bootPromise = runtimeCaptureMode
           impactAudio: "net-thump-glove-slap-frame-ring",
           prediction: "unsolved-short-launch-guide",
           defaultMode: "standard",
-          cacheGeneration: "48.0.0"
+          cacheGeneration: RELEASE_BUILD
         });
         window.__footballLabReleaseV322 = release;
         window.__footballLabReleaseV323 = release;
@@ -188,6 +190,8 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV403A = release;
         window.__footballLabReleaseV410 = release;
         window.__footballLabReleaseV480 = release;
+        window.__footballLabReleaseV511 = release;
+        window.__footballLabReleaseCurrent = release;
       });
 
 bootPromise.catch((error) => {

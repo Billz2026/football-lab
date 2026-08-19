@@ -15,5 +15,5 @@ window.__footballLabTrainingGuardV35 = Object.freeze({
   blocksCareerRewards: true
 });
 
-await import("./penalty-duel-v51.js?v=51.0.0");
-await import("./penalty-duel-transition-guard-v51.js?v=51.0.1");
+await import("./penalty-duel-v51.js?v=51.1.0");
+await import("./penalty-duel-transition-guard-v51.js?v=51.1.0");
