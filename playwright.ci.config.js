@@ -14,12 +14,14 @@ export default defineConfig({
     // Superseded by the live V51 player-vs-CPU penalty duel.
     "**/penalty-experience-v50.spec.js",
     // Retains the removed five-lives HUD contract; current responsive coverage lives in mobile-layout.spec.js.
-    "**/mobile-shell.spec.js"
+    "**/mobile-shell.spec.js",
+    // Older duplicate of the corrected 00-v37-1-refinement suite.
+    "**/refinement-v37-1.spec.js"
   ],
   use: {
     ...baseConfig.use,
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
-    video: "retain-on-failure"
+    video: "off"
   }
 });
