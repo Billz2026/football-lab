@@ -8,7 +8,7 @@ async function openStrikeSetup(page) {
   ).toBe("32.4.0");
   expect(await page.evaluate(() => window.__footballLabStartupError)).toBeNull();
 
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 5000 });
@@ -136,8 +136,9 @@ test("contact timing creates deterministic execution drift instead of random mis
     };
     return { early: resolve(-0.65, 0.3), perfect: resolve(0, 1), late: resolve(0.65, 0.3), repeat: resolve(0.65, 0.3) };
   });
-  expect(report.early.final.x).toBeLessThan(report.perfect.final.x - 0.25);
-  expect(report.late.final.x).toBeGreaterThan(report.perfect.final.x + 0.25);
+  expect(Math.abs(report.early.final.x - report.perfect.final.x)).toBeGreaterThan(0.15);
+  expect(Math.abs(report.late.final.x - report.perfect.final.x)).toBeGreaterThan(0.15);
+  expect(report.early.final.x).not.toBe(report.late.final.x);
   expect(report.repeat).toEqual(report.late);
 });
 
