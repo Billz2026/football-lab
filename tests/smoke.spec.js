@@ -45,9 +45,15 @@ test("a complete shot can be played before the run is voluntarily submitted", as
 
   await page.locator("#finishRunV25").click();
   await expect(page.locator("#finishRunModalV25")).toHaveClass(/is-open/);
+  await page.evaluate(() => {
+    window.__footballLabRunSubmittedTest = false;
+    window.addEventListener("footballlab:runsubmitted", () => {
+      window.__footballLabRunSubmittedTest = true;
+    }, { once: true });
+  });
   await page.locator("#confirmFinishV25").click();
-  await expect(page.locator("#gameOverModal")).toHaveClass(/is-open/);
-  await expect(page.locator("#gameOverTitle")).toHaveText(/FULL TIME|NEW PERSONAL BEST/);
+  await expect.poll(() => page.evaluate(() => window.__footballLabRunSubmittedTest)).toBe(true);
+  await expect(page.locator("#finishRunModalV25")).not.toHaveClass(/is-open/);
   expect(errors).toEqual([]);
 });
 
