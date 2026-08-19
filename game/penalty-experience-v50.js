@@ -291,7 +291,7 @@ function publishReleaseMetadata() {
     cacheGeneration: BUILD
   });
   window.__footballLabReleaseV500 = release;
-  document.documentElement.dataset.footballLabBuild = BUILD;
+  document.documentElement.dataset.footballLabPenaltyExperienceBuild = BUILD;
   const badge = document.querySelector(".build-badge-v22");
   if (badge) {
     badge.textContent = "V50.0";
