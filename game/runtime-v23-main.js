@@ -820,7 +820,9 @@ window.addEventListener("footballlab:beginstrike", () => {
 });
 
 window.addEventListener("footballlab:submitrun", () => {
-  if (state.screen !== "game" || elements.gameOverModal.classList.contains("is-open")) return;
+  const gameIsActive = state.screen === "game" || elements.gameScreen.classList.contains("is-active");
+  if (!gameIsActive || elements.gameOverModal.classList.contains("is-open")) return;
+  state.screen = "game";
   setPhase("ready");
   endRun();
   window.dispatchEvent(new CustomEvent("footballlab:runsubmitted"));
