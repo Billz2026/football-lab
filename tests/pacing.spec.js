@@ -9,7 +9,7 @@ test("fast-flow build loads and clears the opening stage reveal quickly", async 
     { timeout: 5000 }
   ).toBe(true);
 
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
