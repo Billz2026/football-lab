@@ -1,7 +1,7 @@
 import { state, elements } from "./core-v6.js?v=32.4";
 
 function interceptCompetitiveExit(event) {
-  if (state.gameMode !== "training" || !document.documentElement.classList.contains("training-active-v35")) return;
+  if (state.gameMode !== "training") return;
   event.preventDefault?.();
   event.stopImmediatePropagation?.();
   elements.exitGame?.click();
