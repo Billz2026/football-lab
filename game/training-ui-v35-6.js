@@ -112,7 +112,7 @@ window.addEventListener("footballlab:phasechange", (event) => {
 
 if (state.gameMode === "training") queueMicrotask(applyTrainingMicroPolish);
 
-document.documentElement.dataset.footballLabBuild = "35.6.1";
+document.documentElement.dataset.footballLabTrainingUiBuild = "35.6.1";
 const version = document.querySelector(".settings-version-v22 strong");
 if (version) version.textContent = BUILD;
 
