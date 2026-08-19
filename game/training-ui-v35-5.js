@@ -12,6 +12,10 @@ const BALL_NAMES = Object.freeze({
 
 let lastResult = "—";
 
+function trainingModeLabel() {
+  return state.trainingConfig?.activity === "penalties" ? "PENALTY TRAINING" : "FREE TRAINING";
+}
+
 function ensureStylesheet() {
   if (document.querySelector('link[data-training-ui-v355]')) return;
   const link = document.createElement("link");
@@ -39,6 +43,8 @@ function ensureTrainingUi() {
       <span class="training-last-v355">LAST <strong id="trainingLastTopV355">—</strong></span>`;
     panel.prepend(session);
   }
+  const sessionMode = session.querySelector(".training-session-mode-v355");
+  if (sessionMode) sessionMode.textContent = trainingModeLabel();
 
   let tools = document.getElementById("trainingToolsV355");
   if (!tools) {
@@ -125,6 +131,8 @@ function renderTrainingUi() {
 
   const config = document.getElementById("trainingConfigV355");
   if (config) config.textContent = sessionSummary();
+  const sessionMode = document.querySelector(".training-session-mode-v355");
+  if (sessionMode) sessionMode.textContent = trainingModeLabel();
   const attemptsNode = document.getElementById("trainingAttemptsV355");
   const goalsNode = document.getElementById("trainingGoalsV355");
   const accuracyNode = document.getElementById("trainingAccuracyV355");
