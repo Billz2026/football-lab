@@ -88,12 +88,29 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   }, null, { polling: "raf", timeout: 4000 });
   await expect(leftShift).toHaveClass(/is-selected/);
 
-  await page.waitForFunction(() => {
+  const diveCommitted = await page.evaluate(() => new Promise((resolve) => {
     const button = document.querySelector('[data-v51-dive="high-left"]');
-    if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
-    button.click();
-    return true;
-  }, null, { polling: "raf", timeout: 4000 });
+    if (!(button instanceof HTMLButtonElement)) {
+      resolve(false);
+      return;
+    }
+    let observer;
+    const commitWhenReady = () => {
+      if (button.disabled) return false;
+      button.click();
+      observer?.disconnect();
+      resolve(true);
+      return true;
+    };
+    if (commitWhenReady()) return;
+    observer = new MutationObserver(commitWhenReady);
+    observer.observe(button, { attributes: true, attributeFilter: ["disabled"] });
+    setTimeout(() => {
+      observer.disconnect();
+      resolve(false);
+    }, 4000);
+  }));
+  expect(diveCommitted).toBe(true);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.committed),
     { timeout: 1500 }
