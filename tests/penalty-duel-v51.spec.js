@@ -84,10 +84,12 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await leftShift.click();
   await expect(leftShift).toHaveClass(/is-selected/);
 
-  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.runUpStarted);
-  const highLeftDive = page.locator('[data-v51-dive="high-left"]');
-  await expect(highLeftDive).toBeEnabled();
-  await highLeftDive.click();
+  await page.waitForFunction(() => {
+    const button = document.querySelector('[data-v51-dive="high-left"]');
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+    button.click();
+    return true;
+  }, null, { polling: "raf", timeout: 4000 });
   await expect.poll(
     () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.committed),
     { timeout: 1500 }
