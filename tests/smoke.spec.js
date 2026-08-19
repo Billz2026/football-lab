@@ -46,13 +46,13 @@ test("a complete shot can be played before the run is voluntarily submitted", as
   await page.locator("#finishRunV25").click();
   await expect(page.locator("#finishRunModalV25")).toHaveClass(/is-open/);
   await page.evaluate(() => {
-    window.__footballLabRunSubmittedTest = false;
-    window.addEventListener("footballlab:runsubmitted", () => {
-      window.__footballLabRunSubmittedTest = true;
+    window.__footballLabSubmitRunTest = false;
+    window.addEventListener("footballlab:submitrun", () => {
+      window.__footballLabSubmitRunTest = true;
     }, { once: true });
   });
   await page.locator("#confirmFinishV25").click();
-  await expect.poll(() => page.evaluate(() => window.__footballLabRunSubmittedTest)).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__footballLabSubmitRunTest)).toBe(true);
   await expect(page.locator("#finishRunModalV25")).not.toHaveClass(/is-open/);
   expect(errors).toEqual([]);
 });
