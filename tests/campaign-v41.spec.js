@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 async function waitForCampaign(page) {
   await page.goto("/index.html?test=campaign-v41");
+  await loadGameplay(page);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCampaignProgressionV41?.stages),
     { timeout: 10000 }

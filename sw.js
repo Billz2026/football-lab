@@ -6,6 +6,18 @@ const CORE_ASSETS = [
   "./index.html",
   "./style.css?v=2",
   "./product-polish-v22.css?v=22",
+  "./game/hub-v35-1.css?v=35.1",
+  "./game/hub-v35-2.css?v=35.2.1",
+  "./game/hub-v35-3.css?v=35.3",
+  "./game/hub-v35-4.css?v=35.4",
+  "./game/progression-v20.css?v=20",
+  "./game/world-v6.js?v=32.4",
+  "./game/core-v6.js?v=32.4",
+  "./game/product-polish-v22.js?v=32.4",
+  "./game/progression-v20.js?v=32.4",
+  "./game/hub-v35-1.js?v=35.1",
+  "./game/hub-v35-3.js?v=35.3",
+  "./game/hub-v35-4.js?v=35.6.2",
   `./app.js?v=${RELEASE_BUILD}`
 ];
 

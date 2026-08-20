@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 async function waitForV37(page) {
   await page.goto("/index.html");
+  await loadGameplay(page);
   await expect.poll(
     () => page.evaluate(() => Boolean(window.__footballLabSkillBalanceV37)),
     { timeout: 5000 }

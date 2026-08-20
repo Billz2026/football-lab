@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 async function enterClassic(page) {
   await page.locator("#classicCard").click();
@@ -26,6 +27,7 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
     if (request.url().startsWith("https://esm.sh/three@")) threeRequests.push(request.url());
   });
   await page.goto("/index.html?test=character-v46");
+  await loadGameplay(page);
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacter3DV46?.build),

@@ -1,10 +1,12 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 async function startRun(page, viewport = { width: 1180, height: 820 }) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setViewportSize(viewport);
   await page.goto("/index.html?v=17");
+  await loadGameplay(page);
   await expect.poll(() => page.evaluate(() => window.__footballLabMainV17 === true), { timeout: 20000 }).toBe(true);
   await expect.poll(() => page.evaluate(() => window.__footballLabRendererV17 === true), { timeout: 20000 }).toBe(true);
   await expect.poll(() => page.evaluate(() => window.__footballLabVisualV17 === true), { timeout: 20000 }).toBe(true);

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 async function enterClassic(page) {
   await page.locator("#classicCard").click();
@@ -22,6 +23,7 @@ async function chooseKicker(page, characterId) {
   await page.goto("/index.html?test=character-v44");
   await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), characterId);
   await page.reload();
+  await loadGameplay(page);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacter3DV46?.build),
     { timeout: 15000 }

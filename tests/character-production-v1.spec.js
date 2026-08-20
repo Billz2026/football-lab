@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 async function waitForProductionContract(page) {
   await page.goto("/index.html?test=character-production-v1");
+  await loadGameplay(page);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterProductionV1?.build),
     { timeout: 15000 }

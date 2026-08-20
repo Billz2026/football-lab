@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 async function ready(page) {
   await page.goto("/index.html?test=keeper-visuals-current-contract");
+  await loadGameplay(page);
   await expect.poll(
     () => page.evaluate(() => Boolean(window.__footballLabKeeperVisualsV3852)),
     { timeout: 10000 }

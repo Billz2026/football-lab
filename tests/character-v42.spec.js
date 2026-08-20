@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 const KICKERS = [
   ["dax-ryder", "viktor-kane"],
@@ -9,6 +10,7 @@ const KICKERS = [
 
 async function waitForV42(page) {
   await page.goto("/index.html?test=character-v42");
+  await loadGameplay(page);
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCharacterSystemV42?.build),
     { timeout: 15000 }
@@ -52,6 +54,7 @@ test("all live outfield profiles use the shared V44 articulated arcade renderer"
     await page.goto("/index.html?test=character-v44-roster");
     await page.evaluate((id) => localStorage.setItem("footballLabSelectedKickerV13", id), sourceId);
     await page.reload();
+    await loadGameplay(page);
     await expect.poll(
       () => page.evaluate(() => window.__footballLabCharacterSystemV42?.build),
       { timeout: 15000 }

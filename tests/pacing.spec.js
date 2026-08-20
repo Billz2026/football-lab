@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 test("fast-flow build loads and clears the opening stage reveal quickly", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("footballLabTutorialV22", "complete"));
   await page.goto("/index.html");
+  await loadGameplay(page);
 
   await expect.poll(
     () => page.evaluate(() => Boolean(window.__footballLabMainV174)),
@@ -20,6 +22,7 @@ test("fast-flow build loads and clears the opening stage reveal quickly", async 
 
 test("fast-flow timing contract is exposed for regression checks", async ({ page }) => {
   await page.goto("/index.html");
+  await loadGameplay(page);
 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabFastFlowV174 || null),

@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { loadGameplay } from "./helpers/load-gameplay.js";
 
 test("V17.1 startup reports the exact loader result", async ({ page }) => {
   await page.goto("/index.html?v=171");
+  await loadGameplay(page);
   await page.waitForTimeout(3000);
   const startup = await page.evaluate(() => ({
     error: window.__footballLabStartupError,
