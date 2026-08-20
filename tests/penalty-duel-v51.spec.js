@@ -126,7 +126,11 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await expect(page.locator("[data-v51-shift]")).toHaveCount(3);
   await expect(page.locator("[data-v51-dive]")).toHaveCount(6);
   await expect(page.locator("#stageName")).toHaveText("YOU ARE THE GOALKEEPER");
-  await expect(page.getByRole("progressbar", { name: "CPU run-up progress" })).toBeVisible();
+  const runUpMeter = page.locator("#defenseRunUpProgressV51");
+  await expect(runUpMeter).toBeVisible();
+  await expect(runUpMeter).toHaveAttribute("role", "progressbar");
+  await expect(runUpMeter).toHaveAttribute("aria-label", "CPU run-up progress");
+  await expect(runUpMeter).toHaveAttribute("aria-valuenow", /\d+/);
 
   const leftShift = page.locator('[data-v51-shift="left"]');
   await expect(leftShift).toHaveClass(/is-selected/);
@@ -228,7 +232,7 @@ test("V51.2 completes a regulation shootout, persists the win and returns cleanl
 });
 
 test("V51.2 resolves sudden death, records its length and reopens setup for play again", async ({ page }) => {
-  await startDuel(page, "elite", "reach");
+  await startDuel(page, "elite", "giant");
 
   await playRound(page, true, true);
   await playRound(page, false, false);
