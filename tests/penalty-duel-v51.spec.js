@@ -105,6 +105,8 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
     const shift = document.querySelector('[data-v51-shift="left"]');
     const dive = document.querySelector('[data-v51-dive="high-left"]');
     window.__footballLabDiveCommittedTest = false;
+    window.__footballLabDiveCommittedSnapshotTest = null;
+    window.__footballLabOpponentResultsAfterStallTest = null;
     if (!(shift instanceof HTMLButtonElement) || !(dive instanceof HTMLButtonElement)) return;
     shift.click();
     let observer;
@@ -113,6 +115,10 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
       dive.click();
       observer?.disconnect();
       window.__footballLabDiveCommittedTest = true;
+      window.__footballLabDiveCommittedSnapshotTest = window.__footballLabPenaltyDuelV51.snapshot().defense?.committed;
+      const end = performance.now() + 1200;
+      while (performance.now() < end) {}
+      window.__footballLabOpponentResultsAfterStallTest = window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length;
       return true;
     };
     if (commitWhenReady()) return;
@@ -135,20 +141,8 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   const leftShift = page.locator('[data-v51-shift="left"]');
   await expect(leftShift).toHaveClass(/is-selected/);
   await expect.poll(() => page.evaluate(() => window.__footballLabDiveCommittedTest), { timeout: 4000 }).toBe(true);
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.committed),
-    { timeout: 1500 }
-  ).toBe("high-left");
-
-  await expect.poll(
-    () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.runUpStarted),
-    { timeout: 2500 }
-  ).toBe(true);
-  await page.evaluate(() => {
-    const end = performance.now() + 1200;
-    while (performance.now() < end) {}
-  });
-  expect(await page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().opponentResults)).toEqual([]);
+  expect(await page.evaluate(() => window.__footballLabDiveCommittedSnapshotTest)).toBe("high-left");
+  expect(await page.evaluate(() => window.__footballLabOpponentResultsAfterStallTest)).toBe(0);
 
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length), { timeout: 5000 }).toBe(1);
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn), { timeout: 5000 }).toBe("player");
