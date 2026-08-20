@@ -22,6 +22,44 @@ test("main menu permanently starts with the mode tile mosaic", async ({ page }) 
   await expect(page.locator("#classicCard")).toBeVisible();
 });
 
+test("training and penalty bundles stay off the homepage startup path", async ({ page }) => {
+  const requestedPaths = [];
+  page.on("request", (request) => requestedPaths.push(new URL(request.url()).pathname));
+
+  await page.goto("/index.html");
+  await page.waitForFunction(() => window.__footballLabReleaseCurrent?.build === "51.1.0", null, {
+    timeout: 20000
+  });
+
+  expect(await page.evaluate(() => window.__footballLabModeBundles.snapshot())).toEqual({
+    trainingLoaded: false,
+    penaltiesLoaded: false
+  });
+
+  const deferredAtStartup = [
+    "/game/training-v35.js",
+    "/game/training-ui-v35-5.js",
+    "/game/training-ui-v35-6.js",
+    "/game/penalty-training-v48.js",
+    "/game/penalty-shootout-v49.js",
+    "/game/penalty-shootout-v49-base.js",
+    "/game/penalty-duel-v51.js",
+    "/game/penalty-duel-transition-guard-v51.js"
+  ];
+  for (const path of deferredAtStartup) {
+    expect(requestedPaths.some((value) => value.endsWith(path)), path).toBe(false);
+  }
+
+  await page.locator("#trainingCardV35").click();
+  await expect(page.locator("#trainingModalV35")).toHaveClass(/is-open/);
+  expect(await page.evaluate(() => window.__footballLabModeBundles.snapshot())).toEqual({
+    trainingLoaded: true,
+    penaltiesLoaded: false
+  });
+  expect(requestedPaths.some((value) => value.endsWith("/game/training-v35.js"))).toBe(true);
+  expect(requestedPaths.some((value) => value.endsWith("/game/penalty-duel-v51.js"))).toBe(false);
+});
+
 test("V23 boots from static modules without browser-time source execution", async ({ page }) => {
   const errors = [];
   const requestedPaths = [];
