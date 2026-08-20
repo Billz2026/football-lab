@@ -1,16 +1,43 @@
 import { test, expect } from "@playwright/test";
 
 async function startDuel(page, difficulty = "pro", keeper = "reader") {
-  await page.goto("/");
+  await page.goto("/?test=penalty-v51");
   await page.locator(".hub-mode-penalties").click();
   await page.waitForFunction(() => window.__footballLabPenaltyShootoutV49?.build === "49.0.0");
-  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.1.0");
-  await page.waitForFunction(() => window.__footballLabPenaltyDuelTransitionGuardV51?.build === "51.1.0");
+  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.2.0");
+  await page.waitForFunction(() => window.__footballLabPenaltyDuelTransitionGuardV51?.build === "51.2.0");
   await page.locator("#shootoutDifficultyV49").selectOption(difficulty);
   await page.locator("#shootoutKeeperV49").selectOption(keeper);
   await page.locator("#startShootoutV49").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51?.snapshot?.()?.active), { timeout: 8000 }).toBe(true);
+}
+
+async function recordPlayerKick(page, goal) {
+  await page.evaluate(async (scored) => {
+    const core = await import("/game/core-v6.js?v=32.4");
+    core.state.shot.outcome = scored ? "GOAL" : "MISS";
+    delete core.state.shot.__duelCountedV51;
+    window.dispatchEvent(new CustomEvent("footballlab:phasechange", { detail: { phase: "result" } }));
+  }, goal);
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn),
+    { timeout: 5000 }
+  ).toBe("cpu");
+}
+
+async function settleCpuKick(page, goal) {
+  const settled = await page.evaluate((scored) => window.__footballLabPenaltyDuelV51.testControl?.settleCpuResult(scored), goal);
+  expect(settled).toBe(true);
+}
+
+async function playRound(page, playerGoal, cpuGoal, complete = false) {
+  await recordPlayerKick(page, playerGoal);
+  await settleCpuKick(page, cpuGoal);
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn),
+    { timeout: 3000 }
+  ).toBe(complete ? "complete" : "player");
 }
 
 test("V51 player penalties use placement, run-up and one composure strike instead of free-kick controls", async ({ page }) => {
@@ -99,6 +126,7 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await expect(page.locator("[data-v51-shift]")).toHaveCount(3);
   await expect(page.locator("[data-v51-dive]")).toHaveCount(6);
   await expect(page.locator("#stageName")).toHaveText("YOU ARE THE GOALKEEPER");
+  await expect(page.getByRole("progressbar", { name: "CPU run-up progress" })).toBeVisible();
 
   const leftShift = page.locator('[data-v51-shift="left"]');
   await expect(leftShift).toHaveClass(/is-selected/);
@@ -107,6 +135,16 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
     () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.committed),
     { timeout: 1500 }
   ).toBe("high-left");
+
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.runUpStarted),
+    { timeout: 2500 }
+  ).toBe(true);
+  await page.evaluate(() => {
+    const end = performance.now() + 1200;
+    while (performance.now() < end) {}
+  });
+  expect(await page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().opponentResults)).toEqual([]);
 
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length), { timeout: 5000 }).toBe(1);
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn), { timeout: 5000 }).toBe("player");
@@ -117,9 +155,9 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
 });
 
 test("V51 CPU difficulties change readable behaviour, disguise and reaction", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?test=penalty-v51");
   await page.locator(".hub-mode-penalties").click();
-  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.1.0");
+  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.2.0");
   const models = await page.evaluate(() => window.__footballLabPenaltyDuelV51.difficulties);
 
   expect(models.academy.runUpMs).toBeGreaterThan(models.world.runUpMs);
@@ -128,4 +166,89 @@ test("V51 CPU difficulties change readable behaviour, disguise and reaction", as
   expect(models.academy.missChance).toBeGreaterThan(models.world.missChance);
   expect(models.academy.saveThreshold).toBeLessThan(models.world.saveThreshold);
   expect(models.world.disguise).toBeGreaterThan(models.pro.disguise);
+});
+
+test("V51.2 mobile goalkeeper controls keep every dive target at least 44 pixels high", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await startDuel(page, "pro", "reflex");
+  await recordPlayerKick(page, true);
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.runUpStarted),
+    { timeout: 3000 }
+  ).toBe(true);
+
+  const targets = await page.locator("[data-v51-dive]").evaluateAll((buttons) => buttons.map((button) => {
+    const rect = button.getBoundingClientRect();
+    return { width: rect.width, height: rect.height };
+  }));
+  expect(targets).toHaveLength(6);
+  for (const target of targets) {
+    expect(target.width).toBeGreaterThanOrEqual(44);
+    expect(target.height).toBeGreaterThanOrEqual(44);
+  }
+});
+
+test("V51.2 completes a regulation shootout, persists the win and returns cleanly to the menu", async ({ page }) => {
+  await startDuel(page, "pro", "reader");
+  await page.evaluate(() => {
+    window.__footballLabCompletedDuelTest = null;
+    window.addEventListener("footballlab:penaltyduelcomplete", (event) => {
+      window.__footballLabCompletedDuelTest = event.detail;
+    }, { once: true });
+  });
+
+  await playRound(page, true, true);
+  await playRound(page, false, false);
+  await playRound(page, true, true);
+  await playRound(page, false, false);
+  await playRound(page, true, false, true);
+
+  await expect(page.locator("#penaltyDuelResultV51")).toHaveClass(/is-open/);
+  await expect(page.locator("#duelResultTitleV51")).toHaveText("SHOOTOUT WON.");
+  await expect(page.locator("#duelFinalYouV51")).toHaveText("3");
+  await expect(page.locator("#duelFinalCpuV51")).toHaveText("2");
+  expect(await page.evaluate(() => window.__footballLabCompletedDuelTest)).toEqual({
+    winner: "player",
+    playerScore: 3,
+    cpuScore: 2,
+    suddenDeathRounds: 0
+  });
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("footballLabPenaltyShootoutRecordV49")))).toMatchObject({
+    shootouts: 1,
+    wins: 1,
+    losses: 0,
+    currentWinStreak: 1,
+    bestWinStreak: 1
+  });
+
+  await page.locator("#duelMenuV51").click();
+  await expect(page.locator("#modeHub")).toBeVisible();
+  await expect(page.locator("#gameScreen")).not.toHaveClass(/is-active/);
+  await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot())).toBeNull();
+});
+
+test("V51.2 resolves sudden death, records its length and reopens setup for play again", async ({ page }) => {
+  await startDuel(page, "elite", "reach");
+
+  await playRound(page, true, true);
+  await playRound(page, false, false);
+  await playRound(page, true, true);
+  await playRound(page, false, false);
+  await playRound(page, true, true);
+  await playRound(page, true, false, true);
+
+  await expect(page.locator("#penaltyDuelResultV51")).toHaveClass(/is-open/);
+  await expect(page.locator("#duelResultCopyV51")).toContainText("after 1 sudden-death round");
+  await expect(page.locator("#duelFinalYouV51")).toHaveText("4");
+  await expect(page.locator("#duelFinalCpuV51")).toHaveText("3");
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("footballLabPenaltyShootoutRecordV49")))).toMatchObject({
+    shootouts: 1,
+    wins: 1,
+    longestSuddenDeath: 1
+  });
+
+  await page.locator("#duelAgainV51").click();
+  await expect(page.locator("#shootoutDifficultyV49")).toBeVisible();
+  await expect(page.locator("#penaltyShootoutSetupV49")).toHaveClass(/is-open/);
+  await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot())).toBeNull();
 });

@@ -50,7 +50,7 @@ const observer = new MutationObserver(() => {
 observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
 window.__footballLabPenaltyDuelTransitionGuardV51 = Object.freeze({
-  build: "51.1.0",
+  build: "51.2.0",
   playerInputBlockedBetweenResultAndCpuTurn: true,
   snapshot: () => ({ transitionActive })
 });

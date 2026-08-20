@@ -1,5 +1,5 @@
-// Football Lab V51.1 release and cache contract
-const RELEASE_BUILD = "51.1.0";
+// Football Lab V51.2 release and cache contract
+const RELEASE_BUILD = "51.2.0";
 const CACHE_NAME = `football-lab-shell-v${RELEASE_BUILD.replaceAll(".", "-")}`;
 const CORE_ASSETS = [
   "./",

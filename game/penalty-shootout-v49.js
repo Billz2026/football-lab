@@ -21,6 +21,6 @@ try {
 }
 
 window.__footballLabPenaltyShootoutLegacyBridgeV51 = Object.freeze({
-  build: "51.1.0",
+  build: "51.2.0",
   legacyResultSimulationSuppressedWhenDuelOwnsTurn: true
 });

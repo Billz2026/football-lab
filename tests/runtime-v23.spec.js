@@ -27,7 +27,7 @@ test("gameplay, training and penalty bundles stay off the homepage startup path"
   page.on("request", (request) => requestedPaths.push(new URL(request.url()).pathname));
 
   await page.goto("/index.html");
-  await page.waitForFunction(() => window.__footballLabReleaseCurrent?.build === "51.1.0", null, {
+  await page.waitForFunction(() => window.__footballLabReleaseCurrent?.build === "51.2.0", null, {
     timeout: 20000
   });
 
@@ -115,9 +115,9 @@ test("V23 boots from static modules without browser-time source execution", asyn
   expect(runtime.startupError).toBeNull();
   expect(requestedPaths.some((value) => value.endsWith("/game/runtime-v23-main.js"))).toBe(true);
   await page.waitForTimeout(1100);
-  await expect(page.locator(".build-badge-v22")).toHaveText("V51.1");
-  await expect(page.locator(".settings-version-v22 strong")).toHaveText("51.1.0");
-  await expect(page.locator("html")).toHaveAttribute("data-football-lab-build", "51.1.0");
+  await expect(page.locator(".build-badge-v22")).toHaveText("V51.2");
+  await expect(page.locator(".settings-version-v22 strong")).toHaveText("51.2.0");
+  await expect(page.locator("html")).toHaveAttribute("data-football-lab-build", "51.2.0");
   for (const forbidden of FORBIDDEN_RUNTIME_PATHS) {
     expect(requestedPaths.some((value) => value.endsWith(forbidden)), forbidden).toBe(false);
   }

@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 
-const RELEASE_BUILD = "51.1.0";
-const CACHE_NAME = "football-lab-shell-v51-1-0";
+const RELEASE_BUILD = "51.2.0";
+const CACHE_NAME = "football-lab-shell-v51-2-0";
 
 const files = await Promise.all(Object.entries({
   index: "index.html",
@@ -27,7 +27,7 @@ const checks = [
   ["index loads the canonical app version", source.index.includes(`./app.js?v=${RELEASE_BUILD}`)],
   ["app declares the canonical release", source.app.includes(`const RELEASE_BUILD = "${RELEASE_BUILD}";`)],
   ["app registers the versioned worker", source.app.includes("./sw.js?v=${RELEASE_BUILD}")],
-  ["app publishes the current release alias", source.app.includes("window.__footballLabReleaseV511 = release")],
+  ["app publishes the current release alias", source.app.includes("window.__footballLabReleaseV512 = release")],
   ["app exposes the on-demand gameplay loader", source.app.includes("loadGameplay: loadGameplayBundle")],
   ["production runtime is imported by the gameplay loader", source.app.includes(".then(() => import(runtimeEntry))")],
   ["current build presentation is protected after deferred modules load", source.app.includes("protectCurrentBuildPresentation()")],

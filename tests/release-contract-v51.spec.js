@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-const RELEASE_BUILD = "51.1.0";
-const CACHE_NAME = "football-lab-shell-v51-1-0";
+const RELEASE_BUILD = "51.2.0";
+const CACHE_NAME = "football-lab-shell-v51-2-0";
 
-test("V51.1 installs one current shell and reloads the clean menu offline", async ({ page, context }) => {
+test("V51.2 installs one current shell and reloads the clean menu offline", async ({ page, context }) => {
   await page.goto("/index.html");
   await page.waitForFunction(
-    (build) => window.__footballLabReleaseV511?.build === build,
+    (build) => window.__footballLabReleaseV512?.build === build,
     RELEASE_BUILD,
     { timeout: 20000 }
   );
@@ -23,7 +23,7 @@ test("V51.1 installs one current shell and reloads the clean menu offline", asyn
     const worker = registration.active || registration.waiting || registration.installing;
     return {
       build: document.documentElement.dataset.footballLabBuild,
-      release: window.__footballLabReleaseV511?.build,
+      release: window.__footballLabReleaseV512?.build,
       workerUrl: worker?.scriptURL || "",
       caches: await caches.keys()
     };
