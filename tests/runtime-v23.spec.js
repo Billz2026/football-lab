@@ -91,6 +91,9 @@ test("V23 boots from static modules without browser-time source execution", asyn
   await page.waitForFunction(() => window.__footballLabReleaseV25?.build === "25.0.0", null, {
     timeout: 20000
   });
+  await page.waitForFunction(() => window.__footballLabModeBundles.snapshot().gameplayLoaded, null, {
+    timeout: 20000
+  });
   expect(await page.evaluate(() => window.__footballLabModeBundles.snapshot().gameplayLoaded)).toBe(true);
 
   const runtime = await page.evaluate(() => ({

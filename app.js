@@ -314,8 +314,8 @@ function loadPenaltyBundle() {
   if (!penaltyBundlePromise) {
     penaltyBundlePromise = loadTrainingBundle()
       .then(() => import("./game/penalty-training-v48.js?v=48.0.0"))
-      .then(() => import("./game/penalty-duel-v51.js?v=${RELEASE_BUILD}"))
-      .then(() => import("./game/penalty-duel-transition-guard-v51.js?v=${RELEASE_BUILD}"))
+      .then(() => import(`./game/penalty-duel-v51.js?v=${RELEASE_BUILD}`))
+      .then(() => import(`./game/penalty-duel-transition-guard-v51.js?v=${RELEASE_BUILD}`))
       .then(() => {
         penaltyBundleLoaded = true;
         return true;
