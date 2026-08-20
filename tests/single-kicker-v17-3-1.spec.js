@@ -7,7 +7,7 @@ async function openPowerKicker(page) {
   await page.goto("/index.html?v=1731");
   await expect.poll(() => page.evaluate(() => window.__footballLabMainV1731 === true), { timeout: 20000 }).toBe(true);
   await expect.poll(() => page.evaluate(() => window.__footballLabRendererV1731 === true), { timeout: 20000 }).toBe(true);
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();

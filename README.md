@@ -26,6 +26,8 @@ npm install
 npm run test:browser
 ```
 
+Pull requests run `npm run test:ci`, which executes the current automated Playwright specifications with zero retries and retained failure traces. Retired mode contracts, superseded renderer internals, obsolete duplicates and manual visual-capture specifications are excluded from the blocking gate; every exclusion and its reason are documented in `playwright.ci.config.js`.
+
 ## Static runtime
 
 V23 boots from `game/runtime-v23-main.js`. The gameplay, physics and renderer modules are normal static ES modules; the public route no longer downloads JavaScript as text or executes generated Blob modules.

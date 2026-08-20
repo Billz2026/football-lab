@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 
 const RELEASE_BUILD = "51.1.0";
 const CACHE_NAME = "football-lab-shell-v51-1-0";
@@ -15,6 +15,14 @@ const files = await Promise.all(Object.entries({
 }).map(async ([name, path]) => [name, await readFile(path, "utf8")]));
 
 const source = Object.fromEntries(files);
+const gameFiles = (await readdir("game", { recursive: true }))
+  .filter((path) => path.endsWith(".js"));
+const legacyGlobalBuildWriters = [];
+for (const path of gameFiles) {
+  if (path === "penalty-duel-v51.js") continue;
+  const contents = await readFile(`game/${path}`, "utf8");
+  if (contents.includes("dataset.footballLabBuild")) legacyGlobalBuildWriters.push(path);
+}
 const checks = [
   ["index loads the canonical app version", source.index.includes(`./app.js?v=${RELEASE_BUILD}`)],
   ["app declares the canonical release", source.app.includes(`const RELEASE_BUILD = "${RELEASE_BUILD}";`)],
@@ -30,6 +38,7 @@ const checks = [
   ["training guard loads the canonical transition guard", source.trainingGuard.includes(`penalty-duel-transition-guard-v51.js?v=${RELEASE_BUILD}`)],
   ["legacy penalty bridge reports the canonical build", source.bridge.includes(`build: "${RELEASE_BUILD}"`)],
   ["transition guard reports the canonical build", source.transitionGuard.includes(`build: "${RELEASE_BUILD}"`)],
+  ["legacy game modules cannot overwrite the public build marker", legacyGlobalBuildWriters.length === 0],
   ["README identifies the current public release", source.readme.includes(`Current public release: V${RELEASE_BUILD}`)],
   ["README distinguishes the V23 runtime architecture", source.readme.includes("Static runtime architecture: V23")]
 ];
@@ -38,6 +47,7 @@ const failures = checks.filter(([, passed]) => !passed).map(([label]) => label);
 if (failures.length) {
   console.error("Release contract verification failed:");
   for (const failure of failures) console.error(`- ${failure}`);
+  if (legacyGlobalBuildWriters.length) console.error(`  writers: ${legacyGlobalBuildWriters.join(", ")}`);
   process.exitCode = 1;
 } else {
   console.log(`Release contract verified: V${RELEASE_BUILD} / ${CACHE_NAME}`);

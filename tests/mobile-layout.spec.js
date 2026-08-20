@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 async function startClassicRun(page) {
   await page.goto("/index.html");
   await expect(page.locator("#kickerSelectV13")).toHaveCount(1, { timeout: 15000 });
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();

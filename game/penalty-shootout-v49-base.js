@@ -489,7 +489,7 @@ function publishReleaseMetadata() {
     cacheGeneration: BUILD
   });
   window.__footballLabReleaseV490 = release;
-  document.documentElement.dataset.footballLabBuild = BUILD;
+  document.documentElement.dataset.footballLabPenaltyShootoutBuild = BUILD;
   const badge = document.querySelector(".build-badge-v22");
   if (badge) { badge.textContent = "V49.0"; badge.title = `Football Lab build ${BUILD}`; }
   const version = document.querySelector(".settings-version-v22 strong");

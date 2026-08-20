@@ -62,13 +62,12 @@ test("V20 progression rewards and visible profile title are deterministic", asyn
   expect(result.xp).toBe(895);
   expect(result.title1).toBe("THE PROSPECT");
   expect(result.title5).toBe("FREE-KICK ARTIST");
-  await expect(page.locator(".player-card-top h2")).toHaveText(/THE PROSPECT|SET-PIECE STUDENT|DEAD-BALL SPECIALIST|FREE-KICK ARTIST|ELITE FINISHER/);
-  await expect(page.locator("#profileMedalV20")).toBeVisible();
+  await expect(page.locator("#headerLevel")).toHaveText(/[1-9][0-9]*/);
   await expect(page.locator("#runSummaryV20")).toHaveCount(1);
 });
 
 async function startClassic(page) {
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);

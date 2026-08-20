@@ -9,7 +9,7 @@ async function startRun(page, viewport = { width: 1180, height: 820 }) {
   await expect.poll(() => page.evaluate(() => window.__footballLabRendererV17 === true), { timeout: 20000 }).toBe(true);
   await expect.poll(() => page.evaluate(() => window.__footballLabVisualV17 === true), { timeout: 20000 }).toBe(true);
   await expect(page.locator("#kickerSelectV13")).toHaveCount(1, { timeout: 15000 });
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();

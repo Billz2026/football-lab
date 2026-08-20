@@ -32,10 +32,10 @@ jobs:
           while IFS= read -r -d '' file; do
             echo "Checking ${file}"
             node --check "${file}"
-          done < <(find . -type f -name '*.js' -not -path './node_modules/*' -print0)
+          done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './node_modules/*' -print0)
 
       - name: Install test dependencies
-        run: npm install
+        run: npm ci
 
       - name: Verify production character asset contract
         run: npm run verify:characters:v1
@@ -44,7 +44,8 @@ jobs:
         run: npm run verify:release:v51
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 10
+        run: npx playwright install chromium
 
       - name: Verify committed V46 production render bridge
         shell: bash
@@ -73,7 +74,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          npx playwright test tests/runtime-v23.spec.js tests/campaign-v41.spec.js tests/character-v42.spec.js tests/character-production-v1.spec.js tests/character-v43.spec.js tests/character-v46.spec.js tests/penalty-training-v48.spec.js tests/penalty-shootout-v49.spec.js tests/penalty-duel-v51.spec.js tests/release-contract-v51.spec.js --reporter=line,html 2>&1 | tee playwright-output.txt
+          npm run test:ci -- --reporter=line,html 2>&1 | tee playwright-output.txt
 
       - name: Upload validation diagnostics
         if: always()

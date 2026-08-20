@@ -39,14 +39,14 @@ test("current keeper renderer no longer depends on the retired halo monkey patch
   expect(contract.sceneDraw).toBe("function");
 });
 
-test("V41 release preserves the keeper halo and ground-shadow decisions", async ({ page }) => {
+test("current release preserves the keeper halo and ground-shadow decisions", async ({ page }) => {
   await ready(page);
   await expect.poll(
-    () => page.evaluate(() => window.__footballLabReleaseV410?.build),
+    () => page.evaluate(() => window.__footballLabReleaseCurrent?.build),
     { timeout: 10000 }
-  ).toBe("41.0.0");
+  ).toBe("51.1.0");
 
-  const release = await page.evaluate(() => window.__footballLabReleaseV410);
+  const release = await page.evaluate(() => window.__footballLabReleaseCurrent);
   expect(release.keeperBodyHalo).toBe("removed");
   expect(release.keeperProjectedPenaltyArc).toBe("suppressed-in-free-kick-view");
   expect(release.keeperGroundShadow).toBe("soft-ground-only");

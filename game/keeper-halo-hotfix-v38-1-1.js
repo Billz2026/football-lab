@@ -287,7 +287,7 @@ const release = Object.freeze({
 });
 
 function publishBuildMarker() {
-  document.documentElement.dataset.footballLabBuild = BUILD;
+  document.documentElement.dataset.footballLabKeeperHaloBuild = BUILD;
   const badge = document.querySelector(".build-badge-v22");
   if (badge) {
     badge.textContent = "V38.1.3";

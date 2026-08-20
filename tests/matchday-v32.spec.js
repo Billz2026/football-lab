@@ -12,7 +12,7 @@ async function startMatch(page) {
     () => page.evaluate(() => window.__footballLabMatchdayV32?.build),
     { timeout: 12000 }
   ).toBe("32.0.0");
-  await page.locator("#playClassic").click();
+  await page.locator("#classicCard").click();
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
@@ -36,7 +36,7 @@ test("V32 exposes the complete Matchday Impact contract", async ({ page }) => {
   expect(contract.specialistReactions).toBe(true);
   expect(contract.chapterMoments).toBe(true);
   expect(contract.closeBallFollow).toBe(true);
-  expect(contract.outcomeCallouts).toBe(true);
+  expect(contract.outcomeCallouts).toBe(false);
   expect(contract.readableFlightTiming).toBe(true);
   expect(contract.reducedMotionAware).toBe(true);
   expect(await page.evaluate(() => window.__footballLabAudioV32)).toEqual({

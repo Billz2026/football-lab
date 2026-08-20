@@ -187,7 +187,7 @@ syncTouchLayout();
 window.__footballLabTouchGameplayV382 = Object.freeze({ build: TOUCH_BUILD, touchCapabilityDetection: true, foldableSupport: true, holdReleasePower: true, shotPhysicsChanged: false, aimingChanged: false, difficultyChanged: false });
 
 const release = () => {
-  document.documentElement.dataset.footballLabBuild = "38.2";
+  document.documentElement.dataset.footballLabRefinementBuild = "38.2";
   const badge = document.querySelector(".build-badge-v22");
   if (badge) {
     badge.textContent = "V38.2";

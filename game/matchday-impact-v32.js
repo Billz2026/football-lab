@@ -265,7 +265,7 @@ export function drawMatchdayImpact(time) {
   };
 }
 
-document.documentElement.dataset.footballLabBuild = "32";
+document.documentElement.dataset.footballLabMatchdayBuild = "32";
 window.__footballLabMatchdayV32 = Object.freeze({
   build: "32.0.0",
   keeperMotions: ["DIVE", "CATCH", "PARRY", "RECOVERY"],

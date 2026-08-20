@@ -73,6 +73,27 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn), { timeout: 5000 }).toBe("cpu");
   await expect(page.locator("html")).toHaveClass(/is-defending-v51/);
   await expect(page.locator("html")).not.toHaveClass(/penalty-duel-transition-v51/);
+
+  await page.evaluate(() => {
+    const shift = document.querySelector('[data-v51-shift="left"]');
+    const dive = document.querySelector('[data-v51-dive="high-left"]');
+    window.__footballLabDiveCommittedTest = false;
+    if (!(shift instanceof HTMLButtonElement) || !(dive instanceof HTMLButtonElement)) return;
+    shift.click();
+    let observer;
+    const commitWhenReady = () => {
+      if (dive.disabled) return false;
+      dive.click();
+      observer?.disconnect();
+      window.__footballLabDiveCommittedTest = true;
+      return true;
+    };
+    if (commitWhenReady()) return;
+    observer = new MutationObserver(commitWhenReady);
+    observer.observe(dive, { attributes: true, attributeFilter: ["disabled"] });
+    setTimeout(() => observer.disconnect(), 4000);
+  });
+
   await expect(page.locator("#penaltyDefenseV51")).toBeVisible();
   await expect(page.locator("#defenseDifficultyV51")).toHaveText("WORLD CLASS");
   await expect(page.locator("[data-v51-shift]")).toHaveCount(3);
@@ -80,16 +101,12 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await expect(page.locator("#stageName")).toHaveText("YOU ARE THE GOALKEEPER");
 
   const leftShift = page.locator('[data-v51-shift="left"]');
-  await expect(leftShift).toBeEnabled();
-  await leftShift.click();
   await expect(leftShift).toHaveClass(/is-selected/);
-
-  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.runUpStarted);
-  await page.evaluate(() => {
-    const blockedUntil = performance.now() + 1200;
-    while (performance.now() < blockedUntil) {}
-  });
-  await page.locator('[data-v51-dive="high-left"]').click({ timeout: 4000 });
+  await expect.poll(() => page.evaluate(() => window.__footballLabDiveCommittedTest), { timeout: 4000 }).toBe(true);
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.committed),
+    { timeout: 1500 }
+  ).toBe("high-left");
 
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length), { timeout: 5000 }).toBe(1);
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn), { timeout: 5000 }).toBe("player");
