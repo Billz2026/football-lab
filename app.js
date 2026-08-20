@@ -42,10 +42,7 @@ const bootPromise = runtimeCaptureMode
       .then(() => import("./game/keeper-readability-v36-3.js?v=36.3"))
       .then(() => import("./game/keeper-visuals-v38-1.js?v=40.3.0"))
       .then(() => import("./game/flight-v33.js?v=40.3.0"))
-      .then(() => import("./game/training-v35.js?v=35.1"))
       .then(() => import("./game/hub-v35-1.js?v=35.1"))
-      .then(() => import("./game/penalty-training-v48.js?v=48.0.0"))
-      .then(() => import("./game/training-guard-v35.js?v=35.1"))
       .then(() => import("./game/polish-v10-2.js?v=32.4"))
       .then(() => import("./game/polish-v11-4.js?v=32.4"))
       .then(() => import("./game/characters-ui-v13.js?v=32.4"))
@@ -193,6 +190,142 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV511 = release;
         window.__footballLabReleaseCurrent = release;
       });
+
+
+let trainingBundlePromise = null;
+let penaltyBundlePromise = null;
+let trainingBundleLoaded = false;
+let penaltyBundleLoaded = false;
+
+function modeTileStatus(tile) {
+  return tile?.querySelector(".hub-mode-status") || null;
+}
+
+function setModeTileBusy(tile, busy) {
+  if (!tile) return;
+  tile.toggleAttribute("aria-busy", busy);
+  tile.classList.toggle("is-loading-mode", busy);
+  const status = modeTileStatus(tile);
+  if (status) {
+    if (busy) {
+      status.dataset.readyCopy = status.textContent;
+      status.textContent = "LOADING";
+    } else if (status.dataset.readyCopy) {
+      status.textContent = status.dataset.readyCopy;
+      delete status.dataset.readyCopy;
+    }
+  }
+}
+
+function reportModeLoadFailure(tile, error) {
+  window.__footballLabStartupError = error?.stack || error?.message || String(error);
+  console.error("Football Lab mode failed to load", error);
+  const status = modeTileStatus(tile);
+  if (status) status.textContent = "LOAD FAILED · TRY AGAIN";
+}
+
+function wirePenaltyActivityLoader() {
+  const button = [...document.querySelectorAll("#trainingModalV35 .training-activity-v35")]
+    .find((item) => item.textContent.includes("PENALTIES"));
+  if (!button || button.dataset.lazyPenaltyWired === "true") return;
+  button.dataset.lazyPenaltyWired = "true";
+  button.disabled = false;
+  button.removeAttribute("disabled");
+  button.innerHTML = "<strong>PENALTIES</strong><small>PLAYABLE NOW</small>";
+  button.addEventListener("click", async (event) => {
+    if (penaltyBundleLoaded) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    button.disabled = true;
+    try {
+      await loadPenaltyBundle();
+      button.disabled = false;
+      button.click();
+    } catch (error) {
+      button.disabled = false;
+      reportModeLoadFailure(document.querySelector(".hub-mode-penalties"), error);
+    }
+  }, true);
+}
+
+function loadTrainingBundle() {
+  if (!trainingBundlePromise) {
+    trainingBundlePromise = bootPromise
+      .then(() => import("./game/training-v35.js?v=35.0"))
+      .then(() => import("./game/training-guard-v35.js?v=35.1"))
+      .then(() => import("./game/training-ui-v35-5.js?v=35.5"))
+      .then(() => import("./game/training-ui-v35-6.js?v=35.6.1"))
+      .then(() => {
+        trainingBundleLoaded = true;
+        wirePenaltyActivityLoader();
+        return true;
+      })
+      .catch((error) => {
+        trainingBundlePromise = null;
+        throw error;
+      });
+  }
+  return trainingBundlePromise;
+}
+
+function loadPenaltyBundle() {
+  if (!penaltyBundlePromise) {
+    penaltyBundlePromise = loadTrainingBundle()
+      .then(() => import("./game/penalty-training-v48.js?v=48.0.0"))
+      .then(() => import("./game/penalty-duel-v51.js?v=${RELEASE_BUILD}"))
+      .then(() => import("./game/penalty-duel-transition-guard-v51.js?v=${RELEASE_BUILD}"))
+      .then(() => {
+        penaltyBundleLoaded = true;
+        return true;
+      })
+      .catch((error) => {
+        penaltyBundlePromise = null;
+        throw error;
+      });
+  }
+  return penaltyBundlePromise;
+}
+
+const trainingTile = document.getElementById("trainingCardV35");
+trainingTile?.addEventListener("click", async (event) => {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  setModeTileBusy(trainingTile, true);
+  try {
+    await loadTrainingBundle();
+    document.querySelector(".training-card-v35")?.click();
+  } catch (error) {
+    reportModeLoadFailure(trainingTile, error);
+  } finally {
+    setModeTileBusy(trainingTile, false);
+  }
+}, true);
+
+const penaltyTile = document.querySelector(".hub-mode-penalties");
+penaltyTile?.addEventListener("click", async (event) => {
+  if (penaltyBundleLoaded) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  setModeTileBusy(penaltyTile, true);
+  try {
+    await loadPenaltyBundle();
+    penaltyTile.click();
+  } catch (error) {
+    reportModeLoadFailure(penaltyTile, error);
+  } finally {
+    setModeTileBusy(penaltyTile, false);
+  }
+}, true);
+
+window.__footballLabModeBundles = Object.freeze({
+  build: RELEASE_BUILD,
+  loadTraining: loadTrainingBundle,
+  loadPenalties: loadPenaltyBundle,
+  snapshot: () => Object.freeze({
+    trainingLoaded: trainingBundleLoaded,
+    penaltiesLoaded: penaltyBundleLoaded
+  })
+});
 
 bootPromise.catch((error) => {
   window.__footballLabStartupError = error?.stack || error?.message || String(error);

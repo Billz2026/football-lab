@@ -2,11 +2,11 @@ import { test, expect } from "@playwright/test";
 
 test("V48 keeps playable penalty practice inside the Training Ground", async ({ page }) => {
   await page.goto("/");
-  await page.waitForFunction(() => window.__footballLabPenaltyTrainingV48?.build?.startsWith("48.0"));
 
   const trainingTile = page.locator(".hub-mode-training");
   await expect(trainingTile).toBeEnabled();
   await trainingTile.click();
+  await page.waitForFunction(() => window.__footballLabTrainingV35?.build?.startsWith("35.0"));
 
   const modal = page.locator("#trainingModalV35");
   await expect(modal).toHaveClass(/is-open/);
@@ -15,6 +15,7 @@ test("V48 keeps playable penalty practice inside the Training Ground", async ({ 
   await expect(penaltyActivity).toBeEnabled();
   await expect(penaltyActivity).toContainText("PLAYABLE NOW");
   await penaltyActivity.click();
+  await page.waitForFunction(() => window.__footballLabPenaltyTrainingV48?.build?.startsWith("48.0"));
 
   await expect(page.locator("#trainingStartV35")).toHaveText("START PENALTY TRAINING");
   await expect(page.locator("#trainingDistanceV35")).toHaveValue("12");
