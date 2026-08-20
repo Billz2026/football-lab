@@ -9,8 +9,8 @@ function collectRuntimeErrors(page) {
 test("public Classic Kicks boots and starts an unlimited run", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/index.html");
-  await expect(page.locator("#kickerSelectV13")).toHaveCount(1, { timeout: 15000 });
   await page.locator("#classicCard").click();
+  await expect(page.locator("#kickerSelectV13")).toHaveCount(1, { timeout: 15000 });
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
@@ -25,8 +25,9 @@ test("public Classic Kicks boots and starts an unlimited run", async ({ page }) 
 test("a complete shot can be played before the run is voluntarily submitted", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/index.html");
-  await expect(page.locator("#kickerSelectV13")).toHaveCount(1, { timeout: 15000 });
   await page.locator("#classicCard").click();
+  await expect(page.locator("#kickerSelectV13")).toHaveCount(1, { timeout: 15000 });
+  await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#shotAction")).toHaveText("START SHOT", { timeout: 3000 });

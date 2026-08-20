@@ -29,42 +29,43 @@ const runtimeEntry = runtimeCaptureMode
   : "./game/runtime-v23-main.js?v=41.0.0";
 window.__footballLabRuntimeCaptureMode = runtimeCaptureMode;
 
-const runtimePromise = import(runtimeEntry);
+let gameplayBundlePromise = null;
+let gameplayBundleLoaded = false;
+let buildPresentationObserver = null;
+
+function restoreCurrentBuildPresentation() {
+  document.documentElement.dataset.footballLabBuild = RELEASE_BUILD;
+  const badge = document.querySelector(".build-badge-v22");
+  if (badge && badge.textContent !== "V51.1") badge.textContent = "V51.1";
+  if (badge && badge.title !== `Football Lab build ${RELEASE_BUILD}`) {
+    badge.title = `Football Lab build ${RELEASE_BUILD}`;
+  }
+  const version = document.querySelector(".settings-version-v22 strong");
+  if (version && version.textContent !== RELEASE_BUILD) version.textContent = RELEASE_BUILD;
+}
+
+function protectCurrentBuildPresentation() {
+  restoreCurrentBuildPresentation();
+  if (buildPresentationObserver) return;
+  const badge = document.querySelector(".build-badge-v22");
+  const version = document.querySelector(".settings-version-v22 strong");
+  if (!badge || !version) return;
+  buildPresentationObserver = new MutationObserver(restoreCurrentBuildPresentation);
+  buildPresentationObserver.observe(badge, { attributes: true, childList: true, subtree: true });
+  buildPresentationObserver.observe(version, { childList: true, subtree: true });
+}
+
 const bootPromise = runtimeCaptureMode
-  ? runtimePromise.then(() => {
+  ? import(runtimeEntry).then(() => {
       window.__footballLabMainV19 = true;
       window.__footballLabCaptureReadyV23 = true;
     })
-  : runtimePromise
-      .then(() => import("./game/keeper-ai-v34.js?v=35.1"))
-      .then(() => import("./game/keeper-polish-v36.js?v=36.0"))
-      .then(() => import("./game/keeper-realism-v36-2.js?v=36.2"))
-      .then(() => import("./game/keeper-readability-v36-3.js?v=36.3"))
-      .then(() => import("./game/keeper-visuals-v38-1.js?v=40.3.0"))
-      .then(() => import("./game/flight-v33.js?v=40.3.0"))
-      .then(() => import("./game/hub-v35-1.js?v=35.1"))
-      .then(() => import("./game/polish-v10-2.js?v=32.4"))
-      .then(() => import("./game/polish-v11-4.js?v=32.4"))
-      .then(() => import("./game/characters-ui-v13.js?v=32.4"))
-      .then(() => import("./game/keepers-ui-v14.js?v=32.4"))
-      .then(() => import("./game/walls-ui-v15.js?v=32.4"))
-      .then(() => import("./game/mobile-ui-v16.js?v=32.4"))
-      .then(() => import("./game/mobile-shell-v16-1.js?v=32.4"))
-      .then(() => import("./game/mobile-shell-compact-v16-1.js?v=32.4"))
-      .then(() => import("./game/visual-ui-v17.js?v=32.4"))
-      .then(() => import("./game/strike-v32-4.js?v=32.4"))
-      .then(() => import("./game/skill-balance-v37.js?v=37.0"))
-      .then(() => import("./game/input-precision-ui-v18.js?v=32.4"))
-      .then(() => import("./game/progression-v20.js?v=32.4"))
-      .then(() => import("./game/clarity-v21.js?v=32.4"))
+  : Promise.resolve()
       .then(() => import("./game/product-polish-v22.js?v=32.4"))
+      .then(() => import("./game/progression-v20.js?v=32.4"))
+      .then(() => import("./game/hub-v35-1.js?v=35.1"))
       .then(() => import("./game/hub-v35-3.js?v=35.3"))
       .then(() => import("./game/hub-v35-4.js?v=35.6.2"))
-      .then(() => import("./game/release-v23.js?v=32.4"))
-      .then(() => import("./game/immersive-ui-v24.js?v=32.4"))
-      .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
-      .then(() => import("./game/campaign-v31.js?v=32.4"))
-      .then(() => import("./game/campaign-v41.js?v=41.0.0"))
       .then(() => {
         document.documentElement.dataset.footballLabBuild = RELEASE_BUILD;
         const badge = document.querySelector(".build-badge-v22");
@@ -189,8 +190,49 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV480 = release;
         window.__footballLabReleaseV511 = release;
         window.__footballLabReleaseCurrent = release;
+        protectCurrentBuildPresentation();
       });
 
+function loadGameplayBundle() {
+  if (runtimeCaptureMode) return bootPromise;
+  if (!gameplayBundlePromise) {
+    gameplayBundlePromise = bootPromise
+      .then(() => import(runtimeEntry))
+      .then(() => import("./game/keeper-ai-v34.js?v=35.1"))
+      .then(() => import("./game/keeper-polish-v36.js?v=36.0"))
+      .then(() => import("./game/keeper-realism-v36-2.js?v=36.2"))
+      .then(() => import("./game/keeper-readability-v36-3.js?v=36.3"))
+      .then(() => import("./game/keeper-visuals-v38-1.js?v=40.3.0"))
+      .then(() => import("./game/flight-v33.js?v=40.3.0"))
+      .then(() => import("./game/polish-v10-2.js?v=32.4"))
+      .then(() => import("./game/polish-v11-4.js?v=32.4"))
+      .then(() => import("./game/characters-ui-v13.js?v=32.4"))
+      .then(() => import("./game/keepers-ui-v14.js?v=32.4"))
+      .then(() => import("./game/walls-ui-v15.js?v=32.4"))
+      .then(() => import("./game/mobile-ui-v16.js?v=32.4"))
+      .then(() => import("./game/mobile-shell-v16-1.js?v=32.4"))
+      .then(() => import("./game/mobile-shell-compact-v16-1.js?v=32.4"))
+      .then(() => import("./game/visual-ui-v17.js?v=32.4"))
+      .then(() => import("./game/strike-v32-4.js?v=32.4"))
+      .then(() => import("./game/skill-balance-v37.js?v=37.0"))
+      .then(() => import("./game/input-precision-ui-v18.js?v=32.4"))
+      .then(() => import("./game/clarity-v21.js?v=32.4"))
+      .then(() => import("./game/release-v23.js?v=32.4"))
+      .then(() => import("./game/immersive-ui-v24.js?v=32.4"))
+      .then(() => import("./game/infinite-runs-v25.js?v=32.4"))
+      .then(() => import("./game/campaign-v31.js?v=32.4"))
+      .then(() => import("./game/campaign-v41.js?v=41.0.0"))
+      .then(() => {
+        gameplayBundleLoaded = true;
+        return true;
+      })
+      .catch((error) => {
+        gameplayBundlePromise = null;
+        throw error;
+      });
+  }
+  return gameplayBundlePromise;
+}
 
 let trainingBundlePromise = null;
 let penaltyBundlePromise = null;
@@ -250,7 +292,7 @@ function wirePenaltyActivityLoader() {
 
 function loadTrainingBundle() {
   if (!trainingBundlePromise) {
-    trainingBundlePromise = bootPromise
+    trainingBundlePromise = loadGameplayBundle()
       .then(() => import("./game/training-v35.js?v=35.0"))
       .then(() => import("./game/training-guard-v35.js?v=35.1"))
       .then(() => import("./game/training-ui-v35-5.js?v=35.5"))
@@ -272,8 +314,8 @@ function loadPenaltyBundle() {
   if (!penaltyBundlePromise) {
     penaltyBundlePromise = loadTrainingBundle()
       .then(() => import("./game/penalty-training-v48.js?v=48.0.0"))
-      .then(() => import("./game/penalty-duel-v51.js?v=${RELEASE_BUILD}"))
-      .then(() => import("./game/penalty-duel-transition-guard-v51.js?v=${RELEASE_BUILD}"))
+      .then(() => import(`./game/penalty-duel-v51.js?v=${RELEASE_BUILD}`))
+      .then(() => import(`./game/penalty-duel-transition-guard-v51.js?v=${RELEASE_BUILD}`))
       .then(() => {
         penaltyBundleLoaded = true;
         return true;
@@ -285,6 +327,31 @@ function loadPenaltyBundle() {
   }
   return penaltyBundlePromise;
 }
+
+const classicTile = document.getElementById("classicCard");
+const classicEntries = [
+  classicTile,
+  document.getElementById("playClassic"),
+  document.getElementById("modalPlay"),
+  document.getElementById("howToPlay")
+].filter(Boolean);
+
+classicEntries.forEach((entry) => {
+  entry.addEventListener("click", async (event) => {
+    if (gameplayBundleLoaded) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    setModeTileBusy(classicTile, true);
+    try {
+      await loadGameplayBundle();
+      entry.click();
+    } catch (error) {
+      reportModeLoadFailure(classicTile, error);
+    } finally {
+      setModeTileBusy(classicTile, false);
+    }
+  }, true);
+});
 
 const trainingTile = document.getElementById("trainingCardV35");
 trainingTile?.addEventListener("click", async (event) => {
@@ -319,9 +386,11 @@ penaltyTile?.addEventListener("click", async (event) => {
 
 window.__footballLabModeBundles = Object.freeze({
   build: RELEASE_BUILD,
+  loadGameplay: loadGameplayBundle,
   loadTraining: loadTrainingBundle,
   loadPenalties: loadPenaltyBundle,
   snapshot: () => Object.freeze({
+    gameplayLoaded: gameplayBundleLoaded,
     trainingLoaded: trainingBundleLoaded,
     penaltiesLoaded: penaltyBundleLoaded
   })

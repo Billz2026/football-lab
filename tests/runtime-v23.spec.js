@@ -22,7 +22,7 @@ test("main menu permanently starts with the mode tile mosaic", async ({ page }) 
   await expect(page.locator("#classicCard")).toBeVisible();
 });
 
-test("training and penalty bundles stay off the homepage startup path", async ({ page }) => {
+test("gameplay, training and penalty bundles stay off the homepage startup path", async ({ page }) => {
   const requestedPaths = [];
   page.on("request", (request) => requestedPaths.push(new URL(request.url()).pathname));
 
@@ -32,11 +32,17 @@ test("training and penalty bundles stay off the homepage startup path", async ({
   });
 
   expect(await page.evaluate(() => window.__footballLabModeBundles.snapshot())).toEqual({
+    gameplayLoaded: false,
     trainingLoaded: false,
     penaltiesLoaded: false
   });
 
   const deferredAtStartup = [
+    "/game/runtime-v23-main.js",
+    "/game/keeper-ai-v34.js",
+    "/game/keeper-visuals-v38-1.js",
+    "/game/strike-v32-4.js",
+    "/game/campaign-v41.js",
     "/game/training-v35.js",
     "/game/training-ui-v35-5.js",
     "/game/training-ui-v35-6.js",
@@ -53,6 +59,7 @@ test("training and penalty bundles stay off the homepage startup path", async ({
   await page.locator("#trainingCardV35").click();
   await expect(page.locator("#trainingModalV35")).toHaveClass(/is-open/);
   expect(await page.evaluate(() => window.__footballLabModeBundles.snapshot())).toEqual({
+    gameplayLoaded: true,
     trainingLoaded: true,
     penaltiesLoaded: false
   });
@@ -80,9 +87,14 @@ test("V23 boots from static modules without browser-time source execution", asyn
   });
 
   await page.goto("/index.html");
+  await page.locator("#classicCard").click();
   await page.waitForFunction(() => window.__footballLabReleaseV25?.build === "25.0.0", null, {
     timeout: 20000
   });
+  await page.waitForFunction(() => window.__footballLabModeBundles.snapshot().gameplayLoaded, null, {
+    timeout: 20000
+  });
+  expect(await page.evaluate(() => window.__footballLabModeBundles.snapshot().gameplayLoaded)).toBe(true);
 
   const runtime = await page.evaluate(() => ({
     generated: window.__footballLabRuntimeV23,
@@ -102,6 +114,10 @@ test("V23 boots from static modules without browser-time source execution", asyn
   expect(runtime.javascriptBlobCount).toBe(0);
   expect(runtime.startupError).toBeNull();
   expect(requestedPaths.some((value) => value.endsWith("/game/runtime-v23-main.js"))).toBe(true);
+  await page.waitForTimeout(1100);
+  await expect(page.locator(".build-badge-v22")).toHaveText("V51.1");
+  await expect(page.locator(".settings-version-v22 strong")).toHaveText("51.1.0");
+  await expect(page.locator("html")).toHaveAttribute("data-football-lab-build", "51.1.0");
   for (const forbidden of FORBIDDEN_RUNTIME_PATHS) {
     expect(requestedPaths.some((value) => value.endsWith(forbidden)), forbidden).toBe(false);
   }
@@ -116,10 +132,10 @@ test("V23 static runtime preserves the playable unlimited-run flow", async ({ pa
   });
 
   await page.goto("/index.html");
+  await page.locator("#classicCard").click();
   await page.waitForFunction(() => window.__footballLabReleaseV25?.build === "25.0.0", null, {
     timeout: 20000
   });
-  await page.locator("#classicCard").click();
   await expect(page.locator("#kickerSelectV13")).toHaveClass(/is-open/);
   await page.locator(".kicker-card").first().click();
   await page.locator("#kickerConfirmV13").click();
