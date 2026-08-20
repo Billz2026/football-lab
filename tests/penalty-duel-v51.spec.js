@@ -2,10 +2,10 @@ import { test, expect } from "@playwright/test";
 
 async function startDuel(page, difficulty = "pro", keeper = "reader") {
   await page.goto("/");
+  await page.locator(".hub-mode-penalties").click();
   await page.waitForFunction(() => window.__footballLabPenaltyShootoutV49?.build === "49.0.0");
   await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.1.0");
   await page.waitForFunction(() => window.__footballLabPenaltyDuelTransitionGuardV51?.build === "51.1.0");
-  await page.locator(".hub-mode-penalties").click();
   await page.locator("#shootoutDifficultyV49").selectOption(difficulty);
   await page.locator("#shootoutKeeperV49").selectOption(keeper);
   await page.locator("#startShootoutV49").click();
@@ -118,6 +118,7 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
 
 test("V51 CPU difficulties change readable behaviour, disguise and reaction", async ({ page }) => {
   await page.goto("/");
+  await page.locator(".hub-mode-penalties").click();
   await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.1.0");
   const models = await page.evaluate(() => window.__footballLabPenaltyDuelV51.difficulties);
 
