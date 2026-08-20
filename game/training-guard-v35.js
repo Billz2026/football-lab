@@ -14,4 +14,3 @@ window.__footballLabTrainingGuardV35 = Object.freeze({
   blocksCompetitiveSubmission: true,
   blocksCareerRewards: true
 });
-
