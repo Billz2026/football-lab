@@ -1,9 +1,13 @@
 import { clamp, state, elements, syncStage } from "./core-v6.js?v=32.4";
 import { keeperById } from "./keepers-v14.js?v=32.4";
 import { shootoutDecision, shootoutPhaseLabel, goalCount, REGULATION_KICKS } from "./penalty-shootout-rules-v49.js?v=49.0.0";
+import { playImpactSound, playOutcomeSound } from "./audio-v32.js?v=38.7.0";
 
-const BUILD = "51.1.0";
+const BUILD = "51.2.0";
 const RECORD_KEY = "footballLabPenaltyShootoutRecordV49";
+const MAX_RUN_UP_FRAME_ADVANCE_MS = 100;
+const TEST_MODE = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
+  && new URLSearchParams(location.search).get("test") === "penalty-v51";
 const PENALTY_CAMERA = Object.freeze({ sideOffset: 0, backDistance: 7.15, height: 1.82, fovY: 34.5, targetHeight: 1.11 });
 const ZONES = Object.freeze([
   Object.freeze({ id: "high-left", label: "TOP LEFT", short: "TL", x: 0.18, y: 0.18, column: "left", row: "high" }),
@@ -39,6 +43,17 @@ function clearDefenseScheduling() {
   defenseFrame = 0;
 }
 
+function updateDefenseRunUpProgress(value) {
+  const progress = clamp(Number(value) || 0, 0, 1);
+  if (defense) defense.runUpProgress = progress;
+  const meter = document.getElementById("defenseRunUpProgressV51");
+  const bar = document.getElementById("defenseRunUpBarV51");
+  const copy = document.getElementById("defenseRunUpCopyV51");
+  if (meter) meter.setAttribute("aria-valuenow", String(Math.round(progress * 100)));
+  if (bar) bar.style.width = `${progress * 100}%`;
+  if (copy) copy.textContent = progress < 0.18 ? "SET" : progress < 0.72 ? "WATCH" : "STRIKE";
+}
+
 function scheduleCpuStrike(runUpMs) {
   cancelAnimationFrame(defenseFrame);
   let elapsed = 0;
@@ -48,10 +63,12 @@ function scheduleCpuStrike(runUpMs) {
       defenseFrame = 0;
       return;
     }
-    if (previous) elapsed += Math.min(time - previous, 50);
+    if (previous) elapsed += Math.min(Math.max(0, time - previous), MAX_RUN_UP_FRAME_ADVANCE_MS);
     previous = time;
+    updateDefenseRunUpProgress(elapsed / runUpMs);
     if (elapsed >= runUpMs) {
       defenseFrame = 0;
+      updateDefenseRunUpProgress(1);
       cpuStrike();
       return;
     }
@@ -145,10 +162,10 @@ function ensureDefenseUi() {
   overlay.setAttribute("aria-label", "Control your goalkeeper against the CPU penalty");
   overlay.innerHTML = `
     <div class="defense-stadium-v51"></div><div class="defense-goal-v51"></div>
-    <div class="defense-header-v51"><div><span>CPU PENALTY · YOU ARE THE GOALKEEPER</span><strong id="defenseCpuNameV51">PRO XI</strong><small id="defenseCueV51">READ THE RUN-UP</small></div><div><span>DIFFICULTY</span><strong id="defenseDifficultyV51">PROFESSIONAL</strong><small id="defenseTimingV51">WAIT FOR THE STRIKE</small></div></div>
+    <div class="defense-header-v51"><div><span>CPU PENALTY · YOU ARE THE GOALKEEPER</span><strong id="defenseCpuNameV51">PRO XI</strong><small id="defenseCueV51">READ THE RUN-UP</small></div><div><span>DIFFICULTY</span><strong id="defenseDifficultyV51">PROFESSIONAL</strong><small id="defenseTimingV51" aria-live="polite">WAIT FOR THE STRIKE</small><div class="defense-runup-meter-v51" id="defenseRunUpProgressV51" role="progressbar" aria-label="CPU run-up progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i><b id="defenseRunUpBarV51"></b></i><span id="defenseRunUpCopyV51">SET</span></div></div></div>
     <div class="defense-cpu-v51" id="defenseCpuV51"><i></i><b></b></div><div class="defense-ball-v51" id="defenseBallV51"></div>
     <div class="defense-keeper-v51" id="defenseKeeperV51"><i class="head"></i><i class="body"></i><i class="arm-l"></i><i class="arm-r"></i><i class="leg-l"></i><i class="leg-r"></i></div>
-    <div class="defense-result-v51" id="defenseResultV51"></div>
+    <div class="defense-result-v51" id="defenseResultV51" role="status" aria-live="assertive"></div>
     <div class="defense-controls-v51"><div class="defense-shuffle-v51" aria-label="Goalkeeper starting position"><button type="button" data-v51-shift="left">SHIFT LEFT</button><button type="button" data-v51-shift="centre" class="is-selected">HOLD CENTRE</button><button type="button" data-v51-shift="right">SHIFT RIGHT</button></div><div class="defense-dive-grid-v51" aria-label="Goalkeeper dive direction">${ZONES.map((zone) => `<button type="button" data-v51-dive="${zone.id}" disabled>${zone.label}</button>`).join("")}</div></div>`;
   document.querySelector(".game-frame")?.appendChild(overlay);
   overlay.querySelectorAll("[data-v51-shift]").forEach((button) => button.addEventListener("click", () => setKeeperShift(button.dataset.v51Shift)));
@@ -391,7 +408,7 @@ function startDefenseTurn() {
   const cfg = difficulty(); const index = duel.opponentResults.length;
   const plannedZone = zoneForRoll(deterministic(duel.seed, 100 + index * 11));
   const truthful = deterministic(duel.seed, 101 + index * 11) < cfg.cueReliability;
-  defense = { plannedZone, finalZone: plannedZone, shift: "centre", committed: null, commitAt: 0, runUpStarted: false, strikeAt: 0, resolved: false, truthful };
+  defense = { plannedZone, finalZone: plannedZone, shift: "centre", committed: null, commitAt: 0, runUpStarted: false, runUpProgress: 0, strikeAt: 0, resolved: false, truthful };
   ensureDefenseUi(); document.documentElement.classList.add("is-defending-v51"); delete document.documentElement.dataset.duelAttackV51;
   const overlay = document.getElementById("penaltyDefenseV51"); overlay?.classList.remove("is-shot");
   const ball = document.getElementById("defenseBallV51"); if (ball) { ball.classList.remove("is-shot"); ball.style.left = "50%"; ball.style.top = "43%"; }
@@ -404,7 +421,9 @@ function startDefenseTurn() {
   document.getElementById("defenseDifficultyV51").textContent = cfg.label;
   document.getElementById("defenseCueV51").textContent = cueForZone(plannedZone, truthful);
   document.getElementById("defenseTimingV51").textContent = "SHUFFLE, THEN READ THE RUN-UP";
+  updateDefenseRunUpProgress(0);
   duel.lastMessage = "CPU KICK · YOU CONTROL THE GOALKEEPER"; renderScoreboard();
+  window.dispatchEvent(new CustomEvent("footballlab:penaltydefenseturn", { detail: { difficulty: duel.difficultyId, kick: index + 1 } }));
   defenseTimer = setTimeout(beginCpuRunUp, 650);
 }
 
@@ -415,12 +434,15 @@ function beginCpuRunUp() {
   document.getElementById("defenseCpuV51")?.classList.add("is-running");
   document.querySelectorAll("[data-v51-dive]").forEach((button) => { button.disabled = false; });
   document.getElementById("defenseTimingV51").textContent = "DIVE ON THE STRIKE";
+  updateDefenseRunUpProgress(0);
+  window.dispatchEvent(new CustomEvent("footballlab:penaltyrunup", { detail: { runUpMs: cfg.runUpMs } }));
   scheduleCpuStrike(cfg.runUpMs);
 }
 
 function cpuStrike() {
   if (!active || duel?.turn !== "cpu" || !defense || defense.resolved) return;
   const cfg = difficulty(); defense.strikeAt = performance.now();
+  updateDefenseRunUpProgress(1);
   const earlyLead = defense.committed ? defense.strikeAt - defense.commitAt : 0;
   const reactionRoll = deterministic(duel.seed, 150 + duel.opponentResults.length * 13);
   if (defense.committed && earlyLead > 420 && reactionRoll < cfg.reactsToEarly) defense.finalZone = chooseCounterZone(defense.committed, deterministic(duel.seed, 151 + duel.opponentResults.length * 13));
@@ -453,7 +475,6 @@ function zoneMatch(committed, finalZone) {
 
 function resolveCpuKick() {
   if (!active || duel?.turn !== "cpu" || !defense || defense.resolved) return;
-  defense.resolved = true; document.querySelectorAll("[data-v51-dive],[data-v51-shift]").forEach((button) => { button.disabled = true; });
   const cfg = difficulty(); let saved = false;
   if (!defense.cpuMiss && defense.committed) {
     const leadMs = defense.strikeAt - defense.commitAt;
@@ -467,17 +488,43 @@ function resolveCpuKick() {
     defense.timingQuality = timing; defense.reach = reach; defense.threshold = threshold;
   }
   const cpuGoal = !defense.cpuMiss && !saved;
+  settleCpuResult({ cpuGoal, saved, cpuMiss: defense.cpuMiss });
+}
+
+function settleCpuResult({ cpuGoal, saved = false, cpuMiss = false, immediate = false }) {
+  if (!active || duel?.turn !== "cpu" || !defense || defense.resolved) return false;
+  clearDefenseScheduling();
+  defense.resolved = true;
+  defense.cpuMiss = Boolean(cpuMiss);
+  document.querySelectorAll("[data-v51-dive],[data-v51-shift]").forEach((button) => { button.disabled = true; });
   duel.opponentResults.push(cpuGoal);
   const result = document.getElementById("defenseResultV51");
   if (result) {
-    result.textContent = defense.cpuMiss ? "CPU MISSES" : saved ? "SAVED!" : "CPU SCORES";
-    result.className = `defense-result-v51 is-visible ${defense.cpuMiss ? "is-miss" : saved ? "is-save" : "is-goal"}`;
+    result.textContent = cpuMiss ? "CPU MISSES" : saved ? "SAVED!" : "CPU SCORES";
+    result.className = `defense-result-v51 is-visible ${cpuMiss ? "is-miss" : saved ? "is-save" : "is-goal"}`;
   }
-  duel.lastMessage = defense.cpuMiss ? "CPU MISSES · YOUR KICK NEXT" : saved ? "YOU SAVE IT · YOUR KICK NEXT" : "CPU SCORES · YOUR KICK NEXT";
+  const outcome = cpuMiss ? "MISS" : saved ? "SAVE" : "GOAL";
+  playImpactSound(outcome);
+  playOutcomeSound(outcome, saved ? { saveType: "CATCH" } : undefined);
+  navigator.vibrate?.(cpuMiss ? [10, 22, 10] : saved ? [24, 30, 42] : 38);
+  duel.lastMessage = cpuMiss ? "CPU MISSES · YOUR KICK NEXT" : saved ? "YOU SAVE IT · YOUR KICK NEXT" : "CPU SCORES · YOUR KICK NEXT";
   renderScoreboard();
+  window.dispatchEvent(new CustomEvent("footballlab:penaltydefenseresult", { detail: { goal: Boolean(cpuGoal), saved: Boolean(saved), miss: Boolean(cpuMiss), kick: duel.opponentResults.length } }));
   const decision = shootoutDecision(duel.playerResults, duel.opponentResults);
-  if (decision.complete) { defenseTimer = setTimeout(() => completeDuel(decision), 760); return; }
-  defenseTimer = setTimeout(returnToPlayerTurn, 880);
+  if (decision.complete) {
+    if (immediate) completeDuel(decision);
+    else defenseTimer = setTimeout(() => completeDuel(decision), 760);
+    return true;
+  }
+  if (immediate) returnToPlayerTurn();
+  else defenseTimer = setTimeout(returnToPlayerTurn, 880);
+  return true;
+}
+
+function settleCpuResultForTest(goal) {
+  if (!TEST_MODE || !active || duel?.turn !== "cpu" || !defense || duel.complete) return false;
+  if (!defense.runUpStarted) beginCpuRunUp();
+  return settleCpuResult({ cpuGoal: Boolean(goal), saved: !goal, cpuMiss: false, immediate: true });
 }
 
 function returnToPlayerTurn() {
@@ -514,6 +561,7 @@ function completeDuel(decision) {
   document.getElementById("duelResultTitleV51").textContent = won ? "SHOOTOUT WON." : "SHOOTOUT LOST.";
   document.getElementById("duelResultCopyV51").textContent = sudden ? `${won ? "You held your nerve" : "The CPU edged it"} after ${sudden} sudden-death ${sudden === 1 ? "round" : "rounds"}.` : `${won ? "You beat the CPU" : "The CPU wins"} inside the regulation shootout.`;
   document.getElementById("duelFinalYouV51").textContent = String(goalCount(duel.playerResults)); document.getElementById("duelFinalCpuV51").textContent = String(goalCount(duel.opponentResults));
+  window.dispatchEvent(new CustomEvent("footballlab:penaltyduelcomplete", { detail: { winner: decision.winner, playerScore: goalCount(duel.playerResults), cpuScore: goalCount(duel.opponentResults), suddenDeathRounds: sudden } }));
   setTimeout(() => { if (active) showModal(modal); }, 340);
 }
 
@@ -563,8 +611,8 @@ function handleKeys(event) {
 function publishRelease() {
   const old = window.__footballLabReleaseV490 || window.__footballLabReleaseV480; if (!old) return false;
   const release = Object.freeze({ ...old, build: BUILD, penaltyExperience: "full-player-vs-cpu-alternating-duel", penaltyAttack: "six-zone-runup-single-composure-strike", penaltyDefense: "user-controlled-goalkeeper-cpu-kicks", penaltyCpuDifficulty: "academy-pro-elite-world-class-behavioural", penaltyCpuBehaviour: "runup-cues-disguise-early-keeper-read", penaltyKeeperControl: "shuffle-plus-six-zone-dive-timing", penaltyOpponentSimulation: "retired-from-live-v51", cacheGeneration: BUILD });
-  window.__footballLabReleaseV510 = release; window.__footballLabReleaseV511 = release; window.__footballLabReleaseCurrent = release; document.documentElement.dataset.footballLabBuild = BUILD;
-  const badge = document.querySelector(".build-badge-v22"); if (badge) { badge.textContent = "V51.1"; badge.title = `Football Lab build ${BUILD}`; }
+  window.__footballLabReleaseV510 = release; window.__footballLabReleaseV511 = release; window.__footballLabReleaseV512 = release; window.__footballLabReleaseCurrent = release; document.documentElement.dataset.footballLabBuild = BUILD;
+  const badge = document.querySelector(".build-badge-v22"); if (badge) { badge.textContent = "V51.2"; badge.title = `Football Lab build ${BUILD}`; }
   const version = document.querySelector(".settings-version-v22 strong"); if (version) version.textContent = BUILD;
   return true;
 }
@@ -596,7 +644,9 @@ window.__footballLabPenaltyDuelV51 = Object.freeze({
   difficulties: Object.fromEntries(Object.entries(DIFFICULTIES).map(([id, value]) => [id, { ...value }])),
   zones: ZONES.map((zone) => ({ ...zone })),
   goalkeeperControl: "shuffle-plus-six-zone-timed-dive",
+  runUpClock: "frame-aware-100ms-stall-clamp",
   cpuRepliesArePlayable: true,
   attackFlow: "placement-runup-composure",
-  snapshot: () => duel ? { active, turn: duel.turn, difficultyId: duel.difficultyId, userKeeperId: duel.userKeeperId, playerResults: [...duel.playerResults], opponentResults: [...duel.opponentResults], pressure: pressure(), attackZone: attackZone?.id || null, phase: state.phase, defense: defense ? { plannedZone: defense.plannedZone?.id || null, finalZone: defense.finalZone?.id || null, shift: defense.shift, committed: defense.committed?.id || null, runUpStarted: defense.runUpStarted, strikeAt: defense.strikeAt, resolved: defense.resolved, cpuMiss: Boolean(defense.cpuMiss), timingQuality: defense.timingQuality ?? null } : null, complete: duel.complete, winner: duel.decision?.winner || null } : null
+  testControl: TEST_MODE ? Object.freeze({ settleCpuResult: settleCpuResultForTest }) : null,
+  snapshot: () => duel ? { active, turn: duel.turn, difficultyId: duel.difficultyId, userKeeperId: duel.userKeeperId, playerResults: [...duel.playerResults], opponentResults: [...duel.opponentResults], pressure: pressure(), attackZone: attackZone?.id || null, phase: state.phase, defense: defense ? { plannedZone: defense.plannedZone?.id || null, finalZone: defense.finalZone?.id || null, shift: defense.shift, committed: defense.committed?.id || null, runUpStarted: defense.runUpStarted, runUpProgress: defense.runUpProgress, strikeAt: defense.strikeAt, resolved: defense.resolved, cpuMiss: Boolean(defense.cpuMiss), timingQuality: defense.timingQuality ?? null, reach: defense.reach ?? null, threshold: defense.threshold ?? null } : null, complete: duel.complete, winner: duel.decision?.winner || null } : null
 });
