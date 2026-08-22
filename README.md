@@ -6,7 +6,7 @@ Football Lab is a browser-based arcade free-kick game hosted on GitHub Pages. Pl
 
 - Game: `https://billz2026.github.io/football-lab/index.html`
 - Entry point: `/index.html`
-- Current public release: V51.2.0
+- Current public release: V52.0.0
 - Static runtime architecture: V23
 
 ## Run locally
@@ -43,7 +43,7 @@ The build command uses the explicit `?runtime-capture=v23` development route. No
 
 ## Deployment
 
-GitHub Pages deploys from the repository's `main` branch and root directory. V51.2.0 is the single public release identifier used by the page entry point, application metadata, service worker URL and shell cache. Run `npm run verify:release:v51` before publishing so those values cannot drift apart.
+GitHub Pages deploys from the repository's `main` branch and root directory. V52.0.0 is the single public release identifier used by the page entry point, application metadata, service worker URL and shell cache. Run `npm run verify:release:v51` before publishing so those values cannot drift apart.
 
 ## Release checklist
 

@@ -1,5 +1,5 @@
-// Football Lab V51.2 release and cache contract
-const RELEASE_BUILD = "51.2.0";
+// Football Lab V52 release and cache contract
+const RELEASE_BUILD = "52.0.0";
 
 function registerFootballLabServiceWorker() {
   if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
@@ -36,7 +36,7 @@ let buildPresentationObserver = null;
 function restoreCurrentBuildPresentation() {
   document.documentElement.dataset.footballLabBuild = RELEASE_BUILD;
   const badge = document.querySelector(".build-badge-v22");
-  if (badge && badge.textContent !== "V51.2") badge.textContent = "V51.2";
+  if (badge && badge.textContent !== "V52") badge.textContent = "V52";
   if (badge && badge.title !== `Football Lab build ${RELEASE_BUILD}`) {
     badge.title = `Football Lab build ${RELEASE_BUILD}`;
   }
@@ -70,15 +70,15 @@ const bootPromise = runtimeCaptureMode
         document.documentElement.dataset.footballLabBuild = RELEASE_BUILD;
         const badge = document.querySelector(".build-badge-v22");
         if (badge) {
-          badge.textContent = "V51.2";
+          badge.textContent = "V52";
           badge.title = `Football Lab build ${RELEASE_BUILD}`;
         }
         const version = document.querySelector(".settings-version-v22 strong");
         if (version) version.textContent = RELEASE_BUILD;
         const release = Object.freeze({
           build: RELEASE_BUILD,
-          shell: "premium-asymmetric-console-mosaic",
-          navigation: "play-training-profile-in-settings",
+          shell: "premium-black-gold-photographic-mosaic",
+          navigation: "play-progress-settings-only",
           primaryModes: "training-free-kicks-penalties-corners-finishing-match-scenarios",
           aiming: "direct-intended-target-unsolved-route",
           execution: "deterministic-execution-cone-contact-weighted",
@@ -190,6 +190,7 @@ const bootPromise = runtimeCaptureMode
         window.__footballLabReleaseV480 = release;
         window.__footballLabReleaseV511 = release;
         window.__footballLabReleaseV512 = release;
+        window.__footballLabReleaseV520 = release;
         window.__footballLabReleaseCurrent = release;
         protectCurrentBuildPresentation();
       });

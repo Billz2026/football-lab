@@ -1,5 +1,5 @@
-// Football Lab V51.2 release and cache contract
-const RELEASE_BUILD = "51.2.0";
+// Football Lab V52 release and cache contract
+const RELEASE_BUILD = "52.0.0";
 const CACHE_NAME = `football-lab-shell-v${RELEASE_BUILD.replaceAll(".", "-")}`;
 const CORE_ASSETS = [
   "./",
@@ -8,6 +8,7 @@ const CORE_ASSETS = [
   "./product-polish-v22.css?v=22",
   "./game/hub-v35-1.css?v=35.1",
   "./game/hub-v35-2.css?v=35.2.1",
+  "./game/hub-v52.css?v=52.0.0",
   "./game/hub-v35-3.css?v=35.3",
   "./game/hub-v35-4.css?v=35.4",
   "./game/progression-v20.css?v=20",
@@ -18,6 +19,13 @@ const CORE_ASSETS = [
   "./game/hub-v35-1.js?v=35.1",
   "./game/hub-v35-3.js?v=35.3",
   "./game/hub-v35-4.js?v=35.6.2",
+  "./assets/homepage/football-lab-gold-logo.webp",
+  "./assets/homepage/free-training.webp",
+  "./assets/homepage/classic-free-kicks.webp",
+  "./assets/homepage/penalty-duel.webp",
+  "./assets/homepage/corners.webp",
+  "./assets/homepage/finishing.webp",
+  "./assets/homepage/match-scenarios.webp",
   `./app.js?v=${RELEASE_BUILD}`
 ];
 

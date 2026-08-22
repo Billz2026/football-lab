@@ -4,8 +4,8 @@ async function startDuel(page, difficulty = "pro", keeper = "reader") {
   await page.goto("/?test=penalty-v51");
   await page.locator(".hub-mode-penalties").click();
   await page.waitForFunction(() => window.__footballLabPenaltyShootoutV49?.build === "49.0.0");
-  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.2.0");
-  await page.waitForFunction(() => window.__footballLabPenaltyDuelTransitionGuardV51?.build === "51.2.0");
+  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "52.0.0");
+  await page.waitForFunction(() => window.__footballLabPenaltyDuelTransitionGuardV51?.build === "52.0.0");
   await page.locator("#shootoutDifficultyV49").selectOption(difficulty);
   await page.locator("#shootoutKeeperV49").selectOption(keeper);
   await page.locator("#startShootoutV49").click();
@@ -155,7 +155,7 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
 test("V51 CPU difficulties change readable behaviour, disguise and reaction", async ({ page }) => {
   await page.goto("/?test=penalty-v51");
   await page.locator(".hub-mode-penalties").click();
-  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "51.2.0");
+  await page.waitForFunction(() => window.__footballLabPenaltyDuelV51?.build === "52.0.0");
   const models = await page.evaluate(() => window.__footballLabPenaltyDuelV51.difficulties);
 
   expect(models.academy.runUpMs).toBeGreaterThan(models.world.runUpMs);
@@ -166,7 +166,7 @@ test("V51 CPU difficulties change readable behaviour, disguise and reaction", as
   expect(models.world.disguise).toBeGreaterThan(models.pro.disguise);
 });
 
-test("V51.2 mobile goalkeeper controls keep every dive target at least 44 pixels high", async ({ page }) => {
+test("V52 mobile goalkeeper controls keep every dive target at least 44 pixels high", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await startDuel(page, "pro", "reflex");
   await recordPlayerKick(page, true);
@@ -186,7 +186,7 @@ test("V51.2 mobile goalkeeper controls keep every dive target at least 44 pixels
   }
 });
 
-test("V51.2 completes a regulation shootout, persists the win and returns cleanly to the menu", async ({ page }) => {
+test("V52 completes a regulation shootout, persists the win and returns cleanly to the menu", async ({ page }) => {
   await startDuel(page, "pro", "reader");
   await page.evaluate(() => {
     window.__footballLabCompletedDuelTest = null;
@@ -225,7 +225,7 @@ test("V51.2 completes a regulation shootout, persists the win and returns cleanl
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot())).toBeNull();
 });
 
-test("V51.2 resolves sudden death, records its length and reopens setup for play again", async ({ page }) => {
+test("V52 resolves sudden death, records its length and reopens setup for play again", async ({ page }) => {
   await startDuel(page, "elite", "giant");
 
   await playRound(page, true, true);

@@ -35,14 +35,14 @@ test("current release preserves campaign markers and keeper visual safeguards", 
   await expect.poll(
     () => page.evaluate(() => window.__footballLabReleaseCurrent?.build),
     { timeout: 10000 }
-  ).toBe("51.2.0");
+  ).toBe("52.0.0");
   await expect.poll(
     () => page.evaluate(() => window.__footballLabCampaignProgressionV41?.build),
     { timeout: 10000 }
   ).toBe("41.0.0");
 
   const release = await page.evaluate(() => window.__footballLabReleaseCurrent);
-  expect(release.build).toBe("51.2.0");
+  expect(release.build).toBe("52.0.0");
   expect(release.keeperBodyHalo).toBe("removed");
   expect(release.keeperGroundShadow).toBe("soft-ground-only");
   expect(release.keeperContactRing).toBe("removed");
