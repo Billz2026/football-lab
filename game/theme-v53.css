@@ -1,0 +1,439 @@
+/* Football Lab V53 — unified black/gold product theme.
+   Visual-only layer: no gameplay, scoring, physics or campaign logic changes. */
+
+:root {
+  --fl-bg: #020202;
+  --fl-bg-soft: #080806;
+  --fl-surface: rgba(10, 10, 8, 0.94);
+  --fl-surface-raised: rgba(15, 14, 10, 0.96);
+  --fl-surface-soft: rgba(230, 185, 79, 0.045);
+  --fl-gold: #e6b94f;
+  --fl-gold-bright: #ffd86a;
+  --fl-gold-rgb: 230, 185, 79;
+  --fl-ivory: #f5f0e6;
+  --fl-muted: rgba(245, 240, 230, 0.62);
+  --fl-muted-soft: rgba(245, 240, 230, 0.44);
+  --fl-line: rgba(230, 185, 79, 0.22);
+  --fl-line-soft: rgba(245, 240, 230, 0.09);
+  --fl-success: #70d98b;
+  --fl-danger: #ff7c78;
+  --fl-shadow: 0 24px 70px rgba(0, 0, 0, 0.46);
+  --fl-radius-sm: 8px;
+  --fl-radius-md: 14px;
+  --fl-radius-lg: 20px;
+
+  /* Backwards-compatible aliases used throughout the existing game UI. */
+  --bg: var(--fl-bg);
+  --bg-soft: var(--fl-bg-soft);
+  --panel: var(--fl-surface);
+  --panel-solid: #0b0b09;
+  --line: var(--fl-line);
+  --line-soft: var(--fl-line-soft);
+  --lime: var(--fl-gold);
+  --lime-strong: var(--fl-gold-bright);
+  --text: var(--fl-ivory);
+  --muted: var(--fl-muted);
+  --danger: var(--fl-danger);
+  --shadow: var(--fl-shadow);
+  --radius: var(--fl-radius-lg);
+}
+
+html,
+body {
+  background: var(--fl-bg);
+  color: var(--fl-ivory);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 50% 108%, rgba(var(--fl-gold-rgb), 0.11), transparent 42rem),
+    radial-gradient(circle at 84% 12%, rgba(var(--fl-gold-rgb), 0.045), transparent 25rem),
+    linear-gradient(180deg, #080806 0%, #020202 66%, #000 100%);
+}
+
+body::before {
+  opacity: .18;
+  background-image:
+    linear-gradient(rgba(var(--fl-gold-rgb), .018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--fl-gold-rgb), .018) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline-color: rgba(255, 216, 106, .72);
+}
+
+/* Shared surfaces */
+.panel,
+.modal-card,
+.control-panel,
+.game-topbar {
+  border-color: var(--fl-line-soft);
+  background: linear-gradient(155deg, rgba(16, 15, 11, .96), rgba(5, 5, 4, .96));
+  box-shadow: var(--fl-shadow);
+}
+
+.section-label,
+.eyebrow,
+.stage-copy span,
+.meter-label strong,
+.progress-copy strong {
+  color: var(--fl-gold-bright);
+}
+
+.header-stats,
+.game-stats,
+.final-score,
+.game-over-stats {
+  border-color: var(--fl-line);
+}
+
+.header-stats strong,
+.game-stats strong,
+.final-score strong,
+.game-over-stats strong,
+.level-badge {
+  color: var(--fl-gold-bright);
+}
+
+.progress-track,
+.meter {
+  background: rgba(245, 240, 230, .08);
+}
+
+.progress-track span,
+.meter > span,
+#meterFill {
+  background: linear-gradient(90deg, var(--fl-gold), var(--fl-gold-bright));
+  box-shadow: 0 0 16px rgba(var(--fl-gold-rgb), .16);
+}
+
+#meterMarker,
+.meter i {
+  border-color: var(--fl-gold-bright);
+  background: var(--fl-ivory);
+  box-shadow: 0 0 12px rgba(var(--fl-gold-rgb), .38);
+}
+
+/* Buttons */
+.button,
+.icon-button,
+.modal-close {
+  border-radius: var(--fl-radius-sm);
+}
+
+.button-primary {
+  color: #090805;
+  border-color: rgba(255, 216, 106, .56);
+  background: linear-gradient(135deg, var(--fl-gold-bright), var(--fl-gold));
+  box-shadow: 0 12px 30px rgba(var(--fl-gold-rgb), .16);
+}
+
+.button-primary:hover,
+.button-primary:focus-visible {
+  color: #060604;
+  border-color: var(--fl-gold-bright);
+  background: linear-gradient(135deg, #ffe594, var(--fl-gold-bright));
+}
+
+.button-secondary,
+.icon-button,
+.modal-close {
+  color: var(--fl-ivory);
+  border-color: var(--fl-line);
+  background: rgba(var(--fl-gold-rgb), .035);
+}
+
+.button-secondary:hover,
+.button-secondary:focus-visible,
+.icon-button:hover,
+.icon-button:focus-visible,
+.modal-close:hover,
+.modal-close:focus-visible {
+  color: var(--fl-gold-bright);
+  border-color: rgba(255, 216, 106, .52);
+  background: rgba(var(--fl-gold-rgb), .08);
+}
+
+/* Core gameplay shell */
+body.is-game-active {
+  background:
+    radial-gradient(circle at 50% 88%, rgba(var(--fl-gold-rgb), .075), transparent 34rem),
+    linear-gradient(180deg, #080806, #020202 72%, #000);
+}
+
+body.is-game-active .site-header {
+  border-bottom-color: rgba(var(--fl-gold-rgb), .14);
+  background: linear-gradient(180deg, rgba(0, 0, 0, .98), rgba(5, 5, 4, .9));
+}
+
+.game-topbar {
+  border-radius: var(--fl-radius-md);
+}
+
+.stage-copy strong,
+.control-heading h2,
+.modal-card h2 {
+  color: var(--fl-ivory);
+}
+
+.stage-copy span,
+.game-stats span,
+.control-heading p,
+.input-note,
+.modal-card p {
+  color: var(--fl-muted);
+}
+
+.game-frame {
+  border-color: rgba(var(--fl-gold-rgb), .18);
+  background: #050504;
+}
+
+.wind-chip,
+.canvas-prompt,
+.result-banner {
+  border-color: rgba(var(--fl-gold-rgb), .24);
+  background: rgba(4, 4, 3, .78);
+  color: var(--fl-ivory);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .34);
+}
+
+.wind-chip small,
+.canvas-prompt {
+  color: var(--fl-muted);
+}
+
+.wind-chip strong,
+.wind-chip > span {
+  color: var(--fl-gold-bright);
+}
+
+.shot-step {
+  border-color: var(--fl-line-soft);
+  background: rgba(255, 255, 255, .018);
+}
+
+.shot-step > span {
+  color: var(--fl-muted);
+  border-color: rgba(var(--fl-gold-rgb), .18);
+  background: rgba(var(--fl-gold-rgb), .035);
+}
+
+.shot-step strong {
+  color: var(--fl-ivory);
+}
+
+.shot-step small {
+  color: var(--fl-muted-soft);
+}
+
+.shot-step.is-current,
+.shot-step.is-active,
+.shot-step[aria-current="step"] {
+  border-color: rgba(255, 216, 106, .54);
+  background: linear-gradient(145deg, rgba(var(--fl-gold-rgb), .10), rgba(0, 0, 0, .18));
+  box-shadow: inset 0 0 0 1px rgba(255, 216, 106, .08), 0 0 22px rgba(var(--fl-gold-rgb), .06);
+}
+
+.shot-step.is-current > span,
+.shot-step.is-active > span,
+.shot-step[aria-current="step"] > span {
+  color: #070604;
+  border-color: var(--fl-gold-bright);
+  background: linear-gradient(135deg, var(--fl-gold-bright), var(--fl-gold));
+}
+
+/* Modals and setup flows */
+.modal-backdrop {
+  background: rgba(0, 0, 0, .78);
+  backdrop-filter: blur(10px);
+}
+
+.modal-card {
+  border-color: rgba(var(--fl-gold-rgb), .22);
+}
+
+.modal-card li,
+.roadmap-list > *,
+.game-over-stats > div,
+.final-score,
+.profile-records > div {
+  border-color: var(--fl-line-soft);
+  background: rgba(var(--fl-gold-rgb), .025);
+}
+
+.modal-card li > span {
+  color: #080704;
+  border-color: var(--fl-gold-bright);
+  background: linear-gradient(135deg, var(--fl-gold-bright), var(--fl-gold));
+}
+
+/* Training setup + in-session tools. These selectors intentionally cover
+   the current V35/V35.5/V35.6 generations so the experience is visually one product. */
+html body #trainingModalV35 .modal-card,
+html body .training-card-v35,
+html body .training-session-bar-v355,
+html body .training-tools-v355,
+html body .training-stat-v355,
+html body .training-action-v355,
+html body .training-activity-v35,
+html body .training-config-v355 {
+  border-color: var(--fl-line) !important;
+  background: linear-gradient(145deg, rgba(14, 13, 10, .96), rgba(5, 5, 4, .95)) !important;
+  color: var(--fl-ivory) !important;
+}
+
+html body .training-activity-v35:hover,
+html body .training-activity-v35:focus-visible,
+html body .training-action-v355:hover,
+html body .training-action-v355:focus-visible {
+  border-color: rgba(255, 216, 106, .58) !important;
+  background: rgba(var(--fl-gold-rgb), .09) !important;
+}
+
+html body .training-activity-v35 small,
+html body .training-session-bar-v355 span,
+html body .training-stat-v355 span,
+html body .training-action-v355 small,
+html body .training-config-v355 {
+  color: var(--fl-muted) !important;
+}
+
+html body .training-activity-v35 strong,
+html body .training-session-bar-v355 strong,
+html body .training-stat-v355 strong,
+html body .training-action-v355 strong {
+  color: var(--fl-ivory) !important;
+}
+
+/* Penalty Duel — V51 hard-coded lime/green is deliberately overridden here.
+   High specificity + selected !important rules ensure this remains authoritative
+   even though the Penalty Duel stylesheet is lazy-loaded after page boot. */
+html .penalty-duel-v51 .duel-card-v51,
+html .penalty-duel-v51 .shootout-scoreboard-v49 {
+  border-color: var(--fl-line) !important;
+  background: linear-gradient(145deg, rgba(14, 13, 10, .94), rgba(3, 3, 3, .88)) !important;
+  box-shadow: none !important;
+}
+
+html .penalty-duel-v51 .duel-card-v51 > span,
+html .penalty-duel-v51 .duel-pressure-head-v51 span,
+html .penalty-duel-v51 .duel-card-v51 > small,
+html .penalty-duel-v51 .defense-header-v51 small,
+html .penalty-duel-v51 .defense-runup-meter-v51 span {
+  color: var(--fl-muted) !important;
+}
+
+html .penalty-duel-v51 .duel-card-v51 > strong,
+html .penalty-duel-v51 .defense-header-v51 strong {
+  color: var(--fl-ivory) !important;
+}
+
+html .penalty-duel-v51 .duel-pressure-head-v51 strong,
+html .penalty-duel-v51 .duel-composure-copy-v51 strong,
+html .penalty-duel-v51 .defense-header-v51 span,
+html .penalty-duel-v51 .defense-result-v51.is-save {
+  color: var(--fl-gold-bright) !important;
+}
+
+html .penalty-duel-v51 .duel-pressure-track-v51,
+html .penalty-duel-v51 .defense-runup-meter-v51 i {
+  background: rgba(245, 240, 230, .09) !important;
+}
+
+html .penalty-duel-v51 .duel-pressure-track-v51 b,
+html .penalty-duel-v51 .defense-runup-meter-v51 b {
+  background: linear-gradient(90deg, var(--fl-gold), var(--fl-gold-bright)) !important;
+  box-shadow: 0 0 10px rgba(var(--fl-gold-rgb), .28) !important;
+}
+
+html .penalty-duel-v51 .duel-zone-v51,
+html .penalty-duel-v51 .defense-controls-v51 button {
+  border-color: rgba(var(--fl-gold-rgb), .24) !important;
+  background: rgba(4, 4, 3, .76) !important;
+  color: var(--fl-ivory) !important;
+}
+
+html .penalty-duel-v51 .duel-zone-v51:hover,
+html .penalty-duel-v51 .duel-zone-v51:focus-visible,
+html .penalty-duel-v51 .duel-zone-v51.is-selected,
+html .penalty-duel-v51 .defense-controls-v51 button:hover,
+html .penalty-duel-v51 .defense-controls-v51 button:focus-visible,
+html .penalty-duel-v51 .defense-controls-v51 button.is-selected {
+  border-color: var(--fl-gold-bright) !important;
+  background: rgba(var(--fl-gold-rgb), .13) !important;
+  box-shadow: 0 0 18px rgba(var(--fl-gold-rgb), .09) !important;
+}
+
+html .penalty-duel-v51 .duel-composure-track-v51 {
+  background: linear-gradient(90deg,
+    rgba(255, 124, 120, .18),
+    rgba(245, 240, 230, .07) 30%,
+    rgba(var(--fl-gold-rgb), .15) 44%,
+    rgba(var(--fl-gold-rgb), .28) 50%,
+    rgba(var(--fl-gold-rgb), .15) 56%,
+    rgba(245, 240, 230, .07) 70%,
+    rgba(255, 124, 120, .18)) !important;
+}
+
+html .penalty-duel-v51 .duel-composure-track-v51::after {
+  background: var(--fl-gold-bright) !important;
+  box-shadow: 0 0 9px rgba(var(--fl-gold-rgb), .68) !important;
+}
+
+html .penalty-duel-v51 .penalty-defense-v51 {
+  background:
+    radial-gradient(circle at 50% 32%, rgba(var(--fl-gold-rgb), .10), rgba(2, 2, 2, .97) 68%),
+    linear-gradient(#11100c, #020202) !important;
+  color: var(--fl-ivory) !important;
+}
+
+html .penalty-duel-v51 .defense-stadium-v51 {
+  background:
+    linear-gradient(to bottom, rgba(2, 2, 2, .30) 0 19%, rgba(24, 22, 16, .62) 19% 43%, rgba(48, 42, 25, .42) 43% 100%) !important;
+}
+
+html .penalty-duel-v51 .defense-result-v51 {
+  border-color: var(--fl-line) !important;
+  background: rgba(4, 4, 3, .90) !important;
+}
+
+html .penalty-duel-v51 .penalty-duel-result-v51,
+html .penalty-duel-v51 .duel-final-score-v51 {
+  border-color: var(--fl-line) !important;
+  background: linear-gradient(145deg, rgba(14, 13, 10, .96), rgba(4, 4, 3, .96)) !important;
+}
+
+/* Do not recolour semantic outcomes. Brand gold is for interaction/progression;
+   goal/save/miss feedback remains functionally distinct. */
+.result-banner.is-goal,
+.defense-result-v51.is-save { color: var(--fl-success); }
+.result-banner.is-miss,
+.defense-result-v51.is-miss { color: var(--fl-danger); }
+
+@media (max-width: 700px) {
+  .panel,
+  .game-topbar,
+  .control-panel,
+  .modal-card {
+    border-radius: 14px;
+  }
+
+  .button,
+  .icon-button,
+  .modal-close {
+    border-radius: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .shot-step,
+  .duel-zone-v51,
+  .defense-controls-v51 button {
+    transition: none !important;
+  }
+}

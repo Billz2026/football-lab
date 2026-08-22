@@ -1,0 +1,218 @@
+/* Football Lab V53 — runtime/component theme layer.
+   Loaded after theme-v53.css. High-specificity rules intentionally normalise
+   older V13–V41 UI modules without changing their behaviour or game data. */
+
+/* Product utilities: settings, toast, tutorial, pause */
+.skip-link-v22 {
+  color: #080704 !important;
+  background: linear-gradient(135deg, var(--fl-gold-bright), var(--fl-gold)) !important;
+}
+
+.setting-row-v22 {
+  border-color: var(--fl-line-soft) !important;
+  background: rgba(var(--fl-gold-rgb), .025) !important;
+}
+.setting-row-v22 strong { color: var(--fl-ivory) !important; }
+.setting-row-v22 span { color: var(--fl-muted) !important; }
+.setting-toggle-v22 {
+  color: var(--fl-muted) !important;
+  border-color: var(--fl-line) !important;
+  background: rgba(var(--fl-gold-rgb), .035) !important;
+}
+.setting-toggle-v22 i { background: rgba(245, 240, 230, .24) !important; }
+.setting-toggle-v22[data-enabled="true"] {
+  color: #080704 !important;
+  border-color: var(--fl-gold-bright) !important;
+  background: linear-gradient(135deg, var(--fl-gold-bright), var(--fl-gold)) !important;
+}
+.setting-toggle-v22[data-enabled="true"] i { background: #080704 !important; }
+.settings-version-v22 { color: var(--fl-muted-soft) !important; }
+.settings-version-v22 strong { color: var(--fl-gold-bright) !important; }
+
+.toast-v22 {
+  border-color: var(--fl-line) !important;
+  color: var(--fl-ivory) !important;
+  background: rgba(7, 7, 5, .97) !important;
+}
+.toast-v22 button {
+  color: #080704 !important;
+  background: linear-gradient(135deg, var(--fl-gold-bright), var(--fl-gold)) !important;
+}
+
+.tutorial-card-v22 {
+  border-color: rgba(255, 216, 106, .34) !important;
+  color: var(--fl-ivory) !important;
+  background: rgba(7, 7, 5, .97) !important;
+}
+.tutorial-card-v22 > span { color: var(--fl-gold-bright) !important; }
+.tutorial-card-v22 p { color: var(--fl-muted) !important; }
+.tutorial-card-v22 button { color: var(--fl-muted) !important; }
+.tutorial-target-v22 {
+  outline-color: var(--fl-gold-bright) !important;
+  box-shadow: 0 0 0 9px rgba(var(--fl-gold-rgb), .10), 0 0 44px rgba(var(--fl-gold-rgb), .24) !important;
+}
+.pause-overlay-v22 { background: rgba(0, 0, 0, .82) !important; }
+.pause-card-v22 p { color: var(--fl-muted) !important; }
+
+.high-contrast-v22 .meter {
+  box-shadow: 0 0 0 2px rgba(var(--fl-gold-rgb), .25) !important;
+}
+.high-contrast-v22 .shot-step.is-current { border-color: var(--fl-gold-bright) !important; }
+
+/* Campaign journey */
+.campaign-journey-v41 {
+  border-color: var(--fl-line) !important;
+  background:
+    radial-gradient(circle at 78% 0%, rgba(var(--fl-gold-rgb), .07), transparent 34%),
+    linear-gradient(145deg, rgba(12, 11, 8, .97), rgba(4, 4, 3, .96)) !important;
+}
+.campaign-journey-heading-v41 span,
+.campaign-journey-footer-v41 span {
+  color: var(--fl-gold-bright) !important;
+}
+.campaign-journey-heading-v41 h2 { color: var(--fl-ivory) !important; }
+.campaign-journey-heading-v41 p { color: var(--fl-muted) !important; }
+.campaign-journey-grid-v41 article {
+  border-color: var(--fl-line-soft) !important;
+  background: linear-gradient(155deg, rgba(var(--fl-gold-rgb), .035), rgba(255, 255, 255, .008)) !important;
+}
+.campaign-journey-grid-v41 article::after {
+  background: rgba(var(--fl-gold-rgb), .34) !important;
+}
+/* Environment colour remains a subtle scene identity, never primary UI chrome. */
+.campaign-journey-grid-v41 article[data-environment="city"]::after { background: rgba(255, 178, 103, .32) !important; }
+.campaign-journey-grid-v41 article[data-environment="night"]::after { background: rgba(120, 190, 255, .28) !important; }
+.campaign-journey-grid-v41 article[data-environment="storm"]::after { background: rgba(163, 218, 228, .26) !important; }
+.campaign-journey-grid-v41 article[data-environment="world"]::after { background: rgba(245, 205, 112, .34) !important; }
+.campaign-journey-grid-v41 article[data-environment="summit"]::after { background: rgba(205, 242, 244, .28) !important; }
+.campaign-journey-grid-v41 article.is-current {
+  border-color: rgba(255, 216, 106, .58) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .28), inset 0 0 0 1px rgba(var(--fl-gold-rgb), .08) !important;
+}
+.campaign-journey-grid-v41 article.is-complete { border-color: rgba(112, 217, 139, .28) !important; }
+.campaign-chapter-top-v41 i {
+  color: #080704 !important;
+  border-color: var(--fl-gold-bright) !important;
+  background: linear-gradient(135deg, var(--fl-gold-bright), var(--fl-gold)) !important;
+}
+.campaign-chapter-top-v41 span,
+.campaign-journey-grid-v41 article > small { color: var(--fl-muted-soft) !important; }
+.campaign-journey-grid-v41 article > strong,
+.campaign-journey-grid-v41 article > em { color: var(--fl-ivory) !important; }
+.campaign-journey-grid-v41 article > b { color: var(--fl-gold-bright) !important; }
+.campaign-journey-grid-v41 article > p { color: var(--fl-muted) !important; }
+.campaign-stage-dots-v41 span {
+  border-color: rgba(245, 240, 230, .16) !important;
+  background: rgba(245, 240, 230, .055) !important;
+}
+.campaign-stage-dots-v41 span.is-cleared {
+  border-color: rgba(255, 216, 106, .42) !important;
+  background: rgba(var(--fl-gold-rgb), .72) !important;
+}
+.campaign-stage-dots-v41 span.is-current {
+  border-color: var(--fl-ivory) !important;
+  background: var(--fl-ivory) !important;
+  box-shadow: 0 0 12px rgba(var(--fl-gold-rgb), .46) !important;
+}
+.campaign-journey-footer-v41 {
+  border-color: var(--fl-line) !important;
+  background: rgba(var(--fl-gold-rgb), .035) !important;
+}
+.campaign-journey-footer-v41 b { color: var(--fl-gold-bright) !important; }
+.campaign-journey-footer-v41 small { color: var(--fl-muted-soft) !important; }
+.venue-identity-v41 {
+  border-color: var(--fl-line) !important;
+  background: rgba(5, 5, 4, .78) !important;
+}
+.venue-identity-v41 span { color: var(--fl-gold-bright) !important; }
+
+/* Kicker selection shell. Character-specific colours remain inside roster
+   identity/stat elements, while structural chrome is Football Lab gold. */
+html body .kicker-select-backdrop {
+  background: rgba(0, 0, 0, .88) !important;
+}
+html body .kicker-select-panel {
+  border-color: var(--fl-line) !important;
+  background: linear-gradient(145deg, rgba(13, 12, 9, .99), rgba(3, 3, 3, .99)) !important;
+  color: var(--fl-ivory) !important;
+}
+html body .kicker-select-top small { color: var(--fl-gold-bright) !important; }
+html body .kicker-select-top h2 { color: var(--fl-ivory) !important; }
+html body .kicker-select-top p { color: var(--fl-muted) !important; }
+html body .kicker-select-close {
+  color: var(--fl-ivory) !important;
+  border-color: var(--fl-line) !important;
+  background: rgba(var(--fl-gold-rgb), .035) !important;
+}
+html body .kicker-select-close:hover,
+html body .kicker-select-close:focus-visible {
+  color: var(--fl-gold-bright) !important;
+  border-color: rgba(255, 216, 106, .55) !important;
+  background: rgba(var(--fl-gold-rgb), .08) !important;
+}
+html body .kicker-card {
+  color: var(--fl-ivory) !important;
+  border-color: var(--fl-line-soft) !important;
+  background: rgba(var(--fl-gold-rgb), .018) !important;
+}
+html body .kicker-card.is-selected {
+  border-color: var(--fl-gold-bright) !important;
+  background: rgba(var(--fl-gold-rgb), .07) !important;
+  box-shadow: 0 0 0 1px rgba(var(--fl-gold-rgb), .16), 0 18px 42px rgba(0, 0, 0, .32) !important;
+}
+html body .kicker-card-head { border-bottom-color: var(--fl-line-soft) !important; }
+html body .kicker-card-head strong,
+html body .kicker-stat > strong { color: var(--fl-ivory) !important; }
+html body .kicker-card-head em,
+html body .kicker-stat > span,
+html body .kicker-trait p,
+html body .kicker-weakness p,
+html body .kicker-current-copy small { color: var(--fl-muted) !important; }
+html body .kicker-confirm {
+  color: #080704 !important;
+  background: linear-gradient(135deg, var(--fl-gold-bright), var(--fl-gold)) !important;
+  box-shadow: 0 12px 30px rgba(var(--fl-gold-rgb), .15) !important;
+}
+html body .kicker-select-footer { border-top-color: var(--fl-line-soft) !important; }
+html body .kicker-current-copy strong { color: var(--fl-gold-bright) !important; }
+html body .character-change-v13 {
+  color: var(--fl-ivory) !important;
+  border-color: var(--fl-line) !important;
+  background: rgba(var(--fl-gold-rgb), .035) !important;
+}
+html body .character-change-v13:hover,
+html body .character-change-v13:focus-visible {
+  color: var(--fl-gold-bright) !important;
+  border-color: rgba(255, 216, 106, .55) !important;
+  background: rgba(var(--fl-gold-rgb), .08) !important;
+}
+
+/* In-game identity chips. Preserve entity accent inside the small icon where
+   useful, but standardise their surface, typography and framing. */
+html body .active-kicker-chip-v13,
+html body .active-keeper-chip-v14,
+html body .active-wall-chip-v15,
+html body .character-summary-v13 {
+  border-color: var(--fl-line) !important;
+  background: rgba(var(--fl-gold-rgb), .035) !important;
+}
+html body .active-kicker-chip-v13 span,
+html body .active-keeper-chip-v14 span,
+html body .active-wall-chip-v15 span,
+html body .character-summary-v13 span { color: var(--fl-muted) !important; }
+html body .active-kicker-chip-v13 strong,
+html body .active-keeper-chip-v14 strong,
+html body .active-wall-chip-v15 strong { color: var(--fl-ivory) !important; }
+html body .active-keeper-chip-v14 em,
+html body .active-wall-chip-v15 em,
+html body .character-summary-v13 strong { color: var(--fl-gold-bright) !important; }
+
+/* Correct semantic feedback after the brand-level penalty overrides. */
+html .penalty-duel-v51 .defense-result-v51.is-save { color: var(--fl-success) !important; }
+html .penalty-duel-v51 .defense-result-v51.is-miss { color: var(--fl-danger) !important; }
+
+@media (max-width: 700px) {
+  .campaign-journey-v41 { padding: 16px !important; }
+  .campaign-journey-grid-v41 { gap: 8px !important; }
+  html body .kicker-select-panel { border-radius: 15px !important; }
+}
