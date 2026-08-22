@@ -97,7 +97,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (["style", "image", "font", "audio"].includes(request.destination)) {
+  // Styles are network-first so layout hotfixes cannot be stranded behind a stale
+  // cache entry that uses the same historical query string on installed browsers.
+  if (request.destination === "style") {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  if (["image", "font", "audio"].includes(request.destination)) {
     event.respondWith(cacheFirst(request));
     return;
   }
