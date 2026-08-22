@@ -22,7 +22,7 @@
 
   body.is-game-active main {
     min-height: 100dvh;
-    padding: 4px 6px 6px !important;
+    padding: 4px 8px 6px !important;
   }
 
   /* Beat the older injected Fold shell so V53.2 owns the viewport geometry. */
