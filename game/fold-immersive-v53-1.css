@@ -1,5 +1,6 @@
-/* Football Lab V53.1 — Fold / near-square tablet immersive gameplay layout.
-   Layout-only: no gameplay, physics, scoring, campaign or input logic changes. */
+/* Football Lab V53.2 — Fold true immersive gameplay layout.
+   Layout-only: no gameplay, physics, scoring, campaign or input logic changes.
+   Goal: remove dead space by making the gameplay shell own the full Fold viewport. */
 
 @media (min-width: 700px) and (max-width: 1100px) and (max-aspect-ratio: 13/10) {
   body.is-game-active {
@@ -14,29 +15,32 @@
   }
 
   body.is-game-active .site-header {
-    min-height: 60px;
-    padding: 7px 10px;
+    min-height: 56px;
+    padding: 6px 10px;
     gap: 10px;
   }
 
   body.is-game-active main {
     min-height: 100dvh;
-    padding: 6px 6px 8px;
+    padding: 4px 8px 6px !important;
   }
 
-  body.is-game-active .screen-game.is-active {
-    min-height: calc(100dvh - 12px);
-    display: flex;
-    flex-direction: column;
+  /* Beat the older injected Fold shell so V53.2 owns the viewport geometry. */
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 #gameScreen.is-active {
+    width: 100%;
+    min-height: calc(100dvh - 10px) !important;
+    height: calc(100dvh - 10px) !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 6px !important;
   }
 
   body.is-game-active .game-topbar {
-    flex: 0 0 auto;
     min-height: 0;
-    margin-bottom: 7px;
-    padding: 7px 9px;
-    gap: 7px;
-    border-radius: 13px;
+    margin: 0;
+    padding: 6px 8px;
+    gap: 6px;
+    border-radius: 12px;
   }
 
   body.is-game-active .stage-copy {
@@ -48,11 +52,11 @@
   }
 
   body.is-game-active .stage-copy strong {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   body.is-game-active .game-stats div {
-    min-width: 68px;
+    min-width: 66px;
     padding: 3px 8px;
     gap: 2px;
   }
@@ -62,35 +66,37 @@
   }
 
   body.is-game-active .game-stats strong {
-    font-size: 13px;
+    font-size: 12px;
   }
 
-  body.is-game-active .game-layout {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) auto;
-    gap: 7px;
-    align-items: stretch;
-  }
-
-  body.is-game-active .game-frame,
-  body.is-game-active #gameCanvas {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .game-layout {
+    width: 100% !important;
     min-height: 0 !important;
-    max-height: none !important;
+    height: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) auto !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    align-items: stretch !important;
+    align-content: stretch !important;
   }
 
-  body.is-game-active .screen-game .game-frame {
-    height: min(calc(100dvh - 250px), 820px, calc(70dvh - 12px)) !important;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .game-frame {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
     max-height: calc(70dvh - 12px) !important;
     aspect-ratio: auto !important;
-    border-radius: 17px;
+    align-self: stretch !important;
+    border-radius: 17px !important;
   }
 
-  body.is-game-active #gameCanvas {
-    width: 100%;
-    height: 100%;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game #gameCanvas {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
   }
 
   body.is-game-active .wind-chip {
@@ -101,48 +107,32 @@
   }
 
   body.is-game-active .canvas-prompt {
-    bottom: 9px;
+    bottom: 8px;
   }
 
-  body.is-game-active .control-panel {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .control-panel {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    width: 100% !important;
     min-height: 0 !important;
-    height: auto;
-    padding: 9px 10px 10px;
-    border-radius: 17px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(200px, 31%);
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    border-radius: 17px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 31%) !important;
     grid-template-areas:
-      "heading heading"
       "steps steps"
-      "meter action";
-    grid-template-rows: auto auto auto;
-    gap: 6px 10px;
-    align-items: stretch;
+      "meter action" !important;
+    grid-template-rows: auto auto !important;
+    gap: 6px 10px !important;
+    align-items: stretch !important;
+    align-self: end !important;
   }
 
-  body.is-game-active .control-heading {
-    grid-area: heading;
-    min-height: 0;
-    margin: 0;
-    padding: 0 2px;
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  body.is-game-active .control-heading .section-label {
-    font-size: 8px;
-  }
-
-  body.is-game-active .control-heading h2 {
-    margin: 0;
-    font-size: 11px;
-    line-height: 1;
-    letter-spacing: .05em;
-  }
-
-  body.is-game-active .control-heading p,
+  body.is-game-active .control-heading,
   body.is-game-active .input-note,
   body.is-game-active .run-rules-v152,
   body.is-game-active .infinite-rules-v25,
@@ -150,23 +140,25 @@
     display: none !important;
   }
 
-  body.is-game-active .shot-steps {
-    grid-area: steps;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
-    margin: 0;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .shot-steps {
+    grid-area: steps !important;
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    margin: 0 !important;
   }
 
-  body.is-game-active .shot-step {
-    min-height: 56px;
-    padding: 7px 9px;
-    gap: 8px;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .shot-step {
+    min-width: 0 !important;
+    min-height: 50px !important;
+    padding: 6px 8px !important;
+    gap: 7px !important;
   }
 
   body.is-game-active .shot-step > span {
-    width: 29px;
-    height: 29px;
+    width: 28px;
+    height: 28px;
   }
 
   body.is-game-active .shot-step strong {
@@ -177,34 +169,40 @@
     font-size: 8px;
   }
 
-  body.is-game-active .meter-wrap {
-    grid-area: meter;
-    margin: 0;
-    align-self: center;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .meter-wrap {
+    grid-area: meter !important;
+    width: 100% !important;
+    margin: 0 !important;
+    align-self: center !important;
   }
 
   body.is-game-active .meter-label {
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
 
   body.is-game-active .meter {
-    height: 16px;
+    height: 15px;
   }
 
-  body.is-game-active .action-button {
-    grid-area: action;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .action-button {
+    grid-area: action !important;
+    width: 100% !important;
+    min-height: 56px !important;
+    height: 56px !important;
+    max-height: 56px !important;
     margin: 0 !important;
-    min-height: 60px;
-    height: 100%;
-    align-self: stretch;
+    align-self: stretch !important;
   }
 }
 
-/* Keep the same compact command deck in browser fullscreen, while allowing
-   the football scene to absorb the extra vertical space. */
+/* Browser fullscreen: give the football scene additional physical-screen space. */
 @media (min-width: 700px) and (max-width: 1100px) and (max-aspect-ratio: 13/10) and (display-mode: fullscreen) {
-  body.is-game-active .screen-game .game-frame {
-    height: clamp(560px, calc(100dvh - 235px), 900px) !important;
-    max-height: none !important;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 #gameScreen.is-active {
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+  }
+
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .game-frame {
+    max-height: 74dvh !important;
   }
 }
