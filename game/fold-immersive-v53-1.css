@@ -81,8 +81,10 @@
     max-height: none !important;
   }
 
-  body.is-game-active .game-frame {
-    height: min(calc(100dvh - 250px), 820px, calc(70dvh - 12px));
+  body.is-game-active .screen-game .game-frame {
+    height: min(calc(100dvh - 250px), 820px, calc(70dvh - 12px)) !important;
+    max-height: calc(70dvh - 12px) !important;
+    aspect-ratio: auto !important;
     border-radius: 17px;
   }
 
@@ -201,7 +203,8 @@
 /* Keep the same compact command deck in browser fullscreen, while allowing
    the football scene to absorb the extra vertical space. */
 @media (min-width: 700px) and (max-width: 1100px) and (max-aspect-ratio: 13/10) and (display-mode: fullscreen) {
-  body.is-game-active .game-frame {
-    height: clamp(560px, calc(100dvh - 235px), 900px);
+  body.is-game-active .screen-game .game-frame {
+    height: clamp(560px, calc(100dvh - 235px), 900px) !important;
+    max-height: none !important;
   }
 }
