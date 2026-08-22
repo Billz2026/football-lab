@@ -3,7 +3,7 @@ import { keeperById } from "./keepers-v14.js?v=32.4";
 import { shootoutDecision, shootoutPhaseLabel, goalCount, REGULATION_KICKS } from "./penalty-shootout-rules-v49.js?v=49.0.0";
 import { playImpactSound, playOutcomeSound } from "./audio-v32.js?v=38.7.0";
 
-const BUILD = "51.2.0";
+const BUILD = "52.0.0";
 const RECORD_KEY = "footballLabPenaltyShootoutRecordV49";
 const MAX_RUN_UP_FRAME_ADVANCE_MS = 100;
 const TEST_MODE = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
@@ -611,8 +611,8 @@ function handleKeys(event) {
 function publishRelease() {
   const old = window.__footballLabReleaseV490 || window.__footballLabReleaseV480; if (!old) return false;
   const release = Object.freeze({ ...old, build: BUILD, penaltyExperience: "full-player-vs-cpu-alternating-duel", penaltyAttack: "six-zone-runup-single-composure-strike", penaltyDefense: "user-controlled-goalkeeper-cpu-kicks", penaltyCpuDifficulty: "academy-pro-elite-world-class-behavioural", penaltyCpuBehaviour: "runup-cues-disguise-early-keeper-read", penaltyKeeperControl: "shuffle-plus-six-zone-dive-timing", penaltyOpponentSimulation: "retired-from-live-v51", cacheGeneration: BUILD });
-  window.__footballLabReleaseV510 = release; window.__footballLabReleaseV511 = release; window.__footballLabReleaseV512 = release; window.__footballLabReleaseCurrent = release; document.documentElement.dataset.footballLabBuild = BUILD;
-  const badge = document.querySelector(".build-badge-v22"); if (badge) { badge.textContent = "V51.2"; badge.title = `Football Lab build ${BUILD}`; }
+  window.__footballLabReleaseV510 = release; window.__footballLabReleaseV511 = release; window.__footballLabReleaseV512 = release; window.__footballLabReleaseV520 = release; window.__footballLabReleaseCurrent = release; document.documentElement.dataset.footballLabBuild = BUILD;
+  const badge = document.querySelector(".build-badge-v22"); if (badge) { badge.textContent = "V52"; badge.title = `Football Lab build ${BUILD}`; }
   const version = document.querySelector(".settings-version-v22 strong"); if (version) version.textContent = BUILD;
   return true;
 }

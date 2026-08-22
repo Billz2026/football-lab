@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-const RELEASE_BUILD = "51.2.0";
-const CACHE_NAME = "football-lab-shell-v51-2-0";
+const RELEASE_BUILD = "52.0.0";
+const CACHE_NAME = "football-lab-shell-v52-0-0";
 
-test("V51.2 installs one current shell and reloads the clean menu offline", async ({ page, context }) => {
+test("V52 installs one current shell and reloads the clean menu offline", async ({ page, context }) => {
   await page.goto("/index.html");
   await page.waitForFunction(
-    (build) => window.__footballLabReleaseV512?.build === build,
+    (build) => window.__footballLabReleaseV520?.build === build,
     RELEASE_BUILD,
     { timeout: 20000 }
   );
@@ -23,7 +23,7 @@ test("V51.2 installs one current shell and reloads the clean menu offline", asyn
     const worker = registration.active || registration.waiting || registration.installing;
     return {
       build: document.documentElement.dataset.footballLabBuild,
-      release: window.__footballLabReleaseV512?.build,
+      release: window.__footballLabReleaseV520?.build,
       workerUrl: worker?.scriptURL || "",
       caches: await caches.keys()
     };
@@ -37,6 +37,9 @@ test("V51.2 installs one current shell and reloads the clean menu offline", asyn
   await context.setOffline(true);
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("#modeHub")).toBeVisible();
+  await expect(page.locator(".brand-logo-v52")).toBeVisible();
+  await expect(page.locator(".hub-tile-art")).toHaveCount(6);
+  await expect(page.getByRole("heading", { name: "PENALTY DUEL" })).toBeVisible();
   await expect(page.locator(".hub-hero")).toHaveCount(0);
   await expect(page.getByText("MASTER EVERY MOMENT.", { exact: true })).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => window.__footballLabStartupError)).toBeNull();

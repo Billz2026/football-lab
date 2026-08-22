@@ -46,7 +46,7 @@ test("current release preserves the keeper halo and ground-shadow decisions", as
   await expect.poll(
     () => page.evaluate(() => window.__footballLabReleaseCurrent?.build),
     { timeout: 10000 }
-  ).toBe("51.2.0");
+  ).toBe("52.0.0");
 
   const release = await page.evaluate(() => window.__footballLabReleaseCurrent);
   expect(release.keeperBodyHalo).toBe("removed");

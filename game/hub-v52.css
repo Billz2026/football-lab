@@ -1,0 +1,289 @@
+:root{
+  --hub-gold:#e6b94f;
+  --hub-gold-bright:#ffd86a;
+  --hub-gold-rgb:230,185,79;
+  --hub-ivory:#f5f0e6;
+}
+
+/* V52: premium black-and-gold photographic mode hub. */
+body{
+  background:
+    radial-gradient(ellipse at 50% 108%,rgba(230,185,79,.12),transparent 42rem),
+    radial-gradient(circle at 87% 15%,rgba(230,185,79,.05),transparent 24rem),
+    linear-gradient(180deg,#080806 0%,#020202 68%,#000 100%);
+}
+body::before{
+  opacity:.2;
+  background-image:
+    linear-gradient(rgba(230,185,79,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(230,185,79,.018) 1px,transparent 1px);
+  background-size:56px 56px;
+}
+
+.site-header.hub-header{
+  min-height:84px;
+  border-bottom-color:rgba(230,185,79,.16);
+  background:linear-gradient(180deg,rgba(0,0,0,.98),rgba(5,5,4,.9));
+  box-shadow:0 18px 50px rgba(0,0,0,.32);
+}
+.brand{min-width:0}
+.brand-logo-v52{
+  display:block;
+  width:clamp(210px,20vw,286px);
+  height:auto;
+  max-height:58px;
+  object-fit:contain;
+  object-position:left center;
+}
+.hub-nav{margin-left:auto}
+.hub-nav a{
+  min-width:76px;
+  justify-content:center;
+  color:rgba(245,240,230,.62);
+  border-radius:5px;
+}
+.hub-nav a[aria-current="page"]{
+  color:#090805;
+  background:linear-gradient(135deg,var(--hub-gold-bright),var(--hub-gold));
+  box-shadow:0 7px 24px rgba(230,185,79,.16);
+}
+.hub-nav a::after{display:none}
+.hub-nav a:hover,.hub-nav a:focus-visible{
+  color:#090805;
+  background:var(--hub-gold-bright);
+}
+.header-stats{
+  border-color:rgba(230,185,79,.17);
+  border-radius:8px;
+  background:rgba(230,185,79,.025);
+}
+.header-stats div + div{border-left-color:rgba(230,185,79,.13)}
+.header-stats span{color:rgba(245,240,230,.46)}
+.header-stats strong{color:var(--hub-gold-bright)}
+.build-badge-v22{
+  color:rgba(255,216,106,.72);
+  border-color:rgba(230,185,79,.2);
+  background:rgba(230,185,79,.04);
+}
+.settings-button-v22{
+  border-color:rgba(230,185,79,.16);
+  border-radius:8px;
+  color:rgba(245,240,230,.72);
+  background:rgba(230,185,79,.035);
+}
+.settings-button-v22:hover{border-color:rgba(255,216,106,.5);color:var(--hub-gold-bright)}
+
+main{padding-top:14px}
+#menuScreen .hub-modes-section{margin-top:0}
+.hub-mode-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:9px}
+.hub-mode-tile,
+.hub-mode-primary,
+.hub-mode-secondary,
+.hub-mode-penalties,
+.hub-mode-corners,
+.hub-mode-finishing,
+.hub-mode-wide{
+  --tile-accent:var(--hub-gold);
+  --tile-accent-rgb:var(--hub-gold-rgb);
+  grid-column:span 4;
+  min-height:242px;
+  padding:18px;
+  border:1px solid rgba(230,185,79,.26);
+  border-radius:7px;
+  background:#050504;
+  box-shadow:0 16px 36px rgba(0,0,0,.34);
+}
+.hub-mode-corners,.hub-mode-finishing,.hub-mode-scenarios{min-height:218px}
+.hub-mode-tile::before{
+  inset:0;
+  z-index:1;
+  opacity:1;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.71) 36%,rgba(0,0,0,.18) 70%,rgba(0,0,0,.06) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.08) 42%,rgba(0,0,0,.54) 100%);
+}
+.hub-mode-tile::after{
+  inset:auto 0 0;
+  z-index:2;
+  width:auto;
+  height:3px;
+  border-radius:0;
+  background:linear-gradient(90deg,transparent,rgba(230,185,79,.74),transparent);
+  filter:none;
+  opacity:.42;
+}
+.hub-tile-art{
+  z-index:0;
+  opacity:1;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:cover;
+  transform:scale(1.002);
+  transition:transform .38s ease,filter .25s ease;
+}
+.hub-art-training{background-image:url("../assets/homepage/free-training.webp")}
+.hub-art-free-kick{background-image:url("../assets/homepage/classic-free-kicks.webp")}
+.hub-art-penalties{background-image:url("../assets/homepage/penalty-duel.webp")}
+.hub-art-corners{background-image:url("../assets/homepage/corners.webp")}
+.hub-art-finishing{background-image:url("../assets/homepage/finishing.webp")}
+.hub-art-scenarios{background-image:url("../assets/homepage/match-scenarios.webp")}
+.hub-art-scenarios::before,.hub-art-scenarios::after{display:none}
+
+.hub-mode-number,.hub-mode-status,.hub-tile-copy,.hub-mode-lock{position:relative;z-index:3}
+.hub-mode-number{
+  color:rgba(245,240,230,.48);
+  font-size:7px;
+  letter-spacing:.19em;
+}
+.hub-mode-status{
+  top:14px;
+  right:14px;
+  min-height:26px;
+  padding:0 9px;
+  border-color:rgba(255,216,106,.42);
+  border-radius:3px;
+  color:#080704;
+  background:linear-gradient(135deg,var(--hub-gold-bright),var(--hub-gold));
+  box-shadow:0 5px 20px rgba(0,0,0,.25);
+  font-size:7px;
+}
+.hub-tile-copy,.hub-mode-wide .hub-tile-copy{width:min(68%,520px)}
+.hub-mode-tile h3{
+  max-width:12ch;
+  margin:35px 0 7px;
+  color:var(--hub-ivory);
+  font-size:clamp(25px,2.45vw,36px);
+  font-weight:750;
+  line-height:.92;
+  letter-spacing:.015em;
+  text-shadow:0 3px 18px rgba(0,0,0,.78);
+}
+.hub-mode-tile p{
+  max-width:38ch;
+  color:rgba(245,240,230,.65);
+  font-size:9px;
+  line-height:1.48;
+  text-shadow:0 2px 12px rgba(0,0,0,.85);
+}
+.hub-mode-cta{
+  margin-top:auto;
+  padding-top:12px;
+  color:var(--hub-gold-bright);
+  font-size:7px;
+  letter-spacing:.14em;
+}
+.hub-mode-cta b{font-size:12px}
+.hub-mode-training{
+  border-color:var(--hub-gold-bright);
+  box-shadow:0 0 0 1px rgba(255,216,106,.2),0 0 25px rgba(230,185,79,.17),0 18px 42px rgba(0,0,0,.45);
+}
+.hub-mode-training::after{height:4px;opacity:1;background:linear-gradient(90deg,var(--hub-gold),var(--hub-gold-bright),var(--hub-gold))}
+.hub-mode-tile:not(:disabled):hover,.hub-mode-tile:not(:disabled):focus-visible{
+  transform:translateY(-3px);
+  border-color:var(--hub-gold-bright);
+  box-shadow:0 0 0 1px rgba(255,216,106,.17),0 0 30px rgba(230,185,79,.16),0 22px 48px rgba(0,0,0,.5);
+}
+.hub-mode-tile:not(:disabled):hover .hub-tile-art,.hub-mode-tile:not(:disabled):focus-visible .hub-tile-art{transform:scale(1.035)}
+.hub-mode-tile.is-loading-mode .hub-mode-status{color:#080704;background:var(--hub-ivory)}
+
+.hub-mode-tile:disabled{
+  cursor:not-allowed;
+  filter:none;
+  border-color:rgba(230,185,79,.16);
+}
+.hub-mode-tile:disabled::before{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.93) 0%,rgba(0,0,0,.79) 42%,rgba(0,0,0,.44) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.7));
+}
+.hub-mode-tile:disabled .hub-tile-art{filter:grayscale(1) brightness(.58);opacity:.82}
+.hub-mode-tile:disabled .hub-mode-status{
+  color:rgba(255,216,106,.82);
+  border-color:rgba(230,185,79,.24);
+  background:rgba(0,0,0,.56);
+  box-shadow:none;
+}
+.hub-mode-tile:disabled .hub-tile-copy{opacity:.72}
+.hub-mode-lock{
+  position:absolute;
+  left:17px;
+  bottom:16px;
+  width:16px;
+  height:13px;
+  border:2px solid rgba(255,216,106,.65);
+  border-radius:2px;
+}
+.hub-mode-lock::before{
+  content:"";
+  position:absolute;
+  left:2px;
+  top:-10px;
+  width:8px;
+  height:9px;
+  border:2px solid rgba(255,216,106,.65);
+  border-bottom:0;
+  border-radius:7px 7px 0 0;
+}
+.hub-mode-tile:disabled .hub-mode-cta{display:none}
+
+@media(min-width:1051px){
+  .hub-shell{max-width:1380px;margin:0 auto}
+}
+
+@media(min-width:601px) and (max-width:1050px){
+  main{padding-top:10px}
+  .hub-mode-grid{gap:7px}
+  .hub-mode-tile,
+  .hub-mode-primary,
+  .hub-mode-secondary,
+  .hub-mode-penalties,
+  .hub-mode-corners,
+  .hub-mode-finishing,
+  .hub-mode-wide{grid-column:span 6;min-height:210px;padding:14px}
+  .hub-mode-scenarios{grid-column:span 12}
+  .hub-tile-copy,.hub-mode-wide .hub-tile-copy{width:66%}
+  .hub-mode-tile h3{margin-top:32px;font-size:clamp(23px,3.4vw,31px)}
+}
+
+@media(max-width:600px){
+  .site-header.hub-header{min-height:65px;padding:7px 10px}
+  .brand-logo-v52{width:176px;max-height:47px}
+  .header-stats div{min-width:58px;padding:7px 8px}
+  .header-stats strong{font-size:14px}
+  .settings-button-v22{width:36px;height:36px}
+  main{padding:8px 8px 22px}
+  .hub-mode-grid{grid-template-columns:1fr;gap:7px}
+  .hub-mode-tile,
+  .hub-mode-primary,
+  .hub-mode-secondary,
+  .hub-mode-penalties,
+  .hub-mode-corners,
+  .hub-mode-finishing,
+  .hub-mode-wide{
+    grid-column:auto;
+    min-height:176px;
+    padding:13px;
+  }
+  .hub-mode-tile::before{
+    background:
+      linear-gradient(90deg,rgba(0,0,0,.91) 0%,rgba(0,0,0,.73) 43%,rgba(0,0,0,.2) 100%),
+      linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.58));
+  }
+  .hub-mode-status{top:10px;right:10px;min-height:23px;font-size:6px}
+  .hub-mode-number{font-size:6px}
+  .hub-tile-copy,.hub-mode-wide .hub-tile-copy{width:70%}
+  .hub-mode-tile h3{margin-top:25px;font-size:23px}
+  .hub-mode-tile p{font-size:8px;line-height:1.42}
+  .hub-mode-cta{padding-top:8px;font-size:6px}
+  .hub-mode-lock{left:13px;bottom:13px}
+}
+
+@media(max-width:420px){
+  .brand-logo-v52{width:158px}
+  .header-stats{display:none}
+  .hub-tile-copy,.hub-mode-wide .hub-tile-copy{width:74%}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .hub-tile-art{transition:none}
+}

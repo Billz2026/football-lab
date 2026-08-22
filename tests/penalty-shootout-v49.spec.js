@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-test("V49 rules power the competitive V51 penalty duel from the hub", async ({ page }) => {
+test("V49 rules power the competitive V52 penalty duel from the hub", async ({ page }) => {
   await page.goto("/");
 
   const tile = page.locator(".hub-mode-penalties");
   await expect(tile).toBeEnabled();
-  await expect(tile.locator(".hub-mode-status")).toHaveText("PLAYABLE");
-  await expect(tile.locator("h3")).toHaveText("PENALTY SHOOTOUT");
+  await expect(tile.locator(".hub-mode-status")).toHaveText("PLAY NOW");
+  await expect(tile.locator("h3")).toHaveText("PENALTY DUEL");
 
   await tile.click();
   await page.waitForFunction(() => window.__footballLabPenaltyShootoutV49?.build === "49.0.0");

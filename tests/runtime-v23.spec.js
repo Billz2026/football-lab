@@ -22,12 +22,52 @@ test("main menu permanently starts with the mode tile mosaic", async ({ page }) 
   await expect(page.locator("#classicCard")).toBeVisible();
 });
 
+test("V52 homepage uses the approved gold brand and six photographic mode tiles", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/index.html");
+
+  const logo = page.locator(".brand-logo-v52");
+  await expect(logo).toBeVisible();
+  await expect(logo).toHaveAttribute("src", "./assets/homepage/football-lab-gold-logo.webp");
+  await expect(page.locator(".hub-mode-status", { hasText: "PLAY NOW" })).toHaveCount(3);
+  await expect(page.locator(".hub-mode-status", { hasText: "COMING SOON" })).toHaveCount(3);
+  await expect(page.getByRole("heading", { name: "PENALTY DUEL" })).toBeVisible();
+
+  const media = await page.locator(".hub-tile-art").evaluateAll((tiles) => tiles.map((tile) => getComputedStyle(tile).backgroundImage));
+  expect(media).toHaveLength(6);
+  expect(media.every((value) => value.includes("/assets/homepage/") && value.includes(".webp"))).toBe(true);
+  await expect(page.locator(".hub-mode-training")).toHaveCSS("border-top-color", "rgb(255, 216, 106)");
+  await expect(page.locator(".hub-mode-tile:disabled .hub-mode-lock")).toHaveCount(3);
+});
+
+test("V52 homepage stacks cleanly without horizontal overflow on a 320px phone", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("/index.html");
+
+  await expect(page.locator(".brand-logo-v52")).toBeVisible();
+  await expect(page.locator(".hub-mode-grid > .hub-mode-tile")).toHaveCount(6);
+  const layout = await page.evaluate(() => ({
+    documentWidth: document.documentElement.scrollWidth,
+    viewportWidth: window.innerWidth,
+    tiles: [...document.querySelectorAll(".hub-mode-tile")].map((tile) => {
+      const rect = tile.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, height: rect.height };
+    })
+  }));
+  expect(layout.documentWidth).toBe(layout.viewportWidth);
+  for (const tile of layout.tiles) {
+    expect(tile.left).toBeGreaterThanOrEqual(0);
+    expect(tile.right).toBeLessThanOrEqual(layout.viewportWidth);
+    expect(tile.height).toBeGreaterThanOrEqual(170);
+  }
+});
+
 test("gameplay, training and penalty bundles stay off the homepage startup path", async ({ page }) => {
   const requestedPaths = [];
   page.on("request", (request) => requestedPaths.push(new URL(request.url()).pathname));
 
   await page.goto("/index.html");
-  await page.waitForFunction(() => window.__footballLabReleaseCurrent?.build === "51.2.0", null, {
+  await page.waitForFunction(() => window.__footballLabReleaseCurrent?.build === "52.0.0", null, {
     timeout: 20000
   });
 
@@ -115,9 +155,9 @@ test("V23 boots from static modules without browser-time source execution", asyn
   expect(runtime.startupError).toBeNull();
   expect(requestedPaths.some((value) => value.endsWith("/game/runtime-v23-main.js"))).toBe(true);
   await page.waitForTimeout(1100);
-  await expect(page.locator(".build-badge-v22")).toHaveText("V51.2");
-  await expect(page.locator(".settings-version-v22 strong")).toHaveText("51.2.0");
-  await expect(page.locator("html")).toHaveAttribute("data-football-lab-build", "51.2.0");
+  await expect(page.locator(".build-badge-v22")).toHaveText("V52");
+  await expect(page.locator(".settings-version-v22 strong")).toHaveText("52.0.0");
+  await expect(page.locator("html")).toHaveAttribute("data-football-lab-build", "52.0.0");
   for (const forbidden of FORBIDDEN_RUNTIME_PATHS) {
     expect(requestedPaths.some((value) => value.endsWith(forbidden)), forbidden).toBe(false);
   }

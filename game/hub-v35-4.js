@@ -1,6 +1,7 @@
 const BUILD = "35.6.2";
 
 function ensureHubStyle(){
+  if (document.querySelector("link[href*='hub-v52.css']")) return;
   if (document.querySelector("link[data-football-lab-hub='35.4']")) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";

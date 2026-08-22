@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 
-const RELEASE_BUILD = "51.2.0";
-const CACHE_NAME = "football-lab-shell-v51-2-0";
+const RELEASE_BUILD = "52.0.0";
+const CACHE_NAME = "football-lab-shell-v52-0-0";
 
 const files = await Promise.all(Object.entries({
   index: "index.html",
@@ -27,7 +27,7 @@ const checks = [
   ["index loads the canonical app version", source.index.includes(`./app.js?v=${RELEASE_BUILD}`)],
   ["app declares the canonical release", source.app.includes(`const RELEASE_BUILD = "${RELEASE_BUILD}";`)],
   ["app registers the versioned worker", source.app.includes("./sw.js?v=${RELEASE_BUILD}")],
-  ["app publishes the current release alias", source.app.includes("window.__footballLabReleaseV512 = release")],
+  ["app publishes the current release alias", source.app.includes("window.__footballLabReleaseV520 = release")],
   ["app exposes the on-demand gameplay loader", source.app.includes("loadGameplay: loadGameplayBundle")],
   ["production runtime is imported by the gameplay loader", source.app.includes(".then(() => import(runtimeEntry))")],
   ["current build presentation is protected after deferred modules load", source.app.includes("protectCurrentBuildPresentation()")],
@@ -35,7 +35,8 @@ const checks = [
   ["worker derives the shell cache from the release", source.worker.includes("RELEASE_BUILD.replaceAll")],
   ["worker cache resolves to the expected name", `football-lab-shell-v${RELEASE_BUILD.replaceAll(".", "-")}` === CACHE_NAME],
   ["worker caches the canonical app URL", source.worker.includes("./app.js?v=${RELEASE_BUILD}")],
-  ["worker preserves the offline menu shell", source.worker.includes("./game/product-polish-v22.js?v=32.4") && source.worker.includes("./game/hub-v35-4.js?v=35.6.2")],
+  ["worker preserves the offline menu shell", source.worker.includes("./game/product-polish-v22.js?v=32.4") && source.worker.includes("./game/hub-v35-4.js?v=35.6.2") && source.worker.includes("./game/hub-v52.css?v=52.0.0")],
+  ["worker caches the premium homepage media", source.worker.includes("./assets/homepage/football-lab-gold-logo.webp") && source.worker.includes("./assets/homepage/match-scenarios.webp")],
   ["penalty duel publishes the canonical build", source.duel.includes(`const BUILD = "${RELEASE_BUILD}";`)],
   ["penalty duel stylesheet follows its build", source.duel.includes("penalty-duel-v51.css?v=${BUILD}")],
   ["app lazy-loads the canonical duel", source.app.includes('import(`./game/penalty-duel-v51.js?v=${RELEASE_BUILD}`)')],

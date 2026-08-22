@@ -38,23 +38,17 @@
   <link rel="stylesheet" href="./game/strike-v32-4.css?v=32.4" />
   <link rel="stylesheet" href="./game/hub-v35-1.css?v=35.1" />
   <link rel="stylesheet" href="./game/hub-v35-2.css?v=35.2.1" />
+  <link rel="stylesheet" href="./game/hub-v52.css?v=52.0.0" />
 </head>
 <body>
   <a class="skip-link-v22" href="#modeHub">Skip to game modes</a>
   <div class="app-shell">
     <header class="site-header hub-header">
       <button class="brand" id="brandButton" type="button" aria-label="Return to main menu">
-        <span class="brand-mark" aria-hidden="true"><span></span></span>
-        <span class="brand-copy">
-          <strong>FOOTBALL LAB</strong>
-          <small>ARCADE FOOTBALL</small>
-        </span>
+        <img class="brand-logo-v52" src="./assets/homepage/football-lab-gold-logo.webp" alt="" width="351" height="110" aria-hidden="true" />
       </button>
       <nav class="hub-nav" aria-label="Football Lab navigation">
-        <a href="#hubHome">HOME</a>
-        <a href="#modeHub">PLAY</a>
-        <a href="#trainingCardV35">TRAINING</a>
-        <a href="#hubProfile">PROFILE</a>
+        <a href="#modeHub" aria-current="page">PLAY</a>
       </nav>
       <div class="header-stats" aria-label="Saved player progress">
         <div><span>LEVEL</span><strong id="headerLevel">1</strong></div>
@@ -89,61 +83,57 @@
           <section class="hub-modes-section" id="modeHub" aria-label="Choose a game mode">
             <div class="hub-mode-grid">
               <button class="hub-mode-tile hub-mode-primary hub-mode-training" id="trainingCardV35" type="button">
-                <span class="hub-mode-number">01 · TRAINING GROUND</span>
-                <span class="hub-mode-status">PLAYABLE</span>
+                <span class="hub-mode-number">01 · PRACTICE</span>
+                <span class="hub-mode-status">PLAY NOW</span>
                 <span class="hub-tile-copy">
                   <h3>FREE TRAINING</h3>
-                  <p>Build your own session. Choose taker, goalkeeper, distance, wall, wind and specialist footballs with unlimited attempts.</p>
+                  <p>Build your own session and sharpen every part of your technique.</p>
                   <span class="hub-mode-cta">BUILD A SESSION <b>→</b></span>
                 </span>
-                <span class="hub-tile-art hub-art-training" aria-hidden="true"><i class="art-ball"></i><i class="cone cone-one"></i><i class="cone cone-two"></i></span>
+                <span class="hub-tile-art hub-art-training" aria-hidden="true"></span>
               </button>
 
               <button class="hub-mode-tile hub-mode-secondary hub-mode-free-kicks" id="classicCard" type="button">
                 <span class="hub-mode-number mode-number">02 · FLAGSHIP MODE</span>
-                <span class="hub-mode-status">PLAYABLE</span>
+                <span class="hub-mode-status">PLAY NOW</span>
                 <span class="hub-tile-copy">
                   <h3>CLASSIC FREE KICKS</h3>
-                  <p>Choose your specialist after entering the mode, then master aim, curl, power and contact across an escalating campaign.</p>
+                  <p>Master aim, curl, power and contact across an escalating campaign.</p>
                   <span class="hub-mode-cta">ENTER FREE KICKS <b>→</b></span>
                 </span>
-                <span class="hub-tile-art hub-art-free-kick" aria-hidden="true"><i class="art-goal"></i><i class="art-ball"></i><i class="wall w1"></i><i class="wall w2"></i><i class="wall w3"></i><i class="wall w4"></i></span>
+                <span class="hub-tile-art hub-art-free-kick" aria-hidden="true"></span>
               </button>
 
               <button class="hub-mode-tile hub-mode-penalties" type="button" aria-disabled="false">
                 <span class="hub-mode-number">03 · ONE VS ONE</span>
-                <span class="hub-mode-status">PLAYABLE</span>
-                <span class="hub-tile-copy"><h3>PENALTY SHOOTOUT</h3><p>Five kicks each, early clinches and sudden death against escalating goalkeeper pressure.</p><span class="hub-mode-cta">START SHOOTOUT <b>→</b></span></span>
-                <span class="hub-tile-art hub-art-penalties" aria-hidden="true"><i class="art-goal"></i><i class="keeper"></i><i class="art-ball"></i></span>
+                <span class="hub-mode-status">PLAY NOW</span>
+                <span class="hub-tile-copy"><h3>PENALTY DUEL</h3><p>Five kicks each, sudden death and playable goalkeeper duels.</p><span class="hub-mode-cta">START SHOOTOUT <b>→</b></span></span>
+                <span class="hub-tile-art hub-art-penalties" aria-hidden="true"></span>
               </button>
 
               <button class="hub-mode-tile hub-mode-corners" type="button" disabled aria-disabled="true">
                 <span class="hub-mode-number">04 · DELIVERY</span>
                 <span class="hub-mode-status">COMING SOON</span>
-                <span class="hub-tile-copy"><h3>CORNERS</h3><p>Shape the delivery, attack the box and master headers, volleys and second balls.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
-                <span class="hub-tile-art hub-art-corners" aria-hidden="true"><i class="flag"></i><i class="art-ball"></i></span>
+                <span class="hub-tile-copy"><h3>CORNERS</h3><p>Shape the delivery and attack the box.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
+                <span class="hub-mode-lock" aria-hidden="true"></span>
+                <span class="hub-tile-art hub-art-corners" aria-hidden="true"></span>
               </button>
 
               <button class="hub-mode-tile hub-mode-finishing" type="button" disabled aria-disabled="true">
                 <span class="hub-mode-number">05 · FINAL TOUCH</span>
                 <span class="hub-mode-status">COMING SOON</span>
-                <span class="hub-tile-copy"><h3>FINISHING</h3><p>Through balls, cutbacks, chips, first-time strikes and increasingly difficult goal situations.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
-                <span class="hub-tile-art hub-art-finishing" aria-hidden="true"><i class="art-goal"></i><i class="art-ball"></i></span>
+                <span class="hub-tile-copy"><h3>FINISHING</h3><p>Master first-time strikes, chips and one-on-ones.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
+                <span class="hub-mode-lock" aria-hidden="true"></span>
+                <span class="hub-tile-art hub-art-finishing" aria-hidden="true"></span>
               </button>
 
               <button class="hub-mode-tile hub-mode-wide hub-mode-scenarios" type="button" disabled aria-disabled="true">
                 <span class="hub-mode-number">06 · PRESSURE FOOTBALL</span>
                 <span class="hub-mode-status">COMING SOON</span>
-                <span class="hub-tile-copy"><h3>MATCH SCENARIOS</h3><p>Recreate high-pressure football situations: late winners, awkward angles, closing defenders and iconic-style moments with escalating difficulty.</p><span class="hub-mode-cta">SCENARIO ENGINE RESERVED</span></span>
-                <span class="hub-tile-art hub-art-scenarios" aria-hidden="true"><i class="art-ball"></i></span>
+                <span class="hub-tile-copy"><h3>MATCH SCENARIOS</h3><p>Take control of decisive, high-pressure football moments.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
+                <span class="hub-mode-lock" aria-hidden="true"></span>
+                <span class="hub-tile-art hub-art-scenarios" aria-hidden="true"></span>
               </button>
-            </div>
-
-            <div class="hub-future-strip" aria-label="Future Football Lab systems">
-              <span>FUTURE COMPETITIVE LAYER</span>
-              <b>SCORE ATTACK</b>
-              <b>ROAD TO GLORY</b>
-              <small>Planned after the core football activities reach premium quality.</small>
             </div>
             <div class="mode-grid hub-training-bridge" hidden aria-hidden="true"></div>
           </section>
@@ -225,6 +215,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=51.2.0" defer></script>
+  <script src="./app.js?v=52.0.0" defer></script>
 </body>
 </html>
