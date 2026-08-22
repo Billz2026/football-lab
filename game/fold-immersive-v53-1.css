@@ -1,78 +1,87 @@
-/* Football Lab V53.2 — Fold true immersive gameplay layout.
+/* Football Lab V53.3 — Fold viewport grid.
    Layout-only: no gameplay, physics, scoring, campaign or input logic changes.
-   Goal: remove dead space by making the gameplay shell own the full Fold viewport. */
+   The Fold runtime state is authoritative; do not rely on a fragile max-width ceiling. */
 
-@media (min-width: 700px) and (max-width: 1100px) and (max-aspect-ratio: 13/10) {
-  body.is-game-active {
-    min-height: 100dvh;
-  }
-
-  body.is-game-active .app-shell {
+@media (max-aspect-ratio: 13/10) {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 {
     width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .app-shell {
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
     max-width: none;
-    min-height: 100dvh;
     margin: 0;
+    overflow: hidden;
   }
 
-  body.is-game-active .site-header {
-    min-height: 56px;
-    padding: 6px 10px;
-    gap: 10px;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .site-header {
+    min-height: 54px;
+    padding: 5px 8px;
+    gap: 8px;
   }
 
-  body.is-game-active main {
-    min-height: 100dvh;
-    padding: 4px 8px 6px !important;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 main {
+    width: 100%;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    padding: 4px 8px 8px !important;
+    overflow: hidden !important;
   }
 
-  /* Beat the older injected Fold shell so V53.2 owns the viewport geometry. */
+  /* True three-layer viewport: HUD -> expanding gameplay -> bottom command deck. */
   html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 #gameScreen.is-active {
     width: 100%;
-    min-height: calc(100dvh - 10px) !important;
-    height: calc(100dvh - 10px) !important;
+    height: 100% !important;
+    min-height: 0 !important;
     display: grid !important;
     grid-template-rows: auto minmax(0, 1fr) !important;
     gap: 6px !important;
+    overflow: hidden !important;
   }
 
-  body.is-game-active .game-topbar {
-    min-height: 0;
-    margin: 0;
-    padding: 6px 8px;
-    gap: 6px;
-    border-radius: 12px;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .game-topbar {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 5px 8px !important;
+    gap: 6px !important;
+    border-radius: 12px !important;
   }
 
-  body.is-game-active .stage-copy {
-    gap: 2px;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .stage-copy {
+    gap: 1px;
   }
 
-  body.is-game-active .stage-copy span {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .stage-copy span {
     font-size: 8px;
   }
 
-  body.is-game-active .stage-copy strong {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .stage-copy strong {
     font-size: 13px;
   }
 
-  body.is-game-active .game-stats div {
-    min-width: 66px;
-    padding: 3px 8px;
-    gap: 2px;
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .game-stats div {
+    min-width: 64px;
+    padding: 3px 7px;
+    gap: 1px;
   }
 
-  body.is-game-active .game-stats span {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .game-stats span {
     font-size: 8px;
   }
 
-  body.is-game-active .game-stats strong {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .game-stats strong {
     font-size: 12px;
   }
 
   html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .game-layout {
     width: 100% !important;
-    min-height: 0 !important;
     height: 100% !important;
+    min-height: 0 !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
     grid-template-rows: minmax(0, 1fr) auto !important;
@@ -80,16 +89,19 @@
     margin: 0 !important;
     align-items: stretch !important;
     align-content: stretch !important;
+    overflow: hidden !important;
   }
 
+  /* The football scene owns every pixel not required by HUD/controls. */
   html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .game-frame {
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
-    max-height: calc(70dvh - 12px) !important;
+    max-height: none !important;
     aspect-ratio: auto !important;
     align-self: stretch !important;
     border-radius: 17px !important;
+    overflow: hidden !important;
   }
 
   html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game #gameCanvas {
@@ -99,17 +111,18 @@
     max-height: none !important;
   }
 
-  body.is-game-active .wind-chip {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .wind-chip {
     left: 10px;
     top: 10px;
     padding: 6px 9px;
     gap: 7px;
   }
 
-  body.is-game-active .canvas-prompt {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .canvas-prompt {
     bottom: 8px;
   }
 
+  /* Bottom-anchored command deck. */
   html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .control-panel {
     position: relative !important;
     inset: auto !important;
@@ -132,11 +145,11 @@
     align-self: end !important;
   }
 
-  body.is-game-active .control-heading,
-  body.is-game-active .input-note,
-  body.is-game-active .run-rules-v152,
-  body.is-game-active .infinite-rules-v25,
-  body.is-game-active .mobile-run-strip-v161 {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .control-heading,
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .input-note,
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .run-rules-v152,
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .infinite-rules-v25,
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .mobile-run-strip-v161 {
     display: none !important;
   }
 
@@ -151,21 +164,21 @@
 
   html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .shot-step {
     min-width: 0 !important;
-    min-height: 50px !important;
+    min-height: 48px !important;
     padding: 6px 8px !important;
     gap: 7px !important;
   }
 
-  body.is-game-active .shot-step > span {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .shot-step > span {
     width: 28px;
     height: 28px;
   }
 
-  body.is-game-active .shot-step strong {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .shot-step strong {
     font-size: 9px;
   }
 
-  body.is-game-active .shot-step small {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .shot-step small {
     font-size: 8px;
   }
 
@@ -176,33 +189,28 @@
     align-self: center !important;
   }
 
-  body.is-game-active .meter-label {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .meter-label {
     margin-bottom: 5px;
   }
 
-  body.is-game-active .meter {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .meter {
     height: 15px;
   }
 
   html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .action-button {
     grid-area: action !important;
     width: 100% !important;
-    min-height: 56px !important;
-    height: 56px !important;
-    max-height: 56px !important;
+    min-height: 54px !important;
+    height: 54px !important;
+    max-height: 54px !important;
     margin: 0 !important;
     align-self: stretch !important;
   }
 }
 
-/* Browser fullscreen: give the football scene additional physical-screen space. */
-@media (min-width: 700px) and (max-width: 1100px) and (max-aspect-ratio: 13/10) and (display-mode: fullscreen) {
-  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 #gameScreen.is-active {
-    min-height: 100dvh !important;
-    height: 100dvh !important;
-  }
-
-  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 .screen-game .game-frame {
-    max-height: 74dvh !important;
+/* Browser/PWA fullscreen: same geometry, with safe-area-aware bottom padding. */
+@media (max-aspect-ratio: 13/10) and (display-mode: fullscreen) {
+  html[data-fold-shell-v3822="active"] body.is-game-active.fold-shell-v3822 main {
+    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
   }
 }
