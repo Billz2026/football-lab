@@ -82,7 +82,7 @@
   }
 
   body.is-game-active .game-frame {
-    height: clamp(500px, calc(100dvh - 235px), 820px);
+    height: clamp(500px, calc(100dvh - 250px), 820px);
     border-radius: 17px;
   }
 
@@ -105,19 +105,42 @@
   body.is-game-active .control-panel {
     min-height: 0 !important;
     height: auto;
-    padding: 10px;
+    padding: 9px 10px 10px;
     border-radius: 17px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(200px, 31%);
     grid-template-areas:
+      "heading heading"
       "steps steps"
       "meter action";
-    grid-template-rows: auto auto;
-    gap: 8px 10px;
+    grid-template-rows: auto auto auto;
+    gap: 6px 10px;
     align-items: stretch;
   }
 
-  body.is-game-active .control-heading,
+  body.is-game-active .control-heading {
+    grid-area: heading;
+    min-height: 0;
+    margin: 0;
+    padding: 0 2px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  body.is-game-active .control-heading .section-label {
+    font-size: 8px;
+  }
+
+  body.is-game-active .control-heading h2 {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: .05em;
+  }
+
+  body.is-game-active .control-heading p,
   body.is-game-active .input-note,
   body.is-game-active .run-rules-v152,
   body.is-game-active .infinite-rules-v25,
@@ -134,8 +157,8 @@
   }
 
   body.is-game-active .shot-step {
-    min-height: 58px;
-    padding: 8px 9px;
+    min-height: 56px;
+    padding: 7px 9px;
     gap: 8px;
   }
 
@@ -169,7 +192,7 @@
   body.is-game-active .action-button {
     grid-area: action;
     margin: 0 !important;
-    min-height: 62px;
+    min-height: 60px;
     height: 100%;
     align-self: stretch;
   }
@@ -179,6 +202,6 @@
    the football scene to absorb the extra vertical space. */
 @media (min-width: 700px) and (max-width: 1100px) and (max-aspect-ratio: 13/10) and (display-mode: fullscreen) {
   body.is-game-active .game-frame {
-    height: clamp(560px, calc(100dvh - 220px), 900px);
+    height: clamp(560px, calc(100dvh - 235px), 900px);
   }
 }
