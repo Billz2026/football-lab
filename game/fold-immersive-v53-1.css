@@ -82,7 +82,7 @@
   }
 
   body.is-game-active .game-frame {
-    height: clamp(500px, calc(100dvh - 250px), 820px);
+    height: min(calc(100dvh - 250px), 820px, calc(70dvh - 12px));
     border-radius: 17px;
   }
 
