@@ -16,8 +16,13 @@ async function startClassicRun(page) {
   await expect(page.locator("body")).toHaveClass(/is-game-active/);
 }
 
-async function metrics(page) {
-  return page.evaluate(() => {
+async function metrics(page, removeHistoricalMarker = false) {
+  return page.evaluate((removeMarker) => {
+    if (removeMarker) {
+      delete document.documentElement.dataset.foldShellV3822;
+      document.body.classList.remove("fold-shell-v3822");
+    }
+
     const rect = (selector) => {
       const box = document.querySelector(selector)?.getBoundingClientRect();
       if (!box) return null;
@@ -40,7 +45,7 @@ async function metrics(page) {
       controls: rect(".control-panel"),
       action: rect("#shotAction")
     };
-  });
+  }, removeHistoricalMarker);
 }
 
 function expectImmersiveLayout(value) {
@@ -66,15 +71,10 @@ test("wide unfolded Fold uses the full gameplay viewport", async ({ page }) => {
 test("Fold immersive layout survives a missing historical runtime marker", async ({ page }) => {
   await startClassicRun(page);
 
-  // Reproduce the real-device failure mode: V38 runtime marker is absent/stale,
-  // but coarse-touch + near-square Fold geometry is still authoritative.
-  await page.evaluate(() => {
-    delete document.documentElement.dataset.foldShellV3822;
-    document.body.classList.remove("fold-shell-v3822");
-  });
-
-  await page.waitForTimeout(50);
-  const value = await metrics(page);
+  // Reproduce the real-device failure mode atomically. The legacy V38 runtime
+  // may heal its own marker on later browser events; this assertion proves the
+  // geometry-driven V53.4 layout does not require that marker to be present.
+  const value = await metrics(page, true);
   expect(value.foldState).toBeNull();
   expect(value.foldClass).toBe(false);
   expectImmersiveLayout(value);
