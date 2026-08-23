@@ -1,9 +1,9 @@
 /* Football Lab V53.4 — Fold hard fix.
    Layout-only: no gameplay, physics, scoring, campaign or input logic changes.
-   Apply from real device geometry (coarse touch + unfolded width + near-square aspect),
-   not from the historical V38 Fold runtime marker. */
+   Apply from unfolded near-square viewport geometry, not from historical runtime markers
+   or pointer media features that vary between browsers and emulation environments. */
 
-@media (pointer: coarse) and (min-width: 600px) and (max-aspect-ratio: 13/10) {
+@media (min-width: 600px) and (max-width: 1400px) and (max-aspect-ratio: 13/10) {
   html,
   body.is-game-active {
     width: 100%;
@@ -230,7 +230,7 @@
 }
 
 /* Fullscreen/PWA gets the same true viewport geometry with safe-area padding. */
-@media (pointer: coarse) and (min-width: 600px) and (max-aspect-ratio: 13/10) and (display-mode: fullscreen) {
+@media (min-width: 600px) and (max-width: 1400px) and (max-aspect-ratio: 13/10) and (display-mode: fullscreen) {
   body.is-game-active main {
     padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
   }
