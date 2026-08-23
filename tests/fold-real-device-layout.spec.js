@@ -14,13 +14,10 @@ async function startClassicRun(page) {
   await page.locator("#kickerConfirmV13").click();
   await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
   await expect(page.locator("body")).toHaveClass(/is-game-active/);
-  await expect.poll(async () => page.evaluate(() => document.documentElement.dataset.foldShellV3822)).toBe("active");
 }
 
-test("wide unfolded Fold uses the full gameplay viewport", async ({ page }) => {
-  await startClassicRun(page);
-
-  const metrics = await page.evaluate(() => {
+async function metrics(page) {
+  return page.evaluate(() => {
     const rect = (selector) => {
       const box = document.querySelector(selector)?.getBoundingClientRect();
       if (!box) return null;
@@ -36,25 +33,49 @@ test("wide unfolded Fold uses the full gameplay viewport", async ({ page }) => {
 
     return {
       viewport: { width: window.innerWidth, height: window.innerHeight },
-      foldState: document.documentElement.dataset.foldShellV3822,
+      foldState: document.documentElement.dataset.foldShellV3822 || null,
+      foldClass: document.body.classList.contains("fold-shell-v3822"),
       screen: rect("#gameScreen"),
       frame: rect(".game-frame"),
       controls: rect(".control-panel"),
       action: rect("#shotAction")
     };
   });
+}
 
-  expect(metrics.foldState).toBe("active");
-  expect(metrics.screen).not.toBeNull();
-  expect(metrics.frame).not.toBeNull();
-  expect(metrics.controls).not.toBeNull();
-  expect(metrics.action).not.toBeNull();
+function expectImmersiveLayout(value) {
+  expect(value.screen).not.toBeNull();
+  expect(value.frame).not.toBeNull();
+  expect(value.controls).not.toBeNull();
+  expect(value.action).not.toBeNull();
 
-  // Real-device contract: no large dead zone after the command deck.
-  expect(metrics.viewport.height - metrics.controls.bottom).toBeLessThanOrEqual(18);
-  expect(metrics.controls.top - metrics.frame.bottom).toBeLessThanOrEqual(10);
+  // No large dead zone after the command deck.
+  expect(value.viewport.height - value.controls.bottom).toBeLessThanOrEqual(18);
+  expect(value.controls.top - value.frame.bottom).toBeLessThanOrEqual(10);
 
-  // The football scene, not empty page chrome, should absorb spare Fold height.
-  expect(metrics.frame.height).toBeGreaterThan(metrics.viewport.height * 0.68);
-  expect(metrics.action.bottom).toBeLessThanOrEqual(metrics.viewport.height - 4);
+  // The football scene, not empty page chrome, absorbs spare Fold height.
+  expect(value.frame.height).toBeGreaterThan(value.viewport.height * 0.68);
+  expect(value.action.bottom).toBeLessThanOrEqual(value.viewport.height - 4);
+}
+
+test("wide unfolded Fold uses the full gameplay viewport", async ({ page }) => {
+  await startClassicRun(page);
+  expectImmersiveLayout(await metrics(page));
+});
+
+test("Fold immersive layout survives a missing historical runtime marker", async ({ page }) => {
+  await startClassicRun(page);
+
+  // Reproduce the real-device failure mode: V38 runtime marker is absent/stale,
+  // but coarse-touch + near-square Fold geometry is still authoritative.
+  await page.evaluate(() => {
+    delete document.documentElement.dataset.foldShellV3822;
+    document.body.classList.remove("fold-shell-v3822");
+  });
+
+  await page.waitForTimeout(50);
+  const value = await metrics(page);
+  expect(value.foldState).toBeNull();
+  expect(value.foldClass).toBe(false);
+  expectImmersiveLayout(value);
 });
