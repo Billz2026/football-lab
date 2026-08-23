@@ -6,7 +6,7 @@ function ensureStylesheet() {
   const link = document.createElement("link");
   link.id = STYLE_ID;
   link.rel = "stylesheet";
-  link.href = "./mobile-v16.css?v=16";
+  link.href = "./mobile-v16.css?v=53.5.0";
   document.head.appendChild(link);
 }
 
