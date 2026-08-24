@@ -101,32 +101,6 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await expect(page.locator("html")).toHaveClass(/is-defending-v51/);
   await expect(page.locator("html")).not.toHaveClass(/penalty-duel-transition-v51/);
 
-  await page.evaluate(() => {
-    const shift = document.querySelector('[data-v51-shift="left"]');
-    const dive = document.querySelector('[data-v51-dive="high-left"]');
-    window.__footballLabDiveCommittedTest = false;
-    window.__footballLabDiveCommittedSnapshotTest = null;
-    window.__footballLabOpponentResultsAfterStallTest = null;
-    if (!(shift instanceof HTMLButtonElement) || !(dive instanceof HTMLButtonElement)) return;
-    shift.click();
-    let observer;
-    const commitWhenReady = () => {
-      if (dive.disabled) return false;
-      dive.click();
-      observer?.disconnect();
-      window.__footballLabDiveCommittedTest = true;
-      window.__footballLabDiveCommittedSnapshotTest = window.__footballLabPenaltyDuelV51.snapshot().defense?.committed;
-      const end = performance.now() + 1200;
-      while (performance.now() < end) {}
-      window.__footballLabOpponentResultsAfterStallTest = window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length;
-      return true;
-    };
-    if (commitWhenReady()) return;
-    observer = new MutationObserver(commitWhenReady);
-    observer.observe(dive, { attributes: true, attributeFilter: ["disabled"] });
-    setTimeout(() => observer.disconnect(), 4000);
-  });
-
   await expect(page.locator("#penaltyDefenseV51")).toBeVisible();
   await expect(page.locator("#defenseDifficultyV51")).toHaveText("WORLD CLASS");
   await expect(page.locator("[data-v51-shift]")).toHaveCount(3);
@@ -139,8 +113,28 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await expect(runUpMeter).toHaveAttribute("aria-valuenow", /\d+/);
 
   const leftShift = page.locator('[data-v51-shift="left"]');
+  await leftShift.click();
   await expect(leftShift).toHaveClass(/is-selected/);
-  await expect.poll(() => page.evaluate(() => window.__footballLabDiveCommittedTest), { timeout: 4000 }).toBe(true);
+  await expect.poll(
+    () => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().defense?.runUpStarted),
+    { timeout: 4000 }
+  ).toBe(true);
+
+  await page.evaluate(() => {
+    const dive = document.querySelector('[data-v51-dive="high-left"]');
+    window.__footballLabDiveCommittedTest = false;
+    window.__footballLabDiveCommittedSnapshotTest = null;
+    window.__footballLabOpponentResultsAfterStallTest = null;
+    if (!(dive instanceof HTMLButtonElement) || dive.disabled) return;
+    dive.click();
+    window.__footballLabDiveCommittedTest = true;
+    window.__footballLabDiveCommittedSnapshotTest = window.__footballLabPenaltyDuelV51.snapshot().defense?.committed;
+    const end = performance.now() + 1200;
+    while (performance.now() < end) {}
+    window.__footballLabOpponentResultsAfterStallTest = window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length;
+  });
+
+  expect(await page.evaluate(() => window.__footballLabDiveCommittedTest)).toBe(true);
   expect(await page.evaluate(() => window.__footballLabDiveCommittedSnapshotTest)).toBe("high-left");
   expect(await page.evaluate(() => window.__footballLabOpponentResultsAfterStallTest)).toBe(0);
 
