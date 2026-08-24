@@ -2,7 +2,7 @@ import { clamp, easeOutCubic, WORLD, state, ctx, canvasView } from "./core-v6.js
 import { buildCamera, ballWorld } from "./world-v7.js?v=32.4";
 import { projectWorld } from "./projection-v6.js?v=32.4";
 import { sampleShotPath } from "./physics-v7.js?v=32.4";
-import { playStrikeSound } from "./audio-v32.js?v=38.7.0";
+import { playStrikeSound } from "./strike-audio-v54.js?v=54.0.0";
 
 const BUILD = "54.0.0";
 const VIEW = { width: WORLD.width, height: WORLD.height };
