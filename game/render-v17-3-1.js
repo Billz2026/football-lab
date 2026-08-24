@@ -1,8 +1,10 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./render-v17-v1731.js?v=1731";
 import { drawHeroCharacterV46 } from "./character-3d-v46.js?v=46.0.0";
+import { visualHeroTimeV54 } from "./strike-motion-v54.js?v=54.1.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
 import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=40.3.0";
+import { drawGameFeelV54 } from "./game-feel-v54.js?v=54.0.0";
 import { drawStadiumProgressionV41, drawCampaignPresentationV41 } from "./stadium-progression-v41.js?v=41.0.0";
 import "./character-engine-v1.js?v=1.0.0";
 import "./keeper-character-v44.js?v=44.0.0";
@@ -91,11 +93,17 @@ function drawVenueWeather(time) {
   };
 }
 
+function phaseOneStrikeEnabled() {
+  return !document.documentElement.classList.contains("penalty-duel-v51");
+}
+
 export function drawScene(time, finishShot) {
+  const phaseOneEnabled = phaseOneStrikeEnabled();
   drawBaseWithoutLegacyKicker(time, finishShot);
   drawStadiumProgressionV41(time);
-  drawHeroCharacterV46(time);
+  drawHeroCharacterV46(phaseOneEnabled ? visualHeroTimeV54(time) : time);
   drawVenueWeather(time);
+  if (phaseOneEnabled) drawGameFeelV54(time);
   drawMatchdayImpact(time);
   drawCampaignPresentationV41(time);
 
@@ -111,6 +119,7 @@ export function drawScene(time, finishShot) {
     productionCharacterMode: production3D ? "real-skinned-glb-3d" : "articulated-2.5d-fallback",
     production3D,
     staticSpriteFrames: false,
+    phaseOneStrikeEnabled: phaseOneEnabled,
     time
   };
 }
@@ -127,3 +136,5 @@ window.__footballLabCharacterRendererBridgeV42 = true;
 window.__footballLabCharacterRendererBridgeV43 = true;
 window.__footballLabCharacterRendererBridgeV44 = true;
 window.__footballLabCharacterRendererBridgeV46 = true;
+window.__footballLabGameFeelBridgeV54 = true;
+window.__footballLabStrikeMotionBridgeV54 = true;

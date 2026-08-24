@@ -98,49 +98,68 @@ test("V51 alternates into a playable CPU kick with user goalkeeper control", asy
   await expect(page.locator("html")).toHaveClass(/penalty-duel-transition-v51/);
 
   await expect.poll(() => page.evaluate(() => window.__footballLabPenaltyDuelV51.snapshot().turn), { timeout: 5000 }).toBe("cpu");
-  await expect(page.locator("html")).toHaveClass(/is-defending-v51/);
-  await expect(page.locator("html")).not.toHaveClass(/penalty-duel-transition-v51/);
+  const defenseUi = await page.evaluate(() => {
+    const snapshot = window.__footballLabPenaltyDuelV51.snapshot();
+    const root = document.documentElement;
+    const overlay = document.getElementById("penaltyDefenseV51");
+    const meter = document.getElementById("defenseRunUpProgressV51");
+    const shift = document.querySelector('[data-v51-shift="left"]');
+    const overlayStyle = overlay ? getComputedStyle(overlay) : null;
+    const meterStyle = meter ? getComputedStyle(meter) : null;
+    if (shift instanceof HTMLButtonElement) shift.click();
+    return {
+      turn: snapshot.turn,
+      defending: root.classList.contains("is-defending-v51"),
+      transition: root.classList.contains("penalty-duel-transition-v51"),
+      overlayVisible: Boolean(overlay && overlayStyle?.display !== "none" && overlayStyle?.visibility !== "hidden"),
+      difficulty: document.getElementById("defenseDifficultyV51")?.textContent,
+      shiftCount: document.querySelectorAll("[data-v51-shift]").length,
+      diveCount: document.querySelectorAll("[data-v51-dive]").length,
+      stageName: document.getElementById("stageName")?.textContent,
+      meterVisible: Boolean(meter && meterStyle?.display !== "none" && meterStyle?.visibility !== "hidden"),
+      meterRole: meter?.getAttribute("role"),
+      meterLabel: meter?.getAttribute("aria-label"),
+      meterValue: meter?.getAttribute("aria-valuenow"),
+      leftShiftSelected: shift?.classList.contains("is-selected") || false
+    };
+  });
+  expect(defenseUi).toMatchObject({
+    turn: "cpu",
+    defending: true,
+    transition: false,
+    overlayVisible: true,
+    difficulty: "WORLD CLASS",
+    shiftCount: 3,
+    diveCount: 6,
+    stageName: "YOU ARE THE GOALKEEPER",
+    meterVisible: true,
+    meterRole: "progressbar",
+    meterLabel: "CPU run-up progress",
+    leftShiftSelected: true
+  });
+  expect(defenseUi.meterValue).toMatch(/^\d+$/);
+
+  await page.waitForFunction(
+    () => window.__footballLabPenaltyDuelV51.snapshot().defense?.runUpStarted,
+    null,
+    { timeout: 4000, polling: "raf" }
+  );
 
   await page.evaluate(() => {
-    const shift = document.querySelector('[data-v51-shift="left"]');
     const dive = document.querySelector('[data-v51-dive="high-left"]');
     window.__footballLabDiveCommittedTest = false;
     window.__footballLabDiveCommittedSnapshotTest = null;
     window.__footballLabOpponentResultsAfterStallTest = null;
-    if (!(shift instanceof HTMLButtonElement) || !(dive instanceof HTMLButtonElement)) return;
-    shift.click();
-    let observer;
-    const commitWhenReady = () => {
-      if (dive.disabled) return false;
-      dive.click();
-      observer?.disconnect();
-      window.__footballLabDiveCommittedTest = true;
-      window.__footballLabDiveCommittedSnapshotTest = window.__footballLabPenaltyDuelV51.snapshot().defense?.committed;
-      const end = performance.now() + 1200;
-      while (performance.now() < end) {}
-      window.__footballLabOpponentResultsAfterStallTest = window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length;
-      return true;
-    };
-    if (commitWhenReady()) return;
-    observer = new MutationObserver(commitWhenReady);
-    observer.observe(dive, { attributes: true, attributeFilter: ["disabled"] });
-    setTimeout(() => observer.disconnect(), 4000);
+    if (!(dive instanceof HTMLButtonElement) || dive.disabled) return;
+    dive.click();
+    window.__footballLabDiveCommittedTest = true;
+    window.__footballLabDiveCommittedSnapshotTest = window.__footballLabPenaltyDuelV51.snapshot().defense?.committed;
+    const end = performance.now() + 1200;
+    while (performance.now() < end) {}
+    window.__footballLabOpponentResultsAfterStallTest = window.__footballLabPenaltyDuelV51.snapshot().opponentResults.length;
   });
 
-  await expect(page.locator("#penaltyDefenseV51")).toBeVisible();
-  await expect(page.locator("#defenseDifficultyV51")).toHaveText("WORLD CLASS");
-  await expect(page.locator("[data-v51-shift]")).toHaveCount(3);
-  await expect(page.locator("[data-v51-dive]")).toHaveCount(6);
-  await expect(page.locator("#stageName")).toHaveText("YOU ARE THE GOALKEEPER");
-  const runUpMeter = page.locator("#defenseRunUpProgressV51");
-  await expect(runUpMeter).toBeVisible();
-  await expect(runUpMeter).toHaveAttribute("role", "progressbar");
-  await expect(runUpMeter).toHaveAttribute("aria-label", "CPU run-up progress");
-  await expect(runUpMeter).toHaveAttribute("aria-valuenow", /\d+/);
-
-  const leftShift = page.locator('[data-v51-shift="left"]');
-  await expect(leftShift).toHaveClass(/is-selected/);
-  await expect.poll(() => page.evaluate(() => window.__footballLabDiveCommittedTest), { timeout: 4000 }).toBe(true);
+  expect(await page.evaluate(() => window.__footballLabDiveCommittedTest)).toBe(true);
   expect(await page.evaluate(() => window.__footballLabDiveCommittedSnapshotTest)).toBe("high-left");
   expect(await page.evaluate(() => window.__footballLabOpponentResultsAfterStallTest)).toBe(0);
 
