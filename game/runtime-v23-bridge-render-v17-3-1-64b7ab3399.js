@@ -93,12 +93,17 @@ function drawVenueWeather(time) {
   };
 }
 
+function phaseOneStrikeEnabled() {
+  return !document.documentElement.classList.contains("penalty-duel-v51");
+}
+
 export function drawScene(time, finishShot) {
+  const phaseOneEnabled = phaseOneStrikeEnabled();
   drawBaseWithoutLegacyKicker(time, finishShot);
   drawStadiumProgressionV41(time);
-  drawHeroCharacterV46(visualHeroTimeV54(time));
+  drawHeroCharacterV46(phaseOneEnabled ? visualHeroTimeV54(time) : time);
   drawVenueWeather(time);
-  drawGameFeelV54(time);
+  if (phaseOneEnabled) drawGameFeelV54(time);
   drawMatchdayImpact(time);
   drawCampaignPresentationV41(time);
 
@@ -114,6 +119,7 @@ export function drawScene(time, finishShot) {
     productionCharacterMode: production3D ? "real-skinned-glb-3d" : "articulated-2.5d-fallback",
     production3D,
     staticSpriteFrames: false,
+    phaseOneStrikeEnabled: phaseOneEnabled,
     time
   };
 }
