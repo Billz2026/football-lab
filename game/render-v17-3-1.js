@@ -1,5 +1,6 @@
 import { drawScene as drawBaseScene, resizeCanvas } from "./render-v17-v1731.js?v=1731";
 import { drawHeroCharacterV46 } from "./character-3d-v46.js?v=46.0.0";
+import { visualHeroTimeV54 } from "./strike-motion-v54.js?v=54.1.0";
 import { activeCharacter } from "./characters-v13.js?v=32.4";
 import { WORLD, state, ctx, canvasView } from "./core-v6.js?v=32.4";
 import { drawMatchdayImpact } from "./matchday-impact-v32.js?v=40.3.0";
@@ -95,7 +96,7 @@ function drawVenueWeather(time) {
 export function drawScene(time, finishShot) {
   drawBaseWithoutLegacyKicker(time, finishShot);
   drawStadiumProgressionV41(time);
-  drawHeroCharacterV46(time);
+  drawHeroCharacterV46(visualHeroTimeV54(time));
   drawVenueWeather(time);
   drawGameFeelV54(time);
   drawMatchdayImpact(time);
@@ -130,3 +131,4 @@ window.__footballLabCharacterRendererBridgeV43 = true;
 window.__footballLabCharacterRendererBridgeV44 = true;
 window.__footballLabCharacterRendererBridgeV46 = true;
 window.__footballLabGameFeelBridgeV54 = true;
+window.__footballLabStrikeMotionBridgeV54 = true;
