@@ -56,3 +56,16 @@ test("V48 keeps playable penalty practice inside the Training Ground", async ({ 
     windVariance: 0
   });
 });
+
+test("training matchup badges expose a real base tier", async ({ page }) => {
+  await page.goto("/");
+  const trainingTile = page.locator(".hub-mode-training");
+  await trainingTile.click();
+  await page.waitForFunction(() => window.__footballLabTrainingV35?.build?.startsWith("35.0"));
+
+  await page.locator("#trainingStartV35").click();
+  await expect(page.locator("#gameScreen")).toHaveClass(/is-active/);
+  await expect(page.locator(".active-keeper-chip-v14 em")).toHaveText(/T1/);
+  await expect(page.locator(".active-wall-chip-v15 em")).toHaveText(/T1/);
+  await expect(page.locator("body")).not.toContainText("Tundefined");
+});

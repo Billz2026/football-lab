@@ -198,7 +198,8 @@ export function wallForStage(stageIndex = state.stage) {
 }
 
 export function wallById(id) {
-  return BY_ID.get(id) || STANDARD_WALL;
+  const wall = BY_ID.get(id) || STANDARD_WALL;
+  return wall.tier == null ? { ...wall, tier: 1 } : wall;
 }
 
 export function activeWall() {

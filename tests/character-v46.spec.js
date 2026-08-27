@@ -22,9 +22,13 @@ async function enterClassic(page) {
 test("V46 keeps the production keeper GLB but renders Viktor through the shared arcade fallback", async ({ page }) => {
   const glbRequests = [];
   const threeRequests = [];
+  const externalThreeRequests = [];
   page.on("request", (request) => {
     if (request.url().endsWith(".glb")) glbRequests.push({ url: request.url(), method: request.method() });
-    if (request.url().startsWith("https://esm.sh/three@")) threeRequests.push(request.url());
+    if (request.url().includes("/game/vendor/three-v180.module.js") || request.url().includes("/game/vendor/GLTFLoader-v180.js")) {
+      threeRequests.push(request.url());
+    }
+    if (request.url().startsWith("https://esm.sh/three@")) externalThreeRequests.push(request.url());
   });
   await page.goto("/index.html?test=character-v46");
   await loadGameplay(page);
@@ -50,6 +54,7 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
   expect(contract.v46.failed.some((entry) => entry.id === "mikkel-storm")).toBe(false);
   expect(contract.production.liveArcadeFallback).toContain("viktor-kane");
   expect(glbRequests).toEqual([]);
+  expect(externalThreeRequests).toEqual([]);
   expect(threeRequests).toEqual([]);
 
   await enterClassic(page);
@@ -93,4 +98,5 @@ test("V46 keeps the production keeper GLB but renders Viktor through the shared 
   expect(glbRequests[0].url).toContain("mikkel-storm.glb");
   expect(glbRequests[0].method).toBe("GET");
   expect(threeRequests.length).toBeGreaterThan(0);
+  expect(externalThreeRequests).toEqual([]);
 });

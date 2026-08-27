@@ -11,8 +11,8 @@ import { drawHeroCharacterV44 } from "./hero-character-v44.js?v=44.0.0";
 
 const BUILD = "46.0.0";
 const THREE_VERSION = "0.180.0";
-const THREE_URL = `https://esm.sh/three@${THREE_VERSION}`;
-const GLTF_LOADER_URL = `https://esm.sh/three@${THREE_VERSION}/examples/jsm/loaders/GLTFLoader.js`;
+const THREE_URL = `./vendor/three-v180.module.js?v=${THREE_VERSION}`;
+const GLTF_LOADER_URL = `./vendor/GLTFLoader-v180.js?v=${THREE_VERSION}`;
 const VIEW_ASPECT = WORLD.width / WORLD.height;
 const MODEL_FORWARD_AXIS = "+Z";
 

@@ -193,7 +193,8 @@ export function keeperForStage(stageIndex = state.stage) {
 }
 
 export function keeperById(id) {
-  return BY_ID.get(id) || STANDARD_KEEPER;
+  const keeper = BY_ID.get(id) || STANDARD_KEEPER;
+  return keeper.tier == null ? { ...keeper, tier: 1 } : keeper;
 }
 
 export function activeKeeper() {
