@@ -1,6 +1,8 @@
 /* Phase 1.2 final desktop polish: centre the pitch + controls as one unit, preserve the native 5:3 game world and keep duplicated run rules compact. */
 
-@media (min-width: 1180px) {
+/* V53.5: only use the desktop side-tray when the viewport is genuinely wide.
+   Near-square unfolded Fold geometry is owned by fold-immersive-v53-1.css. */
+@media (min-width: 1180px) and (min-aspect-ratio: 13/10) {
   html[data-football-lab-ui="immersive-v24"] body.is-game-active main {
     padding-bottom: 14px;
   }
