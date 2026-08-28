@@ -316,7 +316,52 @@ function drawFloodlightsV403A(theme, architecture) {
   }
 }
 
-function drawBackground() {
+function drawBroadcastDepthV55(time, theme, architecture) {
+  const quality = stadiumQualityV403A();
+  const pulse = 0.84 + Math.sin(time / 1180) * 0.06;
+  const fasciaY = 334 - architecture.scale * 9;
+
+  ctx.save();
+  // A low, continuous fascia gives the stand a believable lower edge without
+  // putting a hard rectangle behind the keeper lane.
+  const fascia = ctx.createLinearGradient(0, fasciaY, 0, fasciaY + 34);
+  fascia.addColorStop(0, "rgba(1,5,4,.08)");
+  fascia.addColorStop(0.42, "rgba(1,5,4,.52)");
+  fascia.addColorStop(1, "rgba(1,5,4,.84)");
+  ctx.fillStyle = fascia;
+  ctx.fillRect(0, fasciaY, WORLD.width, 42);
+
+  ctx.strokeStyle = `rgba(${theme.glow},${(0.10 * pulse).toFixed(3)})`;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, fasciaY + 1);
+  ctx.lineTo(WORLD.width, fasciaY + 1);
+  ctx.stroke();
+
+  // The near-side broadcast wash separates the turf from the lower stand and
+  // is intentionally reduced on coarse/mobile devices.
+  const wash = ctx.createLinearGradient(0, 350, 0, WORLD.height);
+  wash.addColorStop(0, `rgba(${theme.glow},${quality === 1 ? ".018" : ".026"})`);
+  wash.addColorStop(0.44, "rgba(8,28,18,.045)");
+  wash.addColorStop(1, "rgba(0,5,3,.20)");
+  ctx.fillStyle = wash;
+  ctx.fillRect(0, 350, WORLD.width, WORLD.height - 350);
+
+  ctx.globalCompositeOperation = "screen";
+  const leftEdge = ctx.createRadialGradient(84, 355, 2, 84, 355, 260);
+  leftEdge.addColorStop(0, `rgba(${theme.glow},${(0.045 * pulse).toFixed(3)})`);
+  leftEdge.addColorStop(1, `rgba(${theme.glow},0)`);
+  ctx.fillStyle = leftEdge;
+  ctx.fillRect(0, 250, 360, 320);
+  const rightEdge = ctx.createRadialGradient(WORLD.width - 84, 355, 2, WORLD.width - 84, 355, 260);
+  rightEdge.addColorStop(0, `rgba(${theme.glow},${(0.045 * pulse).toFixed(3)})`);
+  rightEdge.addColorStop(1, `rgba(${theme.glow},0)`);
+  ctx.fillStyle = rightEdge;
+  ctx.fillRect(WORLD.width - 360, 250, 360, 320);
+  ctx.restore();
+}
+
+function drawBackground(time) {
   const theme = VENUE_THEMES[state.currentStage.environment] || VENUE_THEMES.academy;
   const architecture = theme.architecture;
   const cleanBounds = goalClearBoundsV403A();
@@ -370,6 +415,7 @@ function drawBackground() {
   }
 
   drawFloodlightsV403A(theme, architecture);
+  drawBroadcastDepthV55(time, theme, architecture);
 
   const glow = ctx.createRadialGradient(610, 190, 0, 610, 190, 500);
   glow.addColorStop(0, `rgba(${theme.glow},${0.07 + architecture.scale * 0.045})`);
@@ -571,6 +617,18 @@ function drawPitch() {
   turfPatch(1.35, 0.85, 1.15, 0.72, "rgba(94,82,48,.052)", quality === 2 ? 18 : 12);
   turfPatch(0, 1.8, 2.45, 1.05, "rgba(214,205,139,.018)", 18);
 
+  // Fine longitudinal cuts restore the broadcast perspective between the
+  // broader mower bands. They are deliberately sparse on coarse displays.
+  const cutSpacing = quality === 2 ? 4.6 : 6.8;
+  for (let x = -PITCH.halfWidth + 1.4, index = 0; x < PITCH.halfWidth; x += cutSpacing, index += 1) {
+    lineWorld(
+      { x, y: 0.006, z: -3.9 },
+      { x, y: 0.006, z: nearZ },
+      quality === 2 ? 0.28 : 0.2,
+      index % 2 ? "rgba(232,255,220,.035)" : "rgba(2,28,14,.04)"
+    );
+  }
+
   // Painted markings use a soft dark under-stroke so they sit on the turf rather than float above it.
   paintPitchLine({ x: -PITCH.halfWidth, y: 0.015, z: 0 }, { x: PITCH.halfWidth, y: 0.015, z: 0 }, 1.72);
   const penalty = PITCH.penaltyHalfWidth;
@@ -632,6 +690,45 @@ function drawPitch() {
   };
 }
 
+function drawGoalVolumeV55() {
+  const left = -GOAL.halfWidth;
+  const right = GOAL.halfWidth;
+  const backZ = -GOAL.depth;
+
+  // Dark interior and side planes make the net read as a volume before the
+  // keeper and wall are painted on top of it.
+  polygonWorld([
+    { x: left, y: 0.015, z: 0 },
+    { x: right, y: 0.015, z: 0 },
+    { x: right, y: 0.015, z: backZ },
+    { x: left, y: 0.015, z: backZ }
+  ], "rgba(1,8,5,.24)");
+  polygonWorld([
+    { x: left, y: 0, z: 0 },
+    { x: left, y: GOAL.height, z: 0 },
+    { x: left, y: GOAL.height, z: backZ },
+    { x: left, y: 0, z: backZ }
+  ], "rgba(216,247,225,.035)");
+  polygonWorld([
+    { x: right, y: 0, z: 0 },
+    { x: right, y: 0, z: backZ },
+    { x: right, y: GOAL.height, z: backZ },
+    { x: right, y: GOAL.height, z: 0 }
+  ], "rgba(0,7,4,.12)");
+  polygonWorld([
+    { x: left, y: 0.02, z: backZ },
+    { x: right, y: 0.02, z: backZ },
+    { x: right, y: GOAL.height, z: backZ },
+    { x: left, y: GOAL.height, z: backZ }
+  ], "rgba(2,13,8,.16)");
+}
+
+function goalFrameV55(a, b, width = 3.4) {
+  lineWorld(a, b, width + 2.1, "rgba(3,13,8,.72)");
+  lineWorld(a, b, width, "rgba(247,255,244,.96)");
+  lineWorld(a, b, Math.max(0.7, width * 0.22), "rgba(255,255,255,.72)");
+}
+
 function drawGoal(time) {
   const left = -GOAL.halfWidth;
   const right = GOAL.halfWidth;
@@ -657,12 +754,33 @@ function drawGoal(time) {
     return rippleEnergy * xFalloff * yFalloff;
   };
 
-  lineWorld({ x: left, y: 0, z: 0 }, { x: left, y: GOAL.height, z: 0 }, 3.4, frame);
-  lineWorld({ x: right, y: 0, z: 0 }, { x: right, y: GOAL.height, z: 0 }, 3.4, frame);
-  lineWorld({ x: left, y: GOAL.height, z: 0 }, { x: right, y: GOAL.height, z: 0 }, 3.4, frame);
-  lineWorld({ x: left, y: GOAL.height, z: 0 }, { x: left, y: GOAL.height, z: backZ }, 1.7, frame);
-  lineWorld({ x: right, y: GOAL.height, z: 0 }, { x: right, y: GOAL.height, z: backZ }, 1.7, frame);
-  lineWorld({ x: left, y: GOAL.height, z: backZ }, { x: right, y: GOAL.height, z: backZ }, 1.7, frame);
+  drawGoalVolumeV55();
+  goalFrameV55({ x: left, y: 0, z: 0 }, { x: left, y: GOAL.height, z: 0 }, 3.4);
+  goalFrameV55({ x: right, y: 0, z: 0 }, { x: right, y: GOAL.height, z: 0 }, 3.4);
+  goalFrameV55({ x: left, y: GOAL.height, z: 0 }, { x: right, y: GOAL.height, z: 0 }, 3.4);
+  goalFrameV55({ x: left, y: 0, z: 0 }, { x: right, y: 0, z: 0 }, 1.6);
+  goalFrameV55({ x: left, y: 0, z: 0 }, { x: left, y: 0, z: backZ }, 1.35);
+  goalFrameV55({ x: right, y: 0, z: 0 }, { x: right, y: 0, z: backZ }, 1.35);
+  goalFrameV55({ x: left, y: GOAL.height, z: 0 }, { x: left, y: GOAL.height, z: backZ }, 1.7);
+  goalFrameV55({ x: right, y: GOAL.height, z: 0 }, { x: right, y: GOAL.height, z: backZ }, 1.7);
+  goalFrameV55({ x: left, y: GOAL.height, z: backZ }, { x: right, y: GOAL.height, z: backZ }, 1.7);
+  goalFrameV55({ x: left, y: 0, z: backZ }, { x: right, y: 0, z: backZ }, 1.1);
+
+  // Rear uprights add a clear silhouette to the far edge of the net.
+  lineWorld({ x: left, y: 0, z: backZ }, { x: left, y: GOAL.height, z: backZ }, 1.15, frame);
+  lineWorld({ x: right, y: 0, z: backZ }, { x: right, y: GOAL.height, z: backZ }, 1.15, frame);
+
+  // A second, quieter mesh on the rear plane sells the net's depth at the
+  // normal gameplay scale without becoming a bright rectangle.
+  const rearNet = "rgba(226,247,232,.115)";
+  for (let index = 1; index < 8; index += 1) {
+    const x = lerp(left, right, index / 8);
+    lineWorld({ x, y: 0.03, z: backZ }, { x, y: GOAL.height - 0.02, z: backZ }, 0.52, rearNet);
+  }
+  for (let index = 1; index < 6; index += 1) {
+    const y = (GOAL.height * index) / 6;
+    lineWorld({ x: left, y, z: backZ }, { x: right, y, z: backZ }, 0.52, rearNet);
+  }
 
   for (let i = 0; i <= 10; i += 1) {
     const x = lerp(left, right, i / 10);
@@ -1550,6 +1668,29 @@ function drawPremiumMatchBall(projected, radius, pathProgress, contactImpact) {
   ctx.fill();
   ctx.restore();
 }
+
+function drawBallGroundShadowV55(world, projected, radius) {
+  const ground = projectWorld({ x: world.x, y: 0.012, z: world.z }, activeCamera, viewport);
+  if (!ground?.visible) return;
+  const height = clamp(Number(world.y) || 0, 0, 3.4);
+  const lift = clamp(height / 2.4, 0, 1);
+  const alpha = 0.24 * (1 - lift * 0.72);
+  const width = radius * (1.18 + lift * 0.34);
+  const depth = radius * (0.31 + lift * 0.12);
+
+  ctx.save();
+  ctx.globalCompositeOperation = "multiply";
+  const shadow = ctx.createRadialGradient(ground.x, ground.y, 0, ground.x, ground.y, width * 1.45);
+  shadow.addColorStop(0, `rgba(0,7,3,${alpha.toFixed(3)})`);
+  shadow.addColorStop(0.64, `rgba(0,7,3,${(alpha * 0.38).toFixed(3)})`);
+  shadow.addColorStop(1, "rgba(0,7,3,0)");
+  ctx.fillStyle = shadow;
+  ctx.beginPath();
+  ctx.ellipse(ground.x, ground.y + 1.1, width, depth, 0, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
 function drawBall(time, finishShot) {
   const progress = progressAt(time);
   let world = ballWorld(state.currentStage);
@@ -1595,6 +1736,7 @@ function drawBall(time, finishShot) {
     ? Math.max(0, 1 - Math.abs(pathProgress - impactRatio()) / 0.022)
     : 0;
 
+  drawBallGroundShadowV55(world, projected, radius);
   drawPremiumMatchBall(projected, radius, pathProgress, contactImpact);
 }
 
@@ -1689,7 +1831,7 @@ export function drawScene(time, finishShot) {
   ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
   applyTransform();
   applyCameraFeedback(time);
-  drawBackground();
+  drawBackground(time);
   drawGoalContrastV402C();
   drawPitch();
   drawGoal(time);
@@ -1711,3 +1853,15 @@ export function drawScene(time, finishShot) {
 window.__footballLabBallImpactV386 = Object.freeze({ build: "38.6.0", readableBall: true, continuousCurlRibbon: true, persistentNetRipple: true, impactFx: true, physicsChanged: false, outcomeChanged: false });
 
 window.__footballLabWallAnimationV39 = Object.freeze({ build: "39.0.0", anticipation: "individual", jump: "staggered", reaction: "head-arm-torso", landing: "offset", proportions: "refined" });
+
+window.__footballLabVisualFoundationV55 = Object.freeze({
+  build: "55.0.0",
+  scene: "shared-training-and-classic-free-kick",
+  stadium: "broadcast-depth-fascia-and-edge-light",
+  pitch: "cross-cut-turf-with-perspective-cuts",
+  goal: "volumetric-frame-net-and-rear-uprights",
+  ball: "grounded-match-ball-shadow-and-existing-panel-renderer",
+  responsiveQuality: "coarse-device-detail-reduction",
+  physicsChanged: false,
+  outcomesChanged: false
+});
