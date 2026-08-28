@@ -125,7 +125,7 @@ const bootPromise = runtimeCaptureMode
           pitchWear: "localized-free-kick-and-goalmouth",
           pitchLighting: "controlled-goalmouth-falloff",
           pitchQualityScaling: "fold-mobile-reduced-micro-detail",
-          visualFoundation: "v55-shared-stadium-pitch-goal-ball-pass",
+          visualFoundation: "v56-premium-broadcast-scene-pass",
           goalBackdrop: "no-rectangle-soft-radial-keeper-contrast",
           advertisingArchitecture: "muted-side-only-clear-goalmouth",
           outcomeFeedback: "canvas-goal-save-parry-post-bar-block-wide-sting-plus-control-panel",

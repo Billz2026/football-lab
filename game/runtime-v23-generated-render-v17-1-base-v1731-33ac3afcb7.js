@@ -361,6 +361,102 @@ function drawBroadcastDepthV55(time, theme, architecture) {
   ctx.restore();
 }
 
+function drawBroadcastSkyV56(time, theme, architecture) {
+  const quality = stadiumQualityV403A();
+  const horizon = 198 - architecture.scale * 14;
+
+  ctx.save();
+  const haze = ctx.createLinearGradient(0, horizon - 78, 0, 370);
+  haze.addColorStop(0, `rgba(${theme.glow},${0.018 + architecture.scale * 0.012})`);
+  haze.addColorStop(0.48, "rgba(222,244,225,.028)");
+  haze.addColorStop(1, "rgba(0,7,5,0)");
+  ctx.fillStyle = haze;
+  ctx.fillRect(0, horizon - 78, WORLD.width, 220);
+
+  // A restrained upper-bowl haze gives the scene an atmospheric horizon while
+  // keeping the keeper and goal lane visually quiet.
+  ctx.globalCompositeOperation = "screen";
+  const horizonGlow = ctx.createRadialGradient(WORLD.width / 2, horizon, 4, WORLD.width / 2, horizon, 430);
+  horizonGlow.addColorStop(0, `rgba(${theme.glow},${0.035 + architecture.scale * 0.018})`);
+  horizonGlow.addColorStop(1, `rgba(${theme.glow},0)`);
+  ctx.fillStyle = horizonGlow;
+  ctx.fillRect(110, horizon - 100, WORLD.width - 220, 240);
+
+  if (theme.lights && architecture.scale > 0.82) {
+    const beamAlpha = quality === 1 ? 0.018 : 0.026;
+    const beamPulse = 0.92 + Math.sin(time / 1700) * 0.08;
+    for (const x of [86, WORLD.width - 86]) {
+      ctx.fillStyle = `rgba(${theme.glow},${(beamAlpha * beamPulse).toFixed(3)})`;
+      ctx.beginPath();
+      ctx.moveTo(x - 13, 38);
+      ctx.lineTo(x + 13, 38);
+      ctx.lineTo(x + 116, 208);
+      ctx.lineTo(x - 116, 208);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  if (architecture.scale > 0.88) {
+    ctx.strokeStyle = `rgba(${theme.glow},${quality === 1 ? ".055" : ".075"})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(WORLD.width / 2, 346, WORLD.width * 0.58, 78, 0, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawStadiumStructureV56(theme, architecture, cleanBounds) {
+  const quality = stadiumQualityV403A();
+  const upperRail = 151 - architecture.scale * 10;
+  const lowerRail = 211 - architecture.scale * 13;
+  const fasciaRail = 344;
+  const laneLeft = cleanBounds.left - 24;
+  const laneRight = cleanBounds.right + 24;
+
+  ctx.save();
+  ctx.lineCap = "round";
+  for (const [y, alpha] of [[upperRail, 0.08], [lowerRail, 0.12], [fasciaRail, 0.1]]) {
+    ctx.strokeStyle = `rgba(230,247,234,${alpha})`;
+    ctx.lineWidth = y === lowerRail ? 2 : 1;
+    ctx.beginPath();
+    ctx.moveTo(18, y);
+    ctx.lineTo(laneLeft, y);
+    ctx.moveTo(laneRight, y);
+    ctx.lineTo(WORLD.width - 18, y);
+    ctx.stroke();
+  }
+
+  // Repeating structural ribs make the upper bowl feel built rather than
+  // painted, with a clear gap over the goalkeeper lane.
+  const ribCount = quality === 1 ? 9 : Math.max(10, architecture.bays + 3);
+  for (let index = 0; index <= ribCount; index += 1) {
+    const x = 28 + (WORLD.width - 56) * (index / ribCount);
+    if (x > laneLeft && x < laneRight) continue;
+    const lean = (x - WORLD.width / 2) * 0.025;
+    ctx.strokeStyle = `rgba(${theme.glow},${0.025 + architecture.scale * 0.018})`;
+    ctx.lineWidth = index % 3 === 0 ? 1.35 : 0.72;
+    ctx.beginPath();
+    ctx.moveTo(x, upperRail - 24);
+    ctx.lineTo(x + lean, fasciaRail - 4);
+    ctx.stroke();
+  }
+
+  // Small segmented LED ribbons create a premium stadium rhythm without
+  // introducing bright advertising blocks behind the action.
+  const ribbonY = lowerRail - 4;
+  const segmentWidth = quality === 1 ? 42 : 31;
+  for (let x = 24; x < WORLD.width - 24; x += segmentWidth + 8) {
+    const centre = x + segmentWidth / 2;
+    if (centre > laneLeft && centre < laneRight) continue;
+    ctx.fillStyle = `rgba(${theme.glow},${0.075 + (Math.floor(x / segmentWidth) % 3) * 0.018})`;
+    roundedRect(x, ribbonY, segmentWidth, 2.2, 1.1);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawBackground(time) {
   const theme = VENUE_THEMES[state.currentStage.environment] || VENUE_THEMES.academy;
   const architecture = theme.architecture;
@@ -373,6 +469,7 @@ function drawBackground(time) {
   sky.addColorStop(1, theme.sky[2]);
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+  drawBroadcastSkyV56(time, theme, architecture);
 
   const standTop = 112 - architecture.scale * 12;
   const standBottom = 356;
@@ -415,6 +512,7 @@ function drawBackground(time) {
   }
 
   drawFloodlightsV403A(theme, architecture);
+  drawStadiumStructureV56(theme, architecture, cleanBounds);
   drawBroadcastDepthV55(time, theme, architecture);
 
   const glow = ctx.createRadialGradient(610, 190, 0, 610, 190, 500);
@@ -541,6 +639,50 @@ function turfPatch(cx, cz, radiusX, radiusZ, colour, segments = 16) {
   polygonWorld(points, colour);
 }
 
+function drawPitchMaterialV56(nearZ, quality) {
+  const corners = [
+    projectWorld({ x: -PITCH.halfWidth, y: 0.025, z: -4 }, activeCamera, viewport),
+    projectWorld({ x: PITCH.halfWidth, y: 0.025, z: -4 }, activeCamera, viewport),
+    projectWorld({ x: PITCH.halfWidth, y: 0.025, z: nearZ }, activeCamera, viewport),
+    projectWorld({ x: -PITCH.halfWidth, y: 0.025, z: nearZ }, activeCamera, viewport)
+  ];
+  if (corners.some((point) => !point?.visible)) return;
+
+  ctx.save();
+  ctx.beginPath();
+  corners.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+  ctx.closePath();
+  ctx.clip();
+
+  // A soft, clipped gradient creates one light source across the whole field,
+  // giving the mowing and grain layers a shared material response.
+  const sheen = ctx.createLinearGradient(0, 270, 0, WORLD.height);
+  sheen.addColorStop(0, "rgba(229,255,218,.012)");
+  sheen.addColorStop(0.38, quality === 2 ? "rgba(220,255,208,.048)" : "rgba(220,255,208,.032)");
+  sheen.addColorStop(1, "rgba(0,14,7,.10)");
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 260, WORLD.width, WORLD.height - 260);
+
+  const centre = projectWorld({ x: 0, y: 0.035, z: 3.6 }, activeCamera, viewport);
+  if (centre?.visible) {
+    ctx.globalCompositeOperation = "screen";
+    const pool = ctx.createRadialGradient(centre.x, centre.y - 12, 2, centre.x, centre.y - 12, 290);
+    pool.addColorStop(0, "rgba(227,255,216,.07)");
+    pool.addColorStop(0.42, "rgba(227,255,216,.022)");
+    pool.addColorStop(1, "rgba(227,255,216,0)");
+    ctx.fillStyle = pool;
+    ctx.beginPath();
+    ctx.ellipse(centre.x, centre.y, 320, 156, 0, 0, TAU);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // The pitch edge receives a thin, darker broadcast cut so it separates from
+  // the stadium fascia without introducing a heavy border.
+  lineWorld({ x: -PITCH.halfWidth, y: 0.022, z: -4 }, { x: -PITCH.halfWidth, y: 0.022, z: nearZ }, 1.25, "rgba(1,24,12,.28)");
+  lineWorld({ x: PITCH.halfWidth, y: 0.022, z: -4 }, { x: PITCH.halfWidth, y: 0.022, z: nearZ }, 1.25, "rgba(1,24,12,.28)");
+}
+
 function drawPitch() {
   const nearZ = activeCamera.position.z - 0.32;
   const surface = PITCH_SURFACES[state.currentStage.environment] || PITCH_SURFACES.academy;
@@ -628,6 +770,8 @@ function drawPitch() {
       index % 2 ? "rgba(232,255,220,.035)" : "rgba(2,28,14,.04)"
     );
   }
+
+  drawPitchMaterialV56(nearZ, quality);
 
   // Painted markings use a soft dark under-stroke so they sit on the turf rather than float above it.
   paintPitchLine({ x: -PITCH.halfWidth, y: 0.015, z: 0 }, { x: PITCH.halfWidth, y: 0.015, z: 0 }, 1.72);
@@ -729,6 +873,76 @@ function goalFrameV55(a, b, width = 3.4) {
   lineWorld(a, b, Math.max(0.7, width * 0.22), "rgba(255,255,255,.72)");
 }
 
+function drawGoalInteriorLightV56() {
+  const left = -GOAL.halfWidth;
+  const right = GOAL.halfWidth;
+  const backZ = -GOAL.depth;
+  const corners = [
+    projectWorld({ x: left, y: 0.02, z: backZ }, activeCamera, viewport),
+    projectWorld({ x: right, y: 0.02, z: backZ }, activeCamera, viewport),
+    projectWorld({ x: right, y: GOAL.height, z: backZ }, activeCamera, viewport),
+    projectWorld({ x: left, y: GOAL.height, z: backZ }, activeCamera, viewport)
+  ];
+  if (corners.some((point) => !point?.visible)) return;
+
+  const minY = Math.min(...corners.map((point) => point.y));
+  const maxY = Math.max(...corners.map((point) => point.y));
+  const minX = Math.min(...corners.map((point) => point.x));
+  const maxX = Math.max(...corners.map((point) => point.x));
+  ctx.save();
+  ctx.beginPath();
+  corners.forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+  ctx.closePath();
+  ctx.clip();
+
+  const interior = ctx.createLinearGradient(0, minY, 0, maxY);
+  interior.addColorStop(0, "rgba(224,255,232,.105)");
+  interior.addColorStop(0.36, "rgba(104,171,123,.052)");
+  interior.addColorStop(1, "rgba(1,10,6,.23)");
+  ctx.fillStyle = interior;
+  ctx.fillRect(minX, minY, maxX - minX, maxY - minY);
+
+  const focus = projectWorld({ x: 0, y: GOAL.height * 0.46, z: backZ }, activeCamera, viewport);
+  if (focus?.visible) {
+    ctx.globalCompositeOperation = "screen";
+    const glow = ctx.createRadialGradient(focus.x, focus.y, 2, focus.x, focus.y, Math.max(46, maxX - minX));
+    glow.addColorStop(0, "rgba(231,255,226,.075)");
+    glow.addColorStop(0.6, "rgba(231,255,226,.018)");
+    glow.addColorStop(1, "rgba(231,255,226,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(minX, minY, maxX - minX, maxY - minY);
+  }
+  ctx.restore();
+}
+
+function drawGoalFinishV56(time) {
+  const theme = VENUE_THEMES[state.currentStage.environment] || VENUE_THEMES.academy;
+  const shimmer = 0.72 + Math.sin(time / 920) * 0.12;
+  const glow = `rgba(${theme.glow},${(0.16 * shimmer).toFixed(3)})`;
+  lineWorld({ x: -GOAL.halfWidth, y: GOAL.height, z: 0 }, { x: GOAL.halfWidth, y: GOAL.height, z: 0 }, 0.58, glow);
+  lineWorld({ x: -GOAL.halfWidth, y: 0, z: 0 }, { x: -GOAL.halfWidth, y: GOAL.height, z: 0 }, 0.42, glow);
+  lineWorld({ x: GOAL.halfWidth, y: 0, z: 0 }, { x: GOAL.halfWidth, y: GOAL.height, z: 0 }, 0.42, glow);
+
+  for (const point of [
+    { x: -GOAL.halfWidth, y: GOAL.height, z: 0 },
+    { x: GOAL.halfWidth, y: GOAL.height, z: 0 },
+    { x: -GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth },
+    { x: GOAL.halfWidth, y: GOAL.height, z: -GOAL.depth }
+  ]) {
+    const projected = projectWorld(point, activeCamera, viewport);
+    if (!projected?.visible) continue;
+    const radius = clamp(projected.scale * 0.048, 1.25, 2.8);
+    const cap = ctx.createRadialGradient(projected.x - radius * 0.35, projected.y - radius * 0.4, 0, projected.x, projected.y, radius);
+    cap.addColorStop(0, "rgba(255,255,255,.88)");
+    cap.addColorStop(0.55, "rgba(235,246,236,.72)");
+    cap.addColorStop(1, "rgba(84,111,92,.72)");
+    ctx.fillStyle = cap;
+    ctx.beginPath();
+    ctx.arc(projected.x, projected.y, radius, 0, TAU);
+    ctx.fill();
+  }
+}
+
 function drawGoal(time) {
   const left = -GOAL.halfWidth;
   const right = GOAL.halfWidth;
@@ -755,6 +969,7 @@ function drawGoal(time) {
   };
 
   drawGoalVolumeV55();
+  drawGoalInteriorLightV56();
   goalFrameV55({ x: left, y: 0, z: 0 }, { x: left, y: GOAL.height, z: 0 }, 3.4);
   goalFrameV55({ x: right, y: 0, z: 0 }, { x: right, y: GOAL.height, z: 0 }, 3.4);
   goalFrameV55({ x: left, y: GOAL.height, z: 0 }, { x: right, y: GOAL.height, z: 0 }, 3.4);
@@ -781,6 +996,7 @@ function drawGoal(time) {
     const y = (GOAL.height * index) / 6;
     lineWorld({ x: left, y, z: backZ }, { x: right, y, z: backZ }, 0.52, rearNet);
   }
+  drawGoalFinishV56(time);
 
   for (let i = 0; i <= 10; i += 1) {
     const x = lerp(left, right, i / 10);
@@ -1862,6 +2078,18 @@ window.__footballLabVisualFoundationV55 = Object.freeze({
   goal: "volumetric-frame-net-and-rear-uprights",
   ball: "grounded-match-ball-shadow-and-existing-panel-renderer",
   responsiveQuality: "coarse-device-detail-reduction",
+  physicsChanged: false,
+  outcomesChanged: false
+});
+
+window.__footballLabVisualFoundationV56 = Object.freeze({
+  build: "56.0.0",
+  scene: "premium-broadcast-material-pass",
+  stadium: "atmospheric-bowl-structure-and-led-ribbons",
+  pitch: "clipped-broadcast-sheen-and-pitch-edge-definition",
+  goal: "shaded-interior-metal-finish-and-post-caps",
+  ball: "v55-grounded-shadow-and-panel-renderer",
+  responsiveQuality: "full-and-coarse-detail-tiers",
   physicsChanged: false,
   outcomesChanged: false
 });
