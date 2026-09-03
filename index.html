@@ -3,221 +3,161 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#080806" />
+  <meta name="theme-color" content="#080704" />
   <meta name="color-scheme" content="dark" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Football Lab" />
-  <meta name="description" content="Football Lab is an arcade football skills platform for free kicks, training and future football challenges." />
-  <meta name="application-name" content="Football Lab" />
-  <meta name="author" content="Football Lab" />
+  <meta name="apple-mobile-web-app-title" content="Football Lab Manager" />
+  <meta name="description" content="Football Lab Manager — a fast, focused football management simulation built around tactics, recruitment and long-term careers." />
+  <meta name="application-name" content="Football Lab Manager" />
+  <meta name="author" content="Football Lab Manager" />
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <link rel="canonical" href="https://billz2026.github.io/football-lab/index.html" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Football Lab" />
-  <meta property="og:title" content="Football Lab | Arcade Football" />
-  <meta property="og:description" content="Train freely, master free kicks and take on an expanding set of football skill challenges." />
+  <meta property="og:site_name" content="Football Lab Manager" />
+  <meta property="og:title" content="Football Lab Manager" />
+  <meta property="og:description" content="Build a career. Shape a squad. Outsmart the opposition." />
   <meta property="og:url" content="https://billz2026.github.io/football-lab/index.html" />
-  <meta property="og:image" content="https://billz2026.github.io/football-lab/social-card.svg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+  <meta property="og:image" content="https://billz2026.github.io/football-lab/assets/homepage/football-lab-manager-logo.webp" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Football Lab | Arcade Football" />
-  <meta name="twitter:description" content="A growing football skills platform built around precision, technique and repeatable challenges." />
-  <meta name="twitter:image" content="https://billz2026.github.io/football-lab/social-card.svg" />
+  <meta name="twitter:title" content="Football Lab Manager" />
+  <meta name="twitter:description" content="Build a career. Shape a squad. Outsmart the opposition." />
+  <meta name="twitter:image" content="https://billz2026.github.io/football-lab/assets/homepage/football-lab-manager-logo.webp" />
 
-  <title>Football Lab | Arcade Football</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=23" />
-  <link rel="icon" href="./icons/football-lab-192.svg?v=161" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./icons/football-lab-192.svg?v=161" />
-  <link rel="stylesheet" href="./style.css?v=2" />
-  <link rel="stylesheet" href="./product-polish-v22.css?v=22" />
-  <link rel="stylesheet" href="./game/strike-v32-4.css?v=32.4" />
-  <link rel="stylesheet" href="./game/hub-v35-1.css?v=35.1" />
-  <link rel="stylesheet" href="./game/hub-v35-2.css?v=35.2.1" />
-  <link rel="stylesheet" href="./game/hub-v52.css?v=52.0.0" />
-  <link rel="stylesheet" href="./game/theme-v53.css?v=53.0.0" />
-  <link rel="stylesheet" href="./game/theme-components-v53.css?v=53.0.0" />
-  <link rel="stylesheet" href="./game/fold-immersive-v53-1.css?v=53.1.0" />
+  <title>Football Lab Manager</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=57" />
+  <link rel="icon" href="./icons/football-lab-192.svg?v=57" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icons/football-lab-192.svg?v=57" />
+  <link rel="stylesheet" href="./manager.css?v=57.0.0" />
 </head>
 <body>
-  <a class="skip-link-v22" href="#modeHub">Skip to game modes</a>
-  <div class="app-shell">
-    <header class="site-header hub-header">
-      <button class="brand" id="brandButton" type="button" aria-label="Return to main menu">
-        <img class="brand-logo-v52" src="./assets/homepage/football-lab-gold-logo.webp" alt="" width="351" height="110" aria-hidden="true" />
+  <a class="skip-link" href="#mainMenu">Skip to main menu</a>
+
+  <div class="page-shell">
+    <header class="topbar">
+      <button class="brand-lockup" type="button" id="brandHome" aria-label="Football Lab Manager home">
+        <img src="./assets/homepage/football-lab-manager-logo.webp" alt="Football Lab Manager" width="420" height="420" />
       </button>
-      <nav class="hub-nav" aria-label="Football Lab navigation">
-        <a href="#modeHub" aria-current="page">PLAY</a>
-      </nav>
-      <div class="header-stats" aria-label="Saved player progress">
-        <div><span>LEVEL</span><strong id="headerLevel">1</strong></div>
-        <div><span>BEST</span><strong id="headerBest">0</strong></div>
+
+      <div class="topbar-meta" aria-label="Game status">
+        <div class="build-chip"><span class="live-dot"></span> MANAGER BUILD</div>
+        <div class="version-chip">V0.1</div>
+        <button class="icon-button" type="button" id="headerSettings" aria-label="Open game settings" title="Game settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.6A3.4 3.4 0 1 0 12 15.4 3.4 3.4 0 0 0 12 8.6Zm9 3.4-2.15-.82a7.47 7.47 0 0 0-.55-1.33l.94-2.1-2.99-2.99-2.1.94a7.47 7.47 0 0 0-1.33-.55L12 3H8l-.82 2.15c-.46.15-.9.33-1.33.55l-2.1-.94-2.99 2.99.94 2.1c-.22.43-.4.87-.55 1.33L-1 12l2.15.82c.15.46.33.9.55 1.33l-.94 2.1 2.99 2.99 2.1-.94c.43.22.87.4 1.33.55L8 21h4l.82-2.15c.46-.15.9-.33 1.33-.55l2.1.94 2.99-2.99-.94-2.1c.22-.43.4-.87.55-1.33L21 12Z"/></svg>
+        </button>
       </div>
     </header>
 
     <main>
-      <section class="screen screen-menu is-active" id="menuScreen" tabindex="-1" aria-label="Football Lab game modes">
-        <div class="hub-shell" id="hubHome">
-          <div class="hub-menu-utilities" aria-hidden="true">
-            <button class="button button-secondary hub-how-button" id="howToPlay" type="button">HOW TO PLAY</button>
-            <button id="playClassic" type="button" hidden aria-hidden="true" tabindex="-1">PLAY CLASSIC</button>
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero-brand">
+          <p class="eyebrow">THE NEXT ERA OF FOOTBALL LAB</p>
+          <h1 id="heroTitle">BUILD YOUR<br /><span>FOOTBALL LEGACY.</span></h1>
+          <p class="hero-copy">Fast careers. Deep decisions. No unnecessary bloat. Football Lab has moved from arcade football to full management simulation.</p>
+          <div class="hero-actions">
+            <button class="primary-action" type="button" data-action="new-game">START NEW GAME</button>
+            <span class="hero-note">PRE-ALPHA · MANAGEMENT FOUNDATION</span>
           </div>
+        </div>
 
-          <section class="hub-profile-strip" id="hubProfile" aria-label="Player profile summary">
-            <div class="hub-profile-id">
-              <span class="hub-profile-mark" aria-hidden="true">FL</span>
-              <div><small>PLAYER PROFILE</small><strong>THE PROSPECT</strong></div>
-            </div>
-            <div class="hub-profile-progress">
-              <div class="progress-copy"><span>CAREER XP</span><strong id="xpCopy">0 / 1,000</strong></div>
-              <div class="progress-track"><span id="xpBar"></span></div>
-            </div>
-            <div class="hub-profile-records">
-              <div><span>LEVEL</span><strong class="level-badge" id="profileLevel">LV. 1</strong></div>
-              <div><span>HIGH SCORE</span><strong id="profileBest">0</strong></div>
-              <div><span>BEST STREAK</span><strong id="profileStreak">0</strong></div>
-            </div>
-          </section>
-
-          <section class="hub-modes-section" id="modeHub" aria-label="Choose a game mode">
-            <div class="hub-mode-grid">
-              <button class="hub-mode-tile hub-mode-primary hub-mode-training" id="trainingCardV35" type="button">
-                <span class="hub-mode-number">01 · PRACTICE</span>
-                <span class="hub-mode-status">PLAY NOW</span>
-                <span class="hub-tile-copy">
-                  <h3>FREE TRAINING</h3>
-                  <p>Build your own session and sharpen every part of your technique.</p>
-                  <span class="hub-mode-cta">BUILD A SESSION <b>→</b></span>
-                </span>
-                <span class="hub-tile-art hub-art-training" aria-hidden="true"></span>
-              </button>
-
-              <button class="hub-mode-tile hub-mode-secondary hub-mode-free-kicks" id="classicCard" type="button">
-                <span class="hub-mode-number mode-number">02 · FLAGSHIP MODE</span>
-                <span class="hub-mode-status">PLAY NOW</span>
-                <span class="hub-tile-copy">
-                  <h3>CLASSIC FREE KICKS</h3>
-                  <p>Master aim, curl, power and contact across an escalating campaign.</p>
-                  <span class="hub-mode-cta">ENTER FREE KICKS <b>→</b></span>
-                </span>
-                <span class="hub-tile-art hub-art-free-kick" aria-hidden="true"></span>
-              </button>
-
-              <button class="hub-mode-tile hub-mode-penalties" type="button" aria-disabled="false">
-                <span class="hub-mode-number">03 · ONE VS ONE</span>
-                <span class="hub-mode-status">PLAY NOW</span>
-                <span class="hub-tile-copy"><h3>PENALTY DUEL</h3><p>Five kicks each, sudden death and playable goalkeeper duels.</p><span class="hub-mode-cta">START SHOOTOUT <b>→</b></span></span>
-                <span class="hub-tile-art hub-art-penalties" aria-hidden="true"></span>
-              </button>
-
-              <button class="hub-mode-tile hub-mode-corners" type="button" disabled aria-disabled="true">
-                <span class="hub-mode-number">04 · DELIVERY</span>
-                <span class="hub-mode-status">COMING SOON</span>
-                <span class="hub-tile-copy"><h3>CORNERS</h3><p>Shape the delivery and attack the box.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
-                <span class="hub-mode-lock" aria-hidden="true"></span>
-                <span class="hub-tile-art hub-art-corners" aria-hidden="true"></span>
-              </button>
-
-              <button class="hub-mode-tile hub-mode-finishing" type="button" disabled aria-disabled="true">
-                <span class="hub-mode-number">05 · FINAL TOUCH</span>
-                <span class="hub-mode-status">COMING SOON</span>
-                <span class="hub-tile-copy"><h3>FINISHING</h3><p>Master first-time strikes, chips and one-on-ones.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
-                <span class="hub-mode-lock" aria-hidden="true"></span>
-                <span class="hub-tile-art hub-art-finishing" aria-hidden="true"></span>
-              </button>
-
-              <button class="hub-mode-tile hub-mode-wide hub-mode-scenarios" type="button" disabled aria-disabled="true">
-                <span class="hub-mode-number">06 · PRESSURE FOOTBALL</span>
-                <span class="hub-mode-status">COMING SOON</span>
-                <span class="hub-tile-copy"><h3>MATCH SCENARIOS</h3><p>Take control of decisive, high-pressure football moments.</p><span class="hub-mode-cta">MODE RESERVED</span></span>
-                <span class="hub-mode-lock" aria-hidden="true"></span>
-                <span class="hub-tile-art hub-art-scenarios" aria-hidden="true"></span>
-              </button>
-            </div>
-            <div class="mode-grid hub-training-bridge" hidden aria-hidden="true"></div>
-          </section>
+        <div class="tactical-stage" aria-hidden="true">
+          <div class="stadium-glow"></div>
+          <div class="tactical-board">
+            <div class="pitch-line pitch-half"></div>
+            <div class="pitch-circle"></div>
+            <div class="box box-left"></div>
+            <div class="box box-right"></div>
+            <span class="player p1"></span><span class="player p2"></span><span class="player p3"></span><span class="player p4"></span><span class="player p5"></span>
+            <span class="player p6"></span><span class="player p7"></span><span class="player p8"></span><span class="player p9"></span><span class="player p10"></span><span class="player p11"></span>
+            <svg class="route route-one" viewBox="0 0 180 90"><path d="M8 73 C55 70, 70 18, 160 18"/><path d="m151 11 10 7-11 6"/></svg>
+            <svg class="route route-two" viewBox="0 0 150 85"><path d="M8 16 C48 18, 58 65, 136 66"/><path d="m127 59 10 7-11 6"/></svg>
+          </div>
+          <div class="desk-card desk-card-left"><small>NEXT FIXTURE</small><strong>CAREER START</strong><span>Choose your club</span></div>
+          <div class="desk-card desk-card-right"><small>PHILOSOPHY</small><strong>YOUR WAY</strong><span>Tactics · Transfers · Development</span></div>
         </div>
       </section>
 
-      <section class="screen screen-game" id="gameScreen" aria-label="Classic Kicks game">
-        <div class="game-topbar panel">
-          <button class="icon-button" id="exitGame" type="button" aria-label="Finish and submit run" title="Finish and submit run">←</button>
-          <div class="stage-copy"><span id="stageNumber">STAGE 01</span><strong id="stageName">THE OPENER</strong></div>
-          <div class="game-stats">
-            <div><span>SCORE</span><strong id="scoreValue">0</strong></div>
-            <div><span>STREAK</span><strong id="streakValue">0</strong></div>
-            <div><span>PERSONAL BEST</span><strong id="livesValue">0</strong></div>
-          </div>
+      <section class="menu-section" id="mainMenu" aria-labelledby="menuTitle">
+        <div class="section-heading">
+          <div><p class="eyebrow">MAIN MENU</p><h2 id="menuTitle">TAKE CONTROL</h2></div>
+          <p>Everything starts here. Build a new career or jump back into the football world.</p>
         </div>
 
-        <div class="game-layout">
-          <div class="game-frame panel">
-            <canvas id="gameCanvas" width="1200" height="720" aria-label="Arcade free-kick scene"></canvas>
-            <div class="wind-chip" aria-label="Wind strength"><span id="windArrow">→</span><div><small>WIND</small><strong id="windValue">0.0</strong></div></div>
-            <div class="result-banner" id="resultBanner" role="status" aria-live="polite"></div>
-            <div class="canvas-prompt" id="canvasPrompt">PRESS START SHOT</div>
-          </div>
+        <div class="menu-grid">
+          <button class="menu-tile tile-new" type="button" data-action="new-game">
+            <span class="tile-number">01 · NEW CAREER</span>
+            <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3h6l1 4-2 2 3 12H7l3-12-2-2 1-4Zm2.1 6h1.8l.5 2h-2.8l.5-2Z"/></svg></span>
+            <span class="tile-copy"><strong>START NEW GAME</strong><small>Build your managerial career from the ground up.</small><em>CREATE CAREER →</em></span>
+            <span class="tile-art art-tunnel" aria-hidden="true"></span>
+          </button>
 
-          <aside class="control-panel panel">
-            <div class="control-heading"><span class="section-label">SHOT CONTROL</span><h2 id="phaseTitle">READY</h2><p id="phaseHelp">Aim and curl first. Then stop power and contact to execute the strike.</p></div>
-            <div class="shot-steps" aria-label="Shot setup progress">
-              <div class="shot-step is-current" data-step="aim"><span>1</span><div><strong>AIM + CURL</strong><small id="aimReadout">—</small><small id="curveReadout">—</small></div></div>
-              <div class="shot-step" data-step="power"><span>2</span><div><strong>POWER</strong><small id="powerReadout">—</small></div></div>
-              <div class="shot-step" data-step="contact"><span>3</span><div><strong>CONTACT</strong><small id="contactReadout">—</small></div></div>
-            </div>
-            <div class="meter-wrap">
-              <div class="meter-label"><span id="meterLabel">SHOT METER</span><strong id="meterNumber">0%</strong></div>
-              <div class="meter"><span id="meterFill"></span><i id="meterMarker"></i></div>
-            </div>
-            <button class="button button-primary action-button" id="shotAction" type="button">START SHOT</button>
-            <p class="input-note">Keyboard: arrows/WASD aim · Q/E curl · SPACE locks each step.</p>
-          </aside>
+          <button class="menu-tile tile-quick" type="button" data-action="quick-start">
+            <span class="tile-number">02 · FAST TRACK</span>
+            <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 1H9v2h6V1Zm-4 6h2v6.2l4.2 2.5-1 1.7L11 14.2V7Zm1-3a9 9 0 1 0 9 9 9 9 0 0 0-9-9Zm0 16a7 7 0 1 1 7-7 7 7 0 0 1-7 7Z"/></svg></span>
+            <span class="tile-copy"><strong>QUICK START</strong><small>Choose a club and get straight into management.</small><em>GET STARTED →</em></span>
+            <span class="tile-art art-pitch" aria-hidden="true"></span>
+          </button>
+
+          <button class="menu-tile tile-load" type="button" data-action="load-game">
+            <span class="tile-number">03 · CONTINUE</span>
+            <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 3h14l2 2v16H4V3Zm3 2v5h9V5H7Zm0 9v5h10v-5H7Z"/></svg></span>
+            <span class="tile-copy"><strong>LOAD GAME</strong><small>Continue a saved career and pick up where you left off.</small><em>VIEW SAVES →</em></span>
+            <span class="tile-art art-locker" aria-hidden="true"></span>
+          </button>
+
+          <button class="menu-tile tile-settings" type="button" data-action="settings">
+            <span class="tile-number">04 · CONFIGURATION</span>
+            <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5Zm8.5 4.9-1.8-.7a7.2 7.2 0 0 0 0-1.4l1.8-.7-1.4-3.4-1.8.8a8 8 0 0 0-1-1l.8-1.8-3.4-1.4-.7 1.8a7.2 7.2 0 0 0-1.4 0l-.7-1.8-3.4 1.4.8 1.8a8 8 0 0 0-1 1l-1.8-.8-1.4 3.4 1.8.7a7.2 7.2 0 0 0 0 1.4l-1.8.7 1.4 3.4 1.8-.8a8 8 0 0 0 1 1l-.8 1.8 3.4 1.4.7-1.8a7.2 7.2 0 0 0 1.4 0l.7 1.8 3.4-1.4-.8-1.8a8 8 0 0 0 1-1l1.8.8 1.4-3.4Z"/></svg></span>
+            <span class="tile-copy"><strong>GAME SETTINGS</strong><small>Customise display, autosave and match experience.</small><em>OPEN SETTINGS →</em></span>
+            <span class="tile-art art-settings" aria-hidden="true"></span>
+          </button>
+
+          <button class="menu-tile tile-fame" type="button" data-action="hall-of-fame">
+            <span class="tile-number">05 · LEGACY</span>
+            <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10v3h3v3c0 3-2 5-5 5.8V17h3v2H6v-2h3v-2.2C6 14 4 12 4 9V6h3V3Zm10 5v4.4A3.5 3.5 0 0 0 18 9V8h-1ZM6 8v1a3.5 3.5 0 0 0 1 3.4V8H6Z"/></svg></span>
+            <span class="tile-copy"><strong>HALL OF FAME</strong><small>View trophies, records and your greatest managerial careers.</small><em>VIEW LEGACY →</em></span>
+            <span class="tile-art art-trophy" aria-hidden="true"></span>
+          </button>
+
+          <button class="menu-tile tile-database" type="button" data-action="database">
+            <span class="tile-number">06 · FOOTBALL WORLD</span>
+            <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm6.9 6h-3a16.7 16.7 0 0 0-1.4-3 8.1 8.1 0 0 1 4.4 3ZM12 4c.9 1 1.6 2.3 2 4h-4c.4-1.7 1.1-3 2-4ZM4.3 14a8.2 8.2 0 0 1 0-4h3.3a18.2 18.2 0 0 0 0 4H4.3Zm.8 2h3a16.7 16.7 0 0 0 1.4 3 8.1 8.1 0 0 1-4.4-3Zm3-8h-3a8.1 8.1 0 0 1 4.4-3 16.7 16.7 0 0 0-1.4 3ZM12 20c-.9-1-1.6-2.3-2-4h4c-.4 1.7-1.1 3-2 4Zm2.4-6H9.6a14.7 14.7 0 0 1 0-4h4.8a14.7 14.7 0 0 1 0 4Zm.1 5a16.7 16.7 0 0 0 1.4-3h3a8.1 8.1 0 0 1-4.4 3Zm1.9-5a18.2 18.2 0 0 0 0-4h3.3a8.2 8.2 0 0 1 0 4h-3.3Z"/></svg></span>
+            <span class="tile-copy"><strong>FOOTBALL DATABASE</strong><small>Explore clubs, players, leagues and competitions.</small><em>EXPLORE WORLD →</em></span>
+            <span class="tile-art art-globe" aria-hidden="true"></span>
+          </button>
         </div>
       </section>
     </main>
+
+    <footer class="site-footer">
+      <div class="footer-status"><span class="live-dot"></span><strong>FOOTBALL LAB MANAGER</strong><span>Project pivot active</span></div>
+      <div class="footer-build">V0.1 · MANAGEMENT FOUNDATION</div>
+    </footer>
   </div>
 
-  <div class="modal" id="howModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+  <div class="modal" id="appModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-backdrop" data-close-modal></div>
-    <div class="modal-card panel">
+    <div class="modal-card" role="document">
       <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
-      <span class="section-label">HOW TO PLAY</span><h2 id="howTitle">PLAN IT. THEN EXECUTE IT.</h2>
-      <ol>
-        <li><span>1</span><div><strong>Choose a mode</strong><p>Enter Free Training for unlimited practice or Classic Free Kicks for the progression campaign.</p></div></li>
-        <li><span>2</span><div><strong>Aim + curl</strong><p>Tap the live goal to choose an intended finish, then shape the strike with the curl dial. Only the early launch is shown.</p></div></li>
-        <li><span>3</span><div><strong>Power + contact</strong><p>Stop both execution meters. Poor timing changes the actual strike, while clean execution rewards accurate planning.</p></div></li>
-      </ol>
-      <button class="button button-primary" id="modalPlay" type="button">ENTER CLASSIC FREE KICKS</button>
+      <p class="eyebrow" id="modalEyebrow">FOOTBALL LAB MANAGER</p>
+      <h2 id="modalTitle">MANAGEMENT FOUNDATION</h2>
+      <p class="modal-copy" id="modalCopy"></p>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
     </div>
   </div>
 
-  <div class="modal" id="previewModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
-    <div class="modal-backdrop" data-close-preview></div>
-    <div class="modal-card panel">
-      <button class="modal-close" type="button" data-close-preview aria-label="Close">×</button>
-      <span class="section-label">DEVELOPMENT ROADMAP</span><h2 id="previewTitle">MODE PREVIEW</h2><p id="previewCopy"></p>
-      <div class="roadmap-list" id="previewList"></div><button class="button button-secondary" type="button" data-close-preview>BACK TO MENU</button>
+  <template id="settingsTemplate">
+    <div class="settings-list">
+      <label class="setting-row"><span><strong>AUTOSAVE</strong><small>Automatically protect career progress.</small></span><input type="checkbox" id="settingAutosave" checked /></label>
+      <label class="setting-row"><span><strong>REDUCED MOTION</strong><small>Minimise interface animation.</small></span><input type="checkbox" id="settingMotion" /></label>
+      <label class="setting-row"><span><strong>COMPACT MENU</strong><small>Use denser menu spacing on larger displays.</small></span><input type="checkbox" id="settingCompact" /></label>
     </div>
-  </div>
+  </template>
 
-  <div class="modal" id="gameOverModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
-    <div class="modal-backdrop"></div>
-    <div class="modal-card game-over-card panel">
-      <span class="section-label">RUN SUBMITTED</span><h2 id="gameOverTitle">FULL TIME</h2>
-      <div class="final-score"><span>FINAL SCORE</span><strong id="finalScore">0</strong></div>
-      <div class="game-over-stats">
-        <div><span>STAGE REACHED</span><strong id="finalStage">1</strong></div>
-        <div><span>BEST STREAK</span><strong id="finalStreak">0</strong></div>
-        <div><span>PERSONAL BEST</span><strong id="finalBest">0</strong></div>
-      </div>
-      <div class="modal-actions"><button class="button button-primary" id="retryGame" type="button">PLAY AGAIN</button><button class="button button-secondary" id="returnMenu" type="button">MAIN MENU</button></div>
-    </div>
-  </div>
-
-  <script src="./app.js?v=52.0.0" defer></script>
+  <script src="./manager.js?v=57.0.0" defer></script>
 </body>
 </html>
