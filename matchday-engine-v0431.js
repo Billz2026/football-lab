@@ -1,6 +1,8 @@
 import './match-centre-v0451.js?v=0.4.5.1';
 import {
   ROLE_DEFINITIONS,
+  advanceInteractiveMatch as baseAdvanceInteractiveMatch,
+  createInteractiveMatch as baseCreateInteractiveMatch,
   getUserShape,
   makeSubstitution as baseMakeSubstitution
 } from './matchday-engine-v043.js';
@@ -10,11 +12,9 @@ export {
   MAX_SUBSTITUTIONS,
   ROLE_DEFINITIONS,
   TACTIC_OPTIONS,
-  advanceInteractiveMatch,
   assignPlayersToFormation,
   changeTactics,
   completeInteractiveRound,
-  createInteractiveMatch,
   getOpponentSnapshot,
   getUserShape,
   setPlayerDuty,
@@ -22,9 +22,10 @@ export {
   swapShapePlayers
 } from './matchday-engine-v043.js';
 
-export const LIVE_ENGINE_VERSION = 7;
+export const LIVE_ENGINE_VERSION = 8;
 
 const clone = value => JSON.parse(JSON.stringify(value));
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 function playerById(db, id) {
   return db.players.find(player => player.id === id);
@@ -63,6 +64,40 @@ function suitability(player, family) {
 
   if (exact.some(code => codes.has(code))) score += 32;
   return Math.round(score + (player.currentAbility || 100) / 20);
+}
+
+function readinessFor(career) {
+  const ids = career.lineupIds || [];
+  const statuses = ids.map(id => career.playerStatus?.[id]).filter(Boolean);
+  const sharpness = statuses.length
+    ? statuses.reduce((sum, status) => sum + (status.sharpness ?? 88), 0) / statuses.length
+    : 88;
+  const familiarity = career.preseason?.tacticalFamiliarity ?? 90;
+  const factor = clamp(0.90 + sharpness / 1800 + familiarity / 1800, 0.95, 1.02);
+  return { sharpness: Math.round(sharpness), familiarity: Math.round(familiarity), factor };
+}
+
+function adjustedDatabase(db, userClubId, factor) {
+  if (Math.abs(factor - 1) < 0.001) return db;
+  return {
+    ...db,
+    players: db.players.map(player => player.clubId === userClubId
+      ? { ...player, currentAbility: (player.currentAbility || 100) * factor }
+      : player)
+  };
+}
+
+export function createInteractiveMatch(career, db) {
+  const state = baseCreateInteractiveMatch(career, db);
+  state.userReadiness = readinessFor(career);
+  return state;
+}
+
+export function advanceInteractiveMatch(inputState, career, db) {
+  const factor = inputState.userReadiness?.factor ?? readinessFor(career).factor;
+  const result = baseAdvanceInteractiveMatch(inputState, career, adjustedDatabase(db, inputState.userClubId || career.clubId, factor));
+  result.state.userReadiness = inputState.userReadiness || readinessFor(career);
+  return result;
 }
 
 export function makeSubstitution(inputState, outId, inId, db, career = {}) {
