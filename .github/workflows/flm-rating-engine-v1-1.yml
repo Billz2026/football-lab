@@ -1,0 +1,53 @@
+name: FLM Rating Engine v1.1 Calibration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/build-flm-rating-engine-v1-1-calibration.mjs'
+      - 'scripts/build-flm-rating-engine-v1-rounds.mjs'
+      - 'data/rating/flm-stat-dictionary-v1.json'
+      - '.github/workflows/flm-rating-engine-v1-1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flm-rating-engine-v1-1-calibration
+  cancel-in-progress: true
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify Sportmonks secret
+        shell: bash
+        env:
+          SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${SPORTMONKS_API_TOKEN:-}"
+
+      - name: Build calibrated global ratings and baseline models
+        env:
+          SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
+        run: node scripts/build-flm-rating-engine-v1-1-calibration.mjs artifacts/flm-rating-engine-v1-1-report.json artifacts/flm-rating-engine-v1-base.json
+
+      - name: Upload sanitised calibration report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flm-rating-engine-v1-1-${{ github.run_id }}
+          path: artifacts/flm-rating-engine-v1-1-report.json
+          if-no-files-found: error
+          retention-days: 3
