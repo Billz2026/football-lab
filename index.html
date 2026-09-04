@@ -32,6 +32,7 @@
   <link rel="icon" href="./icons/football-lab-192.svg?v=57" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./icons/football-lab-192.svg?v=57" />
   <link rel="stylesheet" href="./manager.css?v=57.0.0" />
+  <link rel="stylesheet" href="./player-profile.css?v=59.0.0" />
 </head>
 <body>
   <a class="skip-link" href="#mainMenu">Skip to main menu</a>
@@ -44,7 +45,7 @@
 
       <div class="topbar-meta" aria-label="Game status">
         <div class="build-chip"><span class="live-dot"></span> MANAGER BUILD</div>
-        <div class="version-chip">V0.1</div>
+        <div class="version-chip">V0.2</div>
         <button class="icon-button" type="button" id="headerSettings" aria-label="Open game settings" title="Game settings">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.6A3.4 3.4 0 1 0 12 15.4 3.4 3.4 0 0 0 12 8.6Zm9 3.4-2.15-.82a7.47 7.47 0 0 0-.55-1.33l.94-2.1-2.99-2.99-2.1.94a7.47 7.47 0 0 0-1.33-.55L12 3H8l-.82 2.15c-.46.15-.9.33-1.33.55l-2.1-.94-2.99 2.99.94 2.1c-.22.43-.4.87-.55 1.33L-1 12l2.15.82c.15.46.33.9.55 1.33l-.94 2.1 2.99 2.99 2.1-.94c.43.22.87.4 1.33.55L8 21h4l.82-2.15c.46-.15.9-.33 1.33-.55l2.1.94 2.99-2.99-.94-2.1c.22-.43.4-.87.55-1.33L21 12Z"/></svg>
         </button>
@@ -59,7 +60,7 @@
           <p class="hero-copy">Fast careers. Deep decisions. No unnecessary bloat. Football Lab has moved from arcade football to full management simulation.</p>
           <div class="hero-actions">
             <button class="primary-action" type="button" data-action="new-game">START NEW GAME</button>
-            <span class="hero-note">PRE-ALPHA · MANAGEMENT FOUNDATION</span>
+            <span class="hero-note">PRE-ALPHA · PLAYER MODEL V1</span>
           </div>
         </div>
 
@@ -133,8 +134,8 @@
     </main>
 
     <footer class="site-footer">
-      <div class="footer-status"><span class="live-dot"></span><strong>FOOTBALL LAB MANAGER</strong><span>Project pivot active</span></div>
-      <div class="footer-build">V0.1 · MANAGEMENT FOUNDATION</div>
+      <div class="footer-status"><span class="live-dot"></span><strong>FOOTBALL LAB MANAGER</strong><span>Player Model v1 active</span></div>
+      <div class="footer-build">V0.2 · PLAYER MODEL V1</div>
     </footer>
   </div>
 
@@ -158,6 +159,7 @@
     </div>
   </template>
 
-  <script src="./manager.js?v=57.0.0" defer></script>
+  <script src="./manager.js?v=58.0.0" defer></script>
+  <script src="./player-profile.js?v=59.0.0" defer></script>
 </body>
 </html>

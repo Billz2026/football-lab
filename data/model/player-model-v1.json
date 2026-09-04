@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "attributeScale": { "min": 1, "max": 20 },
+  "abilityScale": { "min": 1, "max": 200, "visibleInGame": false },
+  "attributeGroups": {
+    "technical": ["corners", "crossing", "dribbling", "finishing", "firstTouch", "heading", "longShots", "passing", "tackling", "technique"],
+    "mental": ["aggression", "anticipation", "composure", "decisions", "determination", "flair", "leadership", "offTheBall", "positioning", "teamwork", "vision", "workRate"],
+    "physical": ["acceleration", "agility", "balance", "jumping", "naturalFitness", "pace", "stamina", "strength"]
+  },
+  "goalkeeperSupplement": ["aerialReach", "commandOfArea", "communication", "handling", "kicking", "oneOnOnes", "reflexes", "rushingOut", "throwing", "eccentricity"],
+  "hiddenPersonalityTraits": ["professionalism", "ambition", "determination", "discipline", "temperament", "resilience", "teamOrientation", "adaptability", "loyalty"],
+  "personalities": [
+    {"id":"driven-professional","label":"Driven Professional","family":"elite"},
+    {"id":"elite-mentality","label":"Elite Mentality","family":"elite"},
+    {"id":"relentless","label":"Relentless","family":"elite"},
+    {"id":"disciplined","label":"Disciplined","family":"elite"},
+    {"id":"highly-focused","label":"Highly Focused","family":"elite"},
+    {"id":"composed-competitor","label":"Composed Competitor","family":"elite"},
+    {"id":"natural-leader","label":"Natural Leader","family":"elite"},
+    {"id":"exemplary-professional","label":"Exemplary Professional","family":"elite"},
+    {"id":"ambitious","label":"Ambitious","family":"positive"},
+    {"id":"determined","label":"Determined","family":"positive"},
+    {"id":"competitive","label":"Competitive","family":"positive"},
+    {"id":"resilient","label":"Resilient","family":"positive"},
+    {"id":"loyal","label":"Loyal","family":"positive"},
+    {"id":"team-oriented","label":"Team-Oriented","family":"positive"},
+    {"id":"adaptable","label":"Adaptable","family":"positive"},
+    {"id":"selfless","label":"Selfless","family":"positive"},
+    {"id":"courageous","label":"Courageous","family":"positive"},
+    {"id":"balanced","label":"Balanced","family":"mixed"},
+    {"id":"confident","label":"Confident","family":"mixed"},
+    {"id":"independent","label":"Independent","family":"mixed"},
+    {"id":"expressive","label":"Expressive","family":"mixed"},
+    {"id":"reserved","label":"Reserved","family":"mixed"},
+    {"id":"easy-going","label":"Easy-Going","family":"mixed"},
+    {"id":"pragmatic","label":"Pragmatic","family":"mixed"},
+    {"id":"temperamental","label":"Temperamental","family":"risk"},
+    {"id":"impulsive","label":"Impulsive","family":"risk"},
+    {"id":"inconsistent","label":"Inconsistent","family":"risk"},
+    {"id":"easily-distracted","label":"Easily Distracted","family":"risk"},
+    {"id":"low-ambition","label":"Low Ambition","family":"risk"},
+    {"id":"fragile-confidence","label":"Fragile Confidence","family":"risk"},
+    {"id":"self-centred","label":"Self-Centred","family":"risk"},
+    {"id":"restless","label":"Restless","family":"risk"}
+  ],
+  "development": {
+    "ageBands": [
+      {"min":15,"max":20,"personalityMalleability":1.0,"developmentLabel":"Highly Malleable"},
+      {"min":21,"max":24,"personalityMalleability":0.65,"developmentLabel":"Developing"},
+      {"min":25,"max":28,"personalityMalleability":0.35,"developmentLabel":"Established"},
+      {"min":29,"max":45,"personalityMalleability":0.15,"developmentLabel":"Mature"}
+    ],
+    "growthFactors": ["age", "professionalism", "playingTime", "trainingQuality", "coachingQuality", "morale", "injuryHistory"],
+    "declineFactors": ["age", "naturalFitness", "injuryHistory", "playingTime", "professionalism"],
+    "potentialIsHidden": true
+  },
+  "mentoring": {
+    "enabled": true,
+    "influenceFactors": ["mentorLeadership", "mentorReputation", "mentorProfessionalism", "ageGap", "squadStatus", "relationship", "timeTogether", "personalityCompatibility"],
+    "canInfluencePositively": true,
+    "canInfluenceNegatively": true,
+    "personalityChangesAreGradual": true
+  },
+  "careerEventInfluences": ["promotion", "relegation", "majorInjury", "captaincy", "extendedBenchRole", "majorTransfer", "disciplinaryRecord", "trophySuccess"],
+  "profileTabs": ["profile", "form", "contract", "transfer", "development", "history"]
+}

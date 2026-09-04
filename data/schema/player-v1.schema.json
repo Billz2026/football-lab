@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://footballlab.local/schema/player-v1.json",
+  "title": "Football Lab Manager Player Model v1",
+  "type": "object",
+  "required": ["id", "name", "clubId", "primaryPosition", "positionGroup", "attributes", "currentAbility", "potentialAbility"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^flm-player-[a-z0-9-]+$" },
+    "name": { "type": "string", "minLength": 1 },
+    "clubId": { "type": "string" },
+    "dateOfBirth": { "type": ["string", "null"], "format": "date" },
+    "nationalityCode": { "type": ["string", "null"] },
+    "shirtNumber": { "type": ["integer", "null"], "minimum": 1, "maximum": 99 },
+    "primaryPosition": { "type": "string" },
+    "secondaryPositions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "positionGroup": { "enum": ["GK", "DEF", "MID", "ATT"] },
+    "preferredFoot": { "enum": ["left", "right", "both", "unknown"] },
+    "heightCm": { "type": ["integer", "null"], "minimum": 140, "maximum": 220 },
+    "weightKg": { "type": ["integer", "null"], "minimum": 45, "maximum": 130 },
+    "currentAbility": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Hidden engine value; never displayed in gameplay UI." },
+    "potentialAbility": { "type": "integer", "minimum": 1, "maximum": 200, "description": "Hidden engine ceiling; never displayed in gameplay UI." },
+    "attributes": {
+      "type": "object",
+      "required": ["technical", "mental", "physical"],
+      "properties": {
+        "technical": { "$ref": "#/$defs/attributes" },
+        "mental": { "$ref": "#/$defs/attributes" },
+        "physical": { "$ref": "#/$defs/attributes" },
+        "goalkeeping": { "$ref": "#/$defs/attributes" }
+      },
+      "additionalProperties": false
+    },
+    "personality": {
+      "type": "object",
+      "properties": {
+        "visibleId": { "type": "string" },
+        "hiddenTraits": {
+          "type": "object",
+          "properties": {
+            "professionalism": { "$ref": "#/$defs/trait" },
+            "ambition": { "$ref": "#/$defs/trait" },
+            "determination": { "$ref": "#/$defs/trait" },
+            "discipline": { "$ref": "#/$defs/trait" },
+            "temperament": { "$ref": "#/$defs/trait" },
+            "resilience": { "$ref": "#/$defs/trait" },
+            "teamOrientation": { "$ref": "#/$defs/trait" },
+            "adaptability": { "$ref": "#/$defs/trait" },
+            "loyalty": { "$ref": "#/$defs/trait" }
+          },
+          "additionalProperties": false
+        },
+        "history": { "type": "array", "items": { "type": "object" } }
+      },
+      "additionalProperties": true
+    },
+    "status": { "type": "object" },
+    "contract": { "type": "object" },
+    "transfer": { "type": "object" },
+    "seasonStats": { "type": "array", "items": { "type": "object" } },
+    "careerHistory": { "type": "array", "items": { "type": "object" } }
+  },
+  "$defs": {
+    "trait": { "type": "integer", "minimum": 1, "maximum": 20 },
+    "attributes": {
+      "type": "object",
+      "patternProperties": { "^[a-z][A-Za-z0-9]*$": { "type": "integer", "minimum": 1, "maximum": 20 } },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
