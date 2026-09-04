@@ -1,11 +1,11 @@
 {
   "schemaVersion": "1.0.0",
   "playerModelVersion": "1.0.0",
-  "databaseVersion": "2026.09.04-dev",
+  "databaseVersion": "2026-09-04-api-football-dev",
   "snapshotDate": "2026-09-04",
-  "status": "schema-test",
-  "generatedAt": null,
-  "provider": "pending",
+  "status": "partial-current-squad-development",
+  "generatedAt": "2026-09-04T15:06:21.159Z",
+  "provider": "API-Football Free + Football Lab Manager baseline engine",
   "scope": {
     "country": "England",
     "countryCode": "ENG",
@@ -23,7 +23,34 @@
   "licensing": {
     "officialBadgesIncluded": false,
     "playerPhotosIncluded": false,
-    "notes": "Development database only. Official club badges and player photography are intentionally excluded."
+    "notes": "Development database only. No provider logos or player photos are stored. Publication/competition-rights requirements must be reviewed before a commercial release."
   },
-  "warning": "Placeholder development records are included only to validate the Football Lab Manager data model and browser. They are not current real-world squads."
+  "warning": "Development snapshot: imported names, broad positions, reported ages and squad membership come from API-Football seasonless squad endpoints. 2026/27 season statistics are not available on the free tier, so attributes are clearly marked low-confidence FLM positional baselines rather than claimed real-world ratings.",
+  "importProgress": {
+    "eng-premier-league": {
+      "realClubs": 8,
+      "expectedClubs": 20,
+      "status": "partial"
+    },
+    "eng-championship": {
+      "realClubs": 0,
+      "expectedClubs": 24,
+      "status": "pending"
+    },
+    "eng-league-one": {
+      "realClubs": 0,
+      "expectedClubs": 24,
+      "status": "pending"
+    },
+    "eng-league-two": {
+      "realClubs": 0,
+      "expectedClubs": 24,
+      "status": "pending"
+    },
+    "eng-national-league": {
+      "realClubs": 0,
+      "expectedClubs": 24,
+      "status": "pending"
+    }
+  }
 }

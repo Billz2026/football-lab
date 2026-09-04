@@ -1,18 +1,5 @@
 [
   {
-    "id": "flm-club-dev-premier",
-    "externalIds": {},
-    "name": "FLM Premier Test",
-    "shortName": "Premier Test",
-    "countryCode": "ENG",
-    "leagueId": "eng-premier-league",
-    "founded": null,
-    "venue": null,
-    "preferredFormation": "4-3-3",
-    "reputation": 6500,
-    "isPlaceholder": true
-  },
-  {
     "id": "flm-club-dev-championship",
     "externalIds": {},
     "name": "FLM Championship Test",
@@ -62,6 +49,187 @@
     "venue": null,
     "preferredFormation": "4-4-2",
     "reputation": 2600,
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-club-api-football-35",
+    "externalIds": {
+      "apiFootball": 35
+    },
+    "name": "AFC Bournemouth",
+    "providerName": "Bournemouth",
+    "shortName": "AFC Bournemouth",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1899,
+    "venue": "Vitality Stadium",
+    "preferredFormation": null,
+    "reputation": 7749,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-42",
+    "externalIds": {
+      "apiFootball": 42
+    },
+    "name": "Arsenal",
+    "providerName": "Arsenal",
+    "shortName": "Arsenal",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1886,
+    "venue": "Emirates Stadium",
+    "preferredFormation": null,
+    "reputation": 8211,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-66",
+    "externalIds": {
+      "apiFootball": 66
+    },
+    "name": "Aston Villa",
+    "providerName": "Aston Villa",
+    "shortName": "Aston Villa",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1874,
+    "venue": "Villa Park",
+    "preferredFormation": null,
+    "reputation": 8717,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-55",
+    "externalIds": {
+      "apiFootball": 55
+    },
+    "name": "Brentford",
+    "providerName": "Brentford",
+    "shortName": "Brentford",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1889,
+    "venue": "Gtech Community Stadium",
+    "preferredFormation": null,
+    "reputation": 7935,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-51",
+    "externalIds": {
+      "apiFootball": 51
+    },
+    "name": "Brighton & Hove Albion",
+    "providerName": "Brighton",
+    "shortName": "Brighton & Hove",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1901,
+    "venue": "American Express Stadium",
+    "preferredFormation": null,
+    "reputation": 8659,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-49",
+    "externalIds": {
+      "apiFootball": 49
+    },
+    "name": "Chelsea",
+    "providerName": "Chelsea",
+    "shortName": "Chelsea",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1905,
+    "venue": "Stamford Bridge",
+    "preferredFormation": null,
+    "reputation": 8382,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-1346",
+    "externalIds": {
+      "apiFootball": 1346
+    },
+    "name": "Coventry City",
+    "providerName": "Coventry",
+    "shortName": "Coventry City",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1883,
+    "venue": "The Coventry Building Society Arena",
+    "preferredFormation": null,
+    "reputation": 8471,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-52",
+    "externalIds": {
+      "apiFootball": 52
+    },
+    "name": "Crystal Palace",
+    "providerName": "Crystal Palace",
+    "shortName": "Crystal Palace",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1861,
+    "venue": "Selhurst Park",
+    "preferredFormation": null,
+    "reputation": 7878,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-dev-premier",
+    "externalIds": {},
+    "name": "FLM Premier Test",
+    "shortName": "Premier Test",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": null,
+    "venue": null,
+    "preferredFormation": "4-3-3",
+    "reputation": 6500,
     "isPlaceholder": true
   }
 ]

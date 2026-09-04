@@ -6,8 +6,10 @@
     "level": 1,
     "expectedClubCount": 20,
     "season": "2026/27",
-    "externalIds": {},
-    "importStatus": "pending"
+    "externalIds": {
+      "apiFootball": 39
+    },
+    "importStatus": "partial"
   },
   {
     "id": "eng-championship",
@@ -16,7 +18,9 @@
     "level": 2,
     "expectedClubCount": 24,
     "season": "2026/27",
-    "externalIds": {},
+    "externalIds": {
+      "apiFootball": 40
+    },
     "importStatus": "pending"
   },
   {
