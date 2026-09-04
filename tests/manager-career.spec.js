@@ -12,7 +12,7 @@ test('live match hard-stops at half-time, supports positional roles and persists
   await page.locator('[data-start-club]').first().click();
   await expect(page.locator('[data-career-save-status]')).toContainText(/AUTOSAVE|SAVED/);
 
-  await page.getByRole('button', { name: 'Matchday' }).click();
+  await page.getByRole('button', { name: 'Matchday', exact: true }).click();
   await page.getByRole('button', { name: 'PLAY MATCH' }).click();
   await expect(page.getByRole('heading', { name: 'Live Match Centre' })).toBeVisible();
   await page.getByRole('button', { name: '4×' }).click();
