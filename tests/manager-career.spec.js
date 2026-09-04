@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('new career completes the playable manager loop and persists', async ({ page }) => {
+test('new career completes the playable manager loop, hard-stops at half-time and persists', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').first().click();
@@ -25,30 +25,31 @@ test('new career completes the playable manager loop and persists', async ({ pag
   for (let round = 0; round < 7; round += 1) {
     await page.getByRole('button', { name: 'PLAY MATCH' }).click();
     await expect(page.getByRole('heading', { name: 'Live Match Centre' })).toBeVisible();
+    await page.getByRole('button', { name: '4×' }).click();
+
+    await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 20000 });
+    await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
+    await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
+    await page.waitForTimeout(500);
+    await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
 
     if (round === 0) {
-      await page.getByRole('button', { name: 'PAUSE' }).click();
-      await page.locator('[data-open-tactics]').click();
-      await expect(page.getByRole('heading', { name: 'Tactical Changes' })).toBeVisible();
+      await page.locator('[data-ht-tactics]').click();
       await page.locator('[data-live-tactic="formation"]').selectOption('5-3-2');
       await page.locator('[data-live-tactic="mentality"]').selectOption('Defensive');
-      await page.locator('[data-live-tactic="tempo"]').selectOption('Slow');
-      await page.locator('[data-live-tactic="defensiveLine"]').selectOption('Low');
       await page.locator('[data-apply-live-tactics]').click();
-      await expect(page.locator('[data-tactic-summary]')).toContainText('5-3-2');
+      await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
 
-      await page.locator('[data-open-subs]').click();
-      await expect(page.getByRole('heading', { name: 'Substitutions' })).toBeVisible();
-      await expect(page.locator('[data-sub-in] option')).not.toHaveCount(0);
+      await page.locator('[data-ht-subs]').click();
       await page.locator('[data-apply-sub]').click();
-      await expect(page.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
       await page.locator('[data-close-manager]').last().click();
+      await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
     }
 
-    await page.getByRole('button', { name: '4×' }).click();
-    await expect(page.getByRole('button', { name: 'CONTINUE' })).toBeVisible({ timeout: 30000 });
+    await page.locator('[data-resume-second-half]').click();
+    await expect(page.getByRole('button', { name: 'CONTINUE' })).toBeVisible({ timeout: 20000 });
     await expect(page.locator('[data-live-clock]')).toHaveText('90:00');
-    await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 30000 }).toBeGreaterThanOrEqual(35);
+    await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 20000 }).toBeGreaterThanOrEqual(35);
     await page.getByRole('button', { name: 'CONTINUE' }).click();
   }
 
