@@ -40,7 +40,7 @@ test('V0.4.4 squad and pre-match tactics expose position fit without visible ove
   expect(saved.tacticalSetup.assignments).toHaveLength(11);
 });
 
-test('live match hard-stops at half-time, supports positional roles and persists', async ({ page }) => {
+test('V0.4.5 Match Centre exposes immersive live views and still hard-stops at half-time', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').first().click();
@@ -48,12 +48,32 @@ test('live match hard-stops at half-time, supports positional roles and persists
 
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
   await page.getByRole('button', { name: 'PLAY MATCH' }).click();
-  await expect(page.getByRole('heading', { name: 'Live Match Centre' })).toBeVisible();
-  await page.getByRole('button', { name: '4×' }).click();
+  await expect(page.locator('[data-live-match]')).toHaveAttribute('data-v045-match', '1');
+  await expect(page.getByRole('heading', { name: 'Match Centre' })).toBeVisible();
+  await expect(page.locator('[data-v045-context]')).toContainText('VENUE');
+  await expect(page.locator('[data-v045-context]')).toContainText('ATTENDANCE');
+  await expect(page.locator('[data-v045-context]')).toContainText('REFEREE');
+  await expect(page.locator('[data-v045-context]')).toContainText('WEATHER');
+  await expect(page.locator('[data-v045-view]')).toHaveCount(4);
+  await expect(page.locator('[data-v045-event]')).toBeVisible();
 
+  await page.locator('[data-v045-view="stats"]').click();
+  await expect(page.locator('[data-v045-custom-view]')).toContainText('Match Stats');
+  await page.locator('[data-v045-view="zones"]').click();
+  await expect(page.locator('[data-v045-custom-view]')).toContainText('Action Zones');
+  await page.locator('[data-v045-bottom="latest"]').click();
+  await expect(page.locator('[data-v045-custom-view]')).toContainText('Latest Scores');
+  expect(await page.locator('.v045-score-row').count()).toBeGreaterThanOrEqual(4);
+  await page.locator('[data-v045-bottom="table"]').click();
+  await expect(page.locator('[data-v045-custom-view]')).toContainText('Live League Table');
+  await expect(page.locator('.v045-table tr.is-user')).toHaveCount(1);
+  await page.locator('[data-v045-view="overview"]').click();
+
+  await page.getByRole('button', { name: '4×' }).click();
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 15000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
+  await expect(page.locator('[data-v045-event]')).toContainText('HALF TIME');
   await page.waitForTimeout(350);
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
 
@@ -82,6 +102,7 @@ test('live match hard-stops at half-time, supports positional roles and persists
   await page.locator('[data-resume-second-half]').click();
   await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 15000 });
   await expect(page.locator('[data-finish-live-match]')).toBeVisible();
+  await expect(page.locator('[data-v045-event]')).toContainText('FULL TIME');
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(35);
   await page.locator('[data-finish-live-match]').click();
 
