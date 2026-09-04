@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'scripts/build-flm-rating-engine-v1.mjs'
+      - 'scripts/build-flm-rating-engine-v1-batched.mjs'
       - 'data/rating/flm-stat-dictionary-v1.json'
       - '.github/workflows/flm-rating-engine-v1.yml'
       - 'data/rating/flm-rating-engine-v1.trigger'
@@ -20,7 +20,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -38,11 +38,10 @@ jobs:
           set -euo pipefail
           test -n "${SPORTMONKS_API_TOKEN:-}"
 
-      - name: Build two-season Scottish calibration and FLM ratings
+      - name: Build complete two-season Scottish calibration and FLM ratings
         env:
           SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
-          FLM_FIXTURE_CONCURRENCY: 4
-        run: node scripts/build-flm-rating-engine-v1.mjs artifacts/flm-rating-engine-v1-report.json
+        run: node scripts/build-flm-rating-engine-v1-batched.mjs artifacts/flm-rating-engine-v1-report.json
 
       - name: Upload sanitised FLM rating report
         if: always()
