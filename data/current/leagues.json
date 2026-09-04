@@ -1,0 +1,52 @@
+[
+  {
+    "id": "eng-premier-league",
+    "name": "Premier League",
+    "countryCode": "ENG",
+    "level": 1,
+    "expectedClubCount": 20,
+    "season": "2026/27",
+    "externalIds": {},
+    "importStatus": "pending"
+  },
+  {
+    "id": "eng-championship",
+    "name": "Championship",
+    "countryCode": "ENG",
+    "level": 2,
+    "expectedClubCount": 24,
+    "season": "2026/27",
+    "externalIds": {},
+    "importStatus": "pending"
+  },
+  {
+    "id": "eng-league-one",
+    "name": "League One",
+    "countryCode": "ENG",
+    "level": 3,
+    "expectedClubCount": 24,
+    "season": "2026/27",
+    "externalIds": {},
+    "importStatus": "pending"
+  },
+  {
+    "id": "eng-league-two",
+    "name": "League Two",
+    "countryCode": "ENG",
+    "level": 4,
+    "expectedClubCount": 24,
+    "season": "2026/27",
+    "externalIds": {},
+    "importStatus": "pending"
+  },
+  {
+    "id": "eng-national-league",
+    "name": "National League",
+    "countryCode": "ENG",
+    "level": 5,
+    "expectedClubCount": 24,
+    "season": "2026/27",
+    "externalIds": {},
+    "importStatus": "pending"
+  }
+]

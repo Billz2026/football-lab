@@ -1,0 +1,250 @@
+.modal-card.modal-wide {
+  width: min(1120px, calc(100vw - 32px));
+  max-height: min(86vh, 900px);
+  overflow: auto;
+}
+
+.database-browser {
+  display: grid;
+  gap: 18px;
+}
+
+.db-warning {
+  padding: 13px 15px;
+  border: 1px solid rgba(239, 185, 63, .28);
+  border-radius: 12px;
+  background: rgba(239, 185, 63, .07);
+  color: #d8cfbc;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.db-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.db-summary-card {
+  min-height: 86px;
+  padding: 14px;
+  border-radius: 13px;
+  border: 1px solid rgba(239, 185, 63, .18);
+  background: rgba(255, 255, 255, .018);
+}
+
+.db-summary-card small,
+.db-league-card small,
+.db-club-meta,
+.db-player-row small {
+  display: block;
+  color: #827c70;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.db-summary-card strong {
+  display: block;
+  margin-top: 7px;
+  color: #ffd66a;
+  font-size: 20px;
+}
+
+.db-league-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.db-league-card {
+  padding: 13px;
+  border: 1px solid rgba(239, 185, 63, .18);
+  border-radius: 12px;
+  background: rgba(12, 11, 8, .74);
+}
+
+.db-league-card strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.db-league-progress {
+  margin-top: 10px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+}
+
+.db-league-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #e7ab2e, #ffd66a);
+}
+
+.db-toolbar {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, .7fr);
+  gap: 10px;
+}
+
+.db-toolbar input,
+.db-toolbar select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 13px;
+  color: #f4f1e9;
+  border-radius: 11px;
+  border: 1px solid rgba(239, 185, 63, .22);
+  background: #0b0a08;
+  outline: none;
+}
+
+.db-toolbar input:focus,
+.db-toolbar select:focus {
+  border-color: rgba(255, 214, 106, .62);
+}
+
+.db-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, .72fr) minmax(0, 1.28fr);
+  gap: 12px;
+}
+
+.db-club-list,
+.db-detail {
+  min-height: 330px;
+  max-height: 430px;
+  overflow: auto;
+  border: 1px solid rgba(239, 185, 63, .16);
+  border-radius: 14px;
+  background: rgba(4, 4, 3, .42);
+}
+
+.db-club-button {
+  width: 100%;
+  padding: 13px 14px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .045);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.db-club-button:hover,
+.db-club-button.is-active {
+  background: rgba(239, 185, 63, .075);
+}
+
+.db-club-button strong {
+  display: block;
+  font-size: 13px;
+}
+
+.db-club-button span {
+  display: block;
+  margin-top: 4px;
+  color: #8e887c;
+  font-size: 10px;
+}
+
+.db-detail {
+  padding: 18px;
+}
+
+.db-detail h3 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 38px);
+  letter-spacing: -.035em;
+}
+
+.db-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(239, 185, 63, .14);
+}
+
+.db-placeholder-badge {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  border-radius: 999px;
+  color: #cba74f;
+  border: 1px solid rgba(239, 185, 63, .24);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.db-squad {
+  margin-top: 14px;
+  display: grid;
+  gap: 7px;
+}
+
+.db-player-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 58px 58px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255, 255, 255, .05);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .016);
+}
+
+.db-player-pos {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(239, 185, 63, .09);
+  color: #efb93f;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.db-player-row strong {
+  font-size: 12px;
+}
+
+.db-player-rating {
+  text-align: right;
+}
+
+.db-player-rating b {
+  display: block;
+  color: #ffd66a;
+  font-size: 13px;
+}
+
+.db-empty,
+.db-loading {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #8d877b;
+  text-align: center;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  .db-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .db-league-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .db-layout { grid-template-columns: 1fr; }
+  .db-club-list { max-height: 240px; min-height: 0; }
+}
+
+@media (max-width: 540px) {
+  .db-toolbar { grid-template-columns: 1fr; }
+  .db-summary { grid-template-columns: 1fr 1fr; }
+  .db-league-grid { grid-template-columns: 1fr; }
+  .db-player-row { grid-template-columns: 36px minmax(0, 1fr) 46px 46px; gap: 7px; }
+}

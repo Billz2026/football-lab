@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://footballlab.local/schema/flm-database-v1.json",
+  "title": "Football Lab Manager Database v1",
+  "type": "object",
+  "$defs": {
+    "externalIds": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "integer", "null"] }
+    },
+    "attributeBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z][A-Za-z0-9]*$": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    },
+    "league": {
+      "type": "object",
+      "required": ["id", "name", "countryCode", "level", "expectedClubCount", "season", "externalIds"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "countryCode": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "level": { "type": "integer", "minimum": 1 },
+        "expectedClubCount": { "type": "integer", "minimum": 2 },
+        "season": { "type": "string", "minLength": 4 },
+        "externalIds": { "$ref": "#/$defs/externalIds" },
+        "importStatus": { "enum": ["pending", "partial", "complete"] }
+      },
+      "additionalProperties": true
+    },
+    "club": {
+      "type": "object",
+      "required": ["id", "name", "shortName", "countryCode", "leagueId", "externalIds", "isPlaceholder"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^flm-club-[a-z0-9-]+$" },
+        "externalIds": { "$ref": "#/$defs/externalIds" },
+        "name": { "type": "string", "minLength": 1 },
+        "shortName": { "type": "string", "minLength": 1 },
+        "countryCode": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "leagueId": { "type": "string" },
+        "founded": { "type": ["integer", "null"], "minimum": 1800 },
+        "venue": { "type": ["string", "null"] },
+        "preferredFormation": { "type": ["string", "null"] },
+        "reputation": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "isPlaceholder": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "contract": {
+      "type": "object",
+      "required": ["weeklyWage", "currency", "startDate", "endDate"],
+      "properties": {
+        "weeklyWage": { "type": ["integer", "null"], "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "startDate": { "type": ["string", "null"], "format": "date" },
+        "endDate": { "type": ["string", "null"], "format": "date" },
+        "squadStatus": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "player": {
+      "type": "object",
+      "required": ["id", "externalIds", "name", "dateOfBirth", "nationalityCode", "clubId", "primaryPosition", "positionGroup", "currentAbility", "potentialAbility", "attributes", "isPlaceholder"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^flm-player-[a-z0-9-]+$" },
+        "externalIds": { "$ref": "#/$defs/externalIds" },
+        "name": { "type": "string", "minLength": 1 },
+        "firstName": { "type": ["string", "null"] },
+        "lastName": { "type": ["string", "null"] },
+        "dateOfBirth": { "type": ["string", "null"], "format": "date" },
+        "nationalityCode": { "type": ["string", "null"] },
+        "clubId": { "type": "string" },
+        "shirtNumber": { "type": ["integer", "null"], "minimum": 1, "maximum": 99 },
+        "primaryPosition": { "type": "string" },
+        "secondaryPositions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "positionGroup": { "enum": ["GK", "DEF", "MID", "ATT"] },
+        "preferredFoot": { "enum": ["left", "right", "both", "unknown"] },
+        "heightCm": { "type": ["integer", "null"], "minimum": 140, "maximum": 220 },
+        "weightKg": { "type": ["integer", "null"], "minimum": 45, "maximum": 130 },
+        "currentAbility": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "potentialAbility": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "attributes": {
+          "type": "object",
+          "required": ["technical", "mental", "physical"],
+          "properties": {
+            "technical": { "$ref": "#/$defs/attributeBlock" },
+            "mental": { "$ref": "#/$defs/attributeBlock" },
+            "physical": { "$ref": "#/$defs/attributeBlock" }
+          },
+          "additionalProperties": false
+        },
+        "contract": { "$ref": "#/$defs/contract" },
+        "isPlaceholder": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "manager": {
+      "type": "object",
+      "required": ["id", "externalIds", "name", "clubId", "nationalityCode", "preferredFormation", "isPlaceholder"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^flm-manager-[a-z0-9-]+$" },
+        "externalIds": { "$ref": "#/$defs/externalIds" },
+        "name": { "type": "string", "minLength": 1 },
+        "clubId": { "type": ["string", "null"] },
+        "nationalityCode": { "type": ["string", "null"] },
+        "preferredFormation": { "type": ["string", "null"] },
+        "isPlaceholder": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

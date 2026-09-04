@@ -1,0 +1,12 @@
+{
+  "provider": "sportmonks",
+  "season": "2026/27",
+  "leagues": [
+    { "internalLeagueId": "eng-premier-league", "seasonId": null },
+    { "internalLeagueId": "eng-championship", "seasonId": null },
+    { "internalLeagueId": "eng-league-one", "seasonId": null },
+    { "internalLeagueId": "eng-league-two", "seasonId": null },
+    { "internalLeagueId": "eng-national-league", "seasonId": null }
+  ],
+  "notes": "Copy this file to data/provider/sportmonks.seasons.json after API access is configured, then fill in the five current Sportmonks season IDs. Do not store the API token in this file or anywhere in the repository."
+}

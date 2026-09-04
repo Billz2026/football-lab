@@ -1,0 +1,47 @@
+[
+  {
+    "id": "flm-manager-dev-premier",
+    "externalIds": {},
+    "name": "Premier Test Manager",
+    "clubId": "flm-club-dev-premier",
+    "nationalityCode": "ENG",
+    "preferredFormation": "4-3-3",
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-manager-dev-championship",
+    "externalIds": {},
+    "name": "Championship Test Manager",
+    "clubId": "flm-club-dev-championship",
+    "nationalityCode": "ENG",
+    "preferredFormation": "4-2-3-1",
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-manager-dev-league-one",
+    "externalIds": {},
+    "name": "League One Test Manager",
+    "clubId": "flm-club-dev-league-one",
+    "nationalityCode": "ENG",
+    "preferredFormation": "4-4-2",
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-manager-dev-league-two",
+    "externalIds": {},
+    "name": "League Two Test Manager",
+    "clubId": "flm-club-dev-league-two",
+    "nationalityCode": "ENG",
+    "preferredFormation": "3-5-2",
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-manager-dev-national-league",
+    "externalIds": {},
+    "name": "National League Test Manager",
+    "clubId": "flm-club-dev-national-league",
+    "nationalityCode": "ENG",
+    "preferredFormation": "4-4-2",
+    "isPlaceholder": true
+  }
+]

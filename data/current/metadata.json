@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0.0",
+  "databaseVersion": "2026.09.04-dev",
+  "status": "schema-test",
+  "generatedAt": null,
+  "provider": "pending",
+  "scope": {
+    "country": "England",
+    "countryCode": "ENG",
+    "season": "2026/27",
+    "leagueCount": 5,
+    "targetClubCount": 116,
+    "leagues": [
+      "eng-premier-league",
+      "eng-championship",
+      "eng-league-one",
+      "eng-league-two",
+      "eng-national-league"
+    ]
+  },
+  "licensing": {
+    "officialBadgesIncluded": false,
+    "playerPhotosIncluded": false,
+    "notes": "Development database only. Official club badges and player photography are intentionally excluded."
+  },
+  "warning": "Placeholder development records are included only to validate the Football Lab Manager data model and browser. They are not current real-world squads."
+}

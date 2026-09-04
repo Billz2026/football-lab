@@ -1,0 +1,67 @@
+[
+  {
+    "id": "flm-club-dev-premier",
+    "externalIds": {},
+    "name": "FLM Premier Test",
+    "shortName": "Premier Test",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": null,
+    "venue": null,
+    "preferredFormation": "4-3-3",
+    "reputation": 6500,
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-club-dev-championship",
+    "externalIds": {},
+    "name": "FLM Championship Test",
+    "shortName": "Champ Test",
+    "countryCode": "ENG",
+    "leagueId": "eng-championship",
+    "founded": null,
+    "venue": null,
+    "preferredFormation": "4-2-3-1",
+    "reputation": 5200,
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-club-dev-league-one",
+    "externalIds": {},
+    "name": "FLM League One Test",
+    "shortName": "L1 Test",
+    "countryCode": "ENG",
+    "leagueId": "eng-league-one",
+    "founded": null,
+    "venue": null,
+    "preferredFormation": "4-4-2",
+    "reputation": 4100,
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-club-dev-league-two",
+    "externalIds": {},
+    "name": "FLM League Two Test",
+    "shortName": "L2 Test",
+    "countryCode": "ENG",
+    "leagueId": "eng-league-two",
+    "founded": null,
+    "venue": null,
+    "preferredFormation": "3-5-2",
+    "reputation": 3300,
+    "isPlaceholder": true
+  },
+  {
+    "id": "flm-club-dev-national-league",
+    "externalIds": {},
+    "name": "FLM National League Test",
+    "shortName": "NL Test",
+    "countryCode": "ENG",
+    "leagueId": "eng-national-league",
+    "founded": null,
+    "venue": null,
+    "preferredFormation": "4-4-2",
+    "reputation": 2600,
+    "isPlaceholder": true
+  }
+]
