@@ -15,6 +15,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/import-api-football-english-free.mjs'
+      - 'scripts/merge-api-football-english-batch.mjs'
       - 'data/import/api-football-english-2026-27.json'
       - '.github/workflows/api-football-english-db-v1.yml'
 
@@ -58,6 +59,10 @@ jobs:
           console.log(`Validated ${clubs.length} clubs and ${players.length} players.`);
           console.log(`Remaining daily requests: ${report.usage.lastKnownRemainingDailyRequests ?? 'unknown'}`);
           NODE
+      - name: Build merged current-database preview
+        run: node scripts/merge-api-football-english-batch.mjs artifacts/api-football-english-db-v1 data/current artifacts/api-football-english-db-v1/merged-current
+      - name: Validate merged database preview
+        run: node scripts/validate-database.mjs artifacts/api-football-english-db-v1/merged-current
       - name: Upload sanitised FLM batch
         uses: actions/upload-artifact@v4
         with:
