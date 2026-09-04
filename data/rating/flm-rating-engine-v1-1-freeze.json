@@ -1,0 +1,32 @@
+{
+  "engine": "FLM Rating Engine",
+  "compatibilityLine": "1.1",
+  "candidateVersion": "1.1.1",
+  "status": "freeze-candidate",
+  "principles": [
+    "No player-specific rating overrides.",
+    "Direct statistical evidence receives the highest confidence.",
+    "Proxy attributes are confidence-capped.",
+    "Physical attributes without telemetry remain low-confidence baselines.",
+    "Determination and personality traits are not reverse-engineered from results.",
+    "Competition and club strength are soft calibration priors, never substitutes for player evidence."
+  ],
+  "globalScale": {
+    "mean": 10.1,
+    "directSpread": 0.64,
+    "proxySpread": 0.56,
+    "min": 4,
+    "max": 16
+  },
+  "proxyConfidenceCaps": {
+    "confidenceBelow0.40": 13,
+    "confidenceBelow0.55": 14,
+    "otherwise": 15
+  },
+  "directConfidenceCaps": {
+    "confidenceBelow0.45": 14,
+    "confidenceBelow0.60": 15,
+    "otherwise": 16
+  },
+  "freezeRule": "Set status to frozen only after the FLM Player Sanity Review workflow returns freezeCandidate=true."
+}
