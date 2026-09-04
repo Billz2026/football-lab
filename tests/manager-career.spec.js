@@ -1,12 +1,24 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(45000);
+test.setTimeout(60000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
 });
+
+async function completePreseason(page) {
+  const tab = page.locator('[data-v047-preseason-tab]');
+  await expect(tab).toBeVisible();
+  await tab.click();
+  for (let count = 1; count <= 5; count += 1) {
+    await page.locator('[data-v047-sim]').click();
+    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count);
+  }
+  await page.locator('[data-v047-start]').click();
+  await expect(page.getByRole('button', { name: 'Matchday', exact: true })).toBeEnabled();
+}
 
 test('V0.4.4 squad and pre-match tactics expose position fit without visible overall ability', async ({ page }) => {
   await page.getByRole('button', { name: /QUICK START/ }).click();
@@ -45,6 +57,7 @@ test('V0.4.5 Match Centre exposes immersive live views and still hard-stops at h
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').first().click();
   await expect(page.locator('[data-career-save-status]')).toContainText(/AUTOSAVE|SAVED/);
+  await completePreseason(page);
 
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
   await page.getByRole('button', { name: 'PLAY MATCH' }).click();
