@@ -64,13 +64,12 @@ function numericValue(value, depth = 0) {
 }
 
 async function getSeasonFixtures() {
+  const payload = await getJson(`/schedules/seasons/${SEASON_ID}`);
   const fixtures = [];
-  let page = 1;
-  while (page <= 5 && fixtures.filter(f => Number(f.state_id) === 5).length < FIXTURE_SAMPLE_SIZE) {
-    const payload = await getJson(`/fixtures/seasons/${SEASON_ID}`, { per_page: 50, page });
-    fixtures.push(...(payload.data || []));
-    if (!payload.pagination?.has_more) break;
-    page += 1;
+  for (const stage of payload.data || []) {
+    for (const round of stage.rounds || []) {
+      for (const fixture of round.fixtures || []) fixtures.push(fixture);
+    }
   }
   return fixtures;
 }
