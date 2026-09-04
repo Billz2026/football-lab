@@ -19,7 +19,7 @@ concurrency:
 jobs:
   analyse:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -37,25 +37,10 @@ jobs:
           set -euo pipefail
           test -n "${SPORTMONKS_API_TOKEN:-}"
 
-      - name: Rebuild ephemeral Scottish squad staging
+      - name: Analyse team-season player statistics and provisional ratings
         env:
           SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
-        run: node scripts/import-sportmonks-scotland.mjs data/staging/private/sportmonks-scottish-premiership-2026-27.json artifacts/squad-quality-temp.json
-
-      - name: Analyse player statistics and provisional ratings
-        env:
-          SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
-          SPORTMONKS_STATS_CONCURRENCY: '8'
-        run: node scripts/analyse-sportmonks-player-stats.mjs data/staging/private/sportmonks-scottish-premiership-2026-27.json artifacts/sportmonks-player-stats-quality-report.json
-
-      - name: Verify no raw API data is published
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f artifacts/sportmonks-player-stats-quality-report.json
-          test -f data/staging/private/sportmonks-scottish-premiership-2026-27.json
-          rm -f artifacts/squad-quality-temp.json
-          rm -rf data/staging/private
+        run: node scripts/analyse-sportmonks-player-stats.mjs artifacts/sportmonks-player-stats-quality-report.json
 
       - name: Upload sanitised stats quality report only
         uses: actions/upload-artifact@v4
