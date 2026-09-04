@@ -1,3 +1,4 @@
+import './match-centre-v045.js?v=0.4.5';
 import {
   ROLE_DEFINITIONS,
   getUserShape,
@@ -21,7 +22,7 @@ export {
   swapShapePlayers
 } from './matchday-engine-v043.js';
 
-export const LIVE_ENGINE_VERSION = 5;
+export const LIVE_ENGINE_VERSION = 6;
 
 const clone = value => JSON.parse(JSON.stringify(value));
 
