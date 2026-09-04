@@ -1,0 +1,54 @@
+name: FLM Rating Engine v1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/build-flm-rating-engine-v1.mjs'
+      - 'data/rating/flm-stat-dictionary-v1.json'
+      - '.github/workflows/flm-rating-engine-v1.yml'
+      - 'data/rating/flm-rating-engine-v1.trigger'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flm-rating-engine-v1
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify Sportmonks secret
+        shell: bash
+        env:
+          SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${SPORTMONKS_API_TOKEN:-}"
+
+      - name: Build two-season Scottish calibration and FLM ratings
+        env:
+          SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
+          FLM_FIXTURE_CONCURRENCY: 4
+        run: node scripts/build-flm-rating-engine-v1.mjs artifacts/flm-rating-engine-v1-report.json
+
+      - name: Upload sanitised FLM rating report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flm-rating-engine-v1-${{ github.run_id }}
+          path: artifacts/flm-rating-engine-v1-report.json
+          if-no-files-found: error
+          retention-days: 3
