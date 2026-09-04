@@ -169,8 +169,12 @@ export function completePreseasonFriendly(career, friendlyCareer, db) {
   Object.assign(fixture, clone(result), { type: 'friendly', dateLabel: fixture.dateLabel, round: fixture.round });
 
   const userSquad = new Set(db.players.filter(player => player.clubId === career.clubId && !player.isPlaceholder).map(player => player.id));
-  for (const [playerId, status] of Object.entries(friendlyCareer.playerStatus || {})) {
-    if (userSquad.has(playerId)) career.playerStatus[playerId] = clone(status);
+  for (const [playerId, friendlyStatus] of Object.entries(friendlyCareer.playerStatus || {})) {
+    if (!userSquad.has(playerId) || !career.playerStatus[playerId]) continue;
+    const competitiveStatus = career.playerStatus[playerId];
+    competitiveStatus.condition = friendlyStatus.condition;
+    competitiveStatus.sharpness = friendlyStatus.sharpness;
+    competitiveStatus.morale = friendlyStatus.morale;
   }
   career.tactics = clone(friendlyCareer.tactics || career.tactics);
   if (friendlyCareer.tacticalSetup) career.tacticalSetup = clone(friendlyCareer.tacticalSetup);
