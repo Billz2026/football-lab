@@ -50,12 +50,6 @@ let lastCallAt = 0;
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-function slug(value) {
-  return String(value || '')
-    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
-
 function norm(value) {
   return String(value || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
 }
@@ -250,6 +244,56 @@ function makeClub(manifestClub, row, leagueId, leagueLevel) {
   };
 }
 
+function dedupePlayers(records) {
+  const byId = new Map();
+  const conflicts = [];
+
+  for (const player of records) {
+    const existing = byId.get(player.id);
+    if (!existing) {
+      byId.set(player.id, player);
+      continue;
+    }
+
+    if (existing.clubId === player.clubId) {
+      const preferred = existing.shirtNumber == null && player.shirtNumber != null ? player : existing;
+      byId.set(player.id, preferred);
+      continue;
+    }
+
+    let preferred = player;
+    if (existing.shirtNumber != null && player.shirtNumber == null) preferred = existing;
+    else if (existing.shirtNumber == null && player.shirtNumber != null) preferred = player;
+
+    const conflictingClubIds = [...new Set([
+      ...(existing.dataQuality?.conflictingClubIds || []),
+      existing.clubId,
+      player.clubId
+    ])];
+
+    preferred = {
+      ...preferred,
+      dataQuality: {
+        ...(preferred.dataQuality || {}),
+        squadMembershipConflict: true,
+        conflictingClubIds,
+        squadMembershipResolution: 'Prefer record with a shirt number; otherwise prefer the later manifest squad record.',
+        confidence: 'low'
+      }
+    };
+    byId.set(player.id, preferred);
+    conflicts.push({
+      playerId: player.externalIds?.apiFootball ?? player.id,
+      playerName: player.name,
+      conflictingClubIds,
+      selectedClubId: preferred.clubId
+    });
+  }
+
+  const uniqueConflicts = [...new Map(conflicts.map(item => [String(item.playerId), item])).values()];
+  return { players:[...byId.values()], conflicts:uniqueConflicts };
+}
+
 async function main() {
   const manifest = JSON.parse(await readFile(MANIFEST_PATH, 'utf8'));
   const flat = manifest.leagues.flatMap(league => league.clubs.map(club => ({ ...club, leagueId:league.id, leagueLevel:league.level })));
@@ -289,7 +333,9 @@ async function main() {
   }
 
   const clubIds = new Set(clubs.map(c => c.id));
-  const validPlayers = players.filter(p => clubIds.has(p.clubId));
+  const eligiblePlayers = players.filter(p => clubIds.has(p.clubId));
+  const deduped = dedupePlayers(eligiblePlayers);
+  const validPlayers = deduped.players;
   const report = {
     importer: 'FLM API-Football Free English Database v1',
     generatedAt: new Date().toISOString(),
@@ -297,7 +343,10 @@ async function main() {
     requestedBatch: { offset:BATCH_OFFSET, count:BATCH_COUNT, selected:selection.map(x => ({club:x.name,leagueId:x.leagueId})) },
     result: {
       clubsImported: clubs.length,
+      rawSquadRecords: eligiblePlayers.length,
       playersImported: validPlayers.length,
+      duplicatePlayerRecordsRemoved: eligiblePlayers.length - validPlayers.length,
+      squadMembershipConflicts: deduped.conflicts.length,
       averageSquadSize: clubs.length ? Number((validPlayers.length / clubs.length).toFixed(1)) : 0,
       missingClubMappings: missing.length,
       failedSquads: failures.length
@@ -305,11 +354,13 @@ async function main() {
     usage: { callsMade:calls, lastKnownRemainingDailyRequests:lastRemaining, reportedDailyLimit:reportedLimit, requestDelayMs:REQUEST_DELAY_MS, reserve:DAILY_RESERVE },
     missing,
     failures,
+    playerMembershipConflicts: deduped.conflicts,
     policy: {
       officialBadgesIncluded:false,
       playerPhotosIncluded:false,
       currentSeasonStatisticsClaimed:false,
       attributeMethod:'Low-confidence FLM positional baselines until current statistical evidence is lawfully available.',
+      duplicateMembershipPolicy:'No player ID may appear twice. Cross-club squad conflicts are flagged and resolved deterministically rather than silently duplicated.',
       apiKeyPersisted:false
     }
   };
@@ -320,7 +371,8 @@ async function main() {
     writeFile(path.join(OUT_DIR,'report.json'), JSON.stringify(report,null,2) + '\n')
   ]);
 
-  console.log(`API-Football English batch: ${clubs.length} clubs / ${validPlayers.length} players / ${calls} calls.`);
+  console.log(`API-Football English batch: ${clubs.length} clubs / ${validPlayers.length} unique players / ${calls} calls.`);
+  if (deduped.conflicts.length) console.log(`Resolved ${deduped.conflicts.length} cross-club player membership conflict(s).`);
   if (missing.length) console.log(`Missing club mappings: ${missing.map(x => x.club).join(', ')}`);
   if (failures.length) console.log(`Squad failures: ${failures.map(x => x.club).join(', ')}`);
   if (!clubs.length) process.exitCode = 2;

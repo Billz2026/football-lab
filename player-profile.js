@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const DATA_VERSION = '59';
+  const DATA_VERSION = '60';
   let dataPromise = null;
   let activePlayerId = null;
 
@@ -44,6 +44,13 @@
     const beforeBirthday = ref.getUTCMonth() < dob.getUTCMonth() || (ref.getUTCMonth() === dob.getUTCMonth() && ref.getUTCDate() < dob.getUTCDate());
     if (beforeBirthday) age -= 1;
     return age;
+  }
+
+  function playerAge(player, snapshot = '2026-09-04') {
+    const calculated = calcAge(player.dateOfBirth, snapshot);
+    if (calculated != null) return calculated;
+    const reported = Number(player.reportedAge);
+    return Number.isFinite(reported) && reported >= 15 && reported <= 50 ? reported : null;
   }
 
   function ratingClass(value) {
@@ -126,7 +133,7 @@
   function renderProfileTab(root, player, db) {
     const status = statusFor(player);
     const personality = personalityFor(player, db.model);
-    const age = calcAge(player.dateOfBirth, db.metadata.snapshotDate || '2026-09-04');
+    const age = playerAge(player, db.metadata.snapshotDate || '2026-09-04');
     const positions = [player.primaryPosition, ...(player.secondaryPositions || [])].filter(Boolean);
     root.innerHTML = `
       <div class="flm-profile-grid">
@@ -199,7 +206,7 @@
   }
 
   function renderDevelopmentTab(root, player, db) {
-    const age = calcAge(player.dateOfBirth, db.metadata.snapshotDate || '2026-09-04');
+    const age = playerAge(player, db.metadata.snapshotDate || '2026-09-04');
     const band = developmentBand(age, db.model);
     const personality = personalityFor(player, db.model);
     const history = player.personality?.history || [];
@@ -262,7 +269,7 @@
     const club = db.clubs.find(c => c.id === player.clubId);
     const league = db.leagues.find(l => l.id === club?.leagueId);
     const personality = personalityFor(player, db.model);
-    const age = calcAge(player.dateOfBirth, db.metadata.snapshotDate || '2026-09-04');
+    const age = playerAge(player, db.metadata.snapshotDate || '2026-09-04');
     const modal = document.getElementById('appModal');
     const card = modal?.querySelector('.modal-card');
     const title = document.getElementById('modalTitle');
