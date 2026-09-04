@@ -313,7 +313,9 @@ function scan() {
   if (!shell) activeShell = null;
 }
 
-injectStyles();
-updateVersion();
-new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
-scan();
+if (typeof document !== 'undefined' && typeof window !== 'undefined') {
+  injectStyles();
+  updateVersion();
+  new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
+  scan();
+}
