@@ -24,7 +24,14 @@ test('new career completes the playable manager loop and persists', async ({ pag
   await page.getByRole('button', { name: 'Matchday' }).click();
   for (let round = 0; round < 7; round += 1) {
     await page.getByRole('button', { name: 'PLAY MATCH' }).click();
+    await expect(page.getByRole('heading', { name: 'Live Match Centre' })).toBeVisible();
+    await page.getByRole('button', { name: '4×' }).click();
+    await expect(page.getByRole('button', { name: 'CONTINUE' })).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-live-clock]')).toHaveText('90:00');
+    await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(18);
+    await page.getByRole('button', { name: 'CONTINUE' }).click();
   }
+
   await expect(page.getByRole('heading', { name: 'Invitational complete.' })).toBeVisible();
   await page.getByRole('button', { name: 'VIEW FINAL TABLE' }).click();
   await expect(page.locator('.career-table tbody tr')).toHaveCount(8);
