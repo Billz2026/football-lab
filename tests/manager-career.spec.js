@@ -46,10 +46,10 @@ test('live match hard-stops at half-time, supports positional roles and persists
   await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
 
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.getByRole('button', { name: 'CONTINUE' })).toBeVisible({ timeout: 15000 });
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00');
+  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 15000 });
+  await expect(page.locator('[data-finish-live-match]')).toBeVisible();
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(35);
-  await page.getByRole('button', { name: 'CONTINUE' }).click();
+  await page.locator('[data-finish-live-match]').click();
 
   await expect(page.locator('.career-content')).toContainText(/LAST RESULT|NEXT FIXTURE/);
   await page.getByRole('button', { name: 'EXIT' }).click();
