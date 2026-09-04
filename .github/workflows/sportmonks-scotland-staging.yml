@@ -1,0 +1,57 @@
+name: Sportmonks Scotland staging import
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/import-sportmonks-scotland.mjs'
+      - '.github/workflows/sportmonks-scotland-staging.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sportmonks-scotland-staging-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify secret is configured
+        shell: bash
+        run: |
+          if [ -z "${SPORTMONKS_API_TOKEN:-}" ]; then
+            echo 'SPORTMONKS_API_TOKEN repository secret is missing.' >&2
+            exit 1
+          fi
+          echo 'Sportmonks secret is available to the runner.'
+
+      - name: Import Scottish Premiership to ephemeral staging
+        run: node scripts/import-sportmonks-scotland.mjs
+
+      - name: Verify private staging dataset exists
+        shell: bash
+        run: |
+          test -s data/staging/private/sportmonks-scottish-premiership-2026-27.json
+          node -e "const d=require('./data/staging/private/sportmonks-scottish-premiership-2026-27.json'); if(d.clubs.length!==12) throw new Error('Expected 12 clubs'); if(d.players.length<200) throw new Error('Player count unexpectedly low'); console.log('Ephemeral staging validation passed:', d.clubs.length, 'clubs,', d.players.length, 'players');"
+
+      - name: Upload sanitised quality report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: sportmonks-scotland-quality-${{ github.run_id }}
+          path: artifacts/sportmonks-scotland-quality-report.json
+          if-no-files-found: error
+          retention-days: 3
