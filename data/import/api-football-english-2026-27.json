@@ -1,0 +1,62 @@
+{
+  "snapshotSeason": "2026/27",
+  "sourceNote": "League membership is maintained independently from API-Football's free historical-season restriction. No official badges or player images are imported.",
+  "leagues": [
+    {
+      "id": "eng-premier-league",
+      "level": 1,
+      "clubs": [
+        {"name":"AFC Bournemouth","aliases":["Bournemouth"]},
+        {"name":"Arsenal","aliases":[]},
+        {"name":"Aston Villa","aliases":[]},
+        {"name":"Brentford","aliases":[]},
+        {"name":"Brighton & Hove Albion","aliases":["Brighton"]},
+        {"name":"Chelsea","aliases":[]},
+        {"name":"Coventry City","aliases":["Coventry"]},
+        {"name":"Crystal Palace","aliases":[]},
+        {"name":"Everton","aliases":[]},
+        {"name":"Fulham","aliases":[]},
+        {"name":"Hull City","aliases":["Hull"]},
+        {"name":"Ipswich Town","aliases":["Ipswich"]},
+        {"name":"Leeds United","aliases":["Leeds"]},
+        {"name":"Liverpool","aliases":[]},
+        {"name":"Manchester City","aliases":["Man City"]},
+        {"name":"Manchester United","aliases":["Man United","Man Utd"]},
+        {"name":"Newcastle United","aliases":["Newcastle"]},
+        {"name":"Nottingham Forest","aliases":["Nott'm Forest"]},
+        {"name":"Sunderland","aliases":[]},
+        {"name":"Tottenham Hotspur","aliases":["Tottenham","Spurs"]}
+      ]
+    },
+    {
+      "id": "eng-championship",
+      "level": 2,
+      "clubs": [
+        {"name":"Birmingham City","aliases":["Birmingham"]},
+        {"name":"Blackburn Rovers","aliases":["Blackburn"]},
+        {"name":"Bolton Wanderers","aliases":["Bolton"]},
+        {"name":"Bristol City","aliases":[]},
+        {"name":"Burnley","aliases":[]},
+        {"name":"Cardiff City","aliases":["Cardiff"]},
+        {"name":"Charlton Athletic","aliases":["Charlton"]},
+        {"name":"Derby County","aliases":["Derby"]},
+        {"name":"Lincoln City","aliases":["Lincoln"]},
+        {"name":"Middlesbrough","aliases":[]},
+        {"name":"Millwall","aliases":[]},
+        {"name":"Norwich City","aliases":["Norwich"]},
+        {"name":"Portsmouth","aliases":[]},
+        {"name":"Preston North End","aliases":["Preston"]},
+        {"name":"Queens Park Rangers","aliases":["QPR"]},
+        {"name":"Sheffield United","aliases":["Sheff Utd"]},
+        {"name":"Southampton","aliases":[]},
+        {"name":"Stoke City","aliases":["Stoke"]},
+        {"name":"Swansea City","aliases":["Swansea"]},
+        {"name":"Watford","aliases":[]},
+        {"name":"West Bromwich Albion","aliases":["West Brom","West Bromwich"]},
+        {"name":"West Ham United","aliases":["West Ham"]},
+        {"name":"Wolverhampton Wanderers","aliases":["Wolves","Wolverhampton"]},
+        {"name":"Wrexham","aliases":[]}
+      ]
+    }
+  ]
+}
