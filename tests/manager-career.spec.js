@@ -8,6 +8,38 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+test('V0.4.4 squad and pre-match tactics expose position fit without visible overall ability', async ({ page }) => {
+  await page.getByRole('button', { name: /QUICK START/ }).click();
+  await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+
+  await page.getByRole('button', { name: 'Squad', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Squad' })).toBeVisible();
+  await expect(page.locator('.v044-list')).toBeVisible();
+  await expect(page.locator('.v044-star')).toHaveCount(3);
+  await expect(page.locator('.v044-head')).not.toContainText('CA');
+  await expect(page.locator('.v044-head')).toContainText('PREFERRED');
+  await expect(page.locator('.v044-head')).toContainText('ALTERNATIVES');
+  expect(await page.locator('.v044-row').count()).toBeGreaterThan(11);
+
+  await page.getByRole('button', { name: 'Tactics', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Tactics Centre' })).toBeVisible();
+  await expect(page.locator('.v044-player')).toHaveCount(11);
+  await expect(page.locator('[data-v044-tactic="formation"] option')).toHaveCount(8);
+  expect(await page.locator('.v044-player.fit-preferred').count()).toBeGreaterThan(0);
+  const fitted = await page.locator('.v044-player.fit-preferred,.v044-player.fit-secondary,.v044-player.fit-unfamiliar').count();
+  expect(fitted).toBe(11);
+
+  await page.locator('[data-v044-tactic="formation"]').selectOption('5-3-2');
+  await expect(page.locator('.v044-player')).toHaveCount(11);
+  await expect(page.locator('.v044-player').filter({ hasText: 'RWB' })).toHaveCount(1);
+  await page.locator('[data-v044-apply]').click();
+
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
+  expect(saved.tactics.formation).toBe('5-3-2');
+  expect(saved.tacticalSetup.formation).toBe('5-3-2');
+  expect(saved.tacticalSetup.assignments).toHaveLength(11);
+});
+
 test('live match hard-stops at half-time, supports positional roles and persists', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
