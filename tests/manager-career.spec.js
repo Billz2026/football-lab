@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('new career completes the playable manager loop, hard-stops at half-time and persists', async ({ page }) => {
+test('new career completes the playable manager loop, hard-stops at half-time and supports positional roles', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').first().click();
@@ -34,13 +34,21 @@ test('new career completes the playable manager loop, hard-stops at half-time an
     await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
 
     if (round === 0) {
-      await page.locator('[data-ht-tactics]').click();
+      await page.locator('[data-open-tactics]').click();
       await page.locator('[data-live-tactic="formation"]').selectOption('5-3-2');
       await page.locator('[data-live-tactic="mentality"]').selectOption('Defensive');
       await page.locator('[data-apply-live-tactics]').click();
       await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
+      await expect(page.locator('[data-shape-label]')).toHaveText('5-3-2');
 
-      await page.locator('[data-ht-subs]').click();
+      await page.locator('[data-open-shape]').click();
+      await expect(page.getByRole('heading', { name: 'Roles & Positional Shape' })).toBeVisible();
+      await expect(page.locator('.flm-shape-player')).toHaveCount(11);
+      await page.locator('[data-role-slot="RST"]').selectOption('Target Man');
+      await page.locator('[data-apply-roles]').click();
+      await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
+
+      await page.locator('[data-open-subs]').click();
       await page.locator('[data-apply-sub]').click();
       await page.locator('[data-close-manager]').last().click();
       await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
