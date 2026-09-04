@@ -31,7 +31,7 @@ jobs:
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       FLM_BATCH_OFFSET: ${{ github.event_name == 'push' && '8' || github.event.inputs.offset || '0' }}
-      FLM_BATCH_COUNT: ${{ github.event_name == 'push' && '12' || github.event.inputs.count || '8' }}
+      FLM_BATCH_COUNT: ${{ github.event_name == 'push' && '8' || github.event.inputs.count || '8' }}
       FLM_REQUEST_DELAY_MS: '7000'
       FLM_DAILY_RESERVE: '3'
     steps:
@@ -59,8 +59,10 @@ jobs:
           if (!clubs.length) throw new Error('No clubs imported.');
           if (players.length < clubs.length * 15) throw new Error('Squad coverage is unexpectedly low.');
           if (players.some(p => p.isPlaceholder)) throw new Error('Imported batch contains placeholders.');
+          if (new Set(players.map(p => p.id)).size !== players.length) throw new Error('Imported batch still contains duplicate player IDs.');
           if (players.some(p => !p.attributes?.technical || !p.attributes?.mental || !p.attributes?.physical)) throw new Error('Imported player missing attribute blocks.');
-          console.log(`Validated ${clubs.length} clubs and ${players.length} players.`);
+          console.log(`Validated ${clubs.length} clubs and ${players.length} unique players.`);
+          console.log(`Membership conflicts resolved: ${report.result.squadMembershipConflicts ?? 0}`);
           console.log(`Remaining daily requests: ${report.usage.lastKnownRemainingDailyRequests ?? 'unknown'}`);
           NODE
       - name: Build merged current-database preview
@@ -70,7 +72,9 @@ jobs:
       - name: Promote validated database batch
         if: ${{ github.event_name == 'push' || github.event.inputs.promote == 'true' }}
         run: |
-          cp artifacts/api-football-english-db-v1/merged-current/*.json data/current/
+          for file in metadata.json leagues.json clubs.json players.json managers.json; do
+            cp "artifacts/api-football-english-db-v1/merged-current/$file" "data/current/$file"
+          done
           node scripts/validate-database.mjs data/current
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -82,9 +86,10 @@ jobs:
           git commit -m "Import API-Football English squad batch ${FLM_BATCH_OFFSET}-${FLM_BATCH_COUNT}"
           git push origin HEAD:main
       - name: Upload sanitised FLM batch
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: api-football-english-db-v1-${{ github.run_id }}
           path: artifacts/api-football-english-db-v1
           retention-days: 3
-          if-no-files-found: error
+          if-no-files-found: warn
