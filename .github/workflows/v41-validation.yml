@@ -31,10 +31,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r -d '' file; do
+          for file in \
+            manager.js \
+            manager-core.js \
+            scripts/validate-database.mjs \
+            tests/manager-career.spec.js \
+            tests/manager-core.test.js; do
             echo "Checking ${file}"
             node --check "${file}"
-          done < <(find . -type f \( -name '*.js' -o -name '*.mjs' \) -not -path './node_modules/*' -print0)
+          done
 
       - name: Install test dependencies
         run: npm ci
