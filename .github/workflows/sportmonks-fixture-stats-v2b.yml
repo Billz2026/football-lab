@@ -1,0 +1,50 @@
+name: Sportmonks fixture player stats v2b
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/probe-sportmonks-fixture-player-stats.mjs'
+      - '.github/workflows/sportmonks-fixture-stats-v2b.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sportmonks-fixture-player-stats-v2b
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify secret is configured
+        shell: bash
+        env:
+          SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${SPORTMONKS_API_TOKEN:-}"
+
+      - name: Probe fixture-level player statistics
+        env:
+          SPORTMONKS_API_TOKEN: ${{ secrets.SPORTMONKS_API_TOKEN }}
+        run: node scripts/probe-sportmonks-fixture-player-stats.mjs artifacts/sportmonks-fixture-player-stats-report.json
+
+      - name: Upload sanitised fixture statistics report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: sportmonks-fixture-player-stats-${{ github.run_id }}
+          path: artifacts/sportmonks-fixture-player-stats-report.json
+          if-no-files-found: error
+          retention-days: 3
