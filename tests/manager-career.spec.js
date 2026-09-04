@@ -39,6 +39,7 @@ test('live match hard-stops at half-time, supports positional roles and persists
 
   await page.locator('[data-open-subs]').click();
   await expect(page.locator('[data-sub-in] option')).not.toHaveCount(0);
+  await page.locator('[data-sub-out]').selectOption({ index: 1 });
   await page.locator('[data-apply-sub]').click();
   await expect(page.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
   await page.locator('[data-close-manager]').last().click();
