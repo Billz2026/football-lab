@@ -12,9 +12,9 @@ import {
   makeSubstitution,
   setPlayerRole,
   swapShapePlayers
-} from './matchday-engine-v043.js?v=0.4.3';
+} from './matchday-engine-v0431.js?v=0.4.3.1';
 
-const STYLE_ID = 'flm-live-match-v043-style';
+const STYLE_ID = 'flm-live-match-v0431-style';
 const BASE_STEP_MS = 650;
 
 function esc(value) {
