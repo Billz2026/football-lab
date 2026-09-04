@@ -12,7 +12,7 @@ import {
   makeSubstitution,
   setPlayerRole,
   swapShapePlayers
-} from '../matchday-engine-v043.js';
+} from '../matchday-engine-v0431.js';
 
 const groups = ['GK','DEF','DEF','DEF','DEF','MID','MID','MID','ATT','ATT','ATT','MID','ATT','DEF','MID','ATT','DEF','MID'];
 const positions = ['GK','DR','DC','DC','DL','MC','MC','AMC','AMR','ST','AML','DMC','ST','DC','MC','ST','DR','ML'];
@@ -75,18 +75,24 @@ test('changing formation rebuilds the live positional shape and roles can be edi
   assert.equal(getUserShape(state,c,db).assignments.find(a=>a.slotId===striker.id).role,'Target Man');
 });
 
-test('positional swaps and substitutions keep the live shape valid',()=>{
+test('positional swaps and substitutions preserve the exact vacated slot',()=>{
   const c=career(); let state=createInteractiveMatch(c,db);
   const shape=getUserShape(state,c,db);
   const cmSlots=shape.slots.filter(s=>['CM','DM'].includes(s.family));
   state=swapShapePlayers(state,cmSlots[0].id,cmSlots[1].id,c,db).state;
   assert.equal(new Set(getUserShape(state,c,db).assignments.map(a=>a.playerId)).size,11);
+
   const lineup=state.userClubId===state.homeClubId?state.homeLineupIds:state.awayLineupIds;
-  const result=makeSubstitution(state,lineup.at(-1),state.userBenchIds[0],db,c);
+  const outId=lineup.at(-1);
+  const inId=state.userBenchIds[0];
+  const vacatedSlot=getUserShape(state,c,db).assignments.find(a=>a.playerId===outId).slotId;
+  const result=makeSubstitution(state,outId,inId,db,c);
   state=result.state;
+
   assert.equal(state.substitutions.length,1);
   assert.equal(MAX_SUBSTITUTIONS,5);
-  assert.ok(getUserShape(state,c,db).assignments.some(a=>a.playerId===state.userBenchIds[0]));
+  const incomingAssignment=getUserShape(state,c,db).assignments.find(a=>a.playerId===inId);
+  assert.equal(incomingAssignment.slotId,vacatedSlot);
 });
 
 test('full-time career persists tactical setup for the next match',()=>{
