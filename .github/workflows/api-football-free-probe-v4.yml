@@ -1,0 +1,47 @@
+name: API-Football Free Plan Capability Probe v4
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/probe-api-football-free-v4.mjs'
+      - '.github/workflows/api-football-free-probe-v4.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify API-Football secret
+        shell: bash
+        run: |
+          if [ -z "$API_FOOTBALL_KEY" ]; then
+            echo "API_FOOTBALL_KEY repository secret is missing."
+            exit 1
+          fi
+          echo "API-Football secret is configured."
+
+      - name: Run throttled capability probe
+        run: node scripts/probe-api-football-free-v4.mjs artifacts/api-football-free-probe-v4.json
+
+      - name: Upload sanitised report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-football-free-probe-v4-${{ github.run_id }}
+          path: artifacts/api-football-free-probe-v4.json
+          if-no-files-found: error
+          retention-days: 3
