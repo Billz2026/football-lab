@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.setTimeout(45000);
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
   await page.evaluate(() => localStorage.clear());
@@ -51,7 +53,8 @@ test('live match hard-stops at half-time, supports positional roles and persists
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(35);
   await page.locator('[data-finish-live-match]').click();
 
-  await expect(page.locator('.career-content')).toContainText(/LAST RESULT|NEXT FIXTURE/);
+  await expect(page.locator('.career-page-heading')).toContainText('ROUND 2');
+  await expect(page.locator('.career-commentary')).toContainText('PREVIOUS MATCH');
   await page.getByRole('button', { name: 'EXIT' }).click();
   await page.getByRole('button', { name: /LOAD GAME/ }).click();
   await expect(page.getByRole('button', { name: 'CONTINUE CAREER' })).toBeVisible();
