@@ -2,12 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   MAX_SUBSTITUTIONS,
+  PLAYER_DUTIES,
   advanceInteractiveMatch,
   changeTactics,
   completeInteractiveRound,
   createInteractiveMatch,
-  makeSubstitution
-} from '../matchday-engine-v041.js';
+  makeSubstitution,
+  setPlayerDuty
+} from '../matchday-engine-v042.js';
 
 const groups = ['GK', 'DEF', 'DEF', 'DEF', 'DEF', 'MID', 'MID', 'MID', 'ATT', 'ATT', 'ATT', 'MID', 'ATT', 'DEF', 'MID', 'ATT', 'DEF', 'MID'];
 const clubs = Array.from({ length: 8 }, (_, index) => ({ id: `club-${index + 1}`, name: `Club ${index + 1}`, reputation: 7000 + index * 60, isPlaceholder: false }));
@@ -56,19 +58,22 @@ function career() {
 
 const db = { clubs, players };
 
-test('live engine supports tactical changes and a substitution before finalising the round', () => {
+test('live engine supports tactical changes, duties and a substitution before finalising the round', () => {
   const original = career();
   let state = createInteractiveMatch(original, db);
   for (let minute = 0; minute < 30; minute += 1) state = advanceInteractiveMatch(state, original, db).state;
 
   const lineup = state.userClubId === state.homeClubId ? state.homeLineupIds : state.awayLineupIds;
-  const changed = changeTactics(state, { formation: '5-3-2', mentality: 'Defensive', tempo: 'Slow', defensiveLine: 'Low' });
-  state = changed.state;
+  state = changeTactics(state, { formation: '5-3-2', mentality: 'Defensive', tempo: 'Slow', defensiveLine: 'Low' }).state;
   assert.equal(state.tactics.formation, '5-3-2');
   assert.equal(state.tactics.mentality, 'Defensive');
 
-  const substitution = makeSubstitution(state, lineup.at(-1), state.userBenchIds[0], db);
-  state = substitution.state;
+  const dutyPlayer = lineup.find(id => players.find(player => player.id === id)?.positionGroup === 'MID');
+  state = setPlayerDuty(state, dutyPlayer, 'Attack', db).state;
+  assert.equal(state.playerDuties[dutyPlayer], 'Attack');
+  assert.deepEqual(PLAYER_DUTIES, ['Defend', 'Support', 'Attack']);
+
+  state = makeSubstitution(state, lineup.at(-1), state.userBenchIds[0], db).state;
   assert.equal(state.substitutions.length, 1);
   assert.equal(MAX_SUBSTITUTIONS, 5);
 
@@ -78,7 +83,10 @@ test('live engine supports tactical changes and a substitution before finalising
   assert.ok(finished.table.every(row => row.played === 1));
   assert.equal(finished.lastMatch.substitutions.length, 1);
   assert.equal(finished.lastMatch.tacticsAtFullTime.formation, '5-3-2');
-  assert.ok(finished.lastMatch.events.length >= 30);
+  assert.equal(finished.lastMatch.playerDuties[dutyPlayer], 'Attack');
+  assert.ok(finished.lastMatch.commentaryHistory.length >= 30);
+  assert.ok(finished.lastMatch.events.length < finished.lastMatch.commentaryHistory.length);
+  assert.ok(finished.lastMatch.commentaryHistory.some(event => event.type === 'situation'));
 });
 
 test('future minutes change when the manager changes tactical approach', () => {
