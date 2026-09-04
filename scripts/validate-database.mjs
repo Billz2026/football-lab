@@ -49,6 +49,7 @@ async function main() {
   const clubIds = uniqueIds(clubs, 'club', errors);
   uniqueIds(players, 'player', errors);
   uniqueIds(managers, 'manager', errors);
+  const externalPlayerIds = new Set();
 
   assert(metadata.schemaVersion === '1.0.0', 'metadata.schemaVersion must be 1.0.0', errors);
   assert(metadata.scope?.targetClubCount === 116, 'metadata targetClubCount must be 116 for the England v1 scope', errors);
@@ -60,10 +61,31 @@ async function main() {
 
   players.forEach(player => {
     assert(clubIds.has(player.clubId), `${player.id} references unknown club ${player.clubId}`, errors);
+    assert(['GK', 'DEF', 'MID', 'ATT'].includes(player.positionGroup), `${player.id} has invalid positionGroup ${player.positionGroup}`, errors);
+    assert(Boolean(player.primaryPosition), `${player.id} is missing a primary position`, errors);
     assert(Number.isInteger(player.currentAbility) && player.currentAbility >= 1 && player.currentAbility <= 200, `${player.id} currentAbility must be 1-200`, errors);
     assert(Number.isInteger(player.potentialAbility) && player.potentialAbility >= 1 && player.potentialAbility <= 200, `${player.id} potentialAbility must be 1-200`, errors);
     assert(player.potentialAbility >= player.currentAbility - 20, `${player.id} potentialAbility is implausibly below currentAbility`, errors);
     validateAttributes(player, errors);
+    const externalId = player.externalIds?.apiFootball;
+    if (externalId != null) {
+      assert(!externalPlayerIds.has(externalId), `duplicate API-Football player id: ${externalId}`, errors);
+      externalPlayerIds.add(externalId);
+    }
+  });
+
+  const playableIds = metadata.playableDemo?.clubIds || [];
+  assert(playableIds.length === 8, 'V0.3 playableDemo must freeze exactly eight clubs', errors);
+  assert(new Set(playableIds).size === playableIds.length, 'playableDemo contains duplicate club ids', errors);
+  playableIds.forEach(clubId => {
+    const club = clubs.find(item => item.id === clubId);
+    const squad = players.filter(player => player.clubId === clubId && !player.isPlaceholder);
+    assert(Boolean(club) && !club?.isPlaceholder, `playableDemo references missing or placeholder club ${clubId}`, errors);
+    assert(squad.length >= 18, `${clubId} needs at least 18 real players for the playable demo`, errors);
+    assert(squad.filter(player => player.positionGroup === 'GK').length >= 1, `${clubId} needs a goalkeeper`, errors);
+    assert(squad.filter(player => player.positionGroup === 'DEF').length >= 4, `${clubId} needs at least four defenders`, errors);
+    assert(squad.filter(player => player.positionGroup === 'MID').length >= 3, `${clubId} needs at least three midfielders`, errors);
+    assert(squad.filter(player => player.positionGroup === 'ATT').length >= 2, `${clubId} needs at least two attackers`, errors);
   });
 
   managers.forEach(manager => {

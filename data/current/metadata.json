@@ -26,6 +26,21 @@
     "notes": "Development database only. No provider logos or player photos are stored. Publication/competition-rights requirements must be reviewed before a commercial release."
   },
   "warning": "Development snapshot: imported names, broad positions, reported ages and squad membership come from API-Football seasonless squad endpoints. 2026/27 season statistics are not available on the free tier, so attributes are clearly marked low-confidence FLM positional baselines rather than claimed real-world ratings.",
+  "playableDemo": {
+    "version": "0.3.0",
+    "competitionName": "Football Lab Invitational",
+    "format": "single-round-robin",
+    "clubIds": [
+      "flm-club-api-football-35",
+      "flm-club-api-football-42",
+      "flm-club-api-football-66",
+      "flm-club-api-football-55",
+      "flm-club-api-football-51",
+      "flm-club-api-football-49",
+      "flm-club-api-football-1346",
+      "flm-club-api-football-52"
+    ]
+  },
   "importProgress": {
     "eng-premier-league": {
       "realClubs": 8,
