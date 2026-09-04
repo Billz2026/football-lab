@@ -1,375 +1,122 @@
 import {
+  FORMATION_LAYOUTS,
   MAX_SUBSTITUTIONS,
-  PLAYER_DUTIES,
+  ROLE_DEFINITIONS,
   TACTIC_OPTIONS,
   advanceInteractiveMatch,
   changeTactics,
   completeInteractiveRound,
   createInteractiveMatch,
   getOpponentSnapshot,
+  getUserShape,
   makeSubstitution,
-  setPlayerDuty
-} from './matchday-engine-v042.js?v=0.4.2';
+  setPlayerRole,
+  swapShapePlayers
+} from './matchday-engine-v043.js?v=0.4.3';
 
-const STYLE_ID = 'flm-live-match-v042-style';
-const BASE_STEP_MS = 700;
+const STYLE_ID = 'flm-live-match-v043-style';
+const BASE_STEP_MS = 650;
 
 function esc(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+  return String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+}
+function club(db,id){ return db.clubs.find(item=>item.id===id); }
+function player(db,id){ return db.players.find(item=>item.id===id); }
+function sleep(ms){ return new Promise(resolve=>setTimeout(resolve,ms)); }
+function userSide(state){ return state.userClubId===state.homeClubId?'home':'away'; }
+function currentUserLineup(state){ return userSide(state)==='home'?state.homeLineupIds:state.awayLineupIds; }
+function rating(value){ return Number(value||6.5).toFixed(1); }
+function possession(state){ const total=state.stats.home.possessionTicks+state.stats.away.possessionTicks; const home=total?Math.round(state.stats.home.possessionTicks/total*100):50; return [home,100-home]; }
+function tacticLabel(key){ return key==='defensiveLine'?'DEFENSIVE LINE':key.toUpperCase(); }
+function preset(name){
+  if(name==='protect') return {formation:'5-3-2',mentality:'Defensive',pressing:'Low',tempo:'Slow',passing:'Mixed',width:'Narrow',defensiveLine:'Low'};
+  if(name==='chase') return {formation:'3-4-3',mentality:'Attacking',pressing:'High',tempo:'High',passing:'Direct',width:'Wide',defensiveLine:'High'};
+  return {formation:'4-2-3-1',mentality:'Balanced',pressing:'Standard',tempo:'Standard',passing:'Mixed',width:'Balanced',defensiveLine:'Standard'};
+}
+function lockShell(locked){
+  document.querySelectorAll('[data-career-tab], [data-exit-career], [data-save-career]').forEach(button=>{ button.disabled=locked; button.setAttribute('aria-disabled',String(locked)); });
 }
 
-function ensureStyles() {
-  if (document.getElementById(STYLE_ID)) return;
-  const style = document.createElement('style');
-  style.id = STYLE_ID;
-  style.textContent = `
-    .flm-live-match{position:relative;display:grid;gap:18px;min-height:700px}
-    .flm-live-scoreboard{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;padding:18px 22px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border-radius:18px}
-    .flm-live-team{display:grid;gap:4px}.flm-live-team:last-child{text-align:right}.flm-live-team small{opacity:.62;font-size:.72rem;letter-spacing:.14em}.flm-live-team strong{font-size:1.2rem}
-    .flm-live-score{display:grid;grid-template-columns:auto auto auto;gap:12px;align-items:center;text-align:center}.flm-live-score b{font-size:2.2rem;line-height:1}.flm-live-score span{opacity:.45}.flm-live-clock{grid-column:1/-1;font-variant-numeric:tabular-nums;font-weight:900;letter-spacing:.12em;font-size:.84rem;color:#e6bf52}
-    .flm-live-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);gap:18px}
-    .flm-commentary-panel,.flm-side-panel{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.025);border-radius:18px;padding:18px}.flm-side-panel{display:grid;align-content:start;gap:18px}
-    .flm-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.flm-panel-head p{margin:0;font-size:.72rem;letter-spacing:.14em;opacity:.62}.flm-panel-head strong{font-size:.78rem}
-    .flm-commentary-feed{height:450px;overflow:auto;display:flex;flex-direction:column;gap:7px;padding-right:4px;scroll-behavior:smooth}
-    .flm-commentary-line{display:grid;grid-template-columns:46px 1fr;gap:10px;padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.024);border:1px solid transparent;line-height:1.42}.flm-commentary-line b{font-variant-numeric:tabular-nums;color:#928a79}.flm-commentary-line.goal{border-color:rgba(230,191,82,.52);background:rgba(230,191,82,.12);font-weight:850}.flm-commentary-line.yellow{border-color:rgba(255,221,69,.3)}.flm-commentary-line.red{border-color:rgba(255,84,84,.52);background:rgba(255,84,84,.09);font-weight:850}.flm-commentary-line.injury{border-color:rgba(255,145,77,.42);background:rgba(255,145,77,.07)}.flm-commentary-line.substitution,.flm-commentary-line.tactical,.flm-commentary-line.instruction,.flm-commentary-line.instruction-change{border-color:rgba(100,183,255,.26);background:rgba(100,183,255,.06)}.flm-commentary-line.situation{border-color:rgba(180,160,255,.2);background:rgba(180,160,255,.045)}.flm-commentary-line.marker{opacity:.86;font-weight:900;letter-spacing:.04em}
-    .flm-speed-controls{display:flex;gap:8px;flex-wrap:wrap}.flm-speed-controls button,.flm-manager-actions button{min-width:48px;border:1px solid rgba(255,255,255,.14);background:#141414;color:#fff;border-radius:10px;padding:9px 11px;font-weight:850;cursor:pointer}.flm-speed-controls button.is-active{border-color:#e6bf52;color:#e6bf52}.flm-speed-controls button:disabled,.flm-manager-actions button:disabled{opacity:.45;cursor:not-allowed}
-    .flm-stat-list{display:grid;gap:10px}.flm-stat-row{display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center;padding:4px 0}.flm-stat-row span{text-align:center;font-size:.72rem;opacity:.64}.flm-stat-row strong:last-child{text-align:right}
-    .flm-manager-box{padding-top:15px;border-top:1px solid rgba(255,255,255,.08)}.flm-manager-box h3{margin:0 0 10px;font-size:.82rem;letter-spacing:.12em}.flm-tactic-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}.flm-tactic-summary span{padding:8px;border-radius:9px;background:rgba(255,255,255,.035);font-size:.68rem}.flm-tactic-summary b{display:block;margin-top:2px;color:#e6bf52;font-size:.78rem}.flm-manager-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.flm-manager-actions button{width:100%;border-color:rgba(230,191,82,.28)}
-    .flm-goal-flash{position:absolute;inset:0;z-index:12;display:grid;place-items:center;pointer-events:none;background:rgba(230,191,82,.97);color:#080704;border-radius:22px;opacity:0;transform:scale(.985);transition:opacity .12s ease,transform .12s ease}.flm-goal-flash.is-visible{opacity:1;transform:scale(1)}.flm-goal-flash-inner{text-align:center;padding:30px}.flm-goal-flash .goal-word{display:block;font-size:clamp(3.6rem,11vw,7.4rem);line-height:.88;font-weight:1000;letter-spacing:-.05em}.flm-goal-flash strong{display:block;font-size:1.35rem;margin-top:16px}.flm-goal-flash small{display:block;margin-top:7px;font-weight:900;letter-spacing:.12em}
-    .flm-match-modal{position:absolute;inset:0;z-index:10;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.82);backdrop-filter:blur(7px);border-radius:22px}.flm-match-modal.is-open{display:flex}.flm-match-dialog{width:min(940px,100%);max-height:90%;overflow:auto;border:1px solid rgba(230,191,82,.26);border-radius:18px;background:#0b0a08;padding:20px;box-shadow:0 26px 80px rgba(0,0,0,.45)}
-    .flm-dialog-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:16px}.flm-dialog-head h3{margin:3px 0 0;font-size:1.5rem}.flm-dialog-head p{margin:0;font-size:.7rem;letter-spacing:.12em;color:#e6bf52}.flm-dialog-head button{border:1px solid rgba(255,255,255,.14);background:#141414;color:#fff;border-radius:9px;padding:8px 10px;cursor:pointer}
-    .flm-preset-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}.flm-preset-row button{border:1px solid rgba(230,191,82,.23);background:rgba(230,191,82,.05);color:#fff;border-radius:10px;padding:10px;font-weight:850;cursor:pointer}.flm-tactic-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.flm-tactic-field{display:grid;gap:6px}.flm-tactic-field span{font-size:.67rem;letter-spacing:.11em;opacity:.62}.flm-tactic-field select,.flm-sub-select select,.flm-duty-row select{width:100%;min-height:43px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:#141414;color:#fff;padding:0 10px}
-    .flm-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.flm-dialog-actions button{border:1px solid rgba(255,255,255,.14);background:#141414;color:#fff;border-radius:10px;padding:10px 15px;font-weight:850;cursor:pointer}.flm-dialog-actions button.primary{background:#e6bf52;color:#080704;border-color:#e6bf52}
-    .flm-sub-status{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;margin-bottom:12px;border-radius:10px;background:rgba(230,191,82,.06);font-size:.76rem}.flm-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.flm-sub-select{display:grid;gap:6px}.flm-sub-select span{font-size:.68rem;letter-spacing:.1em;opacity:.62}
-    .flm-player-live-list,.flm-duty-list{display:grid;gap:6px;margin-top:14px;max-height:360px;overflow:auto}.flm-player-live-row{display:grid;grid-template-columns:50px 1fr 74px 64px;gap:8px;align-items:center;padding:8px 9px;border:1px solid rgba(255,255,255,.06);border-radius:9px;background:rgba(255,255,255,.02)}.flm-player-live-row span:first-child{font-size:.67rem;color:#e6bf52;font-weight:900}.flm-player-live-row strong{font-size:.78rem}.flm-player-live-row small{text-align:right;font-size:.67rem;opacity:.68}.flm-player-live-row b{text-align:right;font-size:.78rem}.flm-player-live-row.is-injured{border-color:rgba(255,145,77,.32)}
-    .flm-duty-row{display:grid;grid-template-columns:48px minmax(0,1fr) 145px;gap:10px;align-items:center;padding:8px 9px;border:1px solid rgba(255,255,255,.06);border-radius:9px}.flm-duty-row span{font-size:.68rem;color:#e6bf52;font-weight:900}.flm-duty-row strong{font-size:.78rem}
-    .flm-half-time-card{display:none;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:18px;border:1px solid rgba(230,191,82,.45);border-radius:16px;background:linear-gradient(135deg,rgba(230,191,82,.12),rgba(230,191,82,.035))}.flm-live-match.is-half-time .flm-half-time-card{display:grid}.flm-half-time-card h3{margin:0 0 5px;font-size:1.3rem}.flm-half-time-card p{margin:0;opacity:.72}.flm-half-time-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}.flm-half-time-actions button{border:1px solid rgba(255,255,255,.14);background:#141414;color:#fff;border-radius:10px;padding:10px 12px;font-weight:850;cursor:pointer}.flm-half-time-actions button.primary{background:#e6bf52;color:#080704;border-color:#e6bf52}
-    .flm-ft-card{display:none;border:1px solid rgba(230,191,82,.35);background:rgba(230,191,82,.075);border-radius:16px;padding:16px;align-items:center;justify-content:space-between;gap:16px}.flm-live-match.is-full-time .flm-ft-card{display:flex}.flm-ft-card h3{margin:0 0 4px}.flm-ft-card p{margin:0;opacity:.72}.flm-ft-card button{border:0;border-radius:12px;padding:12px 18px;background:#e6bf52;color:#080704;font-weight:900;cursor:pointer}
-    .flm-opposition-card{display:grid;gap:12px}.flm-opposition-shape{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.flm-opposition-shape span{padding:10px;border-radius:10px;background:rgba(255,255,255,.035);font-size:.72rem}.flm-opposition-shape b{display:block;color:#e6bf52;margin-top:3px}.flm-live-lock-note{font-size:.72rem;opacity:.6}
-    @media(max-width:860px){.flm-live-grid{grid-template-columns:1fr}.flm-commentary-feed{height:360px}.flm-live-scoreboard{grid-template-columns:1fr auto 1fr;padding:14px}.flm-live-team strong{font-size:.95rem}.flm-live-score b{font-size:1.7rem}.flm-tactic-form,.flm-sub-grid{grid-template-columns:1fr}.flm-preset-row{grid-template-columns:1fr}.flm-tactic-summary{grid-template-columns:1fr 1fr}.flm-half-time-card{grid-template-columns:1fr}.flm-half-time-actions{justify-content:flex-start}.flm-duty-row{grid-template-columns:45px 1fr}.flm-duty-row select{grid-column:1/-1}}
-    @media(prefers-reduced-motion:reduce){.flm-goal-flash{transition:none}.flm-commentary-feed{scroll-behavior:auto}}
-  `;
-  document.head.appendChild(style);
+function ensureStyles(){
+  if(document.getElementById(STYLE_ID)) return;
+  const style=document.createElement('style'); style.id=STYLE_ID; style.textContent=`
+  .flm-live-match{position:relative;display:grid;gap:16px;min-height:700px}
+  .flm-live-scoreboard{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:16px 20px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border-radius:16px}
+  .flm-live-team{display:grid;gap:4px}.flm-live-team:last-child{text-align:right}.flm-live-team small{opacity:.6;font-size:.68rem;letter-spacing:.13em}.flm-live-team strong{font-size:1.12rem}
+  .flm-live-score{display:grid;grid-template-columns:auto auto auto;gap:11px;align-items:center;text-align:center}.flm-live-score b{font-size:2.15rem}.flm-live-score span{opacity:.45}.flm-live-clock{grid-column:1/-1;color:#e6bf52;font-weight:900;letter-spacing:.12em;font-size:.8rem}
+  .flm-live-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.82fr);gap:16px}.flm-panel{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.025);border-radius:16px;padding:16px}
+  .flm-panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.flm-panel-head p{margin:0;font-size:.68rem;letter-spacing:.13em;opacity:.62}.flm-panel-head strong{font-size:.75rem}
+  .flm-commentary-feed{height:430px;overflow:auto;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth}.flm-commentary-line{display:grid;grid-template-columns:43px 1fr;gap:9px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.024);border:1px solid transparent;line-height:1.4}.flm-commentary-line b{color:#948d80}.flm-commentary-line.goal{border-color:rgba(230,191,82,.55);background:rgba(230,191,82,.11);font-weight:850}.flm-commentary-line.red{border-color:rgba(255,80,80,.45);background:rgba(255,80,80,.07)}.flm-commentary-line.injury{border-color:rgba(255,145,70,.34)}.flm-commentary-line.role,.flm-commentary-line.role-change,.flm-commentary-line.shape-change,.flm-commentary-line.tactical,.flm-commentary-line.substitution{border-color:rgba(100,183,255,.26);background:rgba(100,183,255,.05)}
+  .flm-side-stack{display:grid;align-content:start;gap:14px}.flm-stat-list{display:grid;gap:8px}.flm-stat-row{display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center}.flm-stat-row span{text-align:center;font-size:.69rem;opacity:.64}.flm-stat-row strong:last-child{text-align:right}
+  .flm-tactic-summary{display:grid;grid-template-columns:1fr 1fr;gap:6px}.flm-tactic-summary span{padding:7px 8px;border-radius:8px;background:rgba(255,255,255,.035);font-size:.65rem}.flm-tactic-summary b{display:block;margin-top:2px;color:#e6bf52;font-size:.75rem}.flm-manager-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.flm-manager-actions button,.flm-speed-controls button,.flm-dialog-actions button,.flm-preset-row button{border:1px solid rgba(255,255,255,.14);background:#141414;color:#fff;border-radius:9px;padding:9px 10px;font-weight:850;cursor:pointer}.flm-manager-actions button{border-color:rgba(230,191,82,.26)}
+  .flm-speed-controls{display:flex;gap:7px;flex-wrap:wrap}.flm-speed-controls button.is-active{border-color:#e6bf52;color:#e6bf52}.flm-speed-controls button:disabled{opacity:.42}.flm-live-note{font-size:.7rem;opacity:.6}
+  .flm-goal-flash{position:absolute;inset:0;z-index:30;display:grid;place-items:center;pointer-events:none;background:rgba(230,191,82,.97);color:#080704;border-radius:20px;opacity:0;transform:scale(.985);transition:.12s}.flm-goal-flash.is-visible{opacity:1;transform:scale(1)}.flm-goal-flash-inner{text-align:center;padding:30px}.flm-goal-flash .goal-word{display:block;font-size:clamp(3.5rem,10vw,7rem);font-weight:1000;line-height:.9}.flm-goal-flash strong{display:block;font-size:1.25rem;margin-top:13px}.flm-goal-flash small{display:block;margin-top:6px;font-weight:900;letter-spacing:.12em}
+  .flm-match-modal{position:absolute;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.84);backdrop-filter:blur(7px);border-radius:20px}.flm-match-modal.is-open{display:flex}.flm-match-dialog{width:min(980px,100%);max-height:90%;overflow:auto;border:1px solid rgba(230,191,82,.26);border-radius:16px;background:#0b0a08;padding:18px;box-shadow:0 26px 80px rgba(0,0,0,.5)}
+  .flm-dialog-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.flm-dialog-head h3{margin:2px 0 0;font-size:1.45rem}.flm-dialog-head p{margin:0;font-size:.67rem;letter-spacing:.12em;color:#e6bf52}.flm-dialog-head button{border:1px solid rgba(255,255,255,.14);background:#141414;color:#fff;border-radius:8px;padding:7px 9px;cursor:pointer}.flm-preset-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}.flm-tactic-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.flm-tactic-field,.flm-sub-select,.flm-role-select{display:grid;gap:5px}.flm-tactic-field span,.flm-sub-select span,.flm-role-select span{font-size:.64rem;letter-spacing:.1em;opacity:.62}.flm-tactic-field select,.flm-sub-select select,.flm-role-select select{width:100%;min-height:41px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:#141414;color:#fff;padding:0 9px}.flm-dialog-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}.flm-dialog-actions .primary{background:#e6bf52;color:#080704;border-color:#e6bf52}
+  .flm-sub-status{display:flex;justify-content:space-between;gap:10px;padding:9px 10px;margin-bottom:10px;border-radius:9px;background:rgba(230,191,82,.06);font-size:.72rem}.flm-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.flm-player-live-list{display:grid;gap:5px;margin-top:12px;max-height:300px;overflow:auto}.flm-player-live-row{display:grid;grid-template-columns:54px minmax(0,1fr) 90px 55px 48px;gap:7px;align-items:center;padding:7px 8px;border:1px solid rgba(255,255,255,.06);border-radius:8px;background:rgba(255,255,255,.02)}.flm-player-live-row span:first-child{color:#e6bf52;font-size:.65rem;font-weight:900}.flm-player-live-row strong{font-size:.75rem}.flm-player-live-row small{text-align:right;font-size:.64rem;opacity:.66}.flm-player-live-row b{text-align:right;font-size:.75rem}
+  .flm-shape-layout{display:grid;grid-template-columns:minmax(380px,1.05fr) minmax(320px,.95fr);gap:14px}.flm-shape-pitch{position:relative;min-height:600px;border:1px solid rgba(230,191,82,.32);border-radius:16px;background:linear-gradient(90deg,rgba(34,93,53,.58),rgba(27,77,45,.7));overflow:hidden}.flm-shape-pitch:before{content:'';position:absolute;inset:5%;border:1px solid rgba(255,255,255,.32);border-radius:2px}.flm-shape-pitch:after{content:'';position:absolute;left:5%;right:5%;top:50%;border-top:1px solid rgba(255,255,255,.3)}.flm-shape-player{position:absolute;transform:translate(-50%,-50%);width:112px;padding:7px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:rgba(8,7,4,.9);text-align:center;z-index:2}.flm-shape-player strong{display:block;font-size:.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.flm-shape-player span{display:block;color:#e6bf52;font-size:.6rem;font-weight:900;letter-spacing:.07em}.flm-shape-player small{display:block;margin-top:2px;font-size:.56rem;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.flm-shape-player.is-poor{border-color:rgba(255,90,90,.55)}.flm-shape-player.is-good{border-color:rgba(100,210,130,.45)}
+  .flm-role-list{display:grid;gap:7px;max-height:600px;overflow:auto}.flm-role-row{display:grid;grid-template-columns:46px minmax(120px,1fr) minmax(150px,1fr);gap:7px;align-items:center;padding:7px;border:1px solid rgba(255,255,255,.06);border-radius:8px}.flm-role-row>span{font-size:.64rem;color:#e6bf52;font-weight:900}.flm-role-row strong{font-size:.72rem}.flm-role-row select{min-height:36px;border:1px solid rgba(255,255,255,.14);background:#141414;color:#fff;border-radius:8px;padding:0 7px;font-size:.68rem}.flm-shape-switch{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:10px}.flm-shape-switch select{min-height:40px;border:1px solid rgba(255,255,255,.14);background:#141414;color:#fff;border-radius:8px;padding:0 8px}.flm-shape-switch button{border:0;border-radius:8px;background:#e6bf52;color:#080704;font-weight:900;padding:0 12px}
+  .flm-opp-card{display:grid;gap:9px}.flm-opp-shape{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.flm-opp-shape div{padding:9px;border-radius:8px;background:rgba(255,255,255,.03)}.flm-opp-shape small{display:block;font-size:.6rem;opacity:.6}.flm-opp-shape strong{display:block;margin-top:2px;color:#e6bf52;font-size:.74rem}
+  .flm-ht-card,.flm-ft-card{display:none;border:1px solid rgba(230,191,82,.36);background:rgba(230,191,82,.07);border-radius:14px;padding:14px;align-items:center;justify-content:space-between;gap:14px}.flm-live-match.is-half-time .flm-ht-card{display:flex}.flm-live-match.is-full-time .flm-ft-card{display:flex}.flm-ht-card h3,.flm-ft-card h3{margin:0 0 3px}.flm-ht-card p,.flm-ft-card p{margin:0;opacity:.7}.flm-ht-card button,.flm-ft-card button{border:0;border-radius:10px;padding:11px 16px;background:#e6bf52;color:#080704;font-weight:900;cursor:pointer}
+  @media(max-width:900px){.flm-live-grid,.flm-shape-layout{grid-template-columns:1fr}.flm-commentary-feed{height:340px}.flm-shape-pitch{min-height:520px}.flm-tactic-form,.flm-sub-grid{grid-template-columns:1fr}.flm-preset-row{grid-template-columns:1fr}.flm-player-live-row{grid-template-columns:48px minmax(0,1fr) 65px 45px}.flm-player-live-row small.role{display:none}}
+  `; document.head.appendChild(style);
 }
 
-function club(db, id) { return db.clubs.find(item => item.id === id); }
-function player(db, id) { return db.players.find(item => item.id === id); }
-function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-function userSide(state) { return state.userClubId === state.homeClubId ? 'home' : 'away'; }
-function currentUserLineup(state) { return userSide(state) === 'home' ? state.homeLineupIds : state.awayLineupIds; }
-function rating(value) { return Number(value || 6.5).toFixed(1); }
-function tacticLabel(key) { return key === 'defensiveLine' ? 'DEFENSIVE LINE' : key.toUpperCase(); }
-
-function lockShell(locked) {
-  document.querySelectorAll('[data-career-tab], [data-exit-career], [data-save-career]').forEach(button => {
-    button.disabled = locked;
-    button.setAttribute('aria-disabled', String(locked));
-  });
-}
-
-function possession(state) {
-  const total = state.stats.home.possessionTicks + state.stats.away.possessionTicks;
-  const home = total ? Math.round(state.stats.home.possessionTicks / total * 100) : 50;
-  return [home, 100 - home];
-}
-
-function preset(name) {
-  if (name === 'protect') return { formation: '5-3-2', mentality: 'Defensive', pressing: 'Low', tempo: 'Slow', passing: 'Mixed', width: 'Narrow', defensiveLine: 'Low' };
-  if (name === 'chase') return { formation: '3-4-3', mentality: 'Attacking', pressing: 'High', tempo: 'High', passing: 'Direct', width: 'Wide', defensiveLine: 'High' };
-  return { formation: '4-2-3-1', mentality: 'Balanced', pressing: 'Standard', tempo: 'Standard', passing: 'Mixed', width: 'Balanced', defensiveLine: 'Standard' };
-}
-
-export async function playLiveMatch({ root, career, completedCareer, db, reducedMotion = false }) {
-  ensureStyles();
-  if (!root) throw new Error('Live match presentation could not initialise.');
-
-  let state = createInteractiveMatch(career, db);
-  const home = club(db, state.homeClubId);
-  const away = club(db, state.awayClubId);
-  let speed = 1;
-  let paused = false;
-  let finished = false;
-  let halfTimeBreak = false;
-  let managerWasPaused = false;
-
+export async function playLiveMatch({root,career,completedCareer,db,reducedMotion=false}){
+  ensureStyles(); if(!root) throw new Error('Live match presentation could not initialise.');
+  let state=createInteractiveMatch(career,db); let speed=1; let paused=false; let finished=false; let halfTimeBreak=false; let managerWasPaused=false;
+  const home=club(db,state.homeClubId), away=club(db,state.awayClubId);
   lockShell(true);
-  root.innerHTML = `
-    <section class="flm-live-match" data-live-match aria-label="Live match centre">
-      <div class="flm-goal-flash" data-goal-flash aria-hidden="true"><div class="flm-goal-flash-inner"><span class="goal-word">GOAL!</span><strong data-goal-scorer></strong><small data-goal-score></small></div></div>
-      <div class="flm-match-modal" data-manager-modal aria-hidden="true"><div class="flm-match-dialog" data-manager-dialog></div></div>
-      <div class="career-page-heading"><div><p class="eyebrow">ROUND ${esc(state.round)}</p><h2>Live Match Centre</h2></div><span class="career-round" data-match-status>LIVE</span></div>
-      <div class="flm-live-scoreboard">
-        <div class="flm-live-team"><small>HOME</small><strong>${esc(home?.name || 'Home')}</strong></div>
-        <div class="flm-live-score"><b data-home-score>0</b><span>—</span><b data-away-score>0</b><div class="flm-live-clock" data-live-clock>00:00</div></div>
-        <div class="flm-live-team"><small>AWAY</small><strong>${esc(away?.name || 'Away')}</strong></div>
-      </div>
-      <div class="flm-live-grid">
-        <article class="flm-commentary-panel">
-          <div class="flm-panel-head"><p>LIVE COMMENTARY</p><strong data-commentary-state>KICK-OFF</strong></div>
-          <div class="flm-commentary-feed" data-commentary-feed aria-live="polite"></div>
-        </article>
-        <aside class="flm-side-panel">
-          <div><div class="flm-panel-head"><p>MATCH STATS</p><strong>LIVE</strong></div><div class="flm-stat-list" data-live-stats></div></div>
-          <div class="flm-manager-box">
-            <h3>MANAGER CONTROL</h3>
-            <div class="flm-tactic-summary" data-tactic-summary></div>
-            <div class="flm-manager-actions">
-              <button type="button" data-open-tactics>TACTICS</button>
-              <button type="button" data-open-subs>SUBSTITUTIONS</button>
-              <button type="button" data-open-instructions>PLAYER DUTIES</button>
-              <button type="button" data-open-ratings>RATINGS</button>
-              <button type="button" data-open-opposition>OPPOSITION</button>
-            </div>
-          </div>
-        </aside>
-      </div>
-      <div class="career-match-actions">
-        <div><strong>MATCH SPEED</strong><span class="flm-live-lock-note">1× is deliberately paced for commentary depth. The match stops automatically at half-time.</span></div>
-        <div class="flm-speed-controls" aria-label="Match speed">
-          <button type="button" data-match-speed="0">PAUSE</button>
-          <button type="button" data-match-speed="1" class="is-active">1×</button>
-          <button type="button" data-match-speed="2">2×</button>
-          <button type="button" data-match-speed="4">4×</button>
-        </div>
-      </div>
-      <div class="flm-half-time-card" data-half-time-card>
-        <div><h3>HALF TIME · <span data-half-time-score></span></h3><p>The clock is stopped. Make any changes you need, then resume the second half.</p></div>
-        <div class="flm-half-time-actions">
-          <button type="button" data-ht-tactics>TACTICS</button>
-          <button type="button" data-ht-subs>SUBSTITUTIONS</button>
-          <button type="button" data-ht-instructions>PLAYER DUTIES</button>
-          <button type="button" class="primary" data-resume-second-half>RESUME SECOND HALF</button>
-        </div>
-      </div>
-      <div class="flm-ft-card"><div><h3>FULL TIME</h3><p data-full-time-score></p></div><button type="button" data-finish-live-match>CONTINUE</button></div>
-    </section>`;
+  root.innerHTML=`<section class="flm-live-match" data-live-match>
+    <div class="flm-goal-flash" data-goal-flash><div class="flm-goal-flash-inner"><span class="goal-word">GOAL!</span><strong data-goal-scorer></strong><small data-goal-score></small></div></div>
+    <div class="flm-match-modal" data-manager-modal aria-hidden="true"><div class="flm-match-dialog" data-manager-dialog></div></div>
+    <div class="career-page-heading"><div><p class="eyebrow">ROUND ${esc(state.round)}</p><h2>Live Match Centre</h2></div><span class="career-round" data-match-status>LIVE</span></div>
+    <div class="flm-live-scoreboard"><div class="flm-live-team"><small>HOME</small><strong>${esc(home?.name||'Home')}</strong></div><div class="flm-live-score"><b data-home-score>0</b><span>—</span><b data-away-score>0</b><div class="flm-live-clock" data-live-clock>00:00</div></div><div class="flm-live-team"><small>AWAY</small><strong>${esc(away?.name||'Away')}</strong></div></div>
+    <div class="flm-live-grid"><article class="flm-panel"><div class="flm-panel-head"><p>LIVE COMMENTARY</p><strong data-commentary-state>KICK-OFF</strong></div><div class="flm-commentary-feed" data-commentary-feed aria-live="polite"></div></article>
+    <aside class="flm-side-stack"><div class="flm-panel"><div class="flm-panel-head"><p>MATCH STATS</p><strong>LIVE</strong></div><div class="flm-stat-list" data-live-stats></div></div><div class="flm-panel"><div class="flm-panel-head"><p>MANAGER CONTROL</p><strong data-shape-label>${esc(state.tactics.formation)}</strong></div><div class="flm-tactic-summary" data-tactic-summary></div><div class="flm-manager-actions"><button data-open-tactics>TACTICS</button><button data-open-subs>SUBSTITUTIONS</button><button data-open-shape>ROLES & SHAPE</button><button data-open-ratings>RATINGS</button><button data-open-opposition>OPPOSITION</button></div></div></aside></div>
+    <div class="career-match-actions"><div><strong>MATCH SPEED</strong><span class="flm-live-note">1× is the full commentary pace. Pause at any time to manage the side.</span></div><div class="flm-speed-controls"><button data-match-speed="0">PAUSE</button><button data-match-speed="1" class="is-active">1×</button><button data-match-speed="2">2×</button><button data-match-speed="4">4×</button></div></div>
+    <div class="flm-ht-card"><div><h3>HALF TIME</h3><p>Score: <span data-half-time-score></span> · Make any changes before restarting.</p></div><button data-resume-second-half>RESUME SECOND HALF</button></div>
+    <div class="flm-ft-card"><div><h3>FULL TIME</h3><p data-full-time-score></p></div><button data-finish-live-match>CONTINUE</button></div>
+  </section>`;
 
-  const shell = root.querySelector('[data-live-match]');
-  const feed = root.querySelector('[data-commentary-feed]');
-  const clock = root.querySelector('[data-live-clock]');
-  const homeScore = root.querySelector('[data-home-score]');
-  const awayScore = root.querySelector('[data-away-score]');
-  const stateLabel = root.querySelector('[data-commentary-state]');
-  const matchStatus = root.querySelector('[data-match-status]');
-  const flash = root.querySelector('[data-goal-flash]');
-  const statsRoot = root.querySelector('[data-live-stats]');
-  const tacticSummary = root.querySelector('[data-tactic-summary]');
-  const modal = root.querySelector('[data-manager-modal]');
-  const dialog = root.querySelector('[data-manager-dialog]');
+  const shell=root.querySelector('[data-live-match]'), feed=root.querySelector('[data-commentary-feed]'), clock=root.querySelector('[data-live-clock]'), homeScore=root.querySelector('[data-home-score]'), awayScore=root.querySelector('[data-away-score]'), stateLabel=root.querySelector('[data-commentary-state]'), matchStatus=root.querySelector('[data-match-status]'), flash=root.querySelector('[data-goal-flash]'), statsRoot=root.querySelector('[data-live-stats]'), tacticSummary=root.querySelector('[data-tactic-summary]'), modal=root.querySelector('[data-manager-modal]'), dialog=root.querySelector('[data-manager-dialog]'), shapeLabel=root.querySelector('[data-shape-label]');
 
-  const refreshScore = () => { homeScore.textContent = state.homeGoals; awayScore.textContent = state.awayGoals; };
+  const shape=()=>getUserShape(state,career,db);
+  const assignmentForPlayer=id=>shape().assignments.find(a=>a.playerId===id);
+  const slotFor=id=>{ const a=assignmentForPlayer(id); return a?shape().slots.find(s=>s.id===a.slotId):null; };
+  const refreshScore=()=>{ homeScore.textContent=state.homeGoals; awayScore.textContent=state.awayGoals; };
+  const refreshStats=()=>{ const [hp,ap]=possession(state); const rows=[['Possession',`${hp}%`,`${ap}%`],['Shots',state.stats.home.shots,state.stats.away.shots],['On target',state.stats.home.onTarget,state.stats.away.onTarget],['Corners',state.stats.home.corners,state.stats.away.corners],['Fouls',state.stats.home.fouls,state.stats.away.fouls],['Cards',state.stats.home.yellowCards,state.stats.away.yellowCards],['Reds',state.stats.home.redCards||0,state.stats.away.redCards||0]]; statsRoot.innerHTML=rows.map(([l,h,a])=>`<div class="flm-stat-row"><strong>${esc(h)}</strong><span>${esc(l)}</span><strong>${esc(a)}</strong></div>`).join(''); };
+  const refreshTactics=()=>{ shapeLabel.textContent=state.tactics.formation; tacticSummary.innerHTML=[['Formation',state.tactics.formation],['Mentality',state.tactics.mentality],['Pressing',state.tactics.pressing],['Tempo',state.tactics.tempo]].map(([l,v])=>`<span>${esc(l)}<b>${esc(v)}</b></span>`).join(''); };
+  const updateSpeedButtons=()=>root.querySelectorAll('[data-match-speed]').forEach(btn=>btn.classList.toggle('is-active',Number(btn.dataset.matchSpeed)===(paused?0:speed)));
+  const addLine=async(minute,text,type)=>{ const line=document.createElement('div'); line.className=`flm-commentary-line ${type||''}`; line.innerHTML=`<b>${minute}'</b><span>${esc(text)}</span>`; feed.appendChild(line); feed.scrollTop=feed.scrollHeight; await sleep(Math.max(35,150/Math.max(1,speed))); };
+  const addEvent=async event=>{ const lines=event.lines?.length?event.lines:[event.text]; const labels={goal:'GOAL',yellow:'BOOKING',red:'RED CARD',injury:'INJURY',substitution:'SUBSTITUTION',tactical:'TACTICAL CHANGE','role-change':'ROLE CHANGE','shape-change':'POSITIONAL SWITCH',marker:event.text}; stateLabel.textContent=labels[event.type]||'LIVE'; for(const text of lines.filter(Boolean)) await addLine(event.minute,text,event.type); };
+  const goalFlash=async event=>{ flash.querySelector('[data-goal-scorer]').textContent=player(db,event.playerId)?.name||'GOAL'; flash.querySelector('[data-goal-score]').textContent=`${state.homeGoals} — ${state.awayGoals}`; flash.classList.add('is-visible'); await sleep(reducedMotion?300:Math.max(850,1350/Math.max(1,speed))); flash.classList.remove('is-visible'); };
 
-  const refreshStats = () => {
-    const [homePoss, awayPoss] = possession(state);
-    const rows = [
-      ['Possession', `${homePoss}%`, `${awayPoss}%`], ['Shots', state.stats.home.shots, state.stats.away.shots],
-      ['On target', state.stats.home.onTarget, state.stats.away.onTarget], ['Corners', state.stats.home.corners, state.stats.away.corners],
-      ['Fouls', state.stats.home.fouls, state.stats.away.fouls], ['Yellows', state.stats.home.yellowCards, state.stats.away.yellowCards],
-      ['Reds', state.stats.home.redCards || 0, state.stats.away.redCards || 0]
-    ];
-    statsRoot.innerHTML = rows.map(([label, h, a]) => `<div class="flm-stat-row"><strong>${esc(h)}</strong><span>${esc(label)}</span><strong>${esc(a)}</strong></div>`).join('');
-  };
+  const closeManager=()=>{ modal.classList.remove('is-open'); modal.setAttribute('aria-hidden','true'); paused=halfTimeBreak?true:managerWasPaused; updateSpeedButtons(); stateLabel.textContent=halfTimeBreak?'HALF TIME':paused?'PAUSED':'LIVE'; };
+  const openManager=renderer=>{ managerWasPaused=paused; paused=true; updateSpeedButtons(); stateLabel.textContent=halfTimeBreak?'HALF TIME':'PAUSED'; renderer(); modal.classList.add('is-open'); modal.setAttribute('aria-hidden','false'); };
+  const head=(title,eyebrow='IN-MATCH MANAGEMENT')=>`<div class="flm-dialog-head"><div><p>${esc(eyebrow)}</p><h3>${esc(title)}</h3></div><button data-close-manager>✕</button></div>`;
+  const bindClose=()=>dialog.querySelectorAll('[data-close-manager]').forEach(btn=>btn.addEventListener('click',closeManager));
 
-  const refreshTactics = () => {
-    tacticSummary.innerHTML = [['Formation', state.tactics.formation], ['Mentality', state.tactics.mentality], ['Pressing', state.tactics.pressing], ['Tempo', state.tactics.tempo]]
-      .map(([label, value]) => `<span>${esc(label)}<b>${esc(value)}</b></span>`).join('');
-  };
+  const renderTactics=()=>{ dialog.innerHTML=`${head('Tactical Changes')}<div class="flm-preset-row"><button data-tactic-preset="protect">PROTECT LEAD</button><button data-tactic-preset="balanced">BALANCED</button><button data-tactic-preset="chase">CHASE GAME</button></div><div class="flm-tactic-form">${Object.entries(TACTIC_OPTIONS).map(([key,values])=>`<label class="flm-tactic-field"><span>${tacticLabel(key)}</span><select data-live-tactic="${key}">${values.map(v=>`<option ${state.tactics[key]===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label>`).join('')}</div><div class="flm-dialog-actions"><button data-close-manager>CANCEL</button><button class="primary" data-apply-live-tactics>APPLY CHANGES</button></div>`; bindClose(); dialog.querySelectorAll('[data-tactic-preset]').forEach(btn=>btn.addEventListener('click',()=>{ const values=preset(btn.dataset.tacticPreset); dialog.querySelectorAll('[data-live-tactic]').forEach(field=>field.value=values[field.dataset.liveTactic]); })); dialog.querySelector('[data-apply-live-tactics]').addEventListener('click',async()=>{ const patch=Object.fromEntries([...dialog.querySelectorAll('[data-live-tactic]')].map(field=>[field.dataset.liveTactic,field.value])); const result=changeTactics(state,patch,career,db); state=result.state; refreshTactics(); await addEvent(result.event); closeManager(); }); };
 
-  const updateSpeedButtons = () => {
-    root.querySelectorAll('[data-match-speed]').forEach(btn => {
-      btn.classList.toggle('is-active', Number(btn.dataset.matchSpeed) === (paused ? 0 : speed));
-      btn.disabled = finished || halfTimeBreak;
-    });
-  };
+  const renderSubs=()=>{ const lineup=currentUserLineup(state), available=state.userBenchIds.filter(id=>!lineup.includes(id)&&!state.subbedOffIds.includes(id)), remaining=MAX_SUBSTITUTIONS-state.substitutions.length; dialog.innerHTML=`${head('Substitutions')}<div class="flm-sub-status"><strong>${remaining} of ${MAX_SUBSTITUTIONS} substitutions remaining</strong><span>${state.minute}'</span></div><div class="flm-sub-grid"><label class="flm-sub-select"><span>PLAYER OFF</span><select data-sub-out>${lineup.map(id=>{const p=player(db,id),a=assignmentForPlayer(id);return `<option value="${esc(id)}">${esc(p?.name||id)} · ${esc(a?.slotId||p?.primaryPosition||'')} · ${Math.round(state.conditions[id]||100)}%</option>`}).join('')}</select></label><label class="flm-sub-select"><span>PLAYER ON</span><select data-sub-in ${available.length?'':'disabled'}>${available.map(id=>{const p=player(db,id);return `<option value="${esc(id)}">${esc(p?.name||id)} · ${esc(p?.primaryPosition||'')} · ${Math.round(state.conditions[id]||100)}%</option>`}).join('')}</select></label></div><div class="flm-player-live-list">${lineup.map(id=>{const p=player(db,id),a=assignmentForPlayer(id);return `<div class="flm-player-live-row"><span>${esc(a?.slotId||p?.primaryPosition||'')}</span><strong>${esc(p?.name||id)}</strong><small class="role">${esc(a?.role||'')}</small><small>${Math.round(state.conditions[id]||100)}% CON</small><b>${rating(state.ratings[id])}</b></div>`}).join('')}</div><div class="flm-dialog-actions"><button data-close-manager>CLOSE</button><button class="primary" data-apply-sub ${remaining>0&&available.length?'':'disabled'}>MAKE SUB</button></div>`; bindClose(); dialog.querySelector('[data-apply-sub]')?.addEventListener('click',async()=>{ try{ const result=makeSubstitution(state,dialog.querySelector('[data-sub-out]').value,dialog.querySelector('[data-sub-in]').value,db,career); state=result.state; await addEvent(result.event); renderSubs(); }catch(error){ dialog.querySelector('.flm-sub-status').innerHTML=`<strong>${esc(error.message)}</strong><span>${state.minute}'</span>`; } }); };
 
-  const statusText = () => halfTimeBreak ? 'HALF TIME' : paused ? 'PAUSED' : 'LIVE';
+  const renderShape=()=>{ const shp=shape(); const slotOptions=shp.slots.map(slot=>`<option value="${esc(slot.id)}">${esc(slot.label)}</option>`).join(''); dialog.innerHTML=`${head('Roles & Positional Shape','TACTICAL BOARD · '+state.tactics.formation)}<div class="flm-shape-layout"><div class="flm-shape-pitch">${shp.slots.map(slot=>{const a=shp.assignments.find(x=>x.slotId===slot.id),p=player(db,a?.playerId);const fit=a?.suitability||0;return `<div class="flm-shape-player ${fit<18?'is-poor':fit>55?'is-good':''}" style="left:${slot.x}%;top:${slot.y}%"><span>${esc(slot.label)}</span><strong>${esc(p?.name||'—')}</strong><small>${esc(a?.role||'')}</small></div>`}).join('')}</div><div><div class="flm-role-list">${shp.slots.map(slot=>{const a=shp.assignments.find(x=>x.slotId===slot.id),p=player(db,a?.playerId);return `<div class="flm-role-row"><span>${esc(slot.label)}</span><strong>${esc(p?.name||'—')}</strong><select data-role-slot="${esc(slot.id)}">${slot.roles.map(role=>`<option ${a?.role===role?'selected':''}>${esc(role)}</option>`).join('')}</select></div>`}).join('')}</div><div class="flm-shape-switch"><select data-swap-a>${slotOptions}</select><select data-swap-b>${slotOptions}</select><button data-swap-players>SWAP</button></div></div></div><div class="flm-dialog-actions"><button data-close-manager>CLOSE</button><button class="primary" data-apply-roles>APPLY ROLES</button></div>`; bindClose(); dialog.querySelector('[data-swap-players]').addEventListener('click',async()=>{ const a=dialog.querySelector('[data-swap-a]').value,b=dialog.querySelector('[data-swap-b]').value; if(a===b) return; const result=swapShapePlayers(state,a,b,career,db); state=result.state; await addEvent(result.event); renderShape(); }); dialog.querySelector('[data-apply-roles]').addEventListener('click',async()=>{ const changes=[]; for(const field of dialog.querySelectorAll('[data-role-slot]')){ const current=shape().assignments.find(a=>a.slotId===field.dataset.roleSlot); if(current?.role!==field.value){ const result=setPlayerRole(state,field.dataset.roleSlot,field.value,career,db); state=result.state; changes.push(result.event); } } for(const event of changes) await addEvent(event); closeManager(); }); };
 
-  const addSingleLine = async (minute, text, type) => {
-    const line = document.createElement('div');
-    line.className = `flm-commentary-line ${type || ''}`;
-    line.innerHTML = `<b>${minute}'</b><span>${esc(text)}</span>`;
-    feed.appendChild(line);
-    feed.scrollTop = feed.scrollHeight;
-    await sleep(Math.max(40, 170 / Math.max(1, speed)));
-  };
+  const renderRatings=()=>{ const lineup=currentUserLineup(state); dialog.innerHTML=`${head('Live Player Ratings')}<div class="flm-player-live-list">${lineup.map(id=>{const p=player(db,id),a=assignmentForPlayer(id),slot=slotFor(id);return `<div class="flm-player-live-row"><span>${esc(slot?.label||p?.primaryPosition||'')}</span><strong>${esc(p?.name||id)}</strong><small class="role">${esc(a?.role||'')}</small><small>${Math.round(state.conditions[id]||100)}% CON</small><b>${rating(state.ratings[id])}</b></div>`}).join('')}</div><div class="flm-dialog-actions"><button class="primary" data-close-manager>CLOSE</button></div>`; bindClose(); };
+  const renderOpposition=()=>{ const opp=getOpponentSnapshot(state,db); dialog.innerHTML=`${head(opp.clubName,'OPPOSITION VIEW')}<div class="flm-opp-card"><div class="flm-opp-shape">${Object.entries(opp.tactics).map(([k,v])=>`<div><small>${esc(tacticLabel(k))}</small><strong>${esc(v)}</strong></div>`).join('')}</div><div class="flm-player-live-list">${opp.lineupIds.map(id=>{const p=player(db,id);return `<div class="flm-player-live-row"><span>${esc(p?.primaryPosition||'')}</span><strong>${esc(p?.name||id)}</strong><small class="role">${esc(p?.positionGroup||'')}</small><small></small><b>${opp.redCards?'10 MEN':'XI'}</b></div>`}).join('')}</div></div><div class="flm-dialog-actions"><button class="primary" data-close-manager>CLOSE</button></div>`; bindClose(); };
 
-  const addEvent = async event => {
-    const labels = { goal: 'GOAL', yellow: 'BOOKING', red: 'RED CARD', injury: 'INJURY', substitution: 'SUBSTITUTION', tactical: 'TACTICAL CHANGE', instruction: 'PLAYER DUTY', 'instruction-change': 'PLAYER DUTY', situation: 'MATCH SITUATION', marker: event.text };
-    stateLabel.textContent = labels[event.type] || 'LIVE';
-    const lines = event.lines?.length ? event.lines : [event.text];
-    for (const text of lines.filter(Boolean)) await addSingleLine(event.minute, text, event.type);
-  };
-
-  const goalFlash = async event => {
-    const scorer = player(db, event.playerId)?.name || 'GOAL';
-    flash.querySelector('[data-goal-scorer]').textContent = scorer;
-    flash.querySelector('[data-goal-score]').textContent = `${state.homeGoals} — ${state.awayGoals}`;
-    flash.classList.add('is-visible'); flash.setAttribute('aria-hidden', 'false');
-    await sleep(reducedMotion ? 300 : Math.max(900, 1450 / Math.max(1, speed)));
-    flash.classList.remove('is-visible'); flash.setAttribute('aria-hidden', 'true');
-  };
-
-  const closeManager = () => {
-    modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true');
-    paused = managerWasPaused;
-    updateSpeedButtons();
-    stateLabel.textContent = statusText();
-  };
-
-  const openManager = renderer => {
-    managerWasPaused = paused;
-    paused = true;
-    updateSpeedButtons();
-    stateLabel.textContent = halfTimeBreak ? 'HALF TIME' : 'PAUSED';
-    renderer(); modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false');
-  };
-
-  const bindClose = () => dialog.querySelectorAll('[data-close-manager]').forEach(button => button.addEventListener('click', closeManager));
-
-  const renderTacticsDialog = () => {
-    dialog.innerHTML = `
-      <div class="flm-dialog-head"><div><p>IN-MATCH MANAGEMENT</p><h3>Tactical Changes</h3></div><button type="button" data-close-manager>✕</button></div>
-      <div class="flm-preset-row"><button type="button" data-tactic-preset="protect">PROTECT LEAD</button><button type="button" data-tactic-preset="balanced">BALANCED</button><button type="button" data-tactic-preset="chase">CHASE GAME</button></div>
-      <div class="flm-tactic-form">${Object.entries(TACTIC_OPTIONS).map(([key, values]) => `<label class="flm-tactic-field"><span>${tacticLabel(key)}</span><select data-live-tactic="${key}">${values.map(value => `<option value="${esc(value)}" ${state.tactics[key] === value ? 'selected' : ''}>${esc(value)}</option>`).join('')}</select></label>`).join('')}</div>
-      <div class="flm-dialog-actions"><button type="button" data-close-manager>CANCEL</button><button type="button" class="primary" data-apply-live-tactics>APPLY CHANGES</button></div>`;
-    bindClose();
-    dialog.querySelectorAll('[data-tactic-preset]').forEach(button => button.addEventListener('click', () => {
-      const values = preset(button.dataset.tacticPreset);
-      dialog.querySelectorAll('[data-live-tactic]').forEach(field => { field.value = values[field.dataset.liveTactic]; });
-    }));
-    dialog.querySelector('[data-apply-live-tactics]').addEventListener('click', async () => {
-      const patch = Object.fromEntries([...dialog.querySelectorAll('[data-live-tactic]')].map(field => [field.dataset.liveTactic, field.value]));
-      const changed = changeTactics(state, patch); state = changed.state; refreshTactics(); await addEvent(changed.event); closeManager();
-    });
-  };
-
-  const playerStatus = id => {
-    const flags = [];
-    if (state.injuredIds?.includes(id)) flags.push('INJ');
-    if (state.sentOffIds?.includes(id)) flags.push('RED');
-    return flags.join(' · ');
-  };
-
-  const renderSubsDialog = () => {
-    const lineup = currentUserLineup(state);
-    const available = state.userBenchIds.filter(id => !lineup.includes(id) && !state.subbedOffIds.includes(id));
-    const remaining = MAX_SUBSTITUTIONS - state.substitutions.length;
-    dialog.innerHTML = `
-      <div class="flm-dialog-head"><div><p>IN-MATCH MANAGEMENT</p><h3>Substitutions</h3></div><button type="button" data-close-manager>✕</button></div>
-      <div class="flm-sub-status"><strong>${remaining} of ${MAX_SUBSTITUTIONS} substitutions remaining</strong><span>${state.minute}'</span></div>
-      <div class="flm-sub-grid">
-        <label class="flm-sub-select"><span>PLAYER OFF</span><select data-sub-out>${lineup.map(id => { const p = player(db, id); return `<option value="${esc(id)}">${esc(p?.name || id)} · ${esc(p?.primaryPosition || '')} · ${Math.round(state.conditions[id] || 100)}% ${state.injuredIds?.includes(id) ? '· INJURED' : ''}</option>`; }).join('')}</select></label>
-        <label class="flm-sub-select"><span>PLAYER ON</span><select data-sub-in ${available.length ? '' : 'disabled'}>${available.map(id => { const p = player(db, id); return `<option value="${esc(id)}">${esc(p?.name || id)} · ${esc(p?.primaryPosition || '')} · ${Math.round(state.conditions[id] || 100)}%</option>`; }).join('')}</select></label>
-      </div>
-      <div class="flm-player-live-list">${lineup.map(id => { const p = player(db, id); return `<div class="flm-player-live-row ${state.injuredIds?.includes(id) ? 'is-injured' : ''}"><span>${esc(p?.primaryPosition || '')}</span><strong>${esc(p?.name || id)} ${playerStatus(id) ? `· ${esc(playerStatus(id))}` : ''}</strong><small>${Math.round(state.conditions[id] || 100)}% CON</small><b>${rating(state.ratings[id])}</b></div>`; }).join('')}</div>
-      <div class="flm-dialog-actions"><button type="button" data-close-manager>CLOSE</button><button type="button" class="primary" data-apply-sub ${remaining > 0 && available.length ? '' : 'disabled'}>MAKE SUB</button></div>`;
-    bindClose();
-    dialog.querySelector('[data-apply-sub]')?.addEventListener('click', async () => {
-      try {
-        const result = makeSubstitution(state, dialog.querySelector('[data-sub-out]').value, dialog.querySelector('[data-sub-in]').value, db);
-        state = result.state; await addEvent(result.event); refreshTactics(); renderSubsDialog();
-      } catch (error) {
-        dialog.querySelector('.flm-sub-status').innerHTML = `<strong>${esc(error.message)}</strong><span>${state.minute}'</span>`;
-      }
-    });
-  };
-
-  const renderInstructionsDialog = () => {
-    const lineup = currentUserLineup(state);
-    dialog.innerHTML = `
-      <div class="flm-dialog-head"><div><p>PLAYER-SPECIFIC MANAGEMENT</p><h3>Player Duties</h3></div><button type="button" data-close-manager>✕</button></div>
-      <div class="flm-sub-status"><strong>Defend · Support · Attack</strong><span>${state.minute}'</span></div>
-      <div class="flm-duty-list">${lineup.map(id => { const p = player(db, id); const current = state.playerDuties?.[id] || (p?.positionGroup === 'ATT' ? 'Attack' : p?.positionGroup === 'DEF' || p?.positionGroup === 'GK' ? 'Defend' : 'Support'); const choices = p?.positionGroup === 'GK' ? ['Defend'] : PLAYER_DUTIES; return `<label class="flm-duty-row"><span>${esc(p?.primaryPosition || '')}</span><strong>${esc(p?.name || id)}</strong><select data-player-duty="${esc(id)}">${choices.map(duty => `<option ${current === duty ? 'selected' : ''}>${duty}</option>`).join('')}</select></label>`; }).join('')}</div>
-      <div class="flm-dialog-actions"><button type="button" data-close-manager>CANCEL</button><button type="button" class="primary" data-apply-duties>APPLY DUTIES</button></div>`;
-    bindClose();
-    dialog.querySelector('[data-apply-duties]').addEventListener('click', async () => {
-      const changes = [...dialog.querySelectorAll('[data-player-duty]')].filter(field => state.playerDuties?.[field.dataset.playerDuty] !== field.value);
-      for (const field of changes) {
-        const result = setPlayerDuty(state, field.dataset.playerDuty, field.value, db); state = result.state; await addEvent(result.event);
-      }
-      closeManager();
-    });
-  };
-
-  const renderRatingsDialog = () => {
-    const lineup = currentUserLineup(state);
-    const bench = state.userBenchIds.filter(id => !lineup.includes(id) && !state.subbedOffIds.includes(id));
-    const row = id => { const p = player(db, id); return `<div class="flm-player-live-row ${state.injuredIds?.includes(id) ? 'is-injured' : ''}"><span>${esc(p?.primaryPosition || '')}</span><strong>${esc(p?.name || id)} ${playerStatus(id) ? `· ${esc(playerStatus(id))}` : ''}</strong><small>${Math.round(state.conditions[id] || 100)}% CON</small><b>${rating(state.ratings[id])}</b></div>`; };
-    dialog.innerHTML = `<div class="flm-dialog-head"><div><p>LIVE PERFORMANCE</p><h3>Player Ratings</h3></div><button type="button" data-close-manager>✕</button></div><div class="flm-sub-status"><strong>ON THE PITCH</strong><span>${state.minute}'</span></div><div class="flm-player-live-list">${lineup.map(row).join('')}</div><div class="flm-sub-status" style="margin-top:16px"><strong>AVAILABLE BENCH</strong><span>${bench.length}</span></div><div class="flm-player-live-list">${bench.map(row).join('')}</div><div class="flm-dialog-actions"><button type="button" data-close-manager>CLOSE</button></div>`;
-    bindClose();
-  };
-
-  const renderOppositionDialog = () => {
-    const snapshot = getOpponentSnapshot(state, db);
-    dialog.innerHTML = `<div class="flm-dialog-head"><div><p>OPPOSITION VIEW</p><h3>${esc(snapshot.clubName)}</h3></div><button type="button" data-close-manager>✕</button></div><div class="flm-opposition-card"><div class="flm-opposition-shape">${[['Formation', snapshot.tactics.formation], ['Mentality', snapshot.tactics.mentality], ['Pressing', snapshot.tactics.pressing], ['Tempo', snapshot.tactics.tempo], ['Width', snapshot.tactics.width], ['Red cards', snapshot.redCards]].map(([label,value]) => `<span>${esc(label)}<b>${esc(value)}</b></span>`).join('')}</div><div class="flm-player-live-list">${snapshot.lineupIds.map(id => { const p = player(db, id); return `<div class="flm-player-live-row"><span>${esc(p?.primaryPosition || '')}</span><strong>${esc(p?.name || id)}</strong><small>${Math.round(state.conditions[id] || 100)}% CON</small><b>${rating(state.ratings[id])}</b></div>`; }).join('')}</div></div><div class="flm-dialog-actions"><button type="button" data-close-manager>CLOSE</button></div>`;
-    bindClose();
-  };
-
-  const openTactics = () => openManager(renderTacticsDialog);
-  const openSubs = () => openManager(renderSubsDialog);
-  const openInstructions = () => openManager(renderInstructionsDialog);
-  root.querySelector('[data-open-tactics]').addEventListener('click', openTactics);
-  root.querySelector('[data-open-subs]').addEventListener('click', openSubs);
-  root.querySelector('[data-open-instructions]').addEventListener('click', openInstructions);
-  root.querySelector('[data-open-ratings]').addEventListener('click', () => openManager(renderRatingsDialog));
-  root.querySelector('[data-open-opposition]').addEventListener('click', () => openManager(renderOppositionDialog));
-  root.querySelector('[data-ht-tactics]').addEventListener('click', openTactics);
-  root.querySelector('[data-ht-subs]').addEventListener('click', openSubs);
-  root.querySelector('[data-ht-instructions]').addEventListener('click', openInstructions);
-
-  root.querySelectorAll('[data-match-speed]').forEach(control => control.addEventListener('click', () => {
-    if (halfTimeBreak || finished) return;
-    const next = Number(control.dataset.matchSpeed); paused = next === 0; if (!paused) speed = next; updateSpeedButtons(); stateLabel.textContent = statusText();
-  }));
-
-  root.querySelector('[data-resume-second-half]').addEventListener('click', async () => {
-    if (!halfTimeBreak) return;
-    halfTimeBreak = false; paused = false; shell.classList.remove('is-half-time'); matchStatus.textContent = 'LIVE'; stateLabel.textContent = 'SECOND HALF'; updateSpeedButtons();
-    await addSingleLine(46, 'The manager has made the half-time call. The second half is ready to begin.', 'marker');
-  });
+  root.querySelector('[data-open-tactics]').addEventListener('click',()=>openManager(renderTactics)); root.querySelector('[data-open-subs]').addEventListener('click',()=>openManager(renderSubs)); root.querySelector('[data-open-shape]').addEventListener('click',()=>openManager(renderShape)); root.querySelector('[data-open-ratings]').addEventListener('click',()=>openManager(renderRatings)); root.querySelector('[data-open-opposition]').addEventListener('click',()=>openManager(renderOpposition));
+  root.querySelectorAll('[data-match-speed]').forEach(control=>control.addEventListener('click',()=>{ if(halfTimeBreak) return; const next=Number(control.dataset.matchSpeed); paused=next===0; if(!paused) speed=next; updateSpeedButtons(); stateLabel.textContent=paused?'PAUSED':'LIVE'; }));
+  root.querySelector('[data-resume-second-half]').addEventListener('click',()=>{ if(!halfTimeBreak) return; halfTimeBreak=false; paused=false; shell.classList.remove('is-half-time'); matchStatus.textContent='LIVE'; stateLabel.textContent='SECOND HALF'; updateSpeedButtons(); });
 
   refreshScore(); refreshStats(); refreshTactics(); updateSpeedButtons();
-
-  const playback = (async () => {
-    while (state.minute < 90 && shell.isConnected) {
-      while (paused && shell.isConnected) await sleep(70);
-      await sleep(Math.max(60, BASE_STEP_MS / speed));
-      if (!shell.isConnected) break;
-
-      const advanced = advanceInteractiveMatch(state, career, db); state = advanced.state;
-      clock.textContent = `${String(state.minute).padStart(2, '0')}:00`; refreshScore(); refreshStats();
-
-      for (const event of advanced.events) {
-        await addEvent(event);
-        if (event.type === 'goal') { refreshScore(); await goalFlash(event); }
-      }
-
-      if (state.minute === 45) {
-        halfTimeBreak = true; paused = true; shell.classList.add('is-half-time'); clock.textContent = '45:00'; matchStatus.textContent = 'HALF TIME'; stateLabel.textContent = 'HALF TIME';
-        root.querySelector('[data-half-time-score]').textContent = `${state.homeGoals}–${state.awayGoals}`;
-        updateSpeedButtons();
-        while (halfTimeBreak && shell.isConnected) await sleep(80);
-      }
+  const playback=(async()=>{ while(state.minute<90&&shell.isConnected){ while(paused&&shell.isConnected) await sleep(70); await sleep(Math.max(60,BASE_STEP_MS/speed)); if(!shell.isConnected) break; const advanced=advanceInteractiveMatch(state,career,db); state=advanced.state; clock.textContent=`${String(state.minute).padStart(2,'0')}:00`; refreshScore(); refreshStats(); refreshTactics(); for(const event of advanced.events){ await addEvent(event); if(event.type==='goal'){ refreshScore(); await goalFlash(event); } }
+      if(state.minute===45){ halfTimeBreak=true; paused=true; shell.classList.add('is-half-time'); clock.textContent='45:00'; matchStatus.textContent='HALF TIME'; stateLabel.textContent='HALF TIME'; root.querySelector('[data-half-time-score]').textContent=`${state.homeGoals}–${state.awayGoals}`; updateSpeedButtons(); while(halfTimeBreak&&shell.isConnected) await sleep(80); }
     }
-
-    if (!shell.isConnected) return;
-    finished = true; paused = true; clock.textContent = '90:00'; refreshScore(); refreshStats(); stateLabel.textContent = 'FULL TIME'; matchStatus.textContent = 'FULL TIME'; shell.classList.remove('is-half-time'); shell.classList.add('is-full-time');
-    root.querySelector('[data-full-time-score]').textContent = `${home?.name || 'Home'} ${state.homeGoals}–${state.awayGoals} ${away?.name || 'Away'}`;
-    root.querySelectorAll('[data-match-speed], [data-open-tactics], [data-open-subs], [data-open-instructions], [data-open-ratings], [data-open-opposition]').forEach(button => button.disabled = true);
+    if(!shell.isConnected) return; finished=true; paused=true; clock.textContent='90:00'; refreshScore(); refreshStats(); stateLabel.textContent='FULL TIME'; matchStatus.textContent='FULL TIME'; shell.classList.remove('is-half-time'); shell.classList.add('is-full-time'); root.querySelector('[data-full-time-score]').textContent=`${home?.name||'Home'} ${state.homeGoals}–${state.awayGoals} ${away?.name||'Away'}`; root.querySelectorAll('[data-match-speed],[data-open-tactics],[data-open-subs],[data-open-shape],[data-open-ratings],[data-open-opposition]').forEach(button=>button.disabled=true);
   })();
-
-  await playback;
-  if (!finished || !shell.isConnected) { lockShell(false); throw new Error('Live match was interrupted before full time.'); }
-
-  const finalCareer = completeInteractiveRound(career, state, db);
-  for (const key of Object.keys(completedCareer || {})) delete completedCareer[key];
-  Object.assign(completedCareer, finalCareer);
-
-  await new Promise(resolve => root.querySelector('[data-finish-live-match]').addEventListener('click', resolve, { once: true }));
-  lockShell(false);
+  await playback; if(!finished||!shell.isConnected){lockShell(false);throw new Error('Live match was interrupted before full time.');}
+  const finalCareer=completeInteractiveRound(career,state,db); for(const key of Object.keys(completedCareer||{})) delete completedCareer[key]; Object.assign(completedCareer,finalCareer);
+  await new Promise(resolve=>root.querySelector('[data-finish-live-match]').addEventListener('click',resolve,{once:true})); lockShell(false);
 }
