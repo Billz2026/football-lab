@@ -1,9 +1,9 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "provider": "sportmonks",
-  "description": "Canonical FLM statistic names mapped to observed Sportmonks fixture lineup detail developer names. Aliases are retained so the engine is resilient to provider naming variants.",
+  "description": "Canonical FLM statistic names mapped to observed Sportmonks fixture lineup detail developer names. Aliases are retained so the engine is resilient to provider naming variants. CUMULATIVE_MINUTES_PLAYED is deliberately excluded because it is not a per-fixture minute value.",
   "stats": {
-    "minutesPlayed": ["MINUTES_PLAYED", "CUMULATIVE_MINUTES_PLAYED"],
+    "minutesPlayed": ["MINUTES_PLAYED"],
     "rating": ["RATING"],
     "touches": ["TOUCHES"],
     "passes": ["PASSES", "PASSES_TOTAL"],
