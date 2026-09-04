@@ -1,0 +1,67 @@
+name: FLM API-Football English Database v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      offset:
+        description: 'Club offset in PL + Championship manifest (0-43)'
+        required: true
+        default: '0'
+      count:
+        description: 'Number of clubs to import this run'
+        required: true
+        default: '8'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/import-api-football-english-free.mjs'
+      - 'data/import/api-football-english-2026-27.json'
+      - '.github/workflows/api-football-english-db-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      FLM_BATCH_OFFSET: ${{ github.event.inputs.offset || '0' }}
+      FLM_BATCH_COUNT: ${{ github.event.inputs.count || '8' }}
+      FLM_REQUEST_DELAY_MS: '7000'
+      FLM_DAILY_RESERVE: '3'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify API-Football secret
+        run: |
+          if [ -z "$API_FOOTBALL_KEY" ]; then
+            echo "API_FOOTBALL_KEY repository secret is missing."
+            exit 1
+          fi
+          echo "API-Football secret is configured."
+      - name: Import current English squad batch
+        run: node scripts/import-api-football-english-free.mjs artifacts/api-football-english-db-v1
+      - name: Validate sanitised batch
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          const dir = 'artifacts/api-football-english-db-v1';
+          const [clubs, players, report] = await Promise.all(['clubs-batch.json','players-batch.json','report.json'].map(async f => JSON.parse(await readFile(`${dir}/${f}`, 'utf8'))));
+          if (!clubs.length) throw new Error('No clubs imported.');
+          if (players.length < clubs.length * 15) throw new Error('Squad coverage is unexpectedly low.');
+          if (players.some(p => p.isPlaceholder)) throw new Error('Imported batch contains placeholders.');
+          if (players.some(p => !p.attributes?.technical || !p.attributes?.mental || !p.attributes?.physical)) throw new Error('Imported player missing attribute blocks.');
+          console.log(`Validated ${clubs.length} clubs and ${players.length} players.`);
+          console.log(`Remaining daily requests: ${report.usage.lastKnownRemainingDailyRequests ?? 'unknown'}`);
+          NODE
+      - name: Upload sanitised FLM batch
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-football-english-db-v1-${{ github.run_id }}
+          path: artifacts/api-football-english-db-v1
+          retention-days: 3
+          if-no-files-found: error
