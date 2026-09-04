@@ -1,6 +1,8 @@
 {
   "schemaVersion": "1.0.0",
+  "playerModelVersion": "1.0.0",
   "databaseVersion": "2026.09.04-dev",
+  "snapshotDate": "2026-09-04",
   "status": "schema-test",
   "generatedAt": null,
   "provider": "pending",
