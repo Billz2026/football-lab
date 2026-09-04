@@ -12,6 +12,54 @@ const writeJson = async (name, value) => writeFile(path.join(OUT_DIR, name), JSO
 
 function byName(a,b) { return String(a.name || '').localeCompare(String(b.name || '')); }
 
+function resolvePlayerDuplicates(records) {
+  const byId = new Map();
+  const conflicts = [];
+
+  for (const player of records) {
+    const existing = byId.get(player.id);
+    if (!existing) {
+      byId.set(player.id, player);
+      continue;
+    }
+
+    if (existing.clubId === player.clubId) {
+      const preferred = existing.shirtNumber == null && player.shirtNumber != null ? player : existing;
+      byId.set(player.id, preferred);
+      continue;
+    }
+
+    let preferred = player;
+    if (existing.shirtNumber != null && player.shirtNumber == null) preferred = existing;
+    else if (existing.shirtNumber == null && player.shirtNumber != null) preferred = player;
+
+    const conflictingClubIds = [...new Set([
+      ...(existing.dataQuality?.conflictingClubIds || []),
+      ...(player.dataQuality?.conflictingClubIds || []),
+      existing.clubId,
+      player.clubId
+    ])];
+
+    preferred = {
+      ...preferred,
+      dataQuality: {
+        ...(preferred.dataQuality || {}),
+        squadMembershipConflict: true,
+        conflictingClubIds,
+        squadMembershipResolution: 'Prefer record with a shirt number; otherwise prefer the newer incoming batch record.',
+        confidence: 'low'
+      }
+    };
+    byId.set(player.id, preferred);
+    conflicts.push({ playerId:player.externalIds?.apiFootball ?? player.id, playerName:player.name, conflictingClubIds, selectedClubId:preferred.clubId });
+  }
+
+  return {
+    players:[...byId.values()],
+    conflicts:[...new Map(conflicts.map(item => [String(item.playerId), item])).values()]
+  };
+}
+
 async function main() {
   const [metadata, leagues, clubs, players, managers, batchClubs, batchPlayers, report] = await Promise.all([
     readJson(path.join(CURRENT_DIR,'metadata.json')),
@@ -38,7 +86,8 @@ async function main() {
     const apiId = String(p.externalIds?.apiFootball ?? '');
     return !(apiId && incomingPlayerApiIds.has(apiId)) && !importedClubIds.has(p.clubId);
   });
-  const mergedPlayers = [...keptPlayers, ...batchPlayers].sort((a,b) => a.clubId.localeCompare(b.clubId) || byName(a,b));
+  const resolved = resolvePlayerDuplicates([...keptPlayers, ...batchPlayers]);
+  const mergedPlayers = resolved.players.sort((a,b) => a.clubId.localeCompare(b.clubId) || byName(a,b));
 
   const realCounts = new Map();
   for (const club of mergedClubs.filter(c => !c.isPlaceholder)) realCounts.set(club.leagueId, (realCounts.get(club.leagueId) || 0) + 1);
@@ -64,7 +113,12 @@ async function main() {
       playerPhotosIncluded:false,
       notes:'Development database only. No provider logos or player photos are stored. Publication/competition-rights requirements must be reviewed before a commercial release.'
     },
-    importProgress: Object.fromEntries(mergedLeagues.map(l => [l.id, { realClubs:realCounts.get(l.id) || 0, expectedClubs:l.expectedClubCount, status:l.importStatus }]))
+    importProgress: Object.fromEntries(mergedLeagues.map(l => [l.id, { realClubs:realCounts.get(l.id) || 0, expectedClubs:l.expectedClubCount, status:l.importStatus }])),
+    dataQuality: {
+      ...(metadata.dataQuality || {}),
+      latestBatchMembershipConflicts: report.result?.squadMembershipConflicts || 0,
+      crossBatchMembershipConflictsResolved: resolved.conflicts.length
+    }
   };
 
   await mkdir(OUT_DIR, { recursive:true });
@@ -73,10 +127,12 @@ async function main() {
     writeJson('leagues.json', mergedLeagues),
     writeJson('clubs.json', mergedClubs),
     writeJson('players.json', mergedPlayers),
-    writeJson('managers.json', managers)
+    writeJson('managers.json', managers),
+    writeJson('membership-conflicts.json', resolved.conflicts)
   ]);
 
-  console.log(`Merged preview: ${mergedClubs.filter(c => !c.isPlaceholder).length} real clubs, ${mergedPlayers.filter(p => !p.isPlaceholder).length} real players.`);
+  console.log(`Merged preview: ${mergedClubs.filter(c => !c.isPlaceholder).length} real clubs, ${mergedPlayers.filter(p => !p.isPlaceholder).length} unique real players.`);
+  if (resolved.conflicts.length) console.log(`Resolved ${resolved.conflicts.length} cross-batch player membership conflict(s).`);
 }
 
 main().catch(error => { console.error(error.stack || error); process.exit(1); });
