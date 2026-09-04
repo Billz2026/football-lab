@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -8,8 +8,13 @@ const API_BASE = 'https://api.sportmonks.com/v3/football';
 const TOKEN = process.env.SPORTMONKS_API_TOKEN;
 const SEASON_ID = 28275;
 const LEAGUE_ID = 501;
-const STAGING_PATH = process.argv[2] || 'data/staging/private/sportmonks-scottish-premiership-2026-27.json';
-const REPORT_PATH = process.argv[3] || 'artifacts/sportmonks-player-stats-quality-report.json';
+const REPORT_PATH = process.argv[2] || 'artifacts/sportmonks-player-stats-quality-report.json';
+
+const CLUBS = [
+  [309, 'Motherwell'], [180, 'Kilmarnock'], [273, 'Aberdeen'], [770, 'Falkirk'],
+  [66, 'Hibernian'], [53, 'Celtic'], [314, 'Hearts'], [284, 'Dundee'],
+  [62, 'Rangers'], [282, 'Dundee United'], [496, 'St. Mirren'], [734, 'St. Johnstone']
+].map(([id, name]) => ({ id, name }));
 
 if (!TOKEN) {
   console.error('SPORTMONKS_API_TOKEN is not available to this workflow.');
@@ -45,13 +50,24 @@ async function getJson(endpoint, params = {}) {
   });
   const text = await response.text();
   if (!response.ok) {
-    let message = text.slice(0, 500);
-    try { const parsed = JSON.parse(text); message = parsed.message || parsed.error || message; } catch {}
+    let message = text.slice(0, 500), rateLimit = null;
+    try {
+      const parsed = JSON.parse(text);
+      message = parsed.message || parsed.error || message;
+      rateLimit = parsed.rate_limit || parsed.meta?.rate_limit || null;
+    } catch {}
     const error = new Error(`${response.status} ${response.statusText}: ${message}`);
     error.status = response.status;
+    error.rateLimit = rateLimit;
     throw error;
   }
   return text ? JSON.parse(text) : {};
+}
+
+function positionGroup(positionId) {
+  switch (Number(positionId)) {
+    case 24: return 'GK'; case 25: return 'DEF'; case 26: return 'MID'; case 27: return 'ATT'; default: return 'UNK';
+  }
 }
 
 function normaliseStatName(value) {
@@ -172,7 +188,7 @@ function ageOn(dateOfBirth) {
 function selectSamples(records, target = 48) {
   const selected = [];
   for (const group of ['GK', 'DEF', 'MID', 'ATT']) {
-    const rows = records.filter(r => r.player.positionGroup === group).sort((a, b) => (b.metrics.minutes || 0) - (a.metrics.minutes || 0));
+    const rows = records.filter(record => record.positionGroup === group).sort((a, b) => (b.metrics.minutes || 0) - (a.metrics.minutes || 0));
     const wanted = Math.min(12, rows.length);
     for (let i = 0; i < wanted; i += 1) {
       const index = Math.round(i * (rows.length - 1) / Math.max(1, wanted - 1));
@@ -183,100 +199,108 @@ function selectSamples(records, target = 48) {
 }
 
 async function main() {
-  const staging = JSON.parse(await readFile(STAGING_PATH, 'utf8'));
-  const players = staging.players || [];
-  const clubs = staging.clubs || [];
-  if (!players.length || !clubs.length) throw new Error(`No staged Scottish data found at ${STAGING_PATH}.`);
-
-  const playerBySportmonksId = new Map(players.map(player => [Number(player.externalIds?.sportmonks), player]));
-  const clubNames = new Map(clubs.map(club => [club.id, club.name]));
-  const recordsByPlayerId = new Map();
+  const records = [];
   const teamReports = [];
+  console.log(`Fetching ${CLUBS.length} Scottish Premiership team-season squad-statistic feeds...`);
 
-  console.log(`Fetching season squad statistics for ${clubs.length} Scottish Premiership clubs...`);
-  for (const club of clubs) {
-    const teamId = Number(club.externalIds?.sportmonks);
-    if (!teamId) continue;
+  for (const club of CLUBS) {
     try {
-      const payload = await getJson(`/squads/seasons/${SEASON_ID}/teams/${teamId}`, { include: 'details.type' });
+      const payload = await getJson(`/squads/seasons/${SEASON_ID}/teams/${club.id}`, { include: 'player;details.type' });
       const rows = payload.data || [];
-      let matched = 0;
       for (const row of rows) {
-        const player = playerBySportmonksId.get(Number(row.player_id));
-        if (!player) continue;
+        const player = row.player || {};
         const statRows = flattenDetails(row.details || []);
-        recordsByPlayerId.set(Number(row.player_id), { ok: true, player, statRows, metrics: buildMetrics(statMap(statRows)) });
-        matched += 1;
+        records.push({
+          playerId: Number(row.player_id),
+          name: player.display_name || player.common_name || player.name || `Player ${row.player_id}`,
+          clubId: club.id,
+          clubName: club.name,
+          positionGroup: positionGroup(row.position_id || player.position_id),
+          detailedPositionId: player.detailed_position_id ?? null,
+          dateOfBirth: player.date_of_birth || null,
+          statRows,
+          metrics: buildMetrics(statMap(statRows)),
+          features: null,
+          ratings: {}
+        });
       }
-      teamReports.push({ teamId, teamName: club.name, returnedPlayerStatisticRows: rows.length, matchedActivePlayers: matched, accessible: true });
-      console.log(`${club.name}: ${rows.length} player-stat rows, ${matched} matched to active staging squad.`);
+      teamReports.push({ teamId: club.id, teamName: club.name, accessible: true, playerStatisticRows: rows.length, rateLimit: payload.rate_limit || payload.meta?.rate_limit || null });
+      console.log(`${club.name}: ${rows.length} player-statistic rows.`);
     } catch (error) {
-      teamReports.push({ teamId, teamName: club.name, returnedPlayerStatisticRows: 0, matchedActivePlayers: 0, accessible: false, status: error.status || null, reason: error.message });
-      console.warn(`${club.name}: statistics request failed: ${error.message}`);
+      teamReports.push({ teamId: club.id, teamName: club.name, accessible: false, playerStatisticRows: 0, status: error.status || null, reason: error.message, rateLimit: error.rateLimit || null });
+      console.warn(`${club.name}: failed: ${error.message}`);
     }
   }
 
-  const results = players.map(player => recordsByPlayerId.get(Number(player.externalIds?.sportmonks)) || { ok: true, player, statRows: [], metrics: buildMetrics(new Map()) });
-  const successfulTeams = teamReports.filter(team => team.accessible);
-  const withStats = results.filter(result => result.statRows.length > 0);
+  if (!records.length) {
+    const report = {
+      provider: 'sportmonks', generatedAt: new Date().toISOString(), scope: 'FLM Data Quality Test v2 - Scottish Premiership 2026/27 player statistics',
+      seasonId: SEASON_ID, leagueId: LEAGUE_ID, statisticsAccess: { accessible: false }, requestSummary: { teamReports },
+      verdict: { statisticsPipelinePass: false, ratingEngineReadyForProduction: false, nextGate: 'Retry after the Sportmonks rate-limit window resets or confirm plan access.' },
+      publicationPolicy: { rawPlayerStatisticsCommitted: false, rawPlayerStatisticsUploadedAsArtifact: false, apiTokenPersisted: false }
+    };
+    await mkdir(path.dirname(REPORT_PATH), { recursive: true });
+    await writeFile(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+    console.log(`No statistics rows were returned. Sanitised failure report written to ${REPORT_PATH}.`);
+    return;
+  }
 
+  const uniquePlayerIds = new Set(records.map(record => record.playerId));
+  const withStats = records.filter(record => record.statRows.length > 0);
   const statTypeSummary = new Map();
-  for (const result of results) {
+  for (const record of records) {
     const seen = new Set();
-    for (const row of result.statRows) {
+    for (const row of record.statRows) {
       if (!row.developerName || seen.has(row.developerName)) continue;
       seen.add(row.developerName);
-      const entry = statTypeSummary.get(row.developerName) || { developerName: row.developerName, displayName: row.displayName, typeId: row.typeId, players: 0, numericPlayers: 0 };
-      entry.players += 1;
-      if (row.numericValue !== null) entry.numericPlayers += 1;
-      statTypeSummary.set(row.developerName, entry);
+      const entry = statTypeSummary.get(row.developerName) || { developerName: row.developerName, displayName: row.displayName, typeId: row.typeId, rows: 0, numericRows: 0 };
+      entry.rows += 1; if (row.numericValue !== null) entry.numericRows += 1; statTypeSummary.set(row.developerName, entry);
     }
   }
 
   const metricCoverage = {};
   for (const metric of Object.keys(METRIC_ALIASES)) {
-    const count = results.filter(result => Number.isFinite(result.metrics[metric])).length;
-    metricCoverage[metric] = { players: count, percentOfStaged: Number(((count / players.length) * 100).toFixed(1)) };
+    const count = records.filter(record => Number.isFinite(record.metrics[metric])).length;
+    metricCoverage[metric] = { rows: count, percentOfRows: Number(((count / records.length) * 100).toFixed(1)) };
   }
 
-  const modelRecords = results.map(result => ({ ...result, features: derivedFeatures(result.metrics, result.player.positionGroup), ratings: {} }));
+  for (const record of records) record.features = derivedFeatures(record.metrics, record.positionGroup);
   for (const group of ['GK', 'DEF', 'MID', 'ATT']) for (const attribute of MODELLED_ATTRIBUTES) {
-    const peers = modelRecords.filter(record => record.player.positionGroup === group).map(record => record.features[attribute]).filter(Number.isFinite);
-    for (const record of modelRecords.filter(record => record.player.positionGroup === group)) record.ratings[attribute] = ratingFromPercentile(percentile(peers, record.features[attribute]));
+    const peers = records.filter(record => record.positionGroup === group).map(record => record.features[attribute]).filter(Number.isFinite);
+    for (const record of records.filter(record => record.positionGroup === group)) record.ratings[attribute] = ratingFromPercentile(percentile(peers, record.features[attribute]));
   }
 
-  const samples = selectSamples(modelRecords).map(record => ({
-    name: record.player.name, club: clubNames.get(record.player.clubId) || null, positionGroup: record.player.positionGroup,
-    detailedPositionId: record.player.sportmonksDetailedPositionId ?? null, age: ageOn(record.player.dateOfBirth),
+  const samples = selectSamples(records).map(record => ({
+    name: record.name, club: record.clubName, positionGroup: record.positionGroup, detailedPositionId: record.detailedPositionId, age: ageOn(record.dateOfBirth),
     minutes: round(record.metrics.minutes, 0), appearances: round(record.metrics.appearances, 0), dataConfidence: confidenceFromMinutes(record.metrics.minutes),
     observed: { goals: round(record.metrics.goals, 0), assists: round(record.metrics.assists, 0), passAccuracy: round(ratio(record.metrics.passesAccurate, record.metrics.passesTotal) * 100, 1), tacklesPer90: round(per90(record.metrics.tackles, record.metrics.minutes), 2), interceptionsPer90: round(per90(record.metrics.interceptions, record.metrics.minutes), 2), dribblesWonPer90: round(per90(record.metrics.dribblesSuccess, record.metrics.minutes), 2), keyPassesPer90: round(per90(record.metrics.keyPasses, record.metrics.minutes), 2) },
     provisionalRatings: Object.fromEntries(Object.entries(record.ratings).filter(([, value]) => value !== null))
   }));
 
-  const minutesValues = results.map(result => result.metrics.minutes).filter(Number.isFinite).sort((a,b) => a-b);
+  const minutesValues = records.map(record => record.metrics.minutes).filter(Number.isFinite).sort((a,b) => a-b);
   const coreMetrics = ['minutes','appearances','goals','assists','shotsTotal','shotsOnTarget','passesTotal','passesAccurate','keyPasses','tackles','interceptions','duelsTotal','duelsWon','dribblesAttempts','dribblesSuccess','aerialsTotal','aerialsWon','crossesTotal','crossesAccurate'];
-  const coreCoverageAverage = coreMetrics.reduce((sum, metric) => sum + metricCoverage[metric].percentOfStaged, 0) / coreMetrics.length;
+  const coreCoverageAverage = coreMetrics.reduce((sum, metric) => sum + metricCoverage[metric].percentOfRows, 0) / coreMetrics.length;
+  const successfulTeams = teamReports.filter(team => team.accessible).length;
 
   const report = {
     provider: 'sportmonks', generatedAt: new Date().toISOString(),
-    scope: 'FLM Data Quality Test v2 - Scottish Premiership 2026/27 player statistics and provisional ratings',
-    seasonId: SEASON_ID, leagueId: LEAGUE_ID, stagedPlayerCount: players.length,
-    requestSummary: { strategy: '12 team-season squad-statistic requests using /squads/seasons/{season}/teams/{team}?include=details.type', teamRequestsAttempted: teamReports.length, successfulTeamRequests: successfulTeams.length, failedTeamRequests: teamReports.length - successfulTeams.length, teamReports },
-    statisticsAccess: { accessible: successfulTeams.length > 0 && withStats.length > 0, playersWithSeasonStatistics: withStats.length, percentOfStagedWithStats: Number(((withStats.length / players.length) * 100).toFixed(1)), uniqueStatisticTypes: statTypeSummary.size, coreMetricCoverageAveragePercent: Number(coreCoverageAverage.toFixed(1)) },
-    currentSeasonSampleSize: { playersWithMinutes: minutesValues.length, medianMinutes: minutesValues.length ? round(minutesValues[Math.floor(minutesValues.length / 2)], 0) : null, atLeast90Minutes: results.filter(r => (r.metrics.minutes || 0) >= 90).length, atLeast180Minutes: results.filter(r => (r.metrics.minutes || 0) >= 180).length, atLeast450Minutes: results.filter(r => (r.metrics.minutes || 0) >= 450).length, atLeast720Minutes: results.filter(r => (r.metrics.minutes || 0) >= 720).length },
+    scope: 'FLM Data Quality Test v2 - Scottish Premiership 2026/27 player statistics and provisional ratings', seasonId: SEASON_ID, leagueId: LEAGUE_ID,
+    requestSummary: { strategy: '12 team-season squad-statistic requests using include=player;details.type', teamRequestsAttempted: CLUBS.length, successfulTeamRequests: successfulTeams, failedTeamRequests: CLUBS.length - successfulTeams, teamReports },
+    population: { playerStatisticRows: records.length, uniquePlayers: uniquePlayerIds.size, duplicatePlayerTeamStints: records.length - uniquePlayerIds.size },
+    statisticsAccess: { accessible: successfulTeams > 0 && withStats.length > 0, rowsWithStatistics: withStats.length, percentOfRowsWithStats: Number(((withStats.length / records.length) * 100).toFixed(1)), uniqueStatisticTypes: statTypeSummary.size, coreMetricCoverageAveragePercent: Number(coreCoverageAverage.toFixed(1)) },
+    currentSeasonSampleSize: { rowsWithMinutes: minutesValues.length, medianMinutes: minutesValues.length ? round(minutesValues[Math.floor(minutesValues.length / 2)], 0) : null, atLeast90Minutes: records.filter(r => (r.metrics.minutes || 0) >= 90).length, atLeast180Minutes: records.filter(r => (r.metrics.minutes || 0) >= 180).length, atLeast450Minutes: records.filter(r => (r.metrics.minutes || 0) >= 450).length, atLeast720Minutes: records.filter(r => (r.metrics.minutes || 0) >= 720).length },
     keyMetricCoverage: metricCoverage,
-    statisticTypeCoverage: [...statTypeSummary.values()].sort((a,b) => b.players - a.players || a.developerName.localeCompare(b.developerName)).map(entry => ({ ...entry, percentOfStaged: Number(((entry.players / players.length) * 100).toFixed(1)), numericPercentOfStaged: Number(((entry.numericPlayers / players.length) * 100).toFixed(1)) })),
-    ratingEngineV1: { status: 'experimental-calibration-only', scale: '1-20', modelledAttributes: MODELLED_ATTRIBUTES, unmodelledAttributes: UNMODELLED_ATTRIBUTES, methodology: 'Position-group percentile model using current-season Sportmonks data. It intentionally leaves unmeasurable physical and mental attributes unmodelled rather than inventing them.', caveats: ['2026/27 is still early in the season, so low-minute players have weak statistical confidence.','Ratings are relative to Scottish Premiership positional peers and are not yet calibrated to an absolute cross-league FLM scale.','League strength, club strength, prior-season performance, scouting input and manual calibration are not yet applied.','A missing provisional rating means the required statistic inputs were not available in sufficient peer coverage.'], samplePlayerCount: samples.length, samplePlayers: samples },
-    verdict: { squadPipelineAlreadyPassed: true, statisticsPipelinePass: successfulTeams.length === clubs.length && withStats.length / Math.max(1, players.length) >= .8, ratingEngineReadyForProduction: false, nextGate: 'Calibrate supported attributes with prior-season data and league-strength factors, then define separate models for physical/mental attributes before publishing ratings in Football Lab Manager.' },
+    statisticTypeCoverage: [...statTypeSummary.values()].sort((a,b) => b.rows - a.rows || a.developerName.localeCompare(b.developerName)).map(entry => ({ ...entry, percentOfRows: Number(((entry.rows / records.length) * 100).toFixed(1)), numericPercentOfRows: Number(((entry.numericRows / records.length) * 100).toFixed(1)) })),
+    ratingEngineV1: { status: 'experimental-calibration-only', scale: '1-20', modelledAttributes: MODELLED_ATTRIBUTES, unmodelledAttributes: UNMODELLED_ATTRIBUTES, methodology: 'Position-group percentile model using current-season Sportmonks statistics. Physical and mental attributes that cannot be inferred reliably are left unmodelled.', caveats: ['The season is still early, so low-minute player ratings have weak confidence.','Ratings are relative to Scottish Premiership positional peers, not yet an absolute cross-league FLM scale.','Prior-season form, league strength, club strength, scouting/manual calibration and age curves are not yet applied.','A missing rating means the required statistical inputs were unavailable or peer coverage was insufficient.'], samplePlayerCount: samples.length, samplePlayers: samples },
+    verdict: { squadPipelineAlreadyPassed: true, statisticsPipelinePass: successfulTeams === CLUBS.length && withStats.length / Math.max(1, records.length) >= .8, ratingEngineReadyForProduction: false, nextGate: 'Add prior-season and league-strength calibration for data-driven attributes, then build separate physical/mental attribute models rather than deriving them from match stats.' },
     publicationPolicy: { rawPlayerStatisticsCommitted: false, rawPlayerStatisticsUploadedAsArtifact: false, reportContains: 'coverage aggregates plus a 48-player calibration sample only', apiTokenPersisted: false }
   };
 
   await mkdir(path.dirname(REPORT_PATH), { recursive: true });
   await writeFile(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-  console.log(`Stats access: ${successfulTeams.length}/${clubs.length} teams.`);
-  console.log(`Players with current-season statistics: ${withStats.length}/${players.length}.`);
-  console.log(`Unique player statistic types: ${statTypeSummary.size}.`);
-  console.log(`Core metric average coverage: ${report.statisticsAccess.coreMetricCoverageAveragePercent}%.`);
+  console.log(`Stats access: ${successfulTeams}/${CLUBS.length} teams.`);
+  console.log(`Player-statistic rows: ${records.length}; unique players: ${uniquePlayerIds.size}.`);
+  console.log(`Unique statistic types: ${statTypeSummary.size}; core metric average coverage: ${report.statisticsAccess.coreMetricCoverageAveragePercent}%.`);
   console.log(`Calibration sample: ${samples.length} players.`);
   console.log(`Sanitised report written to ${REPORT_PATH}.`);
 }
