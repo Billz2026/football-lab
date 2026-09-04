@@ -16,6 +16,10 @@ on:
         required: true
         type: boolean
         default: false
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/api-football-english-db-v1.yml'
 
 permissions:
   contents: write
@@ -26,8 +30,8 @@ jobs:
     timeout-minutes: 20
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-      FLM_BATCH_OFFSET: ${{ github.event.inputs.offset || '0' }}
-      FLM_BATCH_COUNT: ${{ github.event.inputs.count || '8' }}
+      FLM_BATCH_OFFSET: ${{ github.event_name == 'push' && '0' || github.event.inputs.offset || '0' }}
+      FLM_BATCH_COUNT: ${{ github.event_name == 'push' && '8' || github.event.inputs.count || '8' }}
       FLM_REQUEST_DELAY_MS: '7000'
       FLM_DAILY_RESERVE: '3'
     steps:
@@ -64,7 +68,7 @@ jobs:
       - name: Validate merged database preview
         run: node scripts/validate-database.mjs artifacts/api-football-english-db-v1/merged-current
       - name: Promote validated database batch
-        if: ${{ github.event.inputs.promote == 'true' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.promote == 'true' }}
         run: |
           cp artifacts/api-football-english-db-v1/merged-current/*.json data/current/
           node scripts/validate-database.mjs data/current
