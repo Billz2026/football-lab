@@ -17,8 +17,11 @@ on:
       - 'match-centre-v4-fold-v41.css'
       - 'match-centre-v4-mobile-v42.js'
       - 'match-centre-v4-mobile-v42.css'
+      - 'match-centre-v4-polish-v43.js'
+      - 'match-centre-v4-polish-v43.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
+      - 'tests/matchday-v43.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
   pull_request:
     branches: [main]
@@ -36,8 +39,11 @@ on:
       - 'match-centre-v4-fold-v41.css'
       - 'match-centre-v4-mobile-v42.js'
       - 'match-centre-v4-mobile-v42.css'
+      - 'match-centre-v4-polish-v43.js'
+      - 'match-centre-v4-polish-v43.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
+      - 'tests/matchday-v43.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
   workflow_dispatch:
 
@@ -66,7 +72,9 @@ jobs:
           node --check match-centre-v4-mode.js
           node --check match-centre-v4-fold-v41.js
           node --check match-centre-v4-mobile-v42.js
+          node --check match-centre-v4-polish-v43.js
           node --check tests/matchday-v2.spec.js
+          node --check tests/matchday-v43.spec.js
 
       - name: Install dependencies
         run: npm ci
@@ -74,5 +82,5 @@ jobs:
       - name: Install Chromium
         run: npx playwright install chromium
 
-      - name: Run Matchday V2 acceptance test
-        run: npx playwright test tests/matchday-v2.spec.js --config=playwright.ci.config.js --reporter=line
+      - name: Run Matchday acceptance tests
+        run: npx playwright test tests/matchday-v2.spec.js tests/matchday-v43.spec.js --config=playwright.ci.config.js --reporter=line
