@@ -39,7 +39,7 @@ async function completePreseason(page) {
   await continueUntil(page, '2026-08-21');
 }
 
-test('Matchday V2 delivers CM-style clarity, stable ratings and safe click substitutions', async ({ page }) => {
+test('Matchday V3.4 delivers one CM workspace, stable ratings and safe squad management', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').first().click();
@@ -51,18 +51,24 @@ test('Matchday V2 delivers CM-style clarity, stable ratings and safe click subst
 
   const live = page.locator('[data-live-match]');
   await expect(live).toHaveAttribute('data-cm-match-v2', '1');
-  await expect(page.locator('.flm-cm-v2-tabs [data-cm-v2-view]')).toHaveCount(4);
-  await expect(page.locator('.flm-cm-v2-focus')).toBeVisible();
+  await expect(live).toHaveAttribute('data-cm-workspace', '3.4.0');
 
+  // V3.4 owns navigation: one visible rail, no duplicate legacy strip.
+  const rail = page.locator('.cm340-nav');
+  await expect(rail).toBeVisible();
+  await expect(rail.locator('[data-cm340-view]')).toHaveCount(5);
+  await expect(rail.locator('[data-cm340-view="overview"]')).toHaveClass(/is-active/);
+  await expect(page.locator('.flm-cm-v2-tabs')).toBeHidden();
+  await expect(page.locator('.flm-cm-v2-controls')).toBeHidden();
+  await expect(page.locator('.cm33-rail')).toBeHidden();
+
+  await expect(page.locator('.flm-cm-v2-focus')).toBeAttached();
   const typography = await page.locator('.flm-cm-v2-focus .flm-cm-v2-text').evaluate(node => {
     const style = getComputedStyle(node);
     return { family: style.fontFamily.toLowerCase(), size: parseFloat(style.fontSize) };
   });
   expect(typography.family).toContain('tahoma');
   expect(typography.size).toBeGreaterThanOrEqual(24);
-
-  const controls = ['PAUSE MATCH', 'MAKE SUB', 'TACTICS'];
-  for (const label of controls) await expect(page.getByRole('button', { name: label, exact: true }).last()).toBeVisible();
 
   const colours = await live.evaluate(node => ({
     home: getComputedStyle(node).getPropertyValue('--home-color').trim(),
@@ -72,12 +78,16 @@ test('Matchday V2 delivers CM-style clarity, stable ratings and safe click subst
   expect(colours.away).toBeTruthy();
   expect(colours.home).not.toBe(colours.away);
 
-  await page.getByRole('button', { name: '4×', exact: true }).click();
+  await rail.locator('[data-cm340-speed="4"]').click();
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(5);
   const teamPassages = page.locator('[data-commentary-feed] .flm-commentary-line[data-cm-side="home"], [data-commentary-feed] .flm-commentary-line[data-cm-side="away"]');
   await expect.poll(async () => teamPassages.count(), { timeout: 15000 }).toBeGreaterThan(0);
-  const currentTextSize = await page.locator('.flm-cm-v2-focus .flm-cm-v2-text').evaluate(node => parseFloat(getComputedStyle(node).fontSize));
-  expect(currentTextSize).toBeGreaterThanOrEqual(24);
+
+  // V3.4 passage-of-play bar must use real commentary, not invented placeholder copy.
+  await expect(page.locator('.cm340-sequence')).toBeVisible();
+  await expect.poll(async () => page.locator('[data-cm340-sequence-steps] span').count(), { timeout: 10000 }).toBeGreaterThanOrEqual(2);
+  const sequenceText = (await page.locator('[data-cm340-sequence-steps]').textContent()) || '';
+  expect(sequenceText).not.toContain('Waiting for the next sequence');
 
   // Regression: match time must be a visible, unclipped part of the scoreboard.
   await expect(page.locator('[data-live-clock]')).toBeVisible();
@@ -103,8 +113,9 @@ test('Matchday V2 delivers CM-style clarity, stable ratings and safe click subst
   expect(clockGeometry.bottom).toBeLessThanOrEqual(clockGeometry.boardBottom + 1);
   expect(clockGeometry.text).toMatch(/^\d{2}:00$/);
 
-  // Regression: live ratings must show actual player names and keep every field in its column.
-  await page.locator('[data-cm33-view="ratings"]').click();
+  // Ratings: real names, valid shirt numbers, minutes played and locked stat columns.
+  await rail.locator('[data-cm340-view="ratings"]').click();
+  await expect(rail.locator('[data-cm340-view="ratings"]')).toHaveClass(/is-active/);
   await expect(page.locator('.cm332-dual-ratings')).toBeVisible({ timeout: 10000 });
   await expect.poll(async () => page.locator('.cm333-rating-row').count(), { timeout: 10000 }).toBeGreaterThanOrEqual(22);
   const firstRating = page.locator('.cm333-rating-row').first();
@@ -116,27 +127,37 @@ test('Matchday V2 delivers CM-style clarity, stable ratings and safe click subst
   expect(numbers.every(value => /^(?:\d{1,2}|—)$/.test(value.trim()))).toBeTruthy();
   const positions = await page.locator('.cm333-rating-row .cm333-pos').allTextContents();
   expect(positions.every(value => value.trim().length > 0)).toBeTruthy();
+  const minutes = await page.locator('.cm333-rating-row .cm340-min').allTextContents();
+  expect(minutes.length).toBeGreaterThanOrEqual(22);
+  expect(minutes.every(value => /^\d{1,3}'$/.test(value.trim()))).toBeTruthy();
   const ratings = await page.locator('.cm333-rating-row .cm333-rate').allTextContents();
   expect(ratings.every(value => /^\d\.\d$/.test(value.trim()))).toBeTruthy();
-  await page.locator('[data-cm33-view="overview"]').click();
+
+  // This was the old failure: Overview must be a real visible user control.
+  await rail.locator('[data-cm340-view="overview"]').click();
+  await expect(rail.locator('[data-cm340-view="overview"]')).toHaveClass(/is-active/);
+  await expect(page.locator('.cm33-console')).toBeVisible();
 
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await page.waitForTimeout(300);
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
 
-  await page.getByRole('button', { name: 'MAKE SUB', exact: true }).click();
+  await rail.locator('[data-cm340-subs]').click();
   await expect(page.locator('.v2-sub-shell')).toBeVisible();
+  await expect(page.locator('.cm340-sub-summary')).toBeVisible();
+  await expect(page.locator('.cm340-sub-summary')).toContainText('SUBSTITUTION BOARD');
   const confirm = page.locator('[data-apply-sub]');
   await expect(confirm).toHaveText('CONFIRM SUBSTITUTION');
   await expect(confirm).toBeDisabled();
 
-  // Regression: the bench must be visible before selecting the outgoing player.
+  // Starting XI and bench are both visible before any selection.
+  await expect(page.locator('.v2-sub-column').nth(0).locator('.v2-sub-player')).toHaveCount(11);
   await expect.poll(async () => page.locator('.cm332-bench-preview').count(), { timeout: 5000 }).toBeGreaterThan(0);
   const previewNames = await page.locator('.cm332-bench-preview strong').allTextContents();
   expect(previewNames.every(value => value.trim().length > 0)).toBeTruthy();
 
-  // Regression: the sticky scoreboard can never sit above the substitutions dialog.
+  // Sticky scoreboard can never sit above the squad-management dialog.
   const layers = await page.evaluate(() => {
     const modal = document.querySelector('[data-manager-modal].is-open');
     const board = document.querySelector('[data-live-match] > .flm-live-scoreboard');
