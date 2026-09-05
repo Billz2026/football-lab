@@ -1,0 +1,79 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-66",
+  "clubName": "Aston Villa",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {
+    "source": "Premier League post-window squad list",
+    "published": "2026-09-03",
+    "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
+  },
+  "marketBenchmark": {
+    "source": "Transfermarkt",
+    "currency": "EUR",
+    "season": "2026/27",
+    "note": "Dated market estimates. For late-window signings, the latest pre-transfer benchmark is retained until the common source updates; official PL membership always wins ownership conflicts."
+  },
+  "players": [
+    {"name":"Zion Suzuki","aliases":["Suzuki, Zion"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":24,"nationalities":["JPN","USA"],"contractEnd":null,"referenceMarketValueEur":20000000,"importanceScore":89,"squadStatus":"key-player"},
+    {"name":"Marco Bizot","aliases":["Bizot, Marco"],"shirtNumber":40,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":35,"nationalities":["NED"],"contractEnd":"2027-06-30","referenceMarketValueEur":1500000,"importanceScore":38,"squadStatus":"backup"},
+    {"name":"James Wright","aliases":["Wright, James Thomas"],"shirtNumber":42,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":21,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":200000,"importanceScore":19,"squadStatus":"development-goalkeeper"},
+
+    {"name":"Victor Lindelof","aliases":["Victor Lindelöf","Nilsson Lindelof, Victor Jorgen"],"shirtNumber":3,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":32,"nationalities":["SWE"],"contractEnd":null,"referenceMarketValueEur":5000000,"importanceScore":56,"squadStatus":"rotation-first-team"},
+    {"name":"Taylor Harwood-Bellis","aliases":["Harwood-Bellis, Taylor Jay"],"shirtNumber":4,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":24,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":20000000,"importanceScore":76,"squadStatus":"first-team"},
+    {"name":"Tyrone Mings","aliases":["Mings, Tyrone Deon"],"shirtNumber":5,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":33,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":3000000,"importanceScore":58,"squadStatus":"rotation-leader"},
+    {"name":"Pau Torres","aliases":["Francisco Torres, Pau","Pau Francisco Torres"],"shirtNumber":14,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":29,"nationalities":["ESP"],"contractEnd":"2028-06-30","referenceMarketValueEur":20000000,"importanceScore":78,"squadStatus":"first-team"},
+    {"name":"Matty Cash","aliases":["Cash, Matthew Stuart","Matthew Cash"],"shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":29,"nationalities":["POL","ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":22000000,"importanceScore":78,"squadStatus":"first-team"},
+    {"name":"Aaron Wan-Bissaka","aliases":["Wan-Bissaka, Aaron"],"shirtNumber":29,"primaryPosition":"DR","secondaryPositions":["DL","MR"],"positionGroup":"DEF","age":28,"nationalities":["COD","ENG"],"contractEnd":null,"parentClub":"West Ham United","loanStatus":"loan-in","referenceMarketValueEur":15000000,"importanceScore":72,"squadStatus":"first-team"},
+    {"name":"Ian Maatsen","aliases":["Maatsen, Ian Ethan"],"shirtNumber":22,"primaryPosition":"DL","secondaryPositions":["WBL","AML"],"positionGroup":"DEF","age":24,"nationalities":["NED","SUR"],"contractEnd":"2030-06-30","referenceMarketValueEur":30000000,"importanceScore":83,"squadStatus":"first-team"},
+    {"name":"Matteo Ruggeri","aliases":["Ruggeri, Matteo"],"shirtNumber":13,"primaryPosition":"DL","secondaryPositions":["ML","DC"],"positionGroup":"DEF","age":24,"nationalities":["ITA"],"contractEnd":null,"referenceMarketValueEur":28000000,"importanceScore":77,"squadStatus":"first-team"},
+
+    {"name":"Boubacar Kamara","aliases":["Kamara, Boubacar Bernard"],"shirtNumber":8,"primaryPosition":"DMC","secondaryPositions":["MC","DC"],"positionGroup":"MID","age":26,"nationalities":["FRA","SEN"],"contractEnd":"2030-06-30","referenceMarketValueEur":40000000,"importanceScore":100,"squadStatus":"cornerstone"},
+    {"name":"Amadou Onana","aliases":["Mvom Onana, Amadou Ba Z"],"shirtNumber":24,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":25,"nationalities":["BEL","SEN"],"contractEnd":"2029-06-30","referenceMarketValueEur":45000000,"importanceScore":85,"squadStatus":"key-player"},
+    {"name":"Lamare Bogarde","aliases":["Bogarde, Lamare Trenton Chansey"],"shirtNumber":26,"primaryPosition":"DMC","secondaryPositions":["DC","DR"],"positionGroup":"MID","age":22,"nationalities":["NED","SUR"],"contractEnd":"2028-06-30","referenceMarketValueEur":18000000,"importanceScore":65,"squadStatus":"rotation-first-team"},
+    {"name":"Joao Gomes","aliases":["João Gomes","Gomes Da Silva, Joao Victor"],"shirtNumber":35,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":25,"nationalities":["BRA"],"contractEnd":null,"referenceMarketValueEur":40000000,"importanceScore":92,"squadStatus":"key-player","transferStatus":"permanent-2026-07-20"},
+    {"name":"John McGinn","aliases":["McGinn, John"],"shirtNumber":7,"primaryPosition":"MC","secondaryPositions":["MR","ML"],"positionGroup":"MID","age":31,"nationalities":["SCO"],"contractEnd":"2028-06-30","referenceMarketValueEur":13000000,"importanceScore":89,"squadStatus":"key-player-captain"},
+    {"name":"Ross Barkley","aliases":["Barkley, Ross"],"shirtNumber":6,"primaryPosition":"MC","secondaryPositions":["DMC","AMC"],"positionGroup":"MID","age":32,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":4000000,"importanceScore":49,"squadStatus":"rotation"},
+    {"name":"Leon Goretzka","aliases":["Goretzka, Leon Christop"],"shirtNumber":27,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":31,"nationalities":["GER"],"contractEnd":null,"referenceMarketValueEur":12000000,"importanceScore":82,"squadStatus":"first-team-leader","transferStatus":"free-transfer-2026-08-27"},
+    {"name":"Emiliano Buendia","aliases":["Emiliano Buendía","Buendia Stati, Emiliano"],"shirtNumber":10,"primaryPosition":"AMC","secondaryPositions":["AML","AMR"],"positionGroup":"MID","age":29,"nationalities":["ARG","ESP"],"contractEnd":"2027-06-30","referenceMarketValueEur":16000000,"importanceScore":66,"squadStatus":"rotation-first-team"},
+
+    {"name":"Alejandro Garnacho","aliases":["Garnacho Ferreyra, Alejandro"],"shirtNumber":17,"primaryPosition":"AML","secondaryPositions":["AMR","AMC"],"positionGroup":"ATT","age":22,"nationalities":["ARG","ESP"],"contractEnd":null,"parentClub":"Chelsea","loanStatus":"loan-in","referenceMarketValueEur":28000000,"importanceScore":84,"squadStatus":"first-team"},
+    {"name":"Nicolas Jackson","aliases":["Jackson, Nicolas"],"shirtNumber":11,"primaryPosition":"ST","secondaryPositions":["AMR","AML"],"positionGroup":"ATT","age":25,"nationalities":["SEN","GAM"],"contractEnd":null,"referenceMarketValueEur":40000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Tammy Abraham","aliases":["Bakumo-Abraham, Kevin Oghenetega Tamaraebi","Kevin Oghenetega Tamaraebi Bakumo-Abraham"],"shirtNumber":18,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":28,"nationalities":["ENG","NGA"],"contractEnd":"2030-06-30","referenceMarketValueEur":18000000,"importanceScore":78,"squadStatus":"first-team"},
+
+    {"name":"Owen Asemota","aliases":["Asemota, Aimuamwonnsa Presley Owen"],"shirtNumber":60,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":18,"nationalities":["ENG","NGA"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":15,"squadStatus":"academy-goalkeeper","u21":true},
+    {"name":"Modou Keba Cisse","aliases":["Modou Kéba Cissé","Cisse, Modou Keba"],"shirtNumber":48,"primaryPosition":"DC","secondaryPositions":["DMC"],"positionGroup":"DEF","age":21,"nationalities":["SEN"],"contractEnd":"2029-06-30","referenceMarketValueEur":6000000,"importanceScore":47,"squadStatus":"first-team-development","u21":true},
+    {"name":"Johan Manzambi","aliases":["Manzambi, Johan Kula"],"shirtNumber":44,"primaryPosition":"MC","secondaryPositions":["AMC","ST"],"positionGroup":"MID","age":20,"nationalities":["SUI"],"contractEnd":null,"referenceMarketValueEur":50000000,"importanceScore":91,"squadStatus":"key-development","u21":true},
+    {"name":"George Hemmings","aliases":["Hemmings, George Lawrence"],"shirtNumber":53,"primaryPosition":"MC","secondaryPositions":["DMC","AMC"],"positionGroup":"MID","age":19,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":800000,"importanceScore":28,"squadStatus":"development","u21":true},
+    {"name":"Ibrahim Mbaye","aliases":["Mbaye, Ibrahim"],"shirtNumber":19,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT","age":18,"nationalities":["SEN","FRA"],"contractEnd":null,"referenceMarketValueEur":30000000,"importanceScore":81,"squadStatus":"elite-prospect-first-team","u21":true,"transferStatus":"permanent-2026-09-01"},
+    {"name":"Alysson","aliases":["Franco da Rocha dos Santos, Alysson Edward","Alysson Edward"],"shirtNumber":47,"primaryPosition":"AMR","secondaryPositions":[],"positionGroup":"ATT","age":20,"nationalities":["BRA"],"contractEnd":"2031-06-30","referenceMarketValueEur":10000000,"importanceScore":54,"squadStatus":"first-team-development","u21":true},
+    {"name":"Brian Madjo","aliases":["Madjo, Brian Djomeni"],"shirtNumber":39,"primaryPosition":"ST","secondaryPositions":["AMR","AML"],"positionGroup":"ATT","age":17,"nationalities":["ENG","LUX"],"contractEnd":"2032-06-30","referenceMarketValueEur":12000000,"importanceScore":57,"squadStatus":"elite-prospect","u21":true}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Emiliano Martinez","status":"departed","destination":"Chelsea","evidence":"Premier League transfer report and omission from Villa's 2026-09-03 official squad"},
+    {"name":"Ezri Konsa","status":"departed","destination":"Arsenal"},
+    {"name":"Morgan Rogers","status":"departed","destination":"Chelsea"},
+    {"name":"Youri Tielemans","status":"departed","destination":"Manchester United"},
+    {"name":"Harvey Elliott","status":"loan-out","destination":"Valencia"},
+    {"name":"Kosta Nedeljkovic","status":"loan-out","membershipEvidence":"Official Premier League U21 list marks player (Loan)"},
+    {"name":"Yasin Ozcan","status":"loan-out","membershipEvidence":"Official Premier League U21 list marks player (Loan)"},
+    {"name":"Triston Rowe","status":"loan-out","membershipEvidence":"Official Premier League U21 list marks player (Loan)"},
+    {"name":"Ollie Watkins","status":"not-in-post-window-PL-squad"},
+    {"name":"Leon Bailey","status":"not-in-post-window-PL-squad"},
+    {"name":"Lucas Digne","status":"not-in-post-window-PL-squad"}
+  ],
+  "qa": {
+    "officialSeniorListCount": 22,
+    "firstTeamRelevantU21Count": 7,
+    "auditedSelectablePlayers": 29,
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "Emiliano Martinez is removed despite appearing on stale secondary squad pages because the official 3 September PL registration excludes him and confirms his Chelsea move.",
+      "Alejandro Garnacho and Aaron Wan-Bissaka are represented as loan-ins where current transfer reporting identifies the parent-club relationship.",
+      "Boubacar Kamara is the current tactical cornerstone; UEFA's 2026/27 team guide explicitly identifies him as Villa's key player.",
+      "Importance scores are Football Lab gameplay calibration, not factual external ratings."
+    ]
+  }
+}
