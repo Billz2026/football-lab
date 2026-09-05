@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(60000);
+test.setTimeout(90000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -8,16 +8,30 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+async function continueUntil(page, targetDate, maxSteps = 30) {
+  for (let step = 0; step < maxSteps; step += 1) {
+    const current = await page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '');
+    if (current >= targetDate) return current;
+    await page.locator('.career-header [data-v060-continue]').click();
+    await page.waitForTimeout(80);
+  }
+  throw new Error(`Continue Game did not reach ${targetDate}`);
+}
+
 async function completePreseason(page) {
+  const dates = ['2026-07-11','2026-07-18','2026-07-25','2026-08-01','2026-08-08'];
   const tab = page.locator('[data-v047-preseason-tab]');
   await expect(tab).toBeVisible();
-  await tab.click();
   for (let count = 1; count <= 5; count += 1) {
+    await continueUntil(page, dates[count - 1]);
+    await tab.click();
+    await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
     await page.locator('[data-v047-sim]').click();
     await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count);
   }
   await page.locator('[data-v047-start]').click();
   await expect(page.getByRole('button', { name: 'Matchday', exact: true })).toBeEnabled();
+  await continueUntil(page, '2026-08-21');
 }
 
 test('V0.4.8 squad stars and CM-style drag/drop tactics are accurate and usable', async ({ page }) => {
