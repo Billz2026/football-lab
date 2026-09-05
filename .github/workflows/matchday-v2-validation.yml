@@ -15,6 +15,8 @@ on:
       - 'matchday-density-v332.css'
       - 'matchday-stability-v333.js'
       - 'matchday-stability-v333.css'
+      - 'matchday-workspace-v340.js'
+      - 'matchday-workspace-v340.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
@@ -32,6 +34,8 @@ on:
       - 'matchday-density-v332.css'
       - 'matchday-stability-v333.js'
       - 'matchday-stability-v333.css'
+      - 'matchday-workspace-v340.js'
+      - 'matchday-workspace-v340.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
@@ -60,6 +64,7 @@ jobs:
           node --check matchday-ratings-v341.js
           node --check matchday-density-v332.js
           node --check matchday-stability-v333.js
+          node --check matchday-workspace-v340.js
           node --check tests/matchday-v2.spec.js
 
       - name: Install dependencies
