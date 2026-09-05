@@ -53,6 +53,38 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await expect(live).toHaveAttribute('data-cm4', '1');
   const shell = page.locator('.cm4-shell');
   await expect(shell).toBeVisible();
+  await expect(shell).toHaveAttribute('data-cm41', '1');
+
+  // V4.1 keeps the classic vertical match-control rail on unfolded Fold/tablet widths.
+  await page.setViewportSize({ width: 720, height: 900 });
+  const foldGeometry = await page.evaluate(() => {
+    const shell = document.querySelector('.cm4-shell');
+    const rail = document.querySelector('.cm4-rail');
+    const workspace = document.querySelector('.cm4-workspace');
+    const scorebar = document.querySelector('.cm4-scorebar');
+    const tabs = document.querySelector('.cm4-tabs');
+    const bottom = document.querySelector('.cm4-bottom-player');
+    const rr = rail.getBoundingClientRect();
+    const wr = workspace.getBoundingClientRect();
+    const sr = shell.getBoundingClientRect();
+    return {
+      railTop: rr.top,
+      railRight: rr.right,
+      workspaceTop: wr.top,
+      workspaceLeft: wr.left,
+      shellHeight: sr.height,
+      scorePosition: getComputedStyle(scorebar).position,
+      tabsDisplay: getComputedStyle(tabs).display,
+      bottomDisplay: bottom ? getComputedStyle(bottom).display : 'none'
+    };
+  });
+  expect(Math.abs(foldGeometry.railTop - foldGeometry.workspaceTop)).toBeLessThanOrEqual(2);
+  expect(foldGeometry.railRight).toBeLessThanOrEqual(foldGeometry.workspaceLeft + 2);
+  expect(foldGeometry.shellHeight).toBeLessThan(760);
+  expect(foldGeometry.scorePosition).toBe('sticky');
+  expect(foldGeometry.tabsDisplay).toBe('grid');
+  expect(foldGeometry.bottomDisplay).toBe('none');
+  await page.setViewportSize({ width: 1280, height: 720 });
 
   // V4 owns the full match workspace: the career shell collapses, leaving one navigation system.
   await expect(page.locator('.flm-cm-sidebar')).toBeHidden();
@@ -78,9 +110,10 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   // Run the match and make sure the focused event card tracks real commentary.
   await shell.locator('[data-cm4-speed="4"]').click();
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(5);
-  await expect.poll(async () => (await shell.locator('[data-cm4-event-text]').textContent())?.trim().length || 0, { timeout: 10000 }).toBeGreaterThan(5);
-  const eventText = (await shell.locator('[data-cm4-event-text]').textContent()) || '';
+  await expect.poll(async () => (await shell.locator('[data-cm4-event-text]').getAttribute('data-cm41-text'))?.trim().length || 0, { timeout: 10000 }).toBeGreaterThan(5);
+  const eventText = (await shell.locator('[data-cm4-event-text]').getAttribute('data-cm41-text')) || '';
   expect(eventText).not.toContain('Waiting for kick-off');
+  expect(eventText).not.toMatch(/\b(?:LCM|RCM|Central Midfielder role)\b/i);
 
   // V4 clock is visible and has real geometry rather than being clipped under another layer.
   const clockGeometry = await shell.locator('[data-cm4-clock]').evaluate(node => {
