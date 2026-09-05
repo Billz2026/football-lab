@@ -13,6 +13,25 @@ function persist(c) {
   if (status) status.textContent = 'SAVED';
 }
 
+function initialiseManualOwnership() {
+  const c = career();
+  if (!c || Object.prototype.hasOwnProperty.call(c, 'manualLineupSelection')) return;
+
+  // Careers created before this UX layer may already contain the core engine's
+  // auto-picked XI. Before the first competitive match, ownership belongs to the
+  // manager: clear that generated XI and make the user build it deliberately.
+  const untouchedCareer = Number(c.roundIndex || 0) === 0 && !c.lastMatch;
+  if (untouchedCareer) {
+    c.lineupIds = [];
+    c.manualLineupSelection = true;
+    delete c.tacticalSetup;
+  } else {
+    // Never destroy a historic XI in an existing career that is already underway.
+    c.manualLineupSelection = false;
+  }
+  persist(c);
+}
+
 function injectStyles() {
   if (document.getElementById(STYLE_ID)) return;
   const style = document.createElement('style');
@@ -71,11 +90,13 @@ function clearXI(root = document) {
   root.querySelectorAll('[data-lineup-player]').forEach(input => { input.checked = false; });
   c.lineupIds = [];
   c.manualLineupSelection = true;
+  delete c.tacticalSetup;
   persist(c);
   refreshSelectionUI(root);
 }
 
 function enhanceSquad() {
+  initialiseManualOwnership();
   const actions = document.querySelector('.career-squad-actions');
   const list = document.querySelector('.career-squad-list');
   if (!actions || !list || actions.dataset.manualXiV1 === '1') return;
@@ -104,7 +125,7 @@ function enhanceSquad() {
   const helper = [...actions.children].find(node => node.tagName === 'SPAN' && !node.closest('.flm-xi-toolbar'));
   if (helper) {
     helper.classList.add('flm-manual-note');
-    helper.textContent = 'Pick your own XI. Select exactly 11 players including a goalkeeper. Auto Pick is optional.';
+    helper.textContent = 'Your XI starts empty. Pick exactly 11 players including a goalkeeper. Auto Pick is optional.';
   }
 
   refreshSelectionUI(document);
@@ -115,6 +136,7 @@ function queueEnhance() {
   queued = true;
   requestAnimationFrame(() => {
     queued = false;
+    initialiseManualOwnership();
     injectStyles();
     enhanceSquad();
   });
