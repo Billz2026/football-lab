@@ -1,0 +1,30 @@
+{
+  "reviewDate": "2026-09-05",
+  "clubId": "flm-club-api-football-33",
+  "clubName": "Manchester United",
+  "player": "Jadon Sancho",
+  "qaStatus": "confirmed-not-a-manchester-united-player",
+  "currentStatus": "free-agent",
+  "contractEnd": "2026-06-30",
+  "effectiveFreeAgentDate": "2026-07-01",
+  "runtimeRule": "Jadon Sancho must not be selectable as a Manchester United player in the 2026/27 Football Lab database.",
+  "sourcePriorityFinding": "The Premier League squad page currently surfacing Sancho is stale. Manchester United retained/released-list evidence and post-expiry current-status sources override that page.",
+  "evidence": [
+    {
+      "source": "Manchester United retained-list reporting / PA syndication",
+      "url": "https://www.rte.ie/sport/soccer/2026/0610/1577723-manchester-united-confirm-exits-of-sancho-and-malacia/",
+      "finding": "Manchester United confirmed Sancho would leave following expiry of his contract."
+    },
+    {
+      "source": "Transfermarkt current player profile",
+      "url": "https://www.transfermarkt.co.uk/jadon-sancho/profil/spieler/401173",
+      "finding": "Current club: Without Club; without club since 01/07/2026."
+    },
+    {
+      "source": "Recent transfer reporting",
+      "url": "https://www.theguardian.com/football/2026/sep/01/football-transfer-rumours-manchester-united-liverpool-eli-junior-kroupi-jamie-vardy-wrexham",
+      "finding": "Sancho described as a former United player and free agent on 1 September 2026."
+    }
+  ],
+  "qaAction": "Remove any Manchester United ownership/squad assignment for Jadon Sancho and represent him in the world database as a free agent until a confirmed new signing occurs."
+}
