@@ -1,4 +1,4 @@
-const STYLE_HREF = './match-centre-v4-discipline-v44.css?v=4.4.0';
+const STYLE_HREF = './match-centre-v4-discipline-v44.css?v=4.4.1';
 const liveState = new WeakMap();
 
 const clean = value => String(value || '').replace(/\s+/g,' ').trim();
@@ -203,19 +203,19 @@ function renderPayload(live,shell,payload){
   const shown=state.major && state.major.until>now ? state.major : payload;
   if (state.major && state.major.until<=now) state.major=null;
   const key=`${shown.key}|${shown.text}`;
-  if (state.lastRenderedKey===key) return;
   state.lastRenderedKey=key;
   const event=shell.querySelector('[data-cm4-event]');
   const textNode=shell.querySelector('[data-cm4-event-text]');
   if (!event || !textNode) return;
-  event.dataset.cm44Type=shown.type;
-  event.className=`cm4-event is-${shown.type} is-${shown.side}`;
+  const desiredClass=`cm4-event is-${shown.type} is-${shown.side}`;
+  if (event.dataset.cm44Type!==shown.type) event.dataset.cm44Type=shown.type;
+  if (event.className!==desiredClass) event.className=desiredClass;
   const minute=shell.querySelector('[data-cm4-event-minute]');
   const team=shell.querySelector('[data-cm4-event-team]');
-  if (minute) minute.textContent=shown.minute;
-  if (team) team.textContent=shown.team;
-  textNode.dataset.cm44Text=shown.text;
-  textNode.setAttribute('aria-label',shown.text);
+  if (minute && minute.textContent!==shown.minute) minute.textContent=shown.minute;
+  if (team && team.textContent!==shown.team) team.textContent=shown.team;
+  if (textNode.dataset.cm44Text!==shown.text) textNode.dataset.cm44Text=shown.text;
+  if (textNode.getAttribute('aria-label')!==shown.text) textNode.setAttribute('aria-label',shown.text);
 }
 
 function ensureContinueButton(shell){
@@ -241,14 +241,25 @@ function lockHalfTime(live,shell){
   const minute=shell.querySelector('[data-cm4-minute]');
   const event=shell.querySelector('[data-cm4-event]');
   const text=shell.querySelector('[data-cm4-event-text]');
-  if (phase) phase.textContent='Half Time';
-  if (half) half.textContent='HALF TIME';
-  if (minute) minute.textContent="45'";
-  if (pause){ pause.textContent='Resume 2nd Half'; pause.setAttribute('aria-label','Resume Second Half'); }
-  if (event) event.className='cm4-event is-neutral cm44-halftime-event';
-  if (event?.querySelector('[data-cm4-event-minute]')) event.querySelector('[data-cm4-event-minute]').textContent="45'";
-  if (event?.querySelector('[data-cm4-event-team]')) event.querySelector('[data-cm4-event-team]').textContent='HALF TIME';
-  if (text){ text.dataset.cm44Text=result; text.setAttribute('aria-label',result); }
+  if (phase && phase.textContent!=='Half Time') phase.textContent='Half Time';
+  if (half && half.textContent!=='HALF TIME') half.textContent='HALF TIME';
+  if (minute && minute.textContent!=="45'") minute.textContent="45'";
+  if (pause){
+    if (pause.textContent!=='Resume 2nd Half') pause.textContent='Resume 2nd Half';
+    if (pause.getAttribute('aria-label')!=='Resume Second Half') pause.setAttribute('aria-label','Resume Second Half');
+  }
+  if (event){
+    const desired='cm4-event is-neutral cm44-halftime-event';
+    if (event.className!==desired) event.className=desired;
+  }
+  const eventMinute=event?.querySelector('[data-cm4-event-minute]');
+  const eventTeam=event?.querySelector('[data-cm4-event-team]');
+  if (eventMinute && eventMinute.textContent!=="45'") eventMinute.textContent="45'";
+  if (eventTeam && eventTeam.textContent!=='HALF TIME') eventTeam.textContent='HALF TIME';
+  if (text){
+    if (text.dataset.cm44Text!==result) text.dataset.cm44Text=result;
+    if (text.getAttribute('aria-label')!==result) text.setAttribute('aria-label',result);
+  }
 }
 
 function lockFullTime(live,shell){
@@ -263,16 +274,28 @@ function lockFullTime(live,shell){
   const minute=shell.querySelector('[data-cm4-minute]');
   const event=shell.querySelector('[data-cm4-event]');
   const text=shell.querySelector('[data-cm4-event-text]');
-  if (phase) phase.textContent='Full Time';
-  if (half) half.textContent='FULL TIME';
-  if (minute) minute.textContent="90'";
-  if (pause){ pause.textContent='Continue'; pause.disabled=false; pause.setAttribute('aria-label','Continue'); }
-  if (event) event.className='cm4-event is-neutral cm44-fulltime-event';
-  if (event?.querySelector('[data-cm4-event-minute]')) event.querySelector('[data-cm4-event-minute]').textContent="90'";
-  if (event?.querySelector('[data-cm4-event-team]')) event.querySelector('[data-cm4-event-team]').textContent='FULL TIME';
-  if (text){ text.dataset.cm44Text=result; text.setAttribute('aria-label',result); }
+  if (phase && phase.textContent!=='Full Time') phase.textContent='Full Time';
+  if (half && half.textContent!=='FULL TIME') half.textContent='FULL TIME';
+  if (minute && minute.textContent!=="90'") minute.textContent="90'";
+  if (pause){
+    if (pause.textContent!=='Continue') pause.textContent='Continue';
+    pause.disabled=false;
+    if (pause.getAttribute('aria-label')!=='Continue') pause.setAttribute('aria-label','Continue');
+  }
+  if (event){
+    const desired='cm4-event is-neutral cm44-fulltime-event';
+    if (event.className!==desired) event.className=desired;
+  }
+  const eventMinute=event?.querySelector('[data-cm4-event-minute]');
+  const eventTeam=event?.querySelector('[data-cm4-event-team]');
+  if (eventMinute && eventMinute.textContent!=="90'") eventMinute.textContent="90'";
+  if (eventTeam && eventTeam.textContent!=='FULL TIME') eventTeam.textContent='FULL TIME';
+  if (text){
+    if (text.dataset.cm44Text!==result) text.dataset.cm44Text=result;
+    if (text.getAttribute('aria-label')!==result) text.setAttribute('aria-label',result);
+  }
   const goal=shell.querySelector('[data-cm4-goal]');
-  if (goal) goal.classList.add('cm44-suppressed');
+  if (goal && !goal.classList.contains('cm44-suppressed')) goal.classList.add('cm44-suppressed');
   ensureContinueButton(shell);
 }
 
