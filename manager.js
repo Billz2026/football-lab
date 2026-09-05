@@ -24,4 +24,5 @@ import './matchday-polish-v321.js?v=3.2.1';
 import './matchday-console-v33.js?v=3.3.0';
 import './matchday-console-v331-compat.js?v=3.3.1';
 import './matchday-density-v332.js?v=3.3.2';
+import './matchday-stability-v333.js?v=3.3.3';
 import './database-readonly-v1.js?v=1.0.0';
