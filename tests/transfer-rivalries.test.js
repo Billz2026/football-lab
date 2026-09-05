@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getRivalryRule, rivalryDecision } from '../transfer-rivalries-v1.js';
+import { migrateExistingRivalTransfers } from '../transfer-market-v062-rivalry.js';
 import { getTransferStance, submitTransferOffer } from '../transfers-v050.js';
 
 function fixture() {
@@ -63,4 +64,33 @@ test('Arsenal to Tottenham is also treated as a hard direct-rival move', () => {
   const decision = rivalryDecision(db, 'ars', 'tot', player, { rank: 3, key: true, elite: false, contractYears: 3 }, { transfers: { listedPlayerIds: [] } });
   assert.equal(decision.blocked, true);
   assert.match(decision.rule.label, /North London/i);
+});
+
+test('existing AI-only Dorgu-style Manchester derby transfer is reverted in old saves', () => {
+  const { db, dorgu } = fixture();
+  dorgu.clubId = 'mc';
+  const career = {
+    id: 'arsenal-old-save', clubId: 'ars', currentDate: '2026-07-20',
+    transfers: {
+      completed: [{ id: 'old-dorgu-city', playerId: 'dorgu', fromClubId: 'mu', toClubId: 'mc', fee: 55_000_000, weeklyWage: 110_000, source: 'ai', round: 0 }],
+      ownership: { dorgu: 'mc' },
+      contracts: { dorgu: { weeklyWage: 110_000, years: 5, expiryYear: 2031 } },
+      listedPlayerIds: [],
+      aiClubs: {
+        mu: { transferBudget: 90_100_000, wageRoom: 350_000, signedPlayerIds: [], soldPlayerIds: ['dorgu'] },
+        mc: { transferBudget: 70_000_000, wageRoom: 390_000, signedPlayerIds: ['dorgu'], soldPlayerIds: [] }
+      }
+    },
+    news: { items: [{ id: 'news-x-v61-transfer-old-dorgu-city', key: 'v61-transfer-old-dorgu-city', category: 'Transfers', relatedPlayerId: 'dorgu' }] }
+  };
+
+  const reverted = migrateExistingRivalTransfers(career, db);
+  assert.equal(reverted.length, 1);
+  assert.equal(reverted[0].playerId, 'dorgu');
+  assert.equal(dorgu.clubId, 'mu');
+  assert.equal(career.transfers.ownership.dorgu, 'mu');
+  assert.equal(career.transfers.completed.length, 0);
+  assert.equal(career.transfers.aiClubs.mc.signedPlayerIds.includes('dorgu'), false);
+  assert.equal(career.transfers.aiClubs.mu.soldPlayerIds.includes('dorgu'), false);
+  assert.equal(career.news.items.length, 0);
 });
