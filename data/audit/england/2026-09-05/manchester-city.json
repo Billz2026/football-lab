@@ -1,0 +1,54 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-50",
+  "clubName": "Manchester City",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {"source":"Premier League post-window squad submission plus Manchester City official announcements","published":"2026-09-03","url":"https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"},
+  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","url":"https://www.transfermarkt.com/manchester-city/kader/verein/281/saison_id/2026","note":"The squad page predates deadline day in places. Individual dated benchmarks are used for Enzo Fernandez, Iliman Ndiaye and Ayyoub Bouaddi; official registration controls ownership."},
+  "players": [
+    {"name":"Gianluigi Donnarumma","aliases":["Donnarumma, Gianluigi"],"shirtNumber":25,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":27,"nationalities":["ITA"],"contractEnd":"2030-06-30","referenceMarketValueEur":45000000,"importanceScore":97,"squadStatus":"cornerstone"},
+    {"name":"Geronimo Rulli","aliases":["Gerónimo Rulli","Rulli, Geronimo"],"shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":34,"nationalities":["ARG","ITA"],"contractEnd":null,"referenceMarketValueEur":6000000,"importanceScore":52,"squadStatus":"rotation-goalkeeper"},
+    {"name":"Marcus Bettinelli","aliases":["Bettinelli, Marcus"],"shirtNumber":13,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":34,"nationalities":["ENG","ITA"],"contractEnd":"2027-06-30","referenceMarketValueEur":300000,"importanceScore":20,"squadStatus":"backup-depth"},
+
+    {"name":"Ruben Dias","aliases":["Rúben Dias","Dos Santos Gato Alves Dias, Ruben"],"shirtNumber":3,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":29,"nationalities":["POR"],"contractEnd":"2029-06-30","referenceMarketValueEur":55000000,"importanceScore":96,"squadStatus":"cornerstone"},
+    {"name":"Marc Guehi","aliases":["Marc Guéhi","Guehi, Addji Keaninkin Marc-Israel"],"shirtNumber":15,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":26,"nationalities":["ENG","CIV"],"contractEnd":"2031-06-30","referenceMarketValueEur":70000000,"importanceScore":94,"squadStatus":"cornerstone"},
+    {"name":"Josko Gvardiol","aliases":["Joško Gvardiol","Gvardiol, Josko"],"shirtNumber":24,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":24,"nationalities":["CRO"],"contractEnd":"2031-06-30","referenceMarketValueEur":70000000,"importanceScore":94,"squadStatus":"cornerstone"},
+    {"name":"Abdukodir Khusanov","aliases":["Khusanov, Abdukodir"],"shirtNumber":45,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":22,"nationalities":["UZB"],"contractEnd":"2031-06-30","referenceMarketValueEur":50000000,"importanceScore":83,"squadStatus":"first-team-development"},
+    {"name":"Rayan Ait-Nouri","aliases":["Rayan Aït-Nouri","Ait-Nouri, Rayan"],"shirtNumber":21,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF","age":25,"nationalities":["ALG","FRA"],"contractEnd":"2030-06-30","referenceMarketValueEur":40000000,"importanceScore":89,"squadStatus":"key-player"},
+    {"name":"Rico Lewis","aliases":["Lewis, Rico Mark"],"shirtNumber":82,"primaryPosition":"DR","secondaryPositions":["DMC","MC"],"positionGroup":"DEF","age":21,"nationalities":["ENG","JAM"],"contractEnd":"2030-06-30","referenceMarketValueEur":28000000,"importanceScore":77,"squadStatus":"first-team-development"},
+    {"name":"Matheus Nunes","aliases":["Nunes, Matheus Luiz"],"shirtNumber":27,"primaryPosition":"DR","secondaryPositions":["MC","DMC"],"positionGroup":"DEF","age":27,"nationalities":["POR","BRA"],"contractEnd":"2028-06-30","referenceMarketValueEur":50000000,"importanceScore":83,"squadStatus":"first-team"},
+
+    {"name":"Elliot Anderson","aliases":["Anderson, Elliot Junior"],"shirtNumber":null,"primaryPosition":"MC","secondaryPositions":["DMC","AMC"],"positionGroup":"MID","age":23,"nationalities":["ENG","SCO"],"contractEnd":"2031-06-30","referenceMarketValueEur":110000000,"importanceScore":98,"squadStatus":"cornerstone"},
+    {"name":"Enzo Fernandez","aliases":["Enzo Fernández","Fernandez, Enzo Jeremias"],"shirtNumber":null,"primaryPosition":"MC","secondaryPositions":["DMC","AMC"],"positionGroup":"MID","age":25,"nationalities":["ARG"],"contractEnd":null,"referenceMarketValueEur":90000000,"importanceScore":98,"squadStatus":"cornerstone","transferStatus":"deadline-transfer-from-Chelsea"},
+    {"name":"Mateo Kovacic","aliases":["Mateo Kovačić","Kovacic, Mateo"],"shirtNumber":8,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":32,"nationalities":["CRO"],"contractEnd":"2027-06-30","referenceMarketValueEur":10000000,"importanceScore":59,"squadStatus":"rotation-first-team"},
+    {"name":"Rayan Cherki","aliases":["Cherki, Mathis Rayan"],"shirtNumber":10,"primaryPosition":"AMC","secondaryPositions":["AMR","MC"],"positionGroup":"MID","age":22,"nationalities":["FRA","ALG"],"contractEnd":"2030-06-30","referenceMarketValueEur":90000000,"importanceScore":96,"squadStatus":"cornerstone"},
+    {"name":"Phil Foden","aliases":["Foden, Philip Walter"],"shirtNumber":47,"primaryPosition":"AMC","secondaryPositions":["AMR","AML"],"positionGroup":"MID","age":26,"nationalities":["ENG"],"contractEnd":"2030-06-30","referenceMarketValueEur":70000000,"importanceScore":92,"squadStatus":"key-player"},
+
+    {"name":"Jeremy Doku","aliases":["Jérémy Doku","Doku, Jeremy Baffour"],"shirtNumber":11,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT","age":24,"nationalities":["BEL","GHA"],"contractEnd":"2028-06-30","referenceMarketValueEur":75000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Allan Elias","aliases":["Allan Andrade Elias","Andrade Elias, Allan"],"shirtNumber":null,"primaryPosition":"AMR","secondaryPositions":["MC","ST","DR"],"positionGroup":"ATT","age":22,"nationalities":["BRA"],"contractEnd":"2031-06-30","referenceMarketValueEur":null,"importanceScore":78,"squadStatus":"first-team-development","valueConfidence":"benchmark-not-yet-resolved"},
+    {"name":"Iliman Ndiaye","aliases":["Ndiaye, Iliman Cheikh Baroy"],"shirtNumber":null,"primaryPosition":"AMR","secondaryPositions":["AML","AMC"],"positionGroup":"ATT","age":26,"nationalities":["SEN","FRA"],"contractEnd":null,"referenceMarketValueEur":55000000,"importanceScore":88,"squadStatus":"key-player","transferStatus":"deadline-transfer-from-Everton"},
+    {"name":"Antoine Semenyo","aliases":["Semenyo, Antoine Serlom"],"shirtNumber":42,"primaryPosition":"AMR","secondaryPositions":["AML","ST"],"positionGroup":"ATT","age":26,"nationalities":["GHA","ENG"],"contractEnd":"2031-06-30","referenceMarketValueEur":80000000,"importanceScore":93,"squadStatus":"cornerstone"},
+    {"name":"Erling Haaland","aliases":["Haaland, Erling Braut"],"shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":26,"nationalities":["NOR"],"contractEnd":"2034-06-30","referenceMarketValueEur":220000000,"importanceScore":100,"squadStatus":"global-superstar"},
+
+    {"name":"Vitor Reis","aliases":["Vitor Reis","De Oliveira Nunes Dos Reis, Vitor"],"shirtNumber":22,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":20,"nationalities":["BRA"],"contractEnd":"2029-06-30","referenceMarketValueEur":30000000,"importanceScore":67,"squadStatus":"first-team-development","u21":true},
+    {"name":"Nico O'Reilly","aliases":["O'Reilly, Nico"],"shirtNumber":33,"primaryPosition":"DL","secondaryPositions":["MC","DMC"],"positionGroup":"DEF","age":21,"nationalities":["ENG","JAM"],"contractEnd":"2030-06-30","referenceMarketValueEur":70000000,"importanceScore":87,"squadStatus":"key-development","u21":true},
+    {"name":"Ayyoub Bouaddi","aliases":["Bouaddi, Ayyoub"],"shirtNumber":null,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":18,"nationalities":["MAR","FRA"],"contractEnd":null,"referenceMarketValueEur":50000000,"importanceScore":84,"squadStatus":"key-development","u21":true},
+    {"name":"Claudio Echeverri","aliases":["Echeverri, Claudio Jeremias"],"shirtNumber":30,"primaryPosition":"AMC","secondaryPositions":["AMR"],"positionGroup":"MID","age":20,"nationalities":["ARG"],"contractEnd":"2028-06-30","referenceMarketValueEur":15000000,"importanceScore":63,"squadStatus":"first-team-development","u21":true},
+    {"name":"Jeremy Monga","aliases":["Monga, Jeremy Ngola"],"shirtNumber":null,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT","age":17,"nationalities":["ENG","ZAM"],"contractEnd":"2031-06-30","referenceMarketValueEur":15000000,"importanceScore":62,"squadStatus":"elite-prospect","u21":true}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Rodri","status":"not-in-post-window-PL-squad"},
+    {"name":"Tijjani Reijnders","status":"not-in-post-window-PL-squad"},
+    {"name":"Savinho","status":"not-in-post-window-PL-squad"},
+    {"name":"Omar Marmoush","status":"not-in-post-window-PL-squad"},
+    {"name":"Jack Grealish","status":"loan-out","destination":"Everton"},
+    {"name":"Kalvin Phillips","status":"not-in-post-window-PL-squad"},
+    {"name":"Issa Kabore","status":"not-in-post-window-PL-squad"},
+    {"name":"Josh Wilson-Esbrand","status":"not-in-post-window-PL-squad"},
+    {"name":"Max Alleyne","status":"loan-out","membershipEvidence":"Official City U21 list marks player (Loan)"},
+    {"name":"Juma Bah","status":"loan-out","membershipEvidence":"Official City U21 list marks player (Loan)"}
+  ],
+  "qa": {"officialSeniorListCount":20,"firstTeamRelevantU21Count":5,"auditedSelectablePlayers":25,"unresolvedSeniorOwnership":0,"notes":["The official Sep 3 senior submission contains only 20 names; players present on the older Transfermarkt squad but absent from the official registration are not silently retained.","Manchester City's official announcement describes Allan Elias as primarily a right winger with midfield, second-striker and full-back versatility.","Enzo Fernandez uses a €90m reference benchmark and Iliman Ndiaye €55m; these are reference values, not the fees City would have to pay or receive.","Importance scores are Football Lab gameplay calibration, not factual external ratings."]}
+}
