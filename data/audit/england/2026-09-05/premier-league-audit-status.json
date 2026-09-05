@@ -1,0 +1,29 @@
+{
+  "auditDate": "2026-09-05",
+  "season": "2026/27",
+  "branch": "premier-league-full-audit-2026-09-05",
+  "completionRule": "Do not wire this audit into the live runtime until all 20 clubs have passed factual first-team reconciliation and league-wide QA.",
+  "clubs": [
+    {"clubId":"flm-club-api-football-35","club":"AFC Bournemouth","status":"in-progress"},
+    {"clubId":"flm-club-api-football-42","club":"Arsenal","status":"complete-factual-first-team"},
+    {"clubId":"flm-club-api-football-66","club":"Aston Villa","status":"pending"},
+    {"clubId":"flm-club-api-football-55","club":"Brentford","status":"pending"},
+    {"clubId":"flm-club-api-football-51","club":"Brighton & Hove Albion","status":"pending"},
+    {"clubId":"flm-club-api-football-49","club":"Chelsea","status":"pending"},
+    {"clubId":"flm-club-api-football-1346","club":"Coventry City","status":"pending"},
+    {"clubId":"flm-club-api-football-52","club":"Crystal Palace","status":"pending"},
+    {"clubId":"flm-club-api-football-45","club":"Everton","status":"pending"},
+    {"clubId":"flm-club-api-football-36","club":"Fulham","status":"pending"},
+    {"clubId":"flm-club-api-football-64","club":"Hull City","status":"pending"},
+    {"clubId":"flm-club-api-football-57","club":"Ipswich Town","status":"pending"},
+    {"clubId":"flm-club-api-football-63","club":"Leeds United","status":"pending"},
+    {"clubId":"flm-club-api-football-40","club":"Liverpool","status":"pending"},
+    {"clubId":"flm-club-api-football-50","club":"Manchester City","status":"pending"},
+    {"clubId":"flm-club-api-football-33","club":"Manchester United","status":"pending"},
+    {"clubId":"flm-club-api-football-34","club":"Newcastle United","status":"pending"},
+    {"clubId":"flm-club-api-football-65","club":"Nottingham Forest","status":"pending"},
+    {"clubId":"flm-club-api-football-746","club":"Sunderland","status":"pending"},
+    {"clubId":"flm-club-api-football-47","club":"Tottenham Hotspur","status":"pending"}
+  ],
+  "summary": {"complete":1,"inProgress":1,"pending":18,"total":20}
+}
