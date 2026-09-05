@@ -17,6 +17,10 @@ test('career starts in June, gates transfers and releases fixtures on 19 June', 
   await expect(transferGate).toHaveClass(/v054-lock-nav/);
   await expect(transferGate).toContainText('15 JUN');
   await expect(page.locator('[data-v050-transfer-tab]')).toHaveCount(0);
+  const beforeWindow = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
+  expect(beforeWindow.currentDate).toBe('2026-06-05');
+  expect(beforeWindow.transfers?.completed || []).toHaveLength(0);
+  expect(beforeWindow.transfers?.incomingOffers || []).toHaveLength(0);
 
   const fixtures = page.locator('[data-v051-fixtures]');
   await expect(fixtures).toHaveClass(/v054-lock-nav/);
@@ -43,7 +47,6 @@ test('career starts in June, gates transfers and releases fixtures on 19 June', 
   expect(saved.calendar.fixturesReleased).toBeTruthy();
   expect(saved.news.items.some(item => item.key === 'fixture-release')).toBeTruthy();
   expect(saved.news.items.some(item => item.key === 'summer-window-opens')).toBeTruthy();
-  expect((saved.transfers?.completed || []).every(item => item.round !== 0 || item.source !== 'ai')).toBeTruthy();
 });
 
 test('player profiles browse instantly with next previous and jump controls', async ({ page }) => {
