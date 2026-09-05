@@ -1,0 +1,50 @@
+name: Matchday V2 validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'matchday-cm-v2.js'
+      - 'matchday-cm-v2.css'
+      - 'manager.js'
+      - 'tests/matchday-v2.spec.js'
+      - '.github/workflows/matchday-v2-validation.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'matchday-cm-v2.js'
+      - 'matchday-cm-v2.css'
+      - 'manager.js'
+      - 'tests/matchday-v2.spec.js'
+      - '.github/workflows/matchday-v2-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-matchday-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check V2 syntax
+        run: |
+          node --check matchday-cm-v2.js
+          node --check tests/matchday-v2.spec.js
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install chromium
+
+      - name: Run Matchday V2 acceptance test
+        run: npx playwright test tests/matchday-v2.spec.js --config=playwright.ci.config.js --reporter=line
