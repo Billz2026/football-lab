@@ -1,0 +1,108 @@
+/* V3.4.1 exact two-team live ratings */
+.flm-live-match[data-cm-mode="3.4"][data-cm-view="ratings"] .cm33-ratings-panel,
+.flm-live-match[data-cm-mode="3.4"][data-cm-view="ratings"] .cm32-ratings-panel,
+.flm-live-match[data-cm-mode="3.4"][data-cm-view="ratings"] .flm-live-grid > .flm-panel,
+.flm-live-match[data-cm-mode="3.4"][data-cm-view="ratings"] .flm-side-stack,
+.flm-live-match[data-cm-mode="3.4"][data-cm-view="ratings"] .cm31-action-zones{
+  display:none!important;
+}
+.flm-live-match[data-cm-mode="3.4"][data-cm-view="ratings"] .cm34-dual-ratings{
+  display:grid!important;
+}
+.cm34-dual-ratings{
+  display:none;
+  width:100%;
+  height:calc(100dvh - 145px);
+  min-height:0;
+  grid-template-rows:44px minmax(0,1fr);
+  border:1px solid #2d2f2a;
+  background:#080906;
+  color:#e9e5dc;
+  overflow:hidden;
+  font-family:Tahoma,Verdana,Arial,sans-serif;
+}
+.cm34-ratings-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-height:44px;
+  padding:6px 12px;
+  border-bottom:1px solid #2d2f2a;
+  background:#10110e;
+}
+.cm34-ratings-title small{display:block;color:#b99e49;font-size:7px;font-weight:900;letter-spacing:.11em}
+.cm34-ratings-title h3{margin:2px 0 0;color:#f3efe7;font-size:15px;line-height:1}
+.cm34-ratings-title>span{color:#7b766e;font-size:8px;font-weight:800}
+.cm34-ratings-teams{
+  min-height:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  background:#30312d;
+}
+.cm34-ratings-teams>section{
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-rows:34px 24px minmax(0,1fr);
+  background:#080906;
+  overflow:hidden;
+}
+.cm34-ratings-teams>section>header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:0 10px 0 14px;
+  border-bottom:1px solid #272923;
+  background:#0d0e0b;
+}
+.cm34-ratings-teams>section:first-child>header{box-shadow:inset 4px 0 var(--home-color)}
+.cm34-ratings-teams>section:last-child>header{box-shadow:inset 4px 0 var(--away-color)}
+.cm34-ratings-teams>section>header strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#eeeae1;font-size:11px}
+.cm34-ratings-teams>section>header span{color:#716d65;font-size:7px;font-weight:900;letter-spacing:.1em}
+.cm34-rating-head,.cm34-rating-row{
+  display:grid;
+  grid-template-columns:34px minmax(118px,1fr) 46px 43px 28px 28px 43px;
+  gap:4px;
+  align-items:center;
+}
+.cm34-rating-head{
+  min-height:24px;
+  padding:0 8px;
+  border-bottom:1px solid #252722;
+  background:#0b0c09;
+  color:#6f6b64;
+  font-size:6px;
+  font-weight:950;
+  letter-spacing:.06em;
+}
+.cm34-rating-list{min-height:0;overflow:auto;scrollbar-width:thin}
+.cm34-rating-row{
+  min-height:33px;
+  padding:2px 8px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  background:#090a08;
+}
+.cm34-rating-row:nth-child(even){background:#0c0d0a}
+.cm34-rating-row.is-off{opacity:.52}
+.cm34-rating-row .no{color:#8d877e;font-size:8px;font-weight:850}
+.cm34-rating-row .player{min-width:0;display:flex;align-items:center;gap:5px}
+.cm34-rating-row .player strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e8e4dc;font-size:9px}
+.cm34-rating-row .player small{padding:1px 3px;border:1px solid #ffffff17;color:#817b72;font-size:5px;font-weight:950}
+.cm34-rating-row .pos{color:#d2b759;font-size:7px;font-weight:900}
+.cm34-rating-row .con,.cm34-rating-row .return{text-align:center;color:#aaa49b;font-size:7px;font-weight:850}
+.cm34-rating-row .return.has{color:#f1cf5c;font-weight:950}
+.cm34-rating-row .rate{justify-self:end;min-width:36px;padding:3px 4px;border:1px solid #ffffff17;background:#151611;color:#d7d2c9;text-align:center;font-size:8px}
+.cm34-rating-row .rate.elite{border-color:#4b9861;background:#14301c;color:#8ce7a5}
+.cm34-rating-row .rate.good{border-color:#9d8130;background:#2b240e;color:#ffe071}
+.cm34-rating-row .rate.poor{border-color:#93444a;background:#301519;color:#ff9298}
+.cm34-rating-row *::before,.cm34-rating-row *::after{content:none!important;display:none!important}
+.cm34-ratings-empty{display:grid;place-items:center;height:100%;padding:30px;color:#777168;text-align:center;font-size:10px}
+@media(max-width:900px){
+  .cm34-dual-ratings{height:auto;min-height:560px;overflow:visible}
+  .cm34-ratings-teams{grid-template-columns:1fr}
+  .cm34-ratings-teams>section{min-height:380px}
+}
