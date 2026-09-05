@@ -1,0 +1,66 @@
+{
+  "auditVersion": 2,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-47",
+  "clubName": "Tottenham Hotspur",
+  "status": "complete-factual-first-team",
+  "ownershipAuthority": "Tottenham Hotspur current men's first-team page",
+  "registrationAuthority": "Tottenham Hotspur / Premier League post-window squad submission published 2026-09-03",
+  "seniorPlayers": [
+    {"name":"Antonin Kinsky","shirtNumber":31,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Martin Dubravka","shirtNumber":39,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Brandon Austin","shirtNumber":40,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Jacob Knightbridge","shirtNumber":51,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Andy Robertson","shirtNumber":3,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF"},
+    {"name":"Tosin Adarabioyo","shirtNumber":4,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Marcos Senesi","shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Jan Paul van Hecke","shirtNumber":6,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Destiny Udogie","shirtNumber":13,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF"},
+    {"name":"Pedro Porro","shirtNumber":23,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF"},
+    {"name":"Micky van de Ven","shirtNumber":37,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Xavi Simons","shirtNumber":7,"primaryPosition":"AMC","secondaryPositions":["AMR","AML"],"positionGroup":"MID"},
+    {"name":"Conor Gallagher","shirtNumber":8,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID"},
+    {"name":"James Maddison","shirtNumber":10,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Sandro Tonali","shirtNumber":16,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Mateus Fernandes","shirtNumber":18,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Mohammed Kudus","shirtNumber":20,"primaryPosition":"AMR","secondaryPositions":["AMC","AML"],"positionGroup":"ATT"},
+    {"name":"Dejan Kulusevski","shirtNumber":21,"primaryPosition":"AMR","secondaryPositions":["AMC"],"positionGroup":"ATT"},
+    {"name":"Omar Marmoush","shirtNumber":22,"primaryPosition":"ST","secondaryPositions":["AML","AMC"],"positionGroup":"ATT","loanStatus":"loan-in-from-manchester-city"},
+    {"name":"Savio","shirtNumber":17,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT"},
+    {"name":"Mykhailo Mudryk","shirtNumber":27,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT","loanStatus":"loan-in-from-chelsea"},
+    {"name":"Wilson Odobert","shirtNumber":28,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT"},
+    {"name":"Rodrigo Bentancur","shirtNumber":30,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Dominic Solanke","shirtNumber":19,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Ben Davies","shirtNumber":33,"primaryPosition":"DL","secondaryPositions":["DC"],"positionGroup":"DEF"}
+  ],
+  "firstTeamRelevantU21": [
+    {"name":"Archie Gray","shirtNumber":14,"primaryPosition":"MC","secondaryPositions":["DR","DC"],"positionGroup":"MID"},
+    {"name":"Lucas Bergvall","shirtNumber":15,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID"},
+    {"name":"Mathys Tel","shirtNumber":11,"primaryPosition":"ST","secondaryPositions":["AML"],"positionGroup":"ATT"}
+  ],
+  "clubOwnedButPremierLeagueUnregistered": [
+    {"name":"Richarlison","shirtNumber":9,"reason":"Appears on current Tottenham first-team page but is absent from the 2026-09-03 Premier League senior submission; not selectable for Premier League matches unless registration changes."}
+  ],
+  "onLoanOut": [
+    {"name":"Guglielmo Vicario","status":"loan-out"},
+    {"name":"Kevin Danso","status":"loan-out-to-sunderland"},
+    {"name":"Pape Matar Sarr","status":"loan-out-to-juventus"},
+    {"name":"Kota Takai","status":"loan-out"},
+    {"name":"Souza","status":"loan-out"},
+    {"name":"Radu Dragusin","status":"loan-out"},
+    {"name":"Yang Min-Hyeok","status":"loan-out"}
+  ],
+  "notAtClub": [
+    {"name":"Dane Scarlett","status":"transferred-out","hardExclusion":true}
+  ],
+  "qa": {
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "The 3 September Tottenham/Premier League submission is the competition-registration authority.",
+      "Richarlison is deliberately separated from the registered squad instead of being falsely treated as either transferred or eligible.",
+      "Kevin Danso is unavailable to Spurs because he is on loan at Sunderland; Pape Matar Sarr is on loan at Juventus.",
+      "Reference market values are intentionally deferred to the league-wide valuation pass."
+    ]
+  }
+}
