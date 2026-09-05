@@ -25,5 +25,5 @@ import './matchday-console-v33.js?v=3.3.0';
 import './matchday-console-v331-compat.js?v=3.3.1';
 import './matchday-density-v332.js?v=3.3.2';
 import './matchday-stability-v333.js?v=3.3.3';
-import './matchday-workspace-v340.js?v=3.4.0';
+import './match-centre-v4.js?v=4.0.0';
 import './database-readonly-v1.js?v=1.0.0';
