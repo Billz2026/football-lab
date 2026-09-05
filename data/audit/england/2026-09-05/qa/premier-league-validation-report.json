@@ -1,0 +1,34 @@
+{
+  "auditDate": "2026-09-05",
+  "season": "2026/27",
+  "validatedCommit": "f7236fa414ce6b073a9da9feabba389edd4a10ba",
+  "githubActionsRunId": 33972898237,
+  "status": "pass",
+  "summary": {
+    "clubFiles": 20,
+    "activePlayers": 549,
+    "verifiedMarketValues": 503,
+    "explicitUnvaluedMarketValues": 46,
+    "missingMarketValues": 0,
+    "errors": 0,
+    "warnings": 46
+  },
+  "warningPolicy": "An explicit null is allowed only where the selected benchmark source does not publish a current value. It must never be interpreted as zero value and must not be replaced with an invented estimate.",
+  "checksPassed": [
+    "20 Premier League club audit files present",
+    "no duplicate active player identities across clubs",
+    "no duplicate active shirt numbers within a club",
+    "all tactical position codes valid",
+    "position groups compatible with primary tactical positions, including ML/MR winger usage",
+    "no missing market-value benchmark records",
+    "loan-out players excluded from active selectable identity checks"
+  ],
+  "hardCorrectionsApplied": [
+    "Jadon Sancho excluded from Manchester United as a free agent",
+    "Darío Osorio removed from Coventry City and retained at Crystal Palace after his 2 September 2026 transfer",
+    "Jorge Cuenca corrected to Fulham No. 4 while Hugo Larsson retains No. 15",
+    "Morato/Felipe Rodrigues da Silva resolved as one identity and recorded on loan away from Nottingham Forest",
+    "wide players using MR/ML may remain in the ATT group when their verified role is winger/attacker"
+  ],
+  "result": "Premier League audited data is ready for controlled runtime integration."
+}
