@@ -4,14 +4,19 @@ import {
   estimatePlayerValue,
   estimateWeeklyWage,
   getAskingPrice,
+  getIncomingOffers,
   getNegotiation,
+  getPlayerContract,
   getTransferBudget,
+  getTransferWindowStatus,
   listOwnPlayersForTransfer,
+  processTransferWorld,
+  respondToIncomingOffer,
   searchTransferMarket,
   submitContractOffer,
   submitTransferOffer,
   toggleTransferListed
-} from './transfers-v050.js?v=0.5.0';
+} from './transfers-v050.js?v=0.5.2';
 
 const SAVE_KEY = 'flm-career-save';
 let db = null;
@@ -44,7 +49,7 @@ function loadStyles() {
   const link = document.createElement('link');
   link.id = 'flm-transfers-v050-style';
   link.rel = 'stylesheet';
-  link.href = './career-transfers-v050.css?v=0.5.0';
+  link.href = './career-transfers-v050.css?v=0.5.2';
   document.head.appendChild(link);
 }
 
@@ -60,8 +65,10 @@ async function sync() {
   const c = career();
   if (!c || !manager()?.loadDatabase) return null;
   db ||= await manager().loadDatabase();
-  if (ensureTransferState(c, db)) persist(c);
-  return { c, db };
+  const stateChanged = ensureTransferState(c, db);
+  const world = processTransferWorld(c, db);
+  if (stateChanged || world.changed) persist(c);
+  return { c, db, world };
 }
 
 async function ensureNav() {
@@ -75,7 +82,6 @@ async function ensureNav() {
     button.type = 'button';
     button.className = 'career-nav-button v050-transfer-nav';
     button.dataset.v050TransferTab = '1';
-    button.textContent = 'Transfers';
     nav.querySelector('[data-career-tab="squad"]')?.after(button);
     button.addEventListener('click', () => {
       if (button.disabled) return;
@@ -84,6 +90,8 @@ async function ensureNav() {
       queueMicrotask(() => renderTransfers(true));
     });
   }
+  const pending = getIncomingOffers(c, { includeResolved: false }).length;
+  button.innerHTML = pending ? `Transfers<small>${pending} OFFER${pending === 1 ? '' : 'S'}</small>` : 'Transfers';
   button.disabled = Boolean(document.querySelector('[data-live-match]'));
   button.classList.toggle('is-active', open);
 }
@@ -93,16 +101,25 @@ function playerMeta(p) {
   return `${p.reportedAge || '—'} yrs · ${p.primaryPosition || p.positionGroup || '—'} · Alt: ${alternatives}`;
 }
 
+function contractLabel(c, p) {
+  const contract = getPlayerContract(c, p);
+  return contract ? `£${contract.weeklyWage.toLocaleString('en-GB')}/wk · Jun ${contract.expiryYear}` : 'Contract unavailable';
+}
+
 function marketDetail(c, p) {
   if (!p) return `<div class="v050-empty"><strong>SELECT A PLAYER</strong><span>Search the market and open a player to begin negotiations.</span></div>`;
-  const asking = getAskingPrice(p, db);
+  const window = getTransferWindowStatus(c);
+  const asking = getAskingPrice(p, db, c);
   const value = estimatePlayerValue(p);
   const negotiation = c.transfers.negotiations[p.id] || null;
   const status = negotiation?.status || 'idle';
   const latest = negotiation?.messages?.at(-1) || null;
+  const contract = getPlayerContract(c, p);
 
   let action = '';
-  if (status === 'fee-accepted' || status === 'contract-countered') {
+  if (!window.open) {
+    action = `<div class="v050-offer-box v052-closed"><h4>WINDOW CLOSED</h4><div class="v050-message bad">Permanent registrations closed at 23:00 on 1 September. You can still scout the market, but no deal can be completed.</div></div>`;
+  } else if (status === 'fee-accepted' || status === 'contract-countered') {
     const demand = negotiation.wageDemand || estimateWeeklyWage(p);
     action = `
       <div class="v050-offer-box">
@@ -133,10 +150,11 @@ function marketDetail(c, p) {
       <div><p class="eyebrow">TRANSFER TARGET</p><h3>${esc(p.name)}</h3><p>${esc(playerMeta(p))}</p></div>
       <div class="v050-price-card"><small>ESTIMATED VALUE</small><strong>${compactMoney(value)}</strong></div>
     </div>
-    <div class="v050-facts">
+    <div class="v050-facts v052-facts-four">
       <div><small>CURRENT CLUB</small><strong>${esc(clubName(p.clubId))}</strong></div>
       <div><small>ASKING PRICE</small><strong>${compactMoney(asking)}</strong></div>
-      <div><small>PREFERRED POSITION</small><strong>${esc(p.primaryPosition || p.positionGroup || '—')}</strong></div>
+      <div><small>CONTRACT</small><strong>${contract ? `Jun ${contract.expiryYear}` : '—'}</strong></div>
+      <div><small>EST. WAGE</small><strong>${compactMoney(contract?.weeklyWage || estimateWeeklyWage(p))}/wk</strong></div>
     </div>
     ${action}`;
 }
@@ -151,7 +169,7 @@ function marketView(c) {
       <select data-v050-position aria-label="Filter position"><option ${position === 'All' ? 'selected' : ''}>All</option><option ${position === 'GK' ? 'selected' : ''}>GK</option><option ${position === 'DEF' ? 'selected' : ''}>DEF</option><option ${position === 'MID' ? 'selected' : ''}>MID</option><option ${position === 'ATT' ? 'selected' : ''}>ATT</option></select>
     </div>
     <div class="v050-market-layout">
-      <div class="v050-player-list">${players.length ? players.slice(0, 120).map(p => `<button class="v050-player-row ${p.id === selectedId ? 'is-selected' : ''}" data-v050-player="${esc(p.id)}"><span class="v050-pos">${esc(p.primaryPosition || p.positionGroup || '—')}</span><span><strong>${esc(p.name)}</strong><small>${esc(clubName(p.clubId))} · Age ${esc(p.reportedAge || '—')}</small></span><span class="v050-value">${compactMoney(estimatePlayerValue(p))}</span></button>`).join('') : `<div class="v050-empty"><strong>NO MATCHES</strong><span>Change the search or position filter.</span></div>`}</div>
+      <div class="v050-player-list">${players.length ? players.slice(0, 120).map(p => `<button class="v050-player-row ${p.id === selectedId ? 'is-selected' : ''}" data-v050-player="${esc(p.id)}"><span class="v050-pos">${esc(p.primaryPosition || p.positionGroup || '—')}</span><span><strong>${esc(p.name)}</strong><small>${esc(clubName(p.clubId))} · Age ${esc(p.reportedAge || '—')} · Jun ${getPlayerContract(c, p)?.expiryYear || '—'}</small></span><span class="v050-value">${compactMoney(estimatePlayerValue(p))}</span></button>`).join('') : `<div class="v050-empty"><strong>NO MATCHES</strong><span>Change the search or position filter.</span></div>`}</div>
       <article class="v050-detail">${marketDetail(c, selected)}</article>
     </div>`;
 }
@@ -165,10 +183,46 @@ function negotiationsView(c) {
   }).join('')}</div>` : `<div class="v050-empty"><strong>NO NEGOTIATIONS</strong><span>Make an offer for a player to start a negotiation.</span></div>`;
 }
 
+function offersView(c) {
+  const offers = getIncomingOffers(c).sort((a, b) => Number(b.status === 'pending') - Number(a.status === 'pending') || b.round - a.round);
+  if (!offers.length) return `<div class="v050-empty"><strong>NO OFFERS RECEIVED</strong><span>Transfer-listed players are much more likely to attract bids as the window develops.</span></div>`;
+  return `<div class="v052-offer-list">${offers.map(offer => {
+    const p = player(offer.playerId);
+    const pending = offer.status === 'pending';
+    const defaultCounter = Math.round((offer.offeredFee * 1.1) / 250000) * 250000;
+    return `<article class="v052-offer-row ${pending ? 'is-pending' : ''}" data-v052-offer-row="${esc(offer.id)}">
+      <div class="v052-offer-main"><span class="v050-pos">${esc(p?.primaryPosition || p?.positionGroup || '—')}</span><span><strong>${esc(p?.name || 'Player')}</strong><small>${esc(clubName(offer.buyerClubId))} · ${offer.listed ? 'Transfer listed' : 'Unsolicited bid'} · ${esc(contractLabel(c, p))}</small></span></div>
+      <div class="v052-offer-money"><small>OFFER</small><strong>${compactMoney(offer.offeredFee)}</strong></div>
+      <span class="v050-status">${esc(offer.status.replaceAll('-', ' ').toUpperCase())}</span>
+      ${pending ? `<div class="v052-offer-actions"><button class="v050-action" data-v052-accept="${esc(offer.id)}">ACCEPT</button><input type="number" step="250000" min="250000" value="${defaultCounter}" data-v052-counter-fee="${esc(offer.id)}" aria-label="Counter offer"/><button class="v050-action secondary" data-v052-counter="${esc(offer.id)}">COUNTER</button><button class="v050-list-button" data-v052-reject="${esc(offer.id)}">REJECT</button></div>` : `<div class="v052-resolved">${offer.completedFee ? `Completed at ${compactMoney(offer.completedFee)}` : offer.counterFee ? `Countered at ${compactMoney(offer.counterFee)}` : 'No longer active'}</div>`}
+    </article>`;
+  }).join('')}</div>`;
+}
+
+function worldView(c) {
+  const aiDeals = [...(c.transfers.completed || [])].filter(item => item.source === 'ai').reverse();
+  const rumours = [...(c.transfers.rumours || [])].reverse();
+  const latestDeals = aiDeals.slice(0, 30);
+  const latestRumours = rumours.slice(0, 12);
+  return `<div class="v052-world-grid">
+    <section class="v052-world-panel"><div class="v052-world-head"><strong>COMPLETED DEALS</strong><span>${aiDeals.length} AI-TO-AI</span></div>${latestDeals.length ? latestDeals.map(item => {
+      const p = player(item.playerId);
+      return `<div class="v052-world-row"><span><strong>${esc(p?.name || 'Player')}</strong><small>${esc(clubName(item.fromClubId))} → ${esc(clubName(item.toClubId))}</small></span><b>${compactMoney(item.fee)}</b></div>`;
+    }).join('') : `<div class="v050-empty"><strong>NO AI DEALS YET</strong><span>Recruitment departments will act as squad needs and budgets develop.</span></div>`}</section>
+    <section class="v052-world-panel"><div class="v052-world-head"><strong>TRANSFER RUMOURS</strong><span>UNCONFIRMED</span></div>${latestRumours.length ? latestRumours.map(item => {
+      const p = player(item.playerId);
+      return `<div class="v052-world-row"><span><strong>${esc(clubName(item.buyerClubId))} tracking ${esc(p?.name || 'target')}</strong><small>No agreement confirmed</small></span><span class="v050-status">MONITORING</span></div>`;
+    }).join('') : `<div class="v050-empty"><strong>NO ACTIVE RUMOURS</strong><span>Interest will appear as clubs identify targets.</span></div>`}</section>
+  </div>`;
+}
+
 function ownSquadView(c) {
   const players = listOwnPlayersForTransfer(c, db);
   const listed = new Set(c.transfers.listedPlayerIds || []);
-  return `<div class="v050-own-list">${players.map(p => `<div class="v050-own-row"><span><strong>${esc(p.name)}</strong><small>${esc(playerMeta(p))} · Estimated ${compactMoney(estimatePlayerValue(p))}</small></span><span class="v050-status">${listed.has(p.id) ? 'TRANSFER LISTED' : 'AVAILABLE'}</span><button class="v050-list-button" data-v050-list="${esc(p.id)}">${listed.has(p.id) ? 'REMOVE FROM LIST' : 'TRANSFER LIST'}</button></div>`).join('')}</div>`;
+  return `<div class="v050-own-list">${players.map(p => {
+    const contract = getPlayerContract(c, p);
+    return `<div class="v050-own-row"><span><strong>${esc(p.name)}</strong><small>${esc(playerMeta(p))} · ${compactMoney(estimatePlayerValue(p))} value · ${money(contract?.weeklyWage || 0)}/wk · Jun ${contract?.expiryYear || '—'}</small></span><span class="v050-status">${listed.has(p.id) ? 'TRANSFER LISTED' : 'UNDER CONTRACT'}</span><button class="v050-list-button" data-v050-list="${esc(p.id)}">${listed.has(p.id) ? 'REMOVE FROM LIST' : 'TRANSFER LIST'}</button></div>`;
+  }).join('')}</div>`;
 }
 
 async function renderTransfers(force = false) {
@@ -180,15 +234,18 @@ async function renderTransfers(force = false) {
   rendering = true;
   const c = synced.c;
   const budget = getTransferBudget(c);
+  const window = getTransferWindowStatus(c);
+  const pendingOffers = getIncomingOffers(c, { includeResolved: false }).length;
   document.querySelectorAll('.career-nav-button').forEach(button => button.classList.remove('is-active'));
   document.querySelector('[data-v050-transfer-tab]')?.classList.add('is-active');
   root.dataset.v050Transfers = '1';
   root.innerHTML = `
     <section class="v050-transfer-page">
-      <div class="v050-transfer-head"><div><p class="eyebrow">SUMMER TRANSFER WINDOW</p><h2>Transfers</h2></div><div class="v050-budget"><div><small>TRANSFER BUDGET</small><strong>${compactMoney(budget.transferBudget)}</strong></div><div><small>WAGE ROOM / WEEK</small><strong>${compactMoney(budget.wageRoom)}</strong></div></div></div>
+      <div class="v050-transfer-head"><div><p class="eyebrow">${window.deadlineWeek ? 'DEADLINE WEEK · 1 SEP 23:00' : window.open ? 'SUMMER TRANSFER WINDOW · OPEN' : 'SUMMER TRANSFER WINDOW · CLOSED'}</p><h2>Transfers</h2></div><div class="v050-budget v052-budget"><div><small>TRANSFER BUDGET</small><strong>${compactMoney(budget.transferBudget)}</strong></div><div><small>WAGE ROOM / WEEK</small><strong>${compactMoney(budget.wageRoom)}</strong></div><div class="${window.open ? 'is-open' : 'is-closed'}"><small>WINDOW</small><strong>${window.deadlineWeek ? `${Math.max(0, window.daysRemaining)} DAYS` : window.open ? 'OPEN' : 'CLOSED'}</strong></div></div></div>
+      <div class="v052-window-strip ${window.deadlineWeek ? 'deadline' : window.open ? 'open' : 'closed'}"><strong>${esc(window.label)}</strong><span>${window.open ? `${Math.max(0, window.daysRemaining)} days until the 1 September deadline.` : 'Permanent deals cannot now be registered.'}</span></div>
       ${flash ? `<div class="v050-message ${flash.good ? 'good' : flash.bad ? 'bad' : ''}">${esc(flash.text)}</div>` : ''}
-      <div class="v050-tabs"><button class="${tab === 'Market' ? 'is-active' : ''}" data-v050-tab="Market">MARKET</button><button class="${tab === 'Negotiations' ? 'is-active' : ''}" data-v050-tab="Negotiations">NEGOTIATIONS</button><button class="${tab === 'My Squad' ? 'is-active' : ''}" data-v050-tab="My Squad">MY SQUAD</button></div>
-      ${tab === 'Market' ? marketView(c) : tab === 'Negotiations' ? negotiationsView(c) : ownSquadView(c)}
+      <div class="v050-tabs"><button class="${tab === 'Market' ? 'is-active' : ''}" data-v050-tab="Market">MARKET</button><button class="${tab === 'Negotiations' ? 'is-active' : ''}" data-v050-tab="Negotiations">NEGOTIATIONS</button><button class="${tab === 'Offers' ? 'is-active' : ''}" data-v050-tab="Offers">OFFERS${pendingOffers ? ` · ${pendingOffers}` : ''}</button><button class="${tab === 'World' ? 'is-active' : ''}" data-v050-tab="World">WORLD</button><button class="${tab === 'My Squad' ? 'is-active' : ''}" data-v050-tab="My Squad">MY SQUAD</button></div>
+      ${tab === 'Market' ? marketView(c) : tab === 'Negotiations' ? negotiationsView(c) : tab === 'Offers' ? offersView(c) : tab === 'World' ? worldView(c) : ownSquadView(c)}
     </section>`;
   flash = null;
 
@@ -197,7 +254,7 @@ async function renderTransfers(force = false) {
   root.querySelector('[data-v050-position]')?.addEventListener('change', event => { position = event.target.value; selectedId = null; renderTransfers(true); });
   root.querySelectorAll('[data-v050-player]').forEach(button => button.addEventListener('click', () => { selectedId = button.dataset.v050Player; renderTransfers(true); }));
   root.querySelector('[data-v050-asking]')?.addEventListener('click', () => {
-    const p = player(selectedId); const input = root.querySelector('[data-v050-fee]'); if (p && input) input.value = String(getAskingPrice(p, db));
+    const p = player(selectedId); const input = root.querySelector('[data-v050-fee]'); if (p && input) input.value = String(getAskingPrice(p, db, c));
   });
   root.querySelector('[data-v050-offer]')?.addEventListener('click', () => {
     try {
@@ -225,8 +282,34 @@ async function renderTransfers(force = false) {
   });
   root.querySelectorAll('[data-v050-open-neg]').forEach(button => button.addEventListener('click', () => { selectedId = button.dataset.v050OpenNeg; tab = 'Market'; renderTransfers(true); }));
   root.querySelectorAll('[data-v050-list]').forEach(button => button.addEventListener('click', () => {
-    try { const listed = toggleTransferListed(c, db, button.dataset.v050List); persist(c); flash = { text: listed ? 'Player added to the transfer list.' : 'Player removed from the transfer list.' }; }
+    try { const listed = toggleTransferListed(c, db, button.dataset.v050List); persist(c); flash = { text: listed ? 'Player added to the transfer list. Clubs will assess him as the window develops.' : 'Player removed from the transfer list.' }; }
     catch (error) { flash = { text: error.message, bad: true }; }
+    renderTransfers(true);
+  }));
+  root.querySelectorAll('[data-v052-accept]').forEach(button => button.addEventListener('click', () => {
+    try {
+      const result = respondToIncomingOffer(c, db, button.dataset.v052Accept, 'accept');
+      persist(c); tab = 'My Squad';
+      flash = { text: `Offer accepted. ${player(result.transaction.playerId)?.name || 'Player'} has left for ${clubName(result.transaction.toClubId)}. Recheck your starting XI.`, good: true };
+    } catch (error) { flash = { text: error.message, bad: true }; }
+    renderTransfers(true);
+  }));
+  root.querySelectorAll('[data-v052-reject]').forEach(button => button.addEventListener('click', () => {
+    try { respondToIncomingOffer(c, db, button.dataset.v052Reject, 'reject'); persist(c); flash = { text: 'Transfer offer rejected.' }; }
+    catch (error) { flash = { text: error.message, bad: true }; }
+    renderTransfers(true);
+  }));
+  root.querySelectorAll('[data-v052-counter]').forEach(button => button.addEventListener('click', () => {
+    const offerId = button.dataset.v052Counter;
+    const input = root.querySelector(`[data-v052-counter-fee="${CSS.escape(offerId)}"]`);
+    try {
+      const result = respondToIncomingOffer(c, db, offerId, 'counter', Number(input?.value));
+      persist(c);
+      if (result.status === 'completed') {
+        tab = 'My Squad';
+        flash = { text: `Counter accepted. ${player(result.transaction.playerId)?.name || 'Player'} has been sold for ${compactMoney(result.transaction.fee)}.`, good: true };
+      } else flash = { text: 'The buying club rejected your counter-offer and walked away.', bad: true };
+    } catch (error) { flash = { text: error.message, bad: true }; }
     renderTransfers(true);
   }));
   rendering = false;
