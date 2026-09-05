@@ -13,4 +13,5 @@ import './career-world-v060.js?v=0.6.0';
 import './career-transfers-gate-v054.js?v=0.6.0';
 import './manager-shell-v1.js?v=1.0.0';
 import './team-selection-v1.js?v=1.0.1';
+import './manual-tactics-guard-v1.js?v=1.0.0';
 import './matchday-cm-v1.js?v=1.0.0';
