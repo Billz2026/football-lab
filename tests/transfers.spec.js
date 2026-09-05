@@ -15,7 +15,7 @@ async function openTransferWindow(page) {
   await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
 }
 
-test('V0.5.2 transfer market completes a signing and exposes the living football world', async ({ page }) => {
+test('V0.6.1 transfer market completes a signing and exposes the living football world without forcing an AI deal', async ({ page }) => {
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
   await openTransferWindow(page);
@@ -54,7 +54,8 @@ test('V0.5.2 transfer market completes a signing and exposes the living football
   expect(transfer).toBeTruthy();
   expect(saved.transfers.ownership[transfer.playerId]).toBe(saved.clubId);
   expect(saved.news.items.some(item => item.category === 'Transfers' && item.relatedPlayerId === transfer.playerId)).toBeTruthy();
-  expect(saved.transfers.completed.some(item => item.source === 'ai')).toBeTruthy();
+  expect(saved.transfers.aiClubs && Object.keys(saved.transfers.aiClubs).length).toBeGreaterThan(0);
+  expect(Array.isArray(saved.transfers.processedWorldPhases)).toBeTruthy();
   expect(Array.isArray(saved.transfers.rumours)).toBeTruthy();
 
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
