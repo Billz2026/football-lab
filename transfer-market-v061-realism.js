@@ -33,13 +33,15 @@ function transferredThisWindow(career) {
 
 function marketSimulationDb(career, db) {
   const moved = transferredThisWindow(career);
-  const players = (db?.players || [])
-    .filter(player => !moved.has(player.id))
-    .map(player => {
-      const reference = marketReputationReference(player);
-      const calibration = calibratedAbility(reference);
-      return calibration ? { ...player, ...calibration } : player;
-    });
+  const players = (db?.players || []).map(player => {
+    const reference = marketReputationReference(player);
+    const calibration = calibratedAbility(reference);
+    let simulated = calibration ? { ...player, ...calibration } : player;
+    // A new signing must still count toward his new club's squad depth/quality, but the
+    // same player should not become an AI sale target again during the same window.
+    if (moved.has(player.id)) simulated = { ...simulated, reportedAge: 99, marketProtectedThisWindow: true };
+    return simulated;
+  });
   return { ...db, players };
 }
 
@@ -244,6 +246,7 @@ export function processTransferWorld(career, db) {
     return { changed, phaseKey: `D:${window.currentDate || career.currentDate || 'closed'}`, window, aiDeals: [], incomingOffer: null, rumour: null };
   }
 
+  const movedBefore = transferredThisWindow(career);
   const before = career.transfers.completed.length;
   const simulationDb = marketSimulationDb(career, db);
   const result = base.processTransferWorld(career, simulationDb);
@@ -259,6 +262,18 @@ export function processTransferWorld(career, db) {
     if (realPlayer && transaction.toClubId) realPlayer.clubId = transaction.toClubId;
   }
 
+  let incomingOffer = result.incomingOffer || null;
+  if (incomingOffer && movedBefore.has(incomingOffer.playerId)) {
+    career.transfers.incomingOffers = (career.transfers.incomingOffers || []).filter(item => item.id !== incomingOffer.id);
+    if (career.news?.items) {
+      const newsId = `news-${career.id}-incoming-${incomingOffer.id}`;
+      career.news.items = career.news.items.filter(item => item.id !== newsId);
+    }
+    const dateKey = career.currentDate || career.calendar?.currentDate;
+    if (career.transfers.marketV61?.incomingByDate && dateKey) delete career.transfers.marketV61.incomingByDate[dateKey];
+    incomingOffer = null;
+  }
+
   const aiDeals = (result.aiDeals || []).map(deal => ({ ...deal, source: deal.source === 'ai-v61' ? 'ai' : deal.source, marketVersion: 61 }));
-  return { ...result, aiDeals };
+  return { ...result, aiDeals, incomingOffer };
 }
