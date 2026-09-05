@@ -6,17 +6,12 @@ on:
     paths:
       - 'matchday-cm-v2.js'
       - 'matchday-cm-v2.css'
-      - 'matchday-mode-v34.js'
-      - 'matchday-mode-v34.css'
-      - 'matchday-ratings-v341.js'
-      - 'matchday-ratings-v341.css'
-      - 'matchday-mode-v342-fix.css'
       - 'matchday-density-v332.js'
       - 'matchday-density-v332.css'
       - 'matchday-stability-v333.js'
       - 'matchday-stability-v333.css'
-      - 'matchday-workspace-v340.js'
-      - 'matchday-workspace-v340.css'
+      - 'match-centre-v4.js'
+      - 'match-centre-v4.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
@@ -25,17 +20,12 @@ on:
     paths:
       - 'matchday-cm-v2.js'
       - 'matchday-cm-v2.css'
-      - 'matchday-mode-v34.js'
-      - 'matchday-mode-v34.css'
-      - 'matchday-ratings-v341.js'
-      - 'matchday-ratings-v341.css'
-      - 'matchday-mode-v342-fix.css'
       - 'matchday-density-v332.js'
       - 'matchday-density-v332.css'
       - 'matchday-stability-v333.js'
       - 'matchday-stability-v333.css'
-      - 'matchday-workspace-v340.js'
-      - 'matchday-workspace-v340.css'
+      - 'match-centre-v4.js'
+      - 'match-centre-v4.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
@@ -60,11 +50,9 @@ jobs:
       - name: Check Matchday syntax
         run: |
           node --check matchday-cm-v2.js
-          node --check matchday-mode-v34.js
-          node --check matchday-ratings-v341.js
           node --check matchday-density-v332.js
           node --check matchday-stability-v333.js
-          node --check matchday-workspace-v340.js
+          node --check match-centre-v4.js
           node --check tests/matchday-v2.spec.js
 
       - name: Install dependencies
