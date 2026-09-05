@@ -4,7 +4,7 @@
   "databaseVersion": "2026-09-04-api-football-dev",
   "snapshotDate": "2026-09-04",
   "status": "partial-current-squad-development",
-  "generatedAt": "2026-09-04T15:06:21.159Z",
+  "generatedAt": "2026-09-05T07:09:22.324Z",
   "provider": "API-Football Free + Football Lab Manager baseline engine",
   "scope": {
     "country": "England",
@@ -27,8 +27,8 @@
   },
   "warning": "Development snapshot: imported names, broad positions, reported ages and squad membership come from API-Football seasonless squad endpoints. 2026/27 season statistics are not available on the free tier, so attributes are clearly marked low-confidence FLM positional baselines rather than claimed real-world ratings.",
   "playableDemo": {
-    "version": "0.3.0",
-    "competitionName": "Football Lab Invitational",
+    "version": "0.5.0",
+    "competitionName": "Football Lab Premier League",
     "format": "single-round-robin",
     "clubIds": [
       "flm-club-api-football-35",
@@ -38,14 +38,26 @@
       "flm-club-api-football-51",
       "flm-club-api-football-49",
       "flm-club-api-football-1346",
-      "flm-club-api-football-52"
+      "flm-club-api-football-52",
+      "flm-club-api-football-45",
+      "flm-club-api-football-36",
+      "flm-club-api-football-64",
+      "flm-club-api-football-57",
+      "flm-club-api-football-63",
+      "flm-club-api-football-40",
+      "flm-club-api-football-50",
+      "flm-club-api-football-33",
+      "flm-club-api-football-34",
+      "flm-club-api-football-65",
+      "flm-club-api-football-746",
+      "flm-club-api-football-47"
     ]
   },
   "importProgress": {
     "eng-premier-league": {
-      "realClubs": 8,
+      "realClubs": 20,
       "expectedClubs": 20,
-      "status": "partial"
+      "status": "complete"
     },
     "eng-championship": {
       "realClubs": 0,
@@ -67,5 +79,9 @@
       "expectedClubs": 24,
       "status": "pending"
     }
+  },
+  "dataQuality": {
+    "latestBatchMembershipConflicts": 0,
+    "crossBatchMembershipConflictsResolved": 0
   }
 }

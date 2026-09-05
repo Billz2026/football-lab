@@ -220,6 +220,27 @@
     }
   },
   {
+    "id": "flm-club-api-football-45",
+    "externalIds": {
+      "apiFootball": 45
+    },
+    "name": "Everton",
+    "providerName": "Everton",
+    "shortName": "Everton",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1878,
+    "venue": "Hill Dickinson Stadium",
+    "preferredFormation": null,
+    "reputation": 7906,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
     "id": "flm-club-dev-premier",
     "externalIds": {},
     "name": "FLM Premier Test",
@@ -231,5 +252,236 @@
     "preferredFormation": "4-3-3",
     "reputation": 6500,
     "isPlaceholder": true
+  },
+  {
+    "id": "flm-club-api-football-36",
+    "externalIds": {
+      "apiFootball": 36
+    },
+    "name": "Fulham",
+    "providerName": "Fulham",
+    "shortName": "Fulham",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1879,
+    "venue": "Craven Cottage",
+    "preferredFormation": null,
+    "reputation": 7692,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-64",
+    "externalIds": {
+      "apiFootball": 64
+    },
+    "name": "Hull City",
+    "providerName": "Hull City",
+    "shortName": "Hull City",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1904,
+    "venue": "The MKM Stadium",
+    "preferredFormation": null,
+    "reputation": 7879,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-57",
+    "externalIds": {
+      "apiFootball": 57
+    },
+    "name": "Ipswich Town",
+    "providerName": "Ipswich",
+    "shortName": "Ipswich Town",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1878,
+    "venue": "Portman Road",
+    "preferredFormation": null,
+    "reputation": 8773,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-63",
+    "externalIds": {
+      "apiFootball": 63
+    },
+    "name": "Leeds United",
+    "providerName": "Leeds",
+    "shortName": "Leeds United",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1919,
+    "venue": "Elland Road",
+    "preferredFormation": null,
+    "reputation": 7822,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-40",
+    "externalIds": {
+      "apiFootball": 40
+    },
+    "name": "Liverpool",
+    "providerName": "Liverpool",
+    "shortName": "Liverpool",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1892,
+    "venue": "Anfield",
+    "preferredFormation": null,
+    "reputation": 7849,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-50",
+    "externalIds": {
+      "apiFootball": 50
+    },
+    "name": "Manchester City",
+    "providerName": "Manchester City",
+    "shortName": "Manchester City",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1880,
+    "venue": "Etihad Stadium",
+    "preferredFormation": null,
+    "reputation": 8240,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-33",
+    "externalIds": {
+      "apiFootball": 33
+    },
+    "name": "Manchester United",
+    "providerName": "Manchester United",
+    "shortName": "Manchester United",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1878,
+    "venue": "Old Trafford",
+    "preferredFormation": null,
+    "reputation": 7635,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-34",
+    "externalIds": {
+      "apiFootball": 34
+    },
+    "name": "Newcastle United",
+    "providerName": "Newcastle",
+    "shortName": "Newcastle United",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1892,
+    "venue": "St. James' Park",
+    "preferredFormation": null,
+    "reputation": 8530,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-65",
+    "externalIds": {
+      "apiFootball": 65
+    },
+    "name": "Nottingham Forest",
+    "providerName": "Nottingham Forest",
+    "shortName": "Nottingham Forest",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1865,
+    "venue": "The City Ground",
+    "preferredFormation": null,
+    "reputation": 8660,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-746",
+    "externalIds": {
+      "apiFootball": 746
+    },
+    "name": "Sunderland",
+    "providerName": "Sunderland",
+    "shortName": "Sunderland",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1879,
+    "venue": "Stadium of Light",
+    "preferredFormation": null,
+    "reputation": 7840,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
+  },
+  {
+    "id": "flm-club-api-football-47",
+    "externalIds": {
+      "apiFootball": 47
+    },
+    "name": "Tottenham Hotspur",
+    "providerName": "Tottenham",
+    "shortName": "Tottenham Hotspur",
+    "countryCode": "ENG",
+    "leagueId": "eng-premier-league",
+    "founded": 1882,
+    "venue": "Tottenham Hotspur Stadium",
+    "preferredFormation": null,
+    "reputation": 8268,
+    "isPlaceholder": false,
+    "dataQuality": {
+      "membershipSource": "official-2026-27-manifest",
+      "identitySource": "api-football",
+      "badgesIncluded": false
+    }
   }
 ]
