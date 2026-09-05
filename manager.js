@@ -20,4 +20,5 @@ import './matchday-cm-v2.js?v=2.0.0';
 import './matchday-cm-v3.js?v=3.0.0';
 import './matchday-xg-ui-v1.js?v=1.0.0';
 import './matchday-experience-v31.js?v=3.1.0';
+import './matchday-polish-v32.js?v=3.2.0';
 import './database-readonly-v1.js?v=1.0.0';
