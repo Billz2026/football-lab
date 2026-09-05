@@ -1,19 +1,38 @@
 /* Football Lab Match Centre V4.5 — viewport use, scorer history and matchday clarity */
 
 /* Match Centre should feel like the application, not a window floating inside it. */
+.career-app.flm-cm-shell:has(.flm-live-match[data-cm4="1"]) .flm-cm-workspace{
+  position:fixed!important;
+  inset:0!important;
+  z-index:905!important;
+  width:100vw!important;
+  max-width:none!important;
+  height:100dvh!important;
+  min-height:0!important;
+  margin:0!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  background:#050a10!important;
+}
 .career-app.flm-cm-shell .career-content:has(.flm-live-match[data-cm4="1"]){
+  width:100vw!important;
+  max-width:none!important;
+  height:100dvh!important;
+  min-height:0!important;
+  margin:0!important;
   padding:0!important;
   overflow:hidden!important;
 }
 .flm-live-match[data-cm4="1"]{
-  width:100%!important;
-  height:100%!important;
+  width:100vw!important;
+  max-width:none!important;
+  height:100dvh!important;
   min-height:0!important;
   margin:0!important;
   padding:0!important;
 }
 .flm-live-match[data-cm4="1"]>.cm4-shell{
   width:100%!important;
+  max-width:none!important;
   height:100%!important;
   min-height:0!important;
   grid-template-rows:auto auto minmax(0,1fr)!important;
@@ -173,9 +192,13 @@
 
 /* Folded phones: scorers remain readable and don't cover the current event. */
 @media (max-width:559px){
+  .career-app.flm-cm-shell:has(.flm-live-match[data-cm4="1"]) .flm-cm-workspace,
+  .career-app.flm-cm-shell .career-content:has(.flm-live-match[data-cm4="1"]),
+  .flm-live-match[data-cm4="1"]{
+    height:100dvh!important;
+    min-height:100dvh!important;
+  }
   .career-app.flm-cm-shell .career-content:has(.flm-live-match[data-cm4="1"]){overflow:auto!important}
-  .flm-live-match[data-cm4="1"]{height:auto!important;min-height:100%!important}
-  .flm-live-match[data-cm4="1"]>.cm4-shell{height:auto!important;min-height:100%!important}
   .cm45-scorers{top:8px;left:8px;right:8px;gap:8px}
   .cm45-scorer-row{min-height:19px;padding:1px 4px;border-width:2px}
   .cm45-scorer-row strong{font-size:9px}.cm45-scorer-row span{font-size:8px}
