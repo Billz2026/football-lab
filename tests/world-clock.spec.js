@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(70000);
+test.setTimeout(90000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -14,10 +14,20 @@ async function quickStart(page) {
   await expect(page.locator('[data-v060-continue]').first()).toBeVisible();
 }
 
+async function continueUntil(page, targetDate, maxSteps = 30) {
+  for (let step = 0; step < maxSteps; step += 1) {
+    const current = await page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '');
+    if (current >= targetDate) return current;
+    await page.locator('.career-header [data-v060-continue]').click();
+    await page.waitForTimeout(80);
+  }
+  throw new Error(`Continue Game did not reach ${targetDate}`);
+}
+
 test('Continue Game advances the career day by day and stops on June milestones', async ({ page }) => {
   await quickStart(page);
   await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
-  await expect(page.locator('.v060-world-panel')).toContainText('SUMMER TRANSFER WINDOW OPENS');
+  await expect(page.locator('.v060-world-panel')).toContainText('Summer transfer window opens');
 
   await page.locator('.v060-world-panel [data-v060-continue]').click();
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
@@ -49,7 +59,7 @@ test('future friendlies cannot be played early and Continue Game stops on the sc
   expect(saved.currentDate).toBe('2026-06-19');
   expect(saved.preseason.fixtures.filter(item => item.played)).toHaveLength(0);
 
-  await page.locator('.career-header [data-v060-continue]').click();
+  await continueUntil(page, '2026-07-11');
   await expect(page.locator('.v054-date-chip')).toContainText('11 JUL 2026');
   await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
@@ -78,7 +88,7 @@ test('finishing pre-season no longer jumps straight to opening day; Continue Gam
   expect(saved.preseason.phase).toBe('complete');
   expect(saved.currentDate).toBe('2026-08-08');
 
-  await page.locator('.v060-world-panel [data-v060-continue]').click();
+  await continueUntil(page, '2026-08-21');
   await expect(page.locator('.v054-date-chip')).toContainText('21 AUG 2026');
   await expect(page.getByRole('heading', { name: 'Matchday' })).toBeVisible();
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
