@@ -144,9 +144,19 @@ export function searchTransferMarket(career, db, filters = {}) {
 }
 
 export function getNegotiation(career, db, playerId) {
-  const negotiation = base.getNegotiation(career, db, playerId);
+  legacy.ensureTransferState(career, db);
   const player = playerById(db, playerId);
-  if (!negotiation || !player) return negotiation;
+  if (!player || player.clubId === career.clubId) return null;
+
+  career.transfers.negotiations ||= {};
+  let negotiation = career.transfers.negotiations[playerId];
+  const validV61Record = negotiation
+    && [61, 611].includes(negotiation.marketVersion)
+    && negotiation.sellingClubId === player.clubId;
+
+  if (!validV61Record) negotiation = base.getNegotiation(career, db, playerId);
+  if (!negotiation) return null;
+
   const stance = getTransferStance(player, db, career, career.clubId);
   negotiation.marketVersion = 611;
   negotiation.sellerStance = stance.label;
