@@ -75,13 +75,14 @@ async function main() {
   });
 
   const playableIds = metadata.playableDemo?.clubIds || [];
-  assert(playableIds.length === 8, 'V0.3 playableDemo must freeze exactly eight clubs', errors);
+  assert(playableIds.length >= 8 && playableIds.length <= 20, 'playableDemo must contain between eight and twenty clubs', errors);
+  assert(playableIds.length % 2 === 0, 'playableDemo must contain an even number of clubs for round-robin fixtures', errors);
   assert(new Set(playableIds).size === playableIds.length, 'playableDemo contains duplicate club ids', errors);
   playableIds.forEach(clubId => {
     const club = clubs.find(item => item.id === clubId);
     const squad = players.filter(player => player.clubId === clubId && !player.isPlaceholder);
     assert(Boolean(club) && !club?.isPlaceholder, `playableDemo references missing or placeholder club ${clubId}`, errors);
-    assert(squad.length >= 18, `${clubId} needs at least 18 real players for the playable demo`, errors);
+    assert(squad.length >= 18, `${clubId} needs at least 18 real players for the playable competition`, errors);
     assert(squad.filter(player => player.positionGroup === 'GK').length >= 1, `${clubId} needs a goalkeeper`, errors);
     assert(squad.filter(player => player.positionGroup === 'DEF').length >= 4, `${clubId} needs at least four defenders`, errors);
     assert(squad.filter(player => player.positionGroup === 'MID').length >= 3, `${clubId} needs at least three midfielders`, errors);
