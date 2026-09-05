@@ -1,4 +1,15 @@
 const SEASON_LABEL = '2026/27';
+const stylesheetId = 'flm-season-v051-css';
+if (!document.getElementById(stylesheetId)) {
+  const link = document.createElement('link');
+  link.id = stylesheetId;
+  link.rel = 'stylesheet';
+  link.href = './career-season-v051.css?v=0.5.1';
+  document.head.appendChild(link);
+}
+
+let fixturesOpen = false;
+let clubsPromise;
 
 function readCareer() {
   try {
@@ -21,6 +32,84 @@ function formatFixtureDate(value) {
   }).format(date);
 }
 
+function clubMap() {
+  if (!clubsPromise) {
+    clubsPromise = fetch('./data/current/clubs.json?v=60', { cache: 'no-store' })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('clubs unavailable')))
+      .then(clubs => new Map(clubs.map(club => [club.id, club.name])))
+      .catch(() => new Map());
+  }
+  return clubsPromise;
+}
+
+function userFixture(career, round) {
+  return round?.find(fixture => fixture.homeClubId === career.clubId || fixture.awayClubId === career.clubId) || null;
+}
+
+function resultLabel(career, fixture) {
+  if (!fixture?.played) return { text: fixture?.kickoffTime || '', className: '' };
+  const home = fixture.homeClubId === career.clubId;
+  const goalsFor = home ? fixture.homeGoals : fixture.awayGoals;
+  const goalsAgainst = home ? fixture.awayGoals : fixture.homeGoals;
+  return {
+    text: `${goalsFor}–${goalsAgainst}`,
+    className: goalsFor > goalsAgainst ? 'win' : goalsFor < goalsAgainst ? 'loss' : 'draw'
+  };
+}
+
+async function renderFixturesPage() {
+  const career = readCareer();
+  const content = document.querySelector('.career-content');
+  if (!career || !content || !fixturesOpen) return;
+  const names = await clubMap();
+  if (!fixturesOpen || !document.querySelector('.career-content')) return;
+
+  const rows = career.fixtures.map((round, index) => {
+    const fixture = userFixture(career, round);
+    if (!fixture) return '';
+    const home = fixture.homeClubId === career.clubId;
+    const opponentId = home ? fixture.awayClubId : fixture.homeClubId;
+    const result = resultLabel(career, fixture);
+    const isNext = career.status !== 'complete' && index === career.roundIndex;
+    return `<article class="v051-fixture-row ${fixture.played ? 'is-played' : ''} ${isNext ? 'is-next' : ''}">
+      <div class="v051-mw">MW ${fixture.matchweek || fixture.round}</div>
+      <div class="v051-date">${formatFixtureDate(fixture.date)}</div>
+      <div class="v051-opponent"><span class="v051-ha">${home ? 'H' : 'A'}</span><b>${names.get(opponentId) || 'Opponent'}</b></div>
+      <div class="v051-phase">${fixture.phase === 'return-leg' ? 'Return' : 'First leg'}</div>
+      <div class="v051-result ${result.className}">${result.text}</div>
+    </article>`;
+  }).join('');
+
+  const played = career.table?.find(row => row.clubId === career.clubId)?.played || career.roundIndex || 0;
+  content.innerHTML = `<section class="v051-fixtures-page">
+    <div class="v051-fixture-heading"><div><p class="eyebrow">${career.competitionName || 'FOOTBALL LAB PREMIER LEAGUE'}</p><h2>Fixtures & Results</h2></div><p>${SEASON_LABEL} · Home & away · 38 matches</p></div>
+    <div class="v051-season-summary">
+      <article><small>MATCHES</small><strong>${played} / ${career.fixtures.length}</strong></article>
+      <article><small>HOME</small><strong>19</strong></article>
+      <article><small>AWAY</small><strong>19</strong></article>
+      <article><small>FINAL DAY</small><strong>30 MAY 2027</strong></article>
+    </div>
+    <div class="v051-fixture-list">${rows}</div>
+  </section>`;
+}
+
+function ensureFixturesTab() {
+  const nav = document.querySelector('.career-nav');
+  if (!nav || nav.querySelector('[data-v051-fixtures]')) return;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = `career-nav-button${fixturesOpen ? ' is-active' : ''}`;
+  button.dataset.v051Fixtures = '1';
+  button.textContent = 'Fixtures';
+  const table = nav.querySelector('[data-career-tab="table"]');
+  nav.insertBefore(button, table || null);
+  button.addEventListener('click', () => {
+    fixturesOpen = true;
+    nav.querySelectorAll('.career-nav-button').forEach(item => item.classList.toggle('is-active', item === button));
+    renderFixturesPage();
+  });
+}
+
 function syncSeasonPresentation() {
   const heroNote = document.querySelector('.hero-note');
   if (heroNote) heroNote.textContent = 'FULL LEAGUE BETA · 20 CLUBS · 38 MATCHES';
@@ -30,12 +119,12 @@ function syncSeasonPresentation() {
   const footerBuild = document.querySelector('.footer-build');
   if (footerBuild) footerBuild.textContent = 'V0.5.1 · FULL LEAGUE CAREER';
 
+  ensureFixturesTab();
+
   const career = readCareer();
   const total = career?.fixtures?.length || 38;
   const current = Math.min((career?.roundIndex || 0) + 1, total);
-  const next = career?.status === 'complete' ? null : career?.fixtures?.[career?.roundIndex || 0]?.find(
-    fixture => fixture.homeClubId === career.clubId || fixture.awayClubId === career.clubId
-  );
+  const next = career?.status === 'complete' ? null : userFixture(career, career?.fixtures?.[career?.roundIndex || 0]);
 
   document.querySelectorAll('.career-round').forEach(node => {
     node.textContent = node.textContent
@@ -90,6 +179,10 @@ function syncSeasonPresentation() {
     }
   }
 }
+
+document.addEventListener('click', event => {
+  if (event.target.closest('[data-career-tab]')) fixturesOpen = false;
+});
 
 let queued = false;
 function queueSync() {
