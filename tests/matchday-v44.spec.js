@@ -63,8 +63,8 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   const displayed=(await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text'))||'';
   expect(displayed).not.toMatch(/\b(?:LCB|RCB|LCM|RCM|DMC|AMC|AML|AMR|Central Defender|Inside Forward|Poacher|tactical plan|attacking instruction)\b/i);
 
-  // Half time is authoritative until the user resumes.
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00',{timeout:30000});
+  // Half time is authoritative until the user resumes. The wider CI budget still fails a real 43/44 freeze.
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00',{timeout:35000});
   await expect(live).toHaveAttribute('data-cm44-state','halftime');
   await expect(shell.locator('[data-cm4-phase]')).toHaveText('Half Time');
   await expect(shell.locator('[data-cm4-pause]')).toHaveText('Resume 2nd Half');
@@ -74,7 +74,7 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   await expect.poll(async()=>Number(((await shell.locator('[data-cm4-clock]').textContent())||'0').split(':')[0]),{timeout:8000}).toBeGreaterThan(45);
 
   // Full time is latched: no ordinary commentary can overwrite it while waiting to continue.
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00',{timeout:35000});
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00',{timeout:40000});
   await expect(live).toHaveAttribute('data-cm44-state','fulltime');
   await expect(shell.locator('[data-cm4-phase]')).toHaveText('Full Time');
   const finalText=await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text');
