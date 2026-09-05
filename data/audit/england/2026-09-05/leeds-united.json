@@ -1,0 +1,51 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-63",
+  "clubName": "Leeds United",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {"source":"Premier League post-window squad submission plus Leeds official transfer announcements","published":"2026-09-03","url":"https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"},
+  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","url":"https://www.transfermarkt.com/leeds-united/kader/verein/399/saison_id/2026","note":"Dated reference estimates. Official PL registration overrides the older Transfermarkt squad membership where deadline moves are not yet reflected."},
+  "players": [
+    {"name":"James Trafford","aliases":["Trafford, James Harrington"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":23,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":25000000,"importanceScore":94,"squadStatus":"cornerstone"},
+    {"name":"Michael Zetterer","aliases":["Zetterer, Michael"],"shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":31,"nationalities":["GER"],"contractEnd":"2029-06-30","referenceMarketValueEur":4000000,"importanceScore":53,"squadStatus":"rotation-goalkeeper","transferStatus":"permanent-2026-08-29"},
+    {"name":"Alex Cairns","aliases":["Cairns, Alexander Mark David"],"shirtNumber":21,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":33,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":50000,"importanceScore":22,"squadStatus":"backup-depth"},
+
+    {"name":"Tarik Muharemovic","aliases":["Tarik Muharemović","Muharemovic, Tarik"],"shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":23,"nationalities":["BIH","SVN"],"contractEnd":"2031-06-30","referenceMarketValueEur":35000000,"importanceScore":87,"squadStatus":"key-development"},
+    {"name":"Jaka Bijol","aliases":["Bijol, Jaka"],"shirtNumber":15,"primaryPosition":"DC","secondaryPositions":["DMC"],"positionGroup":"DEF","age":27,"nationalities":["SVN"],"contractEnd":"2030-06-30","referenceMarketValueEur":20000000,"importanceScore":85,"squadStatus":"key-player"},
+    {"name":"Joe Rodon","aliases":["Rodon, Joseph Peter"],"shirtNumber":6,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":28,"nationalities":["WAL"],"contractEnd":"2028-06-30","referenceMarketValueEur":18000000,"importanceScore":92,"squadStatus":"key-player"},
+    {"name":"Nico Elvedi","aliases":["Elvedi, Nico"],"shirtNumber":30,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":29,"nationalities":["SUI"],"contractEnd":null,"referenceMarketValueEur":8000000,"importanceScore":73,"squadStatus":"first-team","transferStatus":"permanent-2026-08"},
+    {"name":"Gabriel Gudmundsson","aliases":["Gudmundsson, Gabriel Johan"],"shirtNumber":3,"primaryPosition":"DL","secondaryPositions":["WBL","ML"],"positionGroup":"DEF","age":27,"nationalities":["SWE"],"contractEnd":"2029-06-30","referenceMarketValueEur":20000000,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Melvin Bard","aliases":["Bard, Melvin Michel Maxence"],"shirtNumber":null,"primaryPosition":"DL","secondaryPositions":["ML","WBL"],"positionGroup":"DEF","age":25,"nationalities":["FRA"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":70,"squadStatus":"first-team","loanStatus":"loan-in","parentClub":"OGC Nice"},
+    {"name":"Jayden Bogle","aliases":["Bogle, Jayden Ian"],"shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":26,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":15000000,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"James Justin","aliases":["Justin, James Michael"],"shirtNumber":24,"primaryPosition":"DR","secondaryPositions":["DL","DC"],"positionGroup":"DEF","age":28,"nationalities":["ENG","LCA"],"contractEnd":"2029-06-30","referenceMarketValueEur":12000000,"importanceScore":71,"squadStatus":"rotation-first-team"},
+
+    {"name":"Ethan Ampadu","aliases":["Ampadu, Ethan Kwame Colm Raymond"],"shirtNumber":4,"primaryPosition":"DMC","secondaryPositions":["DC","MC"],"positionGroup":"MID","age":25,"nationalities":["WAL","ENG"],"contractEnd":"2030-06-30","referenceMarketValueEur":30000000,"importanceScore":98,"squadStatus":"cornerstone-captain"},
+    {"name":"Anton Stach","aliases":["Stach, Anton Levi"],"shirtNumber":18,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":27,"nationalities":["GER"],"contractEnd":"2029-06-30","referenceMarketValueEur":28000000,"importanceScore":90,"squadStatus":"key-player"},
+    {"name":"Ilia Gruev","aliases":["Gruev, Ilia"],"shirtNumber":44,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":26,"nationalities":["BUL","GER"],"contractEnd":"2027-06-30","referenceMarketValueEur":12000000,"importanceScore":70,"squadStatus":"rotation-first-team"},
+    {"name":"Sean Longstaff","aliases":["Longstaff, Sean David"],"shirtNumber":8,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":28,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":15000000,"importanceScore":78,"squadStatus":"first-team"},
+    {"name":"Ao Tanaka","aliases":["Tanaka, Ao"],"shirtNumber":22,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":27,"nationalities":["JPN"],"contractEnd":"2028-06-30","referenceMarketValueEur":13000000,"importanceScore":79,"squadStatus":"first-team"},
+    {"name":"Brenden Aaronson","aliases":["Aaronson, Brenden Russell"],"shirtNumber":11,"primaryPosition":"AMC","secondaryPositions":["AMR","MC"],"positionGroup":"MID","age":25,"nationalities":["USA"],"contractEnd":"2027-06-30","referenceMarketValueEur":22000000,"importanceScore":83,"squadStatus":"first-team"},
+
+    {"name":"Noah Okafor","aliases":["Okafor, Noah Arinzechukwu"],"shirtNumber":19,"primaryPosition":"AML","secondaryPositions":["ST"],"positionGroup":"ATT","age":26,"nationalities":["SUI","NGA"],"contractEnd":"2029-06-30","referenceMarketValueEur":25000000,"importanceScore":84,"squadStatus":"first-team"},
+    {"name":"Jean-Matteo Bahoya","aliases":["Jean-Mattéo Bahoya","Bahoya Negoce, Jean-Matteo"],"shirtNumber":null,"primaryPosition":"AML","secondaryPositions":["AMC","ST"],"positionGroup":"ATT","age":21,"nationalities":["FRA","CMR"],"contractEnd":null,"referenceMarketValueEur":25000000,"importanceScore":80,"squadStatus":"first-team-development","loanStatus":"loan-in","parentClub":"Eintracht Frankfurt","u21":true},
+    {"name":"Harry Wilson","aliases":["Wilson, Harry"],"shirtNumber":10,"primaryPosition":"AMR","secondaryPositions":["AMC","AML"],"positionGroup":"ATT","age":29,"nationalities":["WAL","ENG"],"contractEnd":"2030-06-30","referenceMarketValueEur":25000000,"importanceScore":87,"squadStatus":"key-player"},
+    {"name":"Daniel James","aliases":["James, Daniel Owen"],"shirtNumber":7,"primaryPosition":"AMR","secondaryPositions":["AML","MR"],"positionGroup":"ATT","age":28,"nationalities":["WAL","ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":10000000,"importanceScore":72,"squadStatus":"rotation-first-team"},
+    {"name":"Dominic Calvert-Lewin","aliases":["Calvert-Lewin, Dominic Nathaniel"],"shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":29,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":22000000,"importanceScore":86,"squadStatus":"key-player"},
+    {"name":"Lukas Nmecha","aliases":["Nmecha, Lukas"],"shirtNumber":14,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":27,"nationalities":["GER","ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":10000000,"importanceScore":63,"squadStatus":"rotation-first-team"},
+    {"name":"Mateo Joseph","aliases":["Joseph Fernandez Regatillo, Mateo","Mateo Joseph Fernandez"],"shirtNumber":null,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":22,"nationalities":["ESP","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":3500000,"importanceScore":49,"squadStatus":"rotation-development"},
+
+    {"name":"Sam Chambers","aliases":["Chambers, Sam"],"shirtNumber":42,"primaryPosition":"MC","secondaryPositions":["DMC","DR"],"positionGroup":"MID","age":19,"nationalities":["SCO","ENG"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":25,"squadStatus":"academy-first-team-depth","u21":true}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Wilfried Gnonto","status":"loan-out","destination":"Fiorentina","evidence":"Leeds official announcement 2026-09-01"},
+    {"name":"Largie Ramazani","status":"loan-out","destination":"Burnley"},
+    {"name":"Lucas Perri","status":"not-in-post-window-PL-squad"},
+    {"name":"Sebastiaan Bornauw","status":"not-in-post-window-PL-squad"},
+    {"name":"Sam Byram","status":"not-in-post-window-PL-squad"},
+    {"name":"Joe Gelhardt","status":"departed","destination":"Hull City"},
+    {"name":"Joel Piroe","status":"not-in-post-window-PL-squad"}
+  ],
+  "qa": {"officialSeniorListCount":23,"firstTeamRelevantU21Count":2,"auditedSelectablePlayers":25,"unresolvedSeniorOwnership":0,"notes":["Michael Zetterer joined permanently on a three-year contract on 29 August; the older squad-number page still listed Lucas Perri and therefore is not used for final ownership.","Melvin Bard and Jean-Matteo Bahoya are loan-ins with options, confirmed by Leeds on 1 and 2 September respectively.","Joe Rodon remains a key player despite an 8-10 week hamstring injury; injury status must not be confused with squad importance or ownership.","Importance scores are Football Lab gameplay calibration, not external factual ratings."]}
+}
