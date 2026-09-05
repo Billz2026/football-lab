@@ -11,6 +11,10 @@ if (!document.getElementById(stylesheetId)) {
 let fixturesOpen = false;
 let clubsPromise;
 
+function setText(node, value) {
+  if (node && node.textContent !== value) node.textContent = value;
+}
+
 function readCareer() {
   try {
     return JSON.parse(localStorage.getItem('flm-career-save') || 'null');
@@ -111,13 +115,9 @@ function ensureFixturesTab() {
 }
 
 function syncSeasonPresentation() {
-  const heroNote = document.querySelector('.hero-note');
-  if (heroNote) heroNote.textContent = 'FULL LEAGUE BETA · 20 CLUBS · 38 MATCHES';
-
-  const version = document.querySelector('.version-chip');
-  if (version) version.textContent = 'V0.5.1';
-  const footerBuild = document.querySelector('.footer-build');
-  if (footerBuild) footerBuild.textContent = 'V0.5.1 · FULL LEAGUE CAREER';
+  setText(document.querySelector('.hero-note'), 'FULL LEAGUE BETA · 20 CLUBS · 38 MATCHES');
+  setText(document.querySelector('.version-chip'), 'V0.5.1');
+  setText(document.querySelector('.footer-build'), 'V0.5.1 · FULL LEAGUE CAREER');
 
   ensureFixturesTab();
 
@@ -127,55 +127,55 @@ function syncSeasonPresentation() {
   const next = career?.status === 'complete' ? null : userFixture(career, career?.fixtures?.[career?.roundIndex || 0]);
 
   document.querySelectorAll('.career-round').forEach(node => {
-    node.textContent = node.textContent
+    const value = node.textContent
       .replace(/ROUND\s+(\d+)\s+OF\s+(\d+)/i, 'MATCHWEEK $1 OF $2')
       .replace(/(\d+)\s*\/\s*(\d+)\s+ROUNDS/i, '$1 / $2 MATCHWEEKS');
+    setText(node, value);
   });
 
   document.querySelectorAll('.career-page-heading .eyebrow').forEach(node => {
-    node.textContent = node.textContent.replace(/^ROUND\s+(\d+)/i, 'MATCHWEEK $1');
+    setText(node, node.textContent.replace(/^ROUND\s+(\d+)/i, 'MATCHWEEK $1'));
   });
 
   const nextMeta = document.querySelector('.career-next-match small');
   if (nextMeta && next) {
-    const venue = nextMeta.textContent.split('·')[0]?.trim() || (next.homeClubId === career.clubId ? 'Home' : 'Away');
+    const currentVenue = nextMeta.textContent.split('·').find(part => /Home|Away|Stadium|Ground|Park|Bridge|Road|Lane|Stadium/i.test(part))?.trim();
+    const venue = currentVenue || (next.homeClubId === career.clubId ? 'Home' : 'Away');
     const date = formatFixtureDate(next.date);
-    nextMeta.textContent = [date, venue, `Matchweek ${next.matchweek || next.round}`].filter(Boolean).join(' · ');
+    setText(nextMeta, [date, venue, `Matchweek ${next.matchweek || next.round}`].filter(Boolean).join(' · '));
   }
 
   const tableHeading = [...document.querySelectorAll('.career-page-heading .eyebrow')]
     .find(node => /FOOTBALL LAB INVITATIONAL/i.test(node.textContent));
-  if (tableHeading) tableHeading.textContent = 'FOOTBALL LAB PREMIER LEAGUE';
+  setText(tableHeading, 'FOOTBALL LAB PREMIER LEAGUE');
 
   document.querySelectorAll('.career-complete h2').forEach(node => {
-    if (/Invitational complete/i.test(node.textContent)) node.textContent = 'League season complete.';
+    if (/Invitational complete/i.test(node.textContent)) setText(node, 'League season complete.');
   });
   document.querySelectorAll('.career-complete p').forEach(node => {
     if (/first playable management loop/i.test(node.textContent)) {
-      node.textContent = `You completed the full ${SEASON_LABEL} 38-match league season.`;
+      setText(node, `You completed the full ${SEASON_LABEL} 38-match league season.`);
     }
   });
 
   const modalTitle = document.getElementById('modalTitle');
   const modalCopy = document.getElementById('modalCopy');
-  if (modalTitle?.textContent.trim() === 'CHOOSE YOUR CLUB' && modalCopy) {
-    modalCopy.textContent = 'Begin a full 38-match league season. All 20 clubs play each other home and away.';
+  if (modalTitle?.textContent.trim() === 'CHOOSE YOUR CLUB') {
+    setText(modalCopy, 'Begin a full 38-match league season. All 20 clubs play each other home and away.');
   }
 
   const modalBody = document.getElementById('modalBody');
   if (modalTitle?.textContent.trim() === 'LOAD GAME' && modalBody && career) {
     const paragraph = modalBody.querySelector('.notice-panel p');
     if (paragraph && /Round\s+\d+\s+of\s+\d+/i.test(paragraph.textContent)) {
-      paragraph.textContent = career.status === 'complete'
-        ? 'Season complete'
-        : `Matchweek ${current} of ${total}`;
+      setText(paragraph, career.status === 'complete' ? 'Season complete' : `Matchweek ${current} of ${total}`);
     }
   }
 
   if (modalTitle?.textContent.trim() === 'HALL OF FAME' && modalBody) {
     const paragraph = modalBody.querySelector('.notice-panel p');
     if (paragraph && /seven-match Invitational/i.test(paragraph.textContent)) {
-      paragraph.textContent = 'Complete the 38-match league campaign and build a record worth keeping.';
+      setText(paragraph, 'Complete the 38-match league campaign and build a record worth keeping.');
     }
   }
 }
