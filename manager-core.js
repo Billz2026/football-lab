@@ -1,5 +1,16 @@
-export const CAREER_VERSION = 1;
+export const CAREER_VERSION = 2;
 export const SAVE_KEY = 'flm-career-save';
+
+export const PREMIER_LEAGUE_2026_27_MATCHWEEK_DATES = [
+  '2026-08-21', '2026-08-28', '2026-09-04', '2026-09-12', '2026-09-18',
+  '2026-10-10', '2026-10-17', '2026-10-24', '2026-10-31', '2026-11-07',
+  '2026-11-21', '2026-11-28', '2026-12-02', '2026-12-05', '2026-12-12',
+  '2026-12-19', '2026-12-26', '2026-12-30', '2027-01-02', '2027-01-06',
+  '2027-01-16', '2027-01-23', '2027-01-30', '2027-02-06', '2027-02-10',
+  '2027-02-20', '2027-02-27', '2027-03-03', '2027-03-13', '2027-03-20',
+  '2027-04-10', '2027-04-17', '2027-04-24', '2027-05-01', '2027-05-08',
+  '2027-05-15', '2027-05-23', '2027-05-30'
+];
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -38,34 +49,84 @@ function poisson(lambda, random) {
   return clamp(count - 1, 0, 6);
 }
 
+function genericMatchweekDates(roundCount) {
+  const dates = [];
+  const cursor = new Date(Date.UTC(2026, 7, 22));
+  for (let index = 0; index < roundCount; index += 1) {
+    dates.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 7);
+  }
+  return dates;
+}
+
+function matchweekDatesFor(clubCount) {
+  const roundCount = (clubCount - 1) * 2;
+  return clubCount === 20 && roundCount === 38
+    ? PREMIER_LEAGUE_2026_27_MATCHWEEK_DATES
+    : genericMatchweekDates(roundCount);
+}
+
+function kickoffForDate(date, round, totalRounds) {
+  if (round === totalRounds && totalRounds === 38) return '16:00';
+  const day = new Date(`${date}T12:00:00Z`).getUTCDay();
+  return day === 3 ? '20:00' : '15:00';
+}
+
+function fixtureShell({ round, pairIndex, homeClubId, awayClubId, date, phase, totalRounds }) {
+  return {
+    id: `mw${round}-m${pairIndex + 1}`,
+    round,
+    matchweek: round,
+    date,
+    kickoffTime: kickoffForDate(date, round, totalRounds),
+    phase,
+    homeClubId,
+    awayClubId,
+    played: false,
+    homeGoals: null,
+    awayGoals: null,
+    events: []
+  };
+}
+
 export function createFixtures(clubIds) {
   if (!Array.isArray(clubIds) || clubIds.length < 2 || clubIds.length % 2 !== 0) {
-    throw new Error('The demo league requires an even number of clubs.');
+    throw new Error('The league requires an even number of clubs.');
   }
 
+  const firstLeg = [];
   let rotation = [...clubIds];
-  const rounds = [];
   for (let roundIndex = 0; roundIndex < clubIds.length - 1; roundIndex += 1) {
     const fixtures = [];
     for (let pairIndex = 0; pairIndex < rotation.length / 2; pairIndex += 1) {
       const first = rotation[pairIndex];
       const second = rotation[rotation.length - 1 - pairIndex];
-      const flip = (roundIndex + pairIndex) % 2 === 1;
-      fixtures.push({
-        id: `r${roundIndex + 1}-m${pairIndex + 1}`,
-        round: roundIndex + 1,
-        homeClubId: flip ? second : first,
-        awayClubId: flip ? first : second,
-        played: false,
-        homeGoals: null,
-        awayGoals: null,
-        events: []
-      });
+      const flip = pairIndex === 0 ? roundIndex % 2 === 1 : pairIndex % 2 === 1;
+      fixtures.push({ homeClubId: flip ? second : first, awayClubId: flip ? first : second });
     }
-    rounds.push(fixtures);
+    firstLeg.push(fixtures);
     rotation = [rotation[0], rotation.at(-1), ...rotation.slice(1, -1)];
   }
-  return rounds;
+
+  // Shift the return-leg order by one matchweek. This keeps return fixtures far apart,
+  // while avoiding unrealistic runs of three or more consecutive home/away matches.
+  const returnOrder = [...firstLeg.slice(1), firstLeg[0]];
+  const rawRounds = [
+    ...firstLeg.map(round => round.map(fixture => ({ ...fixture, phase: 'first-leg' }))),
+    ...returnOrder.map(round => round.map(fixture => ({
+      homeClubId: fixture.awayClubId,
+      awayClubId: fixture.homeClubId,
+      phase: 'return-leg'
+    })))
+  ];
+  const dates = matchweekDatesFor(clubIds.length);
+  return rawRounds.map((round, roundIndex) => round.map((fixture, pairIndex) => fixtureShell({
+    ...fixture,
+    round: roundIndex + 1,
+    pairIndex,
+    date: dates[roundIndex],
+    totalRounds: rawRounds.length
+  })));
 }
 
 export function autoPickLineup(players, clubId) {
@@ -127,28 +188,32 @@ function initialPlayerStatus(players, clubs) {
 }
 
 export function createCareer({ clubId, clubs, players, seed = Date.now(), managerName = 'The Gaffer' }) {
-  const demoClubs = clubs.filter(club => !club.isPlaceholder);
-  if (!demoClubs.some(club => club.id === clubId)) throw new Error('Choose a club from the playable demo league.');
-  if (demoClubs.length < 4 || demoClubs.length % 2 !== 0) throw new Error('The playable database needs an even set of at least four real clubs.');
+  const leagueClubs = clubs.filter(club => !club.isPlaceholder);
+  if (!leagueClubs.some(club => club.id === clubId)) throw new Error('Choose a club from the playable league.');
+  if (leagueClubs.length < 4 || leagueClubs.length % 2 !== 0) throw new Error('The playable database needs an even set of at least four real clubs.');
 
   const timestamp = new Date().toISOString();
+  const fixtures = createFixtures(leagueClubs.map(club => club.id));
   return {
     version: CAREER_VERSION,
     id: `career-${hashString(`${clubId}:${seed}:${timestamp}`).toString(16)}`,
     managerName,
     clubId,
     season: '2026/27',
-    competitionName: 'Football Lab Invitational',
+    competitionName: leagueClubs.length === 20 ? 'Football Lab Premier League' : 'Football Lab League',
+    competitionFormat: 'double-round-robin',
+    seasonStartDate: fixtures[0]?.[0]?.date || null,
+    seasonEndDate: fixtures.at(-1)?.[0]?.date || null,
     createdAt: timestamp,
     updatedAt: timestamp,
     seed: String(seed),
     status: 'active',
     roundIndex: 0,
-    fixtures: createFixtures(demoClubs.map(club => club.id)),
-    table: baseTable(demoClubs),
+    fixtures,
+    table: baseTable(leagueClubs),
     lineupIds: autoPickLineup(players, clubId),
     tactics: { formation: '4-3-3', mentality: 'Balanced', pressing: 'Standard' },
-    playerStatus: initialPlayerStatus(players, demoClubs),
+    playerStatus: initialPlayerStatus(players, leagueClubs),
     lastMatch: null
   };
 }
@@ -247,28 +312,53 @@ function applyResult(table, result) {
   away.goalDifference = away.goalsFor - away.goalsAgainst;
 }
 
-function updatePlayerStatus(career, db, userResult) {
-  const userAtHome = userResult.homeClubId === career.clubId;
-  const goalsFor = userAtHome ? userResult.homeGoals : userResult.awayGoals;
-  const goalsAgainst = userAtHome ? userResult.awayGoals : userResult.homeGoals;
-  const morale = goalsFor > goalsAgainst ? 'Excellent' : goalsFor < goalsAgainst ? 'Okay' : 'Good';
-  const fatigue = career.tactics.pressing === 'High' ? 12 : career.tactics.pressing === 'Low' ? 7 : 9;
-  const starters = new Set(career.lineupIds);
+function daysBetweenDates(fromDate, toDate) {
+  if (!fromDate || !toDate) return 7;
+  const from = Date.parse(`${fromDate}T12:00:00Z`);
+  const to = Date.parse(`${toDate}T12:00:00Z`);
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return 7;
+  return Math.max(2, Math.round((to - from) / 86400000));
+}
+
+function resultMorale(result, clubId) {
+  const home = result.homeClubId === clubId;
+  const goalsFor = home ? result.homeGoals : result.awayGoals;
+  const goalsAgainst = home ? result.awayGoals : result.homeGoals;
+  return goalsFor > goalsAgainst ? 'Excellent' : goalsFor < goalsAgainst ? 'Okay' : 'Good';
+}
+
+function updateClubPlayerStatus(career, db, result, clubId, nextRoundDate) {
+  const currentDate = result.date;
+  const recoveryDays = daysBetweenDates(currentDate, nextRoundDate);
+  const recovery = nextRoundDate ? Math.min(20, Math.round(recoveryDays * 2.4)) : 20;
+  const pressing = clubId === career.clubId ? career.tactics.pressing : 'Standard';
+  const fatigue = pressing === 'High' ? 17 : pressing === 'Low' ? 10 : 13;
+  const starters = new Set(lineupPlayers(career, db, clubId).map(player => player.id));
+  const morale = resultMorale(result, clubId);
+
   Object.entries(career.playerStatus).forEach(([playerId, status]) => {
     const player = db.players.find(item => item.id === playerId);
-    if (player?.clubId !== career.clubId) return;
+    if (player?.clubId !== clubId) return;
     if (starters.has(playerId)) {
-      status.condition = clamp(status.condition - fatigue, 55, 100);
+      status.condition = clamp(status.condition - fatigue + recovery, 55, 100);
       status.sharpness = clamp(status.sharpness + 3, 1, 100);
       status.appearances += 1;
       status.morale = morale;
     } else {
-      status.condition = clamp(status.condition + 4, 1, 100);
+      status.condition = clamp(status.condition + recovery, 1, 100);
       status.sharpness = clamp(status.sharpness - 1, 1, 100);
     }
   });
-  userResult.events.filter(event => event.type === 'goal' && event.clubId === career.clubId && event.playerId).forEach(event => {
+
+  result.events.filter(event => event.type === 'goal' && event.clubId === clubId && event.playerId).forEach(event => {
     if (career.playerStatus[event.playerId]) career.playerStatus[event.playerId].goals += 1;
+  });
+}
+
+function updateRoundPlayerStatus(career, db, results, nextRoundDate) {
+  results.forEach(result => {
+    updateClubPlayerStatus(career, db, result, result.homeClubId, nextRoundDate);
+    updateClubPlayerStatus(career, db, result, result.awayClubId, nextRoundDate);
   });
 }
 
@@ -280,14 +370,15 @@ export function getNextFixture(career) {
 export function simulateNextRound(career, db) {
   const lineupCheck = validateLineup(career.lineupIds, db.players, career.clubId);
   if (!lineupCheck.valid) throw new Error(lineupCheck.errors.join(' '));
-  if (career.status === 'complete' || !career.fixtures[career.roundIndex]) throw new Error('This demo season is complete.');
+  if (career.status === 'complete' || !career.fixtures[career.roundIndex]) throw new Error('This league season is complete.');
 
   const next = clone(career);
   const results = next.fixtures[next.roundIndex].map(fixture => simulateFixture(next, db, fixture));
   next.fixtures[next.roundIndex] = results;
   results.forEach(result => applyResult(next.table, result));
   const userResult = results.find(result => result.homeClubId === next.clubId || result.awayClubId === next.clubId);
-  updatePlayerStatus(next, db, userResult);
+  const nextRoundDate = next.fixtures[next.roundIndex + 1]?.[0]?.date || null;
+  updateRoundPlayerStatus(next, db, results, nextRoundDate);
   next.lastMatch = userResult;
   next.roundIndex += 1;
   if (next.roundIndex >= next.fixtures.length) next.status = 'complete';
@@ -318,8 +409,56 @@ export function serializeCareer(career) {
   return JSON.stringify(career);
 }
 
+function upgradeLegacyCareer(career) {
+  if (career.version !== 1) return career;
+  const clubIds = (career.table || []).map(row => row.clubId);
+  if (clubIds.length < 4 || clubIds.length % 2 !== 0 || !Array.isArray(career.fixtures)) {
+    throw new Error('This save belongs to an unsupported Football Lab version.');
+  }
+
+  const expectedFirstLegRounds = clubIds.length - 1;
+  if (career.fixtures.length !== expectedFirstLegRounds) {
+    throw new Error('This save belongs to an unsupported Football Lab version.');
+  }
+
+  const dates = matchweekDatesFor(clubIds.length);
+  const firstLeg = career.fixtures.map((round, roundIndex) => round.map((fixture, pairIndex) => ({
+    ...fixture,
+    round: roundIndex + 1,
+    matchweek: roundIndex + 1,
+    date: dates[roundIndex],
+    kickoffTime: kickoffForDate(dates[roundIndex], roundIndex + 1, expectedFirstLegRounds * 2),
+    phase: 'first-leg',
+    id: fixture.id || `mw${roundIndex + 1}-m${pairIndex + 1}`
+  })));
+  const returnSource = [...firstLeg.slice(1), firstLeg[0]];
+  const returnLeg = returnSource.map((round, returnIndex) => {
+    const roundNumber = expectedFirstLegRounds + returnIndex + 1;
+    return round.map((fixture, pairIndex) => fixtureShell({
+      round: roundNumber,
+      pairIndex,
+      homeClubId: fixture.awayClubId,
+      awayClubId: fixture.homeClubId,
+      date: dates[roundNumber - 1],
+      phase: 'return-leg',
+      totalRounds: expectedFirstLegRounds * 2
+    }));
+  });
+
+  return {
+    ...career,
+    version: CAREER_VERSION,
+    competitionName: clubIds.length === 20 ? 'Football Lab Premier League' : 'Football Lab League',
+    competitionFormat: 'double-round-robin',
+    seasonStartDate: dates[0],
+    seasonEndDate: dates.at(-1),
+    fixtures: [...firstLeg, ...returnLeg]
+  };
+}
+
 export function parseCareer(raw, db) {
-  const career = typeof raw === 'string' ? JSON.parse(raw) : clone(raw);
+  let career = typeof raw === 'string' ? JSON.parse(raw) : clone(raw);
+  if (career.version === 1) career = upgradeLegacyCareer(career);
   if (career.version !== CAREER_VERSION) throw new Error('This save belongs to an unsupported Football Lab version.');
   if (!db.clubs.some(club => club.id === career.clubId && !club.isPlaceholder)) throw new Error('The saved club is not available in this database.');
   if (!Array.isArray(career.fixtures) || !Array.isArray(career.table)) throw new Error('The career save is incomplete.');
