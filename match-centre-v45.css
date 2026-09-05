@@ -1,0 +1,185 @@
+/* Football Lab Match Centre V4.5 — viewport use, scorer history and matchday clarity */
+
+/* Match Centre should feel like the application, not a window floating inside it. */
+.career-app.flm-cm-shell .career-content:has(.flm-live-match[data-cm4="1"]){
+  padding:0!important;
+  overflow:hidden!important;
+}
+.flm-live-match[data-cm4="1"]{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+}
+.flm-live-match[data-cm4="1"]>.cm4-shell{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  grid-template-rows:auto auto minmax(0,1fr)!important;
+  gap:3px!important;
+  border-radius:0!important;
+}
+.flm-live-match[data-cm4="1"] .cm4-main{
+  min-height:0!important;
+  height:100%!important;
+  grid-template-columns:132px minmax(0,1fr)!important;
+}
+.flm-live-match[data-cm4="1"] .cm4-workspace,
+.flm-live-match[data-cm4="1"] .cm4-panel{
+  min-height:0!important;
+  height:100%!important;
+}
+.flm-live-match[data-cm4="1"] .cm4-overview.is-active{
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr) auto auto!important;
+}
+.flm-live-match[data-cm4="1"] .cm4-stage{
+  min-height:0!important;
+  height:100%!important;
+  padding:28px 36px!important;
+}
+.flm-live-match[data-cm4="1"] .cm4-bottom-player{display:none!important}
+
+/* Fixture type is authoritative in V4.5, so older League text cannot flash through. */
+.flm-live-match[data-cm4="1"] [data-cm4-comp]{font-size:0!important}
+.flm-live-match[data-cm4="1"] [data-cm4-comp]::after{
+  content:attr(data-cm45-label);
+  font-size:11px!important;
+  font-weight:800!important;
+}
+
+/* Persistent scorer history — CM-style: the score tells you what, these rows tell you who. */
+.cm45-scorers{
+  position:absolute;
+  z-index:4;
+  top:14px;
+  left:22px;
+  right:22px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:54px;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+.cm45-scorers.is-visible{opacity:1;visibility:visible}
+.cm45-scorers section{min-width:0;display:grid;align-content:start}
+.cm45-scorers section.away{text-align:right}
+.cm45-scorer-row{
+  min-height:25px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  padding:2px 8px;
+  background:linear-gradient(90deg,rgba(4,10,15,.82),rgba(4,10,15,.38));
+  border-left:3px solid var(--home-color,#d6454f);
+  color:#f3f5f7;
+  text-shadow:0 1px 2px #000;
+}
+.cm45-scorers section.away .cm45-scorer-row{
+  grid-template-columns:auto minmax(0,1fr);
+  background:linear-gradient(270deg,rgba(4,10,15,.82),rgba(4,10,15,.38));
+  border-left:0;
+  border-right:3px solid var(--away-color,#5aa9df);
+}
+.cm45-scorers section.away .cm45-scorer-row strong{grid-column:2;grid-row:1}
+.cm45-scorers section.away .cm45-scorer-row span{grid-column:1;grid-row:1}
+.cm45-scorer-row strong{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:900;
+}
+.cm45-scorer-row span{
+  color:#f5df62;
+  font-size:12px;
+  font-weight:950;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.flm-live-match[data-cm4="1"] .cm4-stage[data-cm45-has-scorers="1"] .cm4-event{
+  transform:translateY(30px);
+}
+
+/* V4.5 owns the visible goal interruption. Older goal layers may continue underneath. */
+.cm45-goal-overlay{
+  position:absolute;
+  z-index:20;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding:28px;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  background:rgba(2,7,11,.18);
+}
+.cm45-goal-overlay.is-visible{opacity:1;visibility:visible}
+.flm-live-match[data-cm44-state="fulltime"] .cm45-goal-overlay{display:none!important}
+.cm45-goal-card{
+  width:min(1120px,88%);
+  min-height:130px;
+  display:grid;
+  place-content:center;
+  gap:8px;
+  padding:20px 28px;
+  border:1px solid rgba(255,255,255,.66);
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+  text-align:center;
+}
+.cm45-goal-card.announce{
+  background:linear-gradient(180deg,#fff,#ededed);
+  color:#111923;
+}
+.cm45-goal-card.announce strong{font-size:clamp(30px,3.4vw,54px);font-weight:1000;letter-spacing:-.035em}
+.cm45-goal-card.scorer,
+.cm45-goal-card.result{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--home-color) 92%,#111),color-mix(in srgb,var(--home-color) 64%,#070707));
+  color:#fff;
+}
+.cm45-goal-overlay.away .cm45-goal-card.scorer,
+.cm45-goal-overlay.away .cm45-goal-card.result{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--away-color) 92%,#111),color-mix(in srgb,var(--away-color) 64%,#070707));
+}
+.cm45-goal-card.scorer strong{font-size:clamp(30px,3.2vw,50px);font-weight:1000}
+.cm45-goal-card.scorer small,.cm45-goal-card.result small{color:#ffe969;font-size:16px;font-weight:950}
+.cm45-goal-card.result strong{font-size:clamp(22px,2.5vw,35px);font-weight:950}
+.cm45-goal-card.result span{font-size:16px;font-weight:850}
+
+/* Large desktop / landscape: use almost every pixel of the live-match viewport. */
+@media (min-width:1101px){
+  .flm-live-match[data-cm4="1"] .cm4-scorebar{min-height:86px!important}
+  .flm-live-match[data-cm4="1"] .cm4-tabs button{min-height:48px!important}
+  .flm-live-match[data-cm4="1"] .cm4-phase{min-height:76px!important;padding:10px 20px 8px!important}
+  .flm-live-match[data-cm4="1"] .cm4-stage{padding:22px 32px!important}
+}
+
+/* Z Fold/tablet landscape keeps the rail and scorer history without wasting height. */
+@media (min-width:560px) and (max-width:900px){
+  .flm-live-match[data-cm4="1"] .cm4-main{grid-template-columns:118px minmax(0,1fr)!important}
+  .flm-live-match[data-cm4="1"] .cm4-stage{padding:14px 18px!important}
+  .cm45-scorers{top:9px;left:12px;right:12px;gap:20px}
+  .cm45-scorer-row{min-height:20px;padding:1px 5px}
+  .cm45-scorer-row strong{font-size:10px}.cm45-scorer-row span{font-size:9px}
+  .flm-live-match[data-cm4="1"] .cm4-stage[data-cm45-has-scorers="1"] .cm4-event{transform:translateY(22px)}
+  .cm45-goal-card{width:92%;min-height:110px;padding:14px 18px}
+  .cm45-goal-card.announce strong{font-size:30px!important}.cm45-goal-card.scorer strong{font-size:28px!important}.cm45-goal-card.result strong{font-size:20px!important}
+  .flm-live-match[data-cm4="1"] [data-cm4-comp]::after{font-size:9px!important}
+}
+
+/* Folded phones: scorers remain readable and don't cover the current event. */
+@media (max-width:559px){
+  .career-app.flm-cm-shell .career-content:has(.flm-live-match[data-cm4="1"]){overflow:auto!important}
+  .flm-live-match[data-cm4="1"]{height:auto!important;min-height:100%!important}
+  .flm-live-match[data-cm4="1"]>.cm4-shell{height:auto!important;min-height:100%!important}
+  .cm45-scorers{top:8px;left:8px;right:8px;gap:8px}
+  .cm45-scorer-row{min-height:19px;padding:1px 4px;border-width:2px}
+  .cm45-scorer-row strong{font-size:9px}.cm45-scorer-row span{font-size:8px}
+  .flm-live-match[data-cm4="1"] .cm4-stage[data-cm45-has-scorers="1"] .cm4-event{transform:translateY(25px)}
+  .cm45-goal-overlay{padding:10px}.cm45-goal-card{width:96%;min-height:100px;padding:12px}
+  .cm45-goal-card.announce strong{font-size:25px!important}.cm45-goal-card.scorer strong{font-size:23px!important}.cm45-goal-card.result strong{font-size:17px!important}.cm45-goal-card.result span{font-size:12px}
+}
