@@ -1,0 +1,77 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-52",
+  "clubName": "Crystal Palace",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {
+    "source": "Premier League post-window squad submission",
+    "published": "2026-09-03",
+    "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
+  },
+  "marketBenchmark": {
+    "source": "Transfermarkt",
+    "currency": "EUR",
+    "season": "2026/27",
+    "note": "Dated reference estimates only. Official Premier League registration and current Palace announcements override stale third-party ownership."
+  },
+  "players": [
+    {"name":"Dean Henderson","aliases":["Henderson, Dean Bradley"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":29,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":28000000,"importanceScore":96,"squadStatus":"cornerstone-captain"},
+    {"name":"Walter Benitez","aliases":["Walter Benítez","Benitez, Walter Daniel"],"shirtNumber":44,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":33,"nationalities":["ARG","FRA"],"contractEnd":"2028-06-30","referenceMarketValueEur":4000000,"importanceScore":38,"squadStatus":"backup"},
+    {"name":"Remi Matthews","aliases":["Matthews, Remi Luke"],"shirtNumber":31,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":32,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":200000,"importanceScore":20,"squadStatus":"backup-depth"},
+
+    {"name":"Chris Richards","aliases":["Richards, Christopher Jeffrey"],"shirtNumber":26,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":26,"nationalities":["USA"],"contractEnd":"2027-06-30","referenceMarketValueEur":28000000,"importanceScore":88,"squadStatus":"key-player"},
+    {"name":"Axel Disasi","aliases":["Disasi Mhakinis Belho, Axel"],"shirtNumber":5,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":28,"nationalities":["FRA","COD"],"contractEnd":null,"referenceMarketValueEur":15000000,"importanceScore":76,"squadStatus":"first-team","loanStatus":"loan-in","parentClub":"Chelsea"},
+    {"name":"Takehiro Tomiyasu","aliases":["Tomiyasu, Takehiro"],"shirtNumber":17,"primaryPosition":"DC","secondaryPositions":["DR","DL"],"positionGroup":"DEF","age":27,"nationalities":["JPN"],"contractEnd":null,"referenceMarketValueEur":5000000,"importanceScore":63,"squadStatus":"rotation-first-team"},
+    {"name":"Ben Chilwell","aliases":["Chilwell, Benjamin James"],"shirtNumber":null,"primaryPosition":"DL","secondaryPositions":["ML"],"positionGroup":"DEF","age":29,"nationalities":["ENG","NZL"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":72,"squadStatus":"first-team","transferStatus":"permanent-2026-09-01"},
+    {"name":"Tyrick Mitchell","aliases":["Mitchell, Tyrick"],"shirtNumber":3,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF","age":26,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":25000000,"importanceScore":84,"squadStatus":"first-team"},
+    {"name":"Oscar Mingueza","aliases":["Óscar Mingueza","Mingueza Garcia, Oscar"],"shirtNumber":30,"primaryPosition":"DR","secondaryPositions":["DC","MR"],"positionGroup":"DEF","age":27,"nationalities":["ESP"],"contractEnd":"2030-06-30","referenceMarketValueEur":18000000,"importanceScore":79,"squadStatus":"first-team"},
+    {"name":"Anan Khalaili","aliases":["Khalaili, Anan"],"shirtNumber":25,"primaryPosition":"DR","secondaryPositions":["WBR","AMR"],"positionGroup":"DEF","age":22,"nationalities":["ISR"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":66,"squadStatus":"rotation-first-team","valueConfidence":"benchmark-not-yet-resolved"},
+
+    {"name":"Adam Wharton","aliases":["Wharton, Adam James"],"shirtNumber":20,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":22,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":70000000,"importanceScore":100,"squadStatus":"cornerstone"},
+    {"name":"Cheick Doucoure","aliases":["Cheick Doucouré","Doucoure, Cheick Oumar"],"shirtNumber":28,"primaryPosition":"DMC","secondaryPositions":["DC"],"positionGroup":"MID","age":26,"nationalities":["MLI"],"contractEnd":"2029-06-30","referenceMarketValueEur":10000000,"importanceScore":66,"squadStatus":"rotation-first-team"},
+    {"name":"Jefferson Lerma","aliases":["Lerma, Jefferson"],"shirtNumber":8,"primaryPosition":"DMC","secondaryPositions":["MC","DC"],"positionGroup":"MID","age":31,"nationalities":["COL"],"contractEnd":"2027-06-30","referenceMarketValueEur":6000000,"importanceScore":67,"squadStatus":"rotation-first-team"},
+    {"name":"Quinten Timber","aliases":["Timber, Quinten Ryan Crispito"],"shirtNumber":null,"primaryPosition":"MC","secondaryPositions":["DMC","AMC"],"positionGroup":"MID","age":25,"nationalities":["NED","CUW"],"contractEnd":null,"referenceMarketValueEur":25000000,"importanceScore":84,"squadStatus":"first-team"},
+    {"name":"Will Hughes","aliases":["Hughes, William James"],"shirtNumber":19,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":31,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":5000000,"importanceScore":55,"squadStatus":"rotation"},
+    {"name":"Daichi Kamada","aliases":["Kamada, Daichi"],"shirtNumber":18,"primaryPosition":"AMC","secondaryPositions":["MC","AML"],"positionGroup":"MID","age":30,"nationalities":["JPN"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":72,"squadStatus":"first-team"},
+    {"name":"Matheus Franca","aliases":["Matheus França","Franca De Oliveira, Matheus"],"shirtNumber":27,"primaryPosition":"AMC","secondaryPositions":["AMR","AML"],"positionGroup":"MID","age":22,"nationalities":["BRA"],"contractEnd":"2028-06-30","referenceMarketValueEur":6000000,"importanceScore":48,"squadStatus":"rotation-development"},
+
+    {"name":"Ismaila Sarr","aliases":["Ismaïla Sarr","Sarr, Ismaila"],"shirtNumber":7,"primaryPosition":"AMR","secondaryPositions":["AML","ST"],"positionGroup":"ATT","age":28,"nationalities":["SEN"],"contractEnd":"2029-06-30","referenceMarketValueEur":40000000,"importanceScore":93,"squadStatus":"key-player"},
+    {"name":"Yeremy Pino","aliases":["Yéremy Pino","Pino Santos, Yeremy Jesus"],"shirtNumber":10,"primaryPosition":"AMR","secondaryPositions":["AML","MR"],"positionGroup":"ATT","age":23,"nationalities":["ESP"],"contractEnd":"2030-06-30","referenceMarketValueEur":30000000,"importanceScore":88,"squadStatus":"key-player"},
+    {"name":"Dario Osorio","aliases":["Darío Osorio","Osorio Osorio, Dario Esteban"],"shirtNumber":null,"primaryPosition":"AMR","secondaryPositions":["MR"],"positionGroup":"ATT","age":22,"nationalities":["CHI"],"contractEnd":null,"referenceMarketValueEur":15000000,"importanceScore":77,"squadStatus":"first-team"},
+    {"name":"Dwight McNeil","aliases":["McNeil, Dwight James Matthew"],"shirtNumber":11,"primaryPosition":"AML","secondaryPositions":["ML"],"positionGroup":"ATT","age":26,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":18000000,"importanceScore":79,"squadStatus":"first-team"},
+    {"name":"Evann Guessand","aliases":["Guessand, Evann Ludovic Vidjannagni"],"shirtNumber":29,"primaryPosition":"AMR","secondaryPositions":["ST","AML"],"positionGroup":"ATT","age":25,"nationalities":["CIV","FRA"],"contractEnd":null,"referenceMarketValueEur":25000000,"importanceScore":76,"squadStatus":"first-team"},
+    {"name":"Jorgen Strand Larsen","aliases":["Jørgen Strand Larsen","Larsen, Jorgen Strand"],"shirtNumber":22,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":26,"nationalities":["NOR"],"contractEnd":null,"referenceMarketValueEur":40000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Jean-Philippe Mateta","aliases":["Mateta, Jean-Philippe"],"shirtNumber":14,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":29,"nationalities":["FRA","COD"],"contractEnd":"2027-06-30","referenceMarketValueEur":30000000,"importanceScore":90,"squadStatus":"key-player"},
+    {"name":"Eddie Nketiah","aliases":["Nketiah, Edward Keddar"],"shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":27,"nationalities":["ENG","GHA"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":64,"squadStatus":"rotation-first-team"},
+
+    {"name":"Jaydee Canvot","aliases":["Canvot, Jaydee Bruce Hamady"],"shirtNumber":6,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":20,"nationalities":["FRA","SEN"],"contractEnd":"2029-06-30","referenceMarketValueEur":28000000,"importanceScore":86,"squadStatus":"key-development","u21":true},
+    {"name":"Romain Esse","aliases":["Esse, Romain Joy Kouakou"],"shirtNumber":null,"primaryPosition":"AMC","secondaryPositions":["AMR","AML"],"positionGroup":"MID","age":21,"nationalities":["ENG","CIV"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":44,"squadStatus":"development-first-team","u21":true},
+    {"name":"Joel Drakes-Thomas","aliases":["Joél Drakes-Thomas","Drakes-Thomas, Joel Jason"],"shirtNumber":null,"primaryPosition":"ST","secondaryPositions":["AML"],"positionGroup":"ATT","age":17,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":43,"squadStatus":"elite-prospect","u21":true}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Daniel Munoz","status":"departed","destination":"Nottingham Forest","evidence":"Crystal Palace announcement and Reuters, 31 Aug 2026"},
+    {"name":"Maxence Lacroix","status":"departed","destination":"Chelsea"},
+    {"name":"Brennan Johnson","status":"departed","destination":"Everton"},
+    {"name":"Borna Sosa","status":"loan-out","destination":"1. FC Köln","evidence":"Crystal Palace announcement, 1 Sep 2026"},
+    {"name":"David Ozoh","status":"departed","destination":"Derby County","evidence":"Crystal Palace announcement, 1 Sep 2026"},
+    {"name":"Chadi Riad","status":"not-in-post-window-PL-squad"},
+    {"name":"Owen Goodman","status":"not-in-post-window-PL-squad"},
+    {"name":"Justin Devenny","status":"not-in-post-window-PL-squad"},
+    {"name":"Nathaniel Clyne","status":"not-in-post-window-PL-squad"}
+  ],
+  "qa": {
+    "officialSeniorListCount": 25,
+    "firstTeamRelevantU21Count": 3,
+    "auditedSelectablePlayers": 28,
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "The official 3 September registration is the ownership authority. Palace's public first-team page was still showing pre-deadline names such as Chadi Riad and Borna Sosa when crawled.",
+      "Jaydee Canvot is retained as a first-team U21 player; Palace's current player page shows him in the senior team and he has already started Premier League matches in 2026/27.",
+      "Adam Wharton is calibrated as the tactical cornerstone; his dated reference market value is €70m.",
+      "Anan Khalaili's reference market value is deliberately left null rather than guessed because the common benchmark was not reliably resolved in this audit pass.",
+      "Importance scores are Football Lab gameplay calibration, not factual external ratings."
+    ]
+  }
+}
