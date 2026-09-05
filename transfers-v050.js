@@ -124,8 +124,8 @@ export function respondToIncomingOffer(career, db, offerId, action, counterFee =
   return withCalendarDate(career, () => legacy.respondToIncomingOffer(career, db, offerId, action, counterFee));
 }
 
-// Load the profile negotiation surface only in the browser. Keeping this dynamic avoids
-// contaminating Node/core tests with DOM requirements.
+// Load profile transfer interaction only in the browser; Node/core tests stay DOM-free.
 if (typeof window !== 'undefined') {
   import('./career-transfer-negotiation-v061.js').catch(error => console.error('V0.6.1 transfer negotiation UI:', error));
+  import('./career-transfer-negotiation-v061-finish.js').catch(error => console.error('V0.6.1 transfer completion UI:', error));
 }
