@@ -27,10 +27,78 @@ function restoreMarket(career, db, snapshot) {
   }
 }
 
-function decisionForPlayer(player, db, career, buyerClubId, stance = null) {
-  if (!player || !buyerClubId || player.clubId === buyerClubId) return { blocked: false, rule: null, multiplier: 1 };
-  const baseStance = stance || market.getTransferStance(player, db, career, buyerClubId);
-  return rivalryDecision(db, player.clubId, buyerClubId, player, baseStance, career);
+function removeId(list, id) {
+  return Array.isArray(list) ? list.filter(item => item !== id) : [];
+}
+
+function sanitizeExistingAiRivalDeals(career, db) {
+  const state = career?.transfers;
+  if (!state || !Array.isArray(state.completed)) return [];
+  const reverted = [];
+  const keep = [];
+
+  for (const transaction of state.completed) {
+    const isAi = transaction?.source === 'ai' || transaction?.source === 'ai-v61';
+    const player = playerById(db, transaction?.playerId);
+    if (!isAi || !player || !transaction?.fromClubId || !transaction?.toClubId) {
+      keep.push(transaction);
+      continue;
+    }
+
+    const shadowPlayer = { ...player, clubId: transaction.fromClubId };
+    const baseStance = market.getTransferStance(shadowPlayer, db, career, transaction.toClubId);
+    const decision = rivalryDecision(db, transaction.fromClubId, transaction.toClubId, shadowPlayer, baseStance, career);
+    if (!decision.blocked || decision.rule?.level !== 'hard') {
+      keep.push(transaction);
+      continue;
+    }
+
+    const fee = Number(transaction.fee || 0);
+    const wage = Number(transaction.weeklyWage || 0);
+    const buyer = state.aiClubs?.[transaction.toClubId];
+    const seller = state.aiClubs?.[transaction.fromClubId];
+
+    if (buyer) {
+      if (Number.isFinite(buyer.transferBudget)) buyer.transferBudget += fee;
+      if (Number.isFinite(buyer.wageRoom)) buyer.wageRoom += wage;
+      buyer.signedPlayerIds = removeId(buyer.signedPlayerIds, transaction.playerId);
+    }
+    if (seller) {
+      if (Number.isFinite(seller.transferBudget)) seller.transferBudget = Math.max(0, seller.transferBudget - moneyRound(fee * .82));
+      seller.soldPlayerIds = removeId(seller.soldPlayerIds, transaction.playerId);
+    }
+
+    state.ownership ||= {};
+    state.ownership[transaction.playerId] = transaction.fromClubId;
+    if (state.contracts?.[transaction.playerId]) delete state.contracts[transaction.playerId];
+    player.clubId = transaction.fromClubId;
+    reverted.push({
+      playerId: transaction.playerId,
+      fromClubId: transaction.fromClubId,
+      toClubId: transaction.toClubId,
+      fee,
+      rivalry: decision.rule.label,
+      transactionId: transaction.id
+    });
+  }
+
+  if (!reverted.length) return reverted;
+  state.completed = keep;
+  state.rivalryMigrationV1 ||= { appliedAt: null, reverted: [] };
+  state.rivalryMigrationV1.appliedAt = new Date().toISOString();
+  state.rivalryMigrationV1.reverted.push(...reverted);
+
+  if (career.news?.items) {
+    const revertedIds = new Set(reverted.map(item => item.transactionId));
+    career.news.items = career.news.items.filter(item => {
+      const id = String(item.id || '');
+      const key = String(item.key || '');
+      return ![...revertedIds].some(transactionId => id.includes(transactionId) || key.includes(transactionId));
+    });
+  }
+
+  career.updatedAt = new Date().toISOString();
+  return reverted;
 }
 
 export const estimatePlayerValue = market.estimatePlayerValue;
@@ -83,6 +151,7 @@ export function getNegotiation(career, db, playerId) {
 }
 
 export function submitTransferOffer(career, db, playerId, fee) {
+  sanitizeExistingAiRivalDeals(career, db);
   const player = playerById(db, playerId);
   if (!player) throw new Error('Choose a valid player.');
   const stance = getTransferStance(player, db, career, career?.clubId);
@@ -93,6 +162,7 @@ export function submitTransferOffer(career, db, playerId, fee) {
 }
 
 export function acceptSellerCounter(career, db, playerId) {
+  sanitizeExistingAiRivalDeals(career, db);
   const player = playerById(db, playerId);
   const stance = player ? getTransferStance(player, db, career, career?.clubId) : null;
   if (stance?.rivalryBlocked) {
@@ -102,6 +172,7 @@ export function acceptSellerCounter(career, db, playerId) {
 }
 
 export function submitContractOffer(career, db, playerId, weeklyWage, years = 4) {
+  sanitizeExistingAiRivalDeals(career, db);
   const player = playerById(db, playerId);
   const stance = player ? getTransferStance(player, db, career, career?.clubId) : null;
   if (stance?.rivalryBlocked) {
@@ -111,11 +182,12 @@ export function submitContractOffer(career, db, playerId, weeklyWage, years = 4)
 }
 
 export function processTransferWorld(career, db) {
+  sanitizeExistingAiRivalDeals(career, db);
   const before = snapshotMarket(career, db);
   const result = market.processTransferWorld(career, db);
 
   const forbiddenAiDeal = (result.aiDeals || []).find(deal => {
-    const player = playerById(db, deal.playerId) || (db?.players || []).find(item => item.id === deal.playerId);
+    const player = playerById(db, deal.playerId);
     if (!player) return false;
     const originalClubId = before.playerClubs.get(player.id) || deal.fromClubId;
     const shadowPlayer = { ...player, clubId: originalClubId };
@@ -150,4 +222,8 @@ export function processTransferWorld(career, db) {
     rumour: null,
     rivalryBlocked: true
   };
+}
+
+export function migrateExistingRivalTransfers(career, db) {
+  return sanitizeExistingAiRivalDeals(career, db);
 }
