@@ -5,6 +5,11 @@ import { createCareer } from '../manager-core.js';
 import { ensurePreseason } from '../preseason-v047.js';
 import { ensureTransferState } from '../transfers-v050-legacy.js';
 import {
+  getTransferStance,
+  submitContractOffer,
+  submitTransferOffer
+} from '../transfers-v050.js';
+import {
   ensurePlayerDynamics,
   getMoveWillingness,
   getPlayerDynamics,
@@ -31,6 +36,13 @@ function fixture(seed = 'v062-dynamics') {
   career.calendar ||= {};
   career.calendar.currentDate ||= career.currentDate || '2026-06-05';
   return { career, db, userClub, playableClubs };
+}
+
+function openWindow(career) {
+  career.currentDate = '2026-06-15';
+  career.calendar ||= {};
+  career.calendar.currentDate = '2026-06-15';
+  career.worldClock ||= { schemaVersion: 1, totalDaysAdvanced: 0, history: [], acknowledgedMilestones: [] };
 }
 
 test('player dynamics initialise deterministically with realistic squad roles and agents', () => {
@@ -103,6 +115,56 @@ test('player willingness reflects club stature, happiness and an active transfer
   settled.transferRequest = { active: true, requestedDate: career.currentDate, reason: 'Wants a new challenge' };
   const after = getMoveWillingness(career, db, target.id, userClub.id);
   assert.ok(after.score >= before.score + 20, `transfer request should materially improve willingness (${before.score} -> ${after.score})`);
+});
+
+test('an active transfer request materially softens the selling club stance', () => {
+  const { career, db, userClub, playableClubs } = fixture('requested-sale');
+  ensurePlayerDynamics(career, db);
+  const sellerClub = playableClubs
+    .filter(club => club.id !== userClub.id)
+    .sort((a, b) => (b.reputation || 0) - (a.reputation || 0))[0];
+  const target = db.players
+    .filter(player => player.clubId === sellerClub.id && !player.isPlaceholder)
+    .sort((a, b) => (b.currentAbility || 0) - (a.currentAbility || 0))[0];
+  const dynamics = getPlayerDynamics(career, db, target.id);
+  dynamics.happiness = 86;
+  dynamics.transferRequest = null;
+  const settled = getTransferStance(target, db, career, userClub.id);
+
+  dynamics.happiness = 18;
+  dynamics.transferRequest = { active: true, requestedDate: career.currentDate, reason: 'Wants a new challenge' };
+  const requested = getTransferStance(target, db, career, userClub.id);
+  assert.ok(requested.minimumAcceptable <= settled.minimumAcceptable * .85, `request should lower minimum fee (${settled.minimumAcceptable} -> ${requested.minimumAcceptable})`);
+  assert.match(requested.label, /transfer requested/i);
+});
+
+test('a settled star can refuse personal terms even after the clubs agree a fee', () => {
+  const { career, db, userClub, playableClubs } = fixture('player-refusal');
+  openWindow(career);
+  ensurePlayerDynamics(career, db);
+  const sellerClub = playableClubs
+    .filter(club => club.id !== userClub.id)
+    .sort((a, b) => (b.reputation || 0) - (a.reputation || 0))[0];
+  const target = db.players
+    .filter(player => player.clubId === sellerClub.id && !player.isPlaceholder)
+    .sort((a, b) => (b.currentAbility || 0) - (a.currentAbility || 0))[0];
+  const dynamics = getPlayerDynamics(career, db, target.id);
+  dynamics.squadRole = 'Star';
+  dynamics.happiness = 100;
+  dynamics.loyalty = 100;
+  dynamics.ambition = 95;
+  dynamics.transferRequest = null;
+  const interest = getMoveWillingness(career, db, target.id, userClub.id);
+  assert.ok(interest.score < 25, `test needs a genuine refusal state, got ${interest.score}`);
+
+  career.transfers.transferBudget = 1_000_000_000;
+  career.transfers.wageRoom = 2_000_000;
+  const stance = getTransferStance(target, db, career, userClub.id);
+  const feeResult = submitTransferOffer(career, db, target.id, stance.minimumAcceptable);
+  assert.equal(feeResult.status, 'accepted');
+  const contractResult = submitContractOffer(career, db, target.id, 1_000_000, 4);
+  assert.equal(contractResult.status, 'player-refused');
+  assert.match(contractResult.negotiation.messages.at(-1), /not interested/i);
 });
 
 test('renewal demands use squad role, agent and current wage; accepted deals persist', () => {
