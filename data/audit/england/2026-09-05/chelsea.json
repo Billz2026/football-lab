@@ -1,0 +1,82 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-49",
+  "clubName": "Chelsea",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {
+    "source": "Premier League post-window squad submission",
+    "published": "2026-09-03",
+    "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
+  },
+  "marketBenchmark": {
+    "source": "Transfermarkt",
+    "currency": "EUR",
+    "season": "2026/27",
+    "note": "Reference market values are estimates. Official Chelsea/PL registration and deadline-day transactions override stale third-party squad pages."
+  },
+  "players": [
+    {"name":"Emiliano Martinez","aliases":["Emiliano Martínez","Martinez Romero, Damián Emiliano"],"shirtNumber":26,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":34,"nationalities":["ARG","ESP"],"contractEnd":null,"referenceMarketValueEur":12000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Teddy Sharman-Lowe","aliases":["Sharman-Lowe, Teddy Samuel"],"shirtNumber":28,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":23,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":500000,"importanceScore":30,"squadStatus":"backup-development"},
+    {"name":"Mike Penders","aliases":["Penders, Mike"],"shirtNumber":39,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":21,"nationalities":["BEL"],"contractEnd":"2032-06-30","referenceMarketValueEur":25000000,"importanceScore":63,"squadStatus":"elite-goalkeeper-prospect","u21":true},
+    {"name":"Gabriel Slonina","aliases":["Slonina, Gabriel Pawel","Gaga Slonina"],"shirtNumber":44,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":22,"nationalities":["USA","POL"],"contractEnd":"2028-06-30","referenceMarketValueEur":3000000,"importanceScore":27,"squadStatus":"development-goalkeeper"},
+
+    {"name":"Levi Colwill","aliases":["Samuels Colwill, Levi Lamar"],"shirtNumber":6,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":23,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":50000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Wesley Fofana","aliases":["Fofana, Wesley Tidjan"],"shirtNumber":3,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":25,"nationalities":["FRA","CIV"],"contractEnd":null,"referenceMarketValueEur":28000000,"importanceScore":74,"squadStatus":"first-team"},
+    {"name":"Maxence Lacroix","aliases":["Lacroix, Maxence Guy"],"shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":26,"nationalities":["FRA","GLP"],"contractEnd":null,"referenceMarketValueEur":50000000,"importanceScore":87,"squadStatus":"key-player"},
+    {"name":"Aaron Anselmino","aliases":["Anselmino, Aaron","Aarón Anselmino"],"shirtNumber":30,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":21,"nationalities":["ARG"],"contractEnd":"2031-06-30","referenceMarketValueEur":10000000,"importanceScore":49,"squadStatus":"development-first-team","u21":true},
+    {"name":"Josh Acheampong","aliases":["Acheampong, Joshua Kofi"],"shirtNumber":34,"primaryPosition":"DR","secondaryPositions":["DC"],"positionGroup":"DEF","age":20,"nationalities":["ENG","GHA"],"contractEnd":"2029-06-30","referenceMarketValueEur":25000000,"importanceScore":69,"squadStatus":"first-team-development","u21":true},
+    {"name":"Reece James","aliases":["James, Reece"],"shirtNumber":24,"primaryPosition":"DR","secondaryPositions":["WBR","DMC"],"positionGroup":"DEF","age":26,"nationalities":["ENG","GRN"],"contractEnd":"2032-06-30","referenceMarketValueEur":60000000,"importanceScore":95,"squadStatus":"cornerstone"},
+    {"name":"Malo Gusto","aliases":["Gusto, Malo Arthur"],"shirtNumber":27,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":23,"nationalities":["FRA","MTQ"],"contractEnd":"2030-06-30","referenceMarketValueEur":35000000,"importanceScore":77,"squadStatus":"rotation-first-team"},
+    {"name":"Marco Palestra","aliases":["Palestra, Marco"],"shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":21,"nationalities":["ITA"],"contractEnd":"2033-06-30","referenceMarketValueEur":35000000,"importanceScore":73,"squadStatus":"first-team-development","u21":true},
+    {"name":"Jorrel Hato","aliases":["Hato, Jorrel Evan"],"shirtNumber":21,"primaryPosition":"DL","secondaryPositions":["DC"],"positionGroup":"DEF","age":20,"nationalities":["NED","CUW"],"contractEnd":"2032-06-30","referenceMarketValueEur":40000000,"importanceScore":85,"squadStatus":"key-development","u21":true},
+    {"name":"Valentin Barco","aliases":["Valentín Barco","Barco, Valentin"],"shirtNumber":4,"primaryPosition":"MC","secondaryPositions":["DL","WBL"],"positionGroup":"MID","age":22,"nationalities":["ARG"],"contractEnd":null,"referenceMarketValueEur":40000000,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Pep Chavarria","aliases":["Pep Chavarría","Chavarria Perez, Josep Maria","Josep Chavarria"],"shirtNumber":29,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF","age":28,"nationalities":["ESP"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":60,"squadStatus":"rotation-first-team"},
+
+    {"name":"Moises Caicedo","aliases":["Moisés Caicedo","Caicedo Corozo, Moises Isaac"],"shirtNumber":25,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":24,"nationalities":["ECU"],"contractEnd":"2033-06-30","referenceMarketValueEur":100000000,"importanceScore":100,"squadStatus":"cornerstone"},
+    {"name":"Romeo Lavia","aliases":["Roméo Lavia","Lavia, Romeo"],"shirtNumber":45,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":22,"nationalities":["BEL","GHA"],"contractEnd":"2030-06-30","referenceMarketValueEur":22000000,"importanceScore":76,"squadStatus":"first-team"},
+    {"name":"Jordan Henderson","aliases":["Henderson, Jordan Brian"],"shirtNumber":14,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":36,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":1500000,"importanceScore":55,"squadStatus":"rotation-leader"},
+    {"name":"Cole Palmer","aliases":["Palmer, Cole"],"shirtNumber":10,"primaryPosition":"AMC","secondaryPositions":["AMR"],"positionGroup":"MID","age":24,"nationalities":["ENG","KNA"],"contractEnd":"2033-06-30","referenceMarketValueEur":100000000,"importanceScore":100,"squadStatus":"global-superstar"},
+    {"name":"Morgan Rogers","aliases":["Rogers, Morgan Elliot"],"shirtNumber":17,"primaryPosition":"AMC","secondaryPositions":["AML","AMR"],"positionGroup":"MID","age":24,"nationalities":["ENG"],"contractEnd":"2033-06-30","referenceMarketValueEur":90000000,"importanceScore":95,"squadStatus":"cornerstone"},
+    {"name":"Kendry Paez","aliases":["Kendry Páez","Paez Andrade, Ray Kendry"],"shirtNumber":null,"primaryPosition":"AMC","secondaryPositions":["AMR"],"positionGroup":"MID","age":19,"nationalities":["ECU"],"contractEnd":null,"referenceMarketValueEur":9000000,"importanceScore":49,"squadStatus":"elite-prospect","u21":true},
+
+    {"name":"Pedro Neto","aliases":["Lomba Neto, Pedro"],"shirtNumber":7,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT","age":26,"nationalities":["POR"],"contractEnd":"2031-06-30","referenceMarketValueEur":60000000,"importanceScore":90,"squadStatus":"key-player"},
+    {"name":"Estevao","aliases":["Estêvão","Almeida de Oliveira Goncalves, Estevao Willian","Estêvão Willian"],"shirtNumber":41,"primaryPosition":"AMR","secondaryPositions":["AMC","AML"],"positionGroup":"ATT","age":19,"nationalities":["BRA"],"contractEnd":"2033-06-30","referenceMarketValueEur":80000000,"importanceScore":94,"squadStatus":"key-development","u21":true},
+    {"name":"Geovany Quenda","aliases":["Quenda, Geovany Tcherno"],"shirtNumber":23,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT","age":19,"nationalities":["POR","GNB"],"contractEnd":"2034-06-30","referenceMarketValueEur":42000000,"importanceScore":79,"squadStatus":"first-team-development","u21":true},
+    {"name":"Jamie Gittens","aliases":["Bynoe-Gittens, Jamie Jermaine","Jamie Bynoe-Gittens"],"shirtNumber":11,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT","age":22,"nationalities":["ENG","BRB"],"contractEnd":"2032-06-30","referenceMarketValueEur":30000000,"importanceScore":76,"squadStatus":"first-team"},
+    {"name":"Joao Pedro","aliases":["João Pedro","Junqueira De Jesus, Joao Pedro"],"shirtNumber":9,"primaryPosition":"ST","secondaryPositions":["AMC","AML"],"positionGroup":"ATT","age":24,"nationalities":["BRA"],"contractEnd":"2033-06-30","referenceMarketValueEur":80000000,"importanceScore":95,"squadStatus":"cornerstone"},
+    {"name":"Emmanuel Emegha","aliases":["Emegha, Emmanuel","Emmanuel Esseh Emegha"],"shirtNumber":22,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":23,"nationalities":["NED","NGA"],"contractEnd":"2033-06-30","referenceMarketValueEur":25000000,"importanceScore":74,"squadStatus":"first-team"},
+    {"name":"Danny Welbeck","aliases":["Welbeck, Daniel","Daniel Welbeck"],"shirtNumber":18,"primaryPosition":"ST","secondaryPositions":["AML"],"positionGroup":"ATT","age":35,"nationalities":["ENG","GHA"],"contractEnd":null,"referenceMarketValueEur":3000000,"importanceScore":51,"squadStatus":"rotation-leader"},
+
+    {"name":"Reggie Watson","aliases":["Watson, Reggie"],"shirtNumber":31,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID","age":null,"nationalities":[],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":18,"squadStatus":"academy-depth","u21":true},
+    {"name":"Mahdi Nicoll-Jazuli","aliases":["Nicoll-Jazuli, Mahdi"],"shirtNumber":32,"primaryPosition":"AMR","secondaryPositions":["AMC"],"positionGroup":"ATT","age":null,"nationalities":[],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":18,"squadStatus":"academy-depth","u21":true},
+    {"name":"Tayo Subuloye","aliases":["Subuloye, Olutayo Peter Gabriel"],"shirtNumber":37,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":null,"nationalities":[],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":18,"squadStatus":"academy-depth","u21":true}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Enzo Fernandez","status":"departed","destination":"Manchester City","evidence":"Premier League deadline-day wrap confirms the transfer and Chelsea's official Sep 3 submission excludes him."},
+    {"name":"Nicolas Jackson","status":"departed","destination":"Aston Villa","evidence":"Aston Villa's official Sep 3 PL submission lists Jackson."},
+    {"name":"Alejandro Garnacho","status":"loan-out","destination":"Aston Villa","evidence":"Aston Villa's official Sep 3 PL submission lists Garnacho; current transfer reporting identifies the Chelsea parent relationship."},
+    {"name":"Dario Essugo","status":"loan-out","membershipEvidence":"Chelsea U21 PL list marks player (Loan)"},
+    {"name":"Mamadou Sarr","status":"loan-out","membershipEvidence":"Chelsea U21 PL list marks player (Loan)"},
+    {"name":"Robert Sanchez","status":"not-in-post-window-PL-squad"},
+    {"name":"Filip Jorgensen","status":"not-in-post-window-PL-squad"},
+    {"name":"Tosin Adarabioyo","status":"not-in-post-window-PL-squad"},
+    {"name":"Benoit Badiashile","status":"not-in-post-window-PL-squad"},
+    {"name":"Liam Delap","status":"not-in-post-window-PL-squad"},
+    {"name":"Mykhailo Mudryk","status":"not-in-post-window-PL-squad"}
+  ],
+  "qa": {
+    "officialSeniorListCount": 20,
+    "firstTeamRelevantU21Count": 11,
+    "auditedSelectablePlayers": 31,
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "Chelsea's pre-window squad-number page is used only for shirt numbers where the player survives the official Sep 3 registration; it is not an ownership authority.",
+      "Emiliano Martinez is Chelsea's registered senior goalkeeper and wore no.26 in the 30 August league match against Brighton.",
+      "Valentin Barco is treated primarily as a central midfielder in this snapshot, matching his latest established role, with left-side defensive roles retained as secondary positions.",
+      "Three numbered academy players are retained as depth with null external market values rather than invented valuations.",
+      "Importance scores are Football Lab gameplay calibration, not factual external ratings."
+    ]
+  }
+}
