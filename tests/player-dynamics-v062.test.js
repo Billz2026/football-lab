@@ -28,6 +28,8 @@ function fixture(seed = 'v062-dynamics') {
   const career = createCareer({ clubId: userClub.id, clubs: playableClubs, players: db.players, seed, managerName: 'Dynamics Test' });
   ensurePreseason(career, db);
   ensureTransferState(career, db);
+  career.calendar ||= {};
+  career.calendar.currentDate ||= career.currentDate || '2026-06-05';
   return { career, db, userClub, playableClubs };
 }
 
