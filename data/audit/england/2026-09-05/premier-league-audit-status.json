@@ -4,10 +4,10 @@
   "branch": "premier-league-full-audit-2026-09-05",
   "completionRule": "Do not wire this audit into the live runtime until all 20 clubs have passed factual first-team reconciliation and league-wide QA.",
   "clubs": [
-    {"clubId":"flm-club-api-football-35","club":"AFC Bournemouth","status":"in-progress"},
+    {"clubId":"flm-club-api-football-35","club":"AFC Bournemouth","status":"complete-factual-first-team"},
     {"clubId":"flm-club-api-football-42","club":"Arsenal","status":"complete-factual-first-team"},
-    {"clubId":"flm-club-api-football-66","club":"Aston Villa","status":"pending"},
-    {"clubId":"flm-club-api-football-55","club":"Brentford","status":"pending"},
+    {"clubId":"flm-club-api-football-66","club":"Aston Villa","status":"complete-factual-first-team"},
+    {"clubId":"flm-club-api-football-55","club":"Brentford","status":"in-progress"},
     {"clubId":"flm-club-api-football-51","club":"Brighton & Hove Albion","status":"pending"},
     {"clubId":"flm-club-api-football-49","club":"Chelsea","status":"pending"},
     {"clubId":"flm-club-api-football-1346","club":"Coventry City","status":"pending"},
@@ -25,5 +25,5 @@
     {"clubId":"flm-club-api-football-746","club":"Sunderland","status":"pending"},
     {"clubId":"flm-club-api-football-47","club":"Tottenham Hotspur","status":"pending"}
   ],
-  "summary": {"complete":1,"inProgress":1,"pending":18,"total":20}
+  "summary": {"complete":3,"inProgress":1,"pending":16,"total":20}
 }
