@@ -8,17 +8,26 @@ export const MARKET_REPUTATION_REVIEW_DATE = '2026-09-05';
 
 const REFERENCES = [
   { aliases: ['Haaland'], floor: 175_000_000, tier: 'world-icon' },
+  { aliases: ['Saka'], floor: 130_000_000, tier: 'global-superstar' },
   { aliases: ['Rice'], floor: 105_000_000, tier: 'elite' },
-  { aliases: ['Saka'], floor: 100_000_000, tier: 'global-superstar' },
-  { aliases: ['Saliba'], floor: 88_000_000, tier: 'elite' },
-  { aliases: ['Palmer'], floor: 88_000_000, tier: 'elite' },
-  { aliases: ['Caicedo'], floor: 88_000_000, tier: 'elite' },
+  { aliases: ['Palmer'], floor: 100_000_000, tier: 'elite' },
+  { aliases: ['Isak'], floor: 100_000_000, tier: 'elite' },
+  { aliases: ['Rodri'], floor: 95_000_000, tier: 'elite' },
+  { aliases: ['Mac Allister'], floor: 88_000_000, tier: 'elite' },
+  { aliases: ['Foden'], floor: 88_000_000, tier: 'elite' },
+  { aliases: ['Saliba'], floor: 82_000_000, tier: 'elite' },
+  { aliases: ['Caicedo'], floor: 80_000_000, tier: 'elite' },
   { aliases: ['Wirtz'], floor: 88_000_000, tier: 'elite' },
-  { aliases: ['Szoboszlai'], floor: 88_000_000, tier: 'elite' },
-  { aliases: ['Fernandez', 'Fernández'], floor: 78_000_000, tier: 'star' },
-  { aliases: ['Rogers'], floor: 78_000_000, tier: 'star' },
-  { aliases: ['Isak'], floor: 74_000_000, tier: 'star' },
-  { aliases: ['Ekitike', 'Ekitiké'], floor: 70_000_000, tier: 'star' }
+  { aliases: ['Szoboszlai'], floor: 72_000_000, tier: 'star' },
+  { aliases: ['Odegaard', 'Ødegaard'], floor: 74_000_000, tier: 'star' },
+  { aliases: ['Guimaraes', 'Guimarães'], floor: 70_000_000, tier: 'star' },
+  { aliases: ['Gravenberch'], floor: 66_000_000, tier: 'star' },
+  { aliases: ['Fernandez', 'Fernández'], floor: 66_000_000, tier: 'star' },
+  { aliases: ['Rogers'], floor: 62_000_000, tier: 'star' },
+  { aliases: ['Ekitike', 'Ekitiké'], floor: 62_000_000, tier: 'star' },
+  { aliases: ['Yoro'], floor: 48_000_000, tier: 'star' },
+  { aliases: ['Eze'], floor: 48_000_000, tier: 'star' },
+  { aliases: ['Murillo'], floor: 48_000_000, tier: 'star' }
 ];
 
 function normalise(value) {
