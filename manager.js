@@ -1,4 +1,5 @@
 import './manager-base-v045.js?v=0.4.5';
+import './player-audit-v1.js?v=1.0.0';
 import './career-news-ui-v0461.js?v=0.4.6.1';
 import './career-news-ui-v0462-fix.js?v=0.4.6.2';
 import './career-preseason-ui-v047.js?v=0.4.7';
@@ -11,5 +12,5 @@ import './career-interactions-v053.js?v=0.5.3';
 import './career-world-v060.js?v=0.6.0';
 import './career-transfers-gate-v054.js?v=0.6.0';
 import './manager-shell-v1.js?v=1.0.0';
-import './team-selection-v1.js?v=1.0.0';
+import './team-selection-v1.js?v=1.0.1';
 import './matchday-cm-v1.js?v=1.0.0';
