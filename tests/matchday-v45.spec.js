@@ -25,6 +25,18 @@ async function selectXI(page) {
   await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
 }
 
+async function liveGoalInfo(page) {
+  return page.evaluate(async () => {
+    const goals = (window.__flmLiveStateV332?.events || []).filter(event => event.type === 'goal');
+    const db = await window.FLMManager.loadDatabase();
+    return goals.map(goal => ({
+      playerId: goal.playerId,
+      name: db.players.find(player => player.id === goal.playerId)?.name || '',
+      minute: goal.minute
+    }));
+  });
+}
+
 test('V4.5 starts the next friendly directly, fills the viewport and keeps scorer history', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await page.locator('[data-start-club]').first().click();
@@ -33,6 +45,7 @@ test('V4.5 starts the next friendly directly, fills the viewport and keeps score
 
   const continueButton = page.locator('[data-shell-continue]');
   await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY', { timeout: 5000 });
+  await expect(continueButton).toHaveAttribute('data-shell-action', 'friendly');
   await continueButton.click();
 
   const live = page.locator('[data-live-match]');
@@ -49,7 +62,13 @@ test('V4.5 starts the next friendly directly, fills the viewport and keeps score
   expect(geometry.height / geometry.vh).toBeGreaterThan(0.9);
 
   const scorers = shell.locator('[data-cm45-scorers]');
-  await expect(scorers).toHaveAttribute('aria-hidden', 'true');
+  const initialGoals = await liveGoalInfo(page);
+  await expect(scorers).toHaveAttribute('aria-hidden', initialGoals.length ? 'false' : 'true');
+  await expect(shell).toHaveAttribute('data-cm45-goal-count', String(initialGoals.length));
+  if (initialGoals.length) {
+    const initialText = await scorers.innerText();
+    expect(initialGoals.some(goal => goal.name && initialText.includes(goal.name))).toBeTruthy();
+  }
 
   // The timing budget measures a complete simulation, not animation-frame speed.
   await shell.locator('[data-cm4-speed="4"]').click();
@@ -57,15 +76,7 @@ test('V4.5 starts the next friendly directly, fills the viewport and keeps score
   await shell.locator('[data-cm4-pause]').click();
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 50000 });
 
-  const goalInfo = await page.evaluate(async () => {
-    const goals = (window.__flmLiveStateV332?.events || []).filter(event => event.type === 'goal');
-    const db = await window.FLMManager.loadDatabase();
-    return goals.map(goal => ({
-      playerId: goal.playerId,
-      name: db.players.find(player => player.id === goal.playerId)?.name || '',
-      minute: goal.minute
-    }));
-  });
+  const goalInfo = await liveGoalInfo(page);
   await expect(shell).toHaveAttribute('data-cm45-goal-count', String(goalInfo.length));
   if (goalInfo.length) {
     await expect(scorers).toHaveAttribute('aria-hidden', 'false');
