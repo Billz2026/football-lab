@@ -1,0 +1,51 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-57",
+  "clubName": "Ipswich Town",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {"source":"Premier League post-window squad submission plus 2026-09-04 confirmed Liverpool match squad","published":"2026-09-03","url":"https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"},
+  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","note":"Dated reference estimates. Deadline additions use their latest resolved benchmark; null means not reliably resolved rather than guessed."},
+  "players": [
+    {"name":"Kjell Scherpen","aliases":["Scherpen, Kjell"],"shirtNumber":37,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":26,"nationalities":["NED"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Christian Walton","aliases":["Walton, Christian Timothy"],"shirtNumber":28,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":30,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":2500000,"importanceScore":58,"squadStatus":"rotation-goalkeeper"},
+    {"name":"Alex Palmer","aliases":["Palmer, Alexander"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":29,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":1000000,"importanceScore":37,"squadStatus":"backup"},
+
+    {"name":"Dara O'Shea","aliases":["O'Shea, Dara Joseph"],"shirtNumber":26,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":27,"nationalities":["IRL"],"contractEnd":"2030-06-30","referenceMarketValueEur":16000000,"importanceScore":94,"squadStatus":"cornerstone-captain"},
+    {"name":"Issa Diop","aliases":["Diop, Issa Laye Lucas Jean"],"shirtNumber":6,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":29,"nationalities":["FRA","SEN"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":78,"squadStatus":"first-team"},
+    {"name":"Jacob Greaves","aliases":["Greaves, Jacob John"],"shirtNumber":24,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":25,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":14000000,"importanceScore":88,"squadStatus":"key-player"},
+    {"name":"Cedric Kipre","aliases":["Cédric Kipré","Kipre, Cedric"],"shirtNumber":4,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":29,"nationalities":["CIV","FRA"],"contractEnd":null,"referenceMarketValueEur":2000000,"importanceScore":53,"squadStatus":"rotation"},
+    {"name":"Leif Davis","aliases":["Davis, Leif"],"shirtNumber":3,"primaryPosition":"DL","secondaryPositions":["ML"],"positionGroup":"DEF","age":26,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":20000000,"importanceScore":93,"squadStatus":"cornerstone"},
+    {"name":"Darnell Furlong","aliases":["Furlong, Darnell Anthony"],"shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":30,"nationalities":["ENG","MSR"],"contractEnd":"2028-06-30","referenceMarketValueEur":2500000,"importanceScore":63,"squadStatus":"rotation-first-team"},
+    {"name":"Abdoul Ouattara","aliases":["Ouattara, Guemissongui Abdoul Moumine"],"shirtNumber":42,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":20,"nationalities":[],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":46,"squadStatus":"first-team-development","u21":true},
+
+    {"name":"Azor Matusiwa","aliases":["Matusiwa, Azor Melo"],"shirtNumber":5,"primaryPosition":"DMC","secondaryPositions":["MC","DR"],"positionGroup":"MID","age":28,"nationalities":["NED","ANG"],"contractEnd":"2029-06-30","referenceMarketValueEur":12000000,"importanceScore":80,"squadStatus":"first-team"},
+    {"name":"Florentino Luis","aliases":["Florentino","Morris Luis, Florentino Ibrain","Florentino Luís"],"shirtNumber":12,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":27,"nationalities":["POR","ANG"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":86,"squadStatus":"key-player"},
+    {"name":"Sasa Lukic","aliases":["Saša Lukić","Lukic, Sasa"],"shirtNumber":23,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":30,"nationalities":["SRB"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Exequiel Palacios","aliases":["Palacios, Exequiel Alejandro"],"shirtNumber":25,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":27,"nationalities":["ARG"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":89,"squadStatus":"key-player"},
+    {"name":"Marcelino Nunez","aliases":["Marcelino Núñez","Nunez Espinoza, Marcelino Ignacio"],"shirtNumber":32,"primaryPosition":"MC","secondaryPositions":["DMC","MR"],"positionGroup":"MID","age":26,"nationalities":["CHI"],"contractEnd":"2029-06-30","referenceMarketValueEur":14000000,"importanceScore":74,"squadStatus":"first-team"},
+    {"name":"Jack Taylor","aliases":["Taylor, Jack Henry"],"shirtNumber":14,"primaryPosition":"MC","secondaryPositions":["DMC","AMC"],"positionGroup":"MID","age":28,"nationalities":["IRL","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":3000000,"importanceScore":51,"squadStatus":"rotation"},
+
+    {"name":"Julio Enciso","aliases":["Enciso Espinola, Julio Cesar","Julio Enciso"],"shirtNumber":10,"primaryPosition":"AMC","secondaryPositions":["AML","ST"],"positionGroup":"MID","age":22,"nationalities":["PAR"],"contractEnd":null,"referenceMarketValueEur":25000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Anis Mehmeti","aliases":["Mehmeti, Anis"],"shirtNumber":33,"primaryPosition":"AMC","secondaryPositions":["ML","MC"],"positionGroup":"MID","age":25,"nationalities":["ALB","ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":15000000,"importanceScore":73,"squadStatus":"first-team"},
+    {"name":"Abdul Fatawu","aliases":["Fatawu, Issahaku Abdul"],"shirtNumber":7,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT","age":22,"nationalities":["GHA"],"contractEnd":null,"referenceMarketValueEur":20000000,"importanceScore":90,"squadStatus":"key-player"},
+    {"name":"Sindre Walle Egeli","aliases":["Egeli, Sindre Walle"],"shirtNumber":8,"primaryPosition":"AMR","secondaryPositions":["AML","ST"],"positionGroup":"ATT","age":20,"nationalities":["NOR"],"contractEnd":"2030-06-30","referenceMarketValueEur":15000000,"importanceScore":72,"squadStatus":"first-team-development","u21":true},
+    {"name":"Jaden Philogene","aliases":["Philogene-Bidace, Jaden Richard","Jaden Philogene"],"shirtNumber":11,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT","age":24,"nationalities":["ENG","DMA"],"contractEnd":"2029-06-30","referenceMarketValueEur":18000000,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Jack Clarke","aliases":["Clarke, Jack Raymond"],"shirtNumber":47,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT","age":25,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":18000000,"importanceScore":78,"squadStatus":"first-team"},
+    {"name":"Daizen Maeda","aliases":["Maeda, Daizen"],"shirtNumber":38,"primaryPosition":"AML","secondaryPositions":["ST","AMR"],"positionGroup":"ATT","age":28,"nationalities":["JPN"],"contractEnd":null,"referenceMarketValueEur":13000000,"importanceScore":88,"squadStatus":"key-player"},
+    {"name":"Kasey McAteer","aliases":["McAteer, Kasey Ian Robert"],"shirtNumber":20,"primaryPosition":"AMR","secondaryPositions":["MR","AML"],"positionGroup":"ATT","age":24,"nationalities":["IRL","ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":10000000,"importanceScore":66,"squadStatus":"rotation-first-team"},
+    {"name":"Emersonn","aliases":["Correia Da Silva, Emersonn"],"shirtNumber":19,"primaryPosition":"ST","secondaryPositions":["AMR"],"positionGroup":"ATT","age":22,"nationalities":["BRA"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":63,"squadStatus":"rotation-first-team"},
+    {"name":"Chuba Akpom","aliases":["Akpom, Chuba Amechi"],"shirtNumber":29,"primaryPosition":"ST","secondaryPositions":["AMC"],"positionGroup":"ATT","age":30,"nationalities":["ENG","NGA"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":59,"squadStatus":"rotation-striker"},
+    {"name":"Zian Flemming","aliases":["Flemming, Zian"],"shirtNumber":9,"primaryPosition":"ST","secondaryPositions":["AMC","MC"],"positionGroup":"ATT","age":28,"nationalities":["NED"],"contractEnd":"2030-06-30","referenceMarketValueEur":12000000,"importanceScore":83,"squadStatus":"first-team"}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Ben Johnson","status":"not-in-post-window-PL-squad"},
+    {"name":"George Hirst","status":"not-in-post-window-PL-squad"},
+    {"name":"Sammie Szmodics","status":"loan-out","destination":"Derby County","evidence":"Ipswich official 1 Aug 2026 announcement"},
+    {"name":"Ali Al-Hamadi","status":"loan-out","destination":"Sheffield Wednesday","evidence":"Ipswich official 26 Aug 2026 announcement"},
+    {"name":"Harry Clarke","status":"not-in-post-window-PL-squad"},
+    {"name":"Cieran Slicker","status":"not-in-post-window-PL-squad"}
+  ],
+  "qa": {"officialSeniorListCount":25,"firstTeamRelevantU21Count":2,"auditedSelectablePlayers":27,"unresolvedSeniorOwnership":0,"notes":["The 4 September Liverpool matchday squad is used to validate the post-deadline XI and shirt numbers for Scherpen, Lukic, Palacios, Enciso, Maeda, Emersonn and Flemming.","Zian Flemming wears #9 and signed through 2030, confirmed by Ipswich on deadline day.","Older Ipswich team pages remain stale and are not used to retain Ben Johnson, George Hirst or other players absent from the official Sep 3 registration.","Importance scores are Football Lab gameplay calibration, not external factual ratings."]}
+}
