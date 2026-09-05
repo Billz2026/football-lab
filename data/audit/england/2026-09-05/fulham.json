@@ -1,0 +1,67 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-36",
+  "clubName": "Fulham",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {
+    "source": "Premier League post-window squad submission + 2026-09-05 Premier League matchday squad",
+    "published": "2026-09-03",
+    "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
+  },
+  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","note":"Dated external estimates; official registration and current matchday evidence override stale club ownership."},
+  "players": [
+    {"name":"Bernd Leno","aliases":["Leno, Bernd"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":34,"nationalities":["GER"],"contractEnd":"2027-06-30","referenceMarketValueEur":6000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Benjamin Lecomte","aliases":["Lecomte, Benjamin"],"shirtNumber":23,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":35,"nationalities":["FRA"],"contractEnd":"2027-06-30","referenceMarketValueEur":800000,"importanceScore":34,"squadStatus":"backup"},
+    {"name":"Michael Allen","aliases":["Allen, Michael Thomas"],"shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":21,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":null,"importanceScore":18,"squadStatus":"development-goalkeeper"},
+
+    {"name":"Joachim Andersen","aliases":["Andersen, Joachim Christian"],"shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":30,"nationalities":["DEN"],"contractEnd":"2029-06-30","referenceMarketValueEur":20000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Calvin Bassey","aliases":["Bassey, Calvin Ughelumba"],"shirtNumber":3,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":26,"nationalities":["NGA","ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":28000000,"importanceScore":92,"squadStatus":"key-player"},
+    {"name":"David Affengruber","aliases":["Affengruber, David Leopold"],"shirtNumber":22,"primaryPosition":"DC","secondaryPositions":["DMC"],"positionGroup":"DEF","age":25,"nationalities":["AUT"],"contractEnd":null,"referenceMarketValueEur":20000000,"importanceScore":79,"squadStatus":"first-team"},
+    {"name":"Jorge Cuenca","aliases":["Cuenca Barreno, Jorge"],"shirtNumber":15,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":26,"nationalities":["ESP"],"contractEnd":"2028-06-30","referenceMarketValueEur":8000000,"importanceScore":58,"squadStatus":"rotation-first-team"},
+    {"name":"Timothy Castagne","aliases":["Castagne, Timothy"],"shirtNumber":21,"primaryPosition":"DR","secondaryPositions":["MR","DL"],"positionGroup":"DEF","age":30,"nationalities":["BEL"],"contractEnd":"2027-06-30","referenceMarketValueEur":8000000,"importanceScore":70,"squadStatus":"first-team"},
+    {"name":"Kenny Tete","aliases":["Tete, Kenny Joelle"],"shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["DC","DL"],"positionGroup":"DEF","age":30,"nationalities":["NED","MOZ"],"contractEnd":"2028-06-30","referenceMarketValueEur":8000000,"importanceScore":61,"squadStatus":"rotation-first-team"},
+    {"name":"Antonee Robinson","aliases":["Robinson, Antonee"],"shirtNumber":33,"primaryPosition":"DL","secondaryPositions":["ML"],"positionGroup":"DEF","age":28,"nationalities":["USA","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":22000000,"importanceScore":94,"squadStatus":"cornerstone"},
+    {"name":"Ryan Sessegnon","aliases":["Sessegnon, Kouassi Ryan"],"shirtNumber":30,"primaryPosition":"DL","secondaryPositions":["ML","AML"],"positionGroup":"DEF","age":26,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":22000000,"importanceScore":78,"squadStatus":"first-team"},
+
+    {"name":"Sander Berge","aliases":["Berge, Sander Gard Bolin"],"shirtNumber":16,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":28,"nationalities":["NOR"],"contractEnd":"2029-06-30","referenceMarketValueEur":25000000,"importanceScore":93,"squadStatus":"cornerstone"},
+    {"name":"Shea Charles","aliases":["Charles, Shea Emmanuel"],"shirtNumber":19,"primaryPosition":"DMC","secondaryPositions":["DC","DR"],"positionGroup":"MID","age":22,"nationalities":["NIR","ENG"],"contractEnd":null,"referenceMarketValueEur":15000000,"importanceScore":79,"squadStatus":"first-team"},
+    {"name":"Harrison Reed","aliases":["Reed, Harrison James"],"shirtNumber":6,"primaryPosition":"MC","secondaryPositions":["DMC","MR"],"positionGroup":"MID","age":31,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":2000000,"importanceScore":48,"squadStatus":"rotation"},
+    {"name":"Hugo Larsson","aliases":["Larsson, Hugo Emanuel"],"shirtNumber":15,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":22,"nationalities":["SWE"],"contractEnd":null,"referenceMarketValueEur":28000000,"importanceScore":85,"squadStatus":"key-development"},
+    {"name":"Manuel Angel","aliases":["Manuel Ángel","Moran Ibanez, Manuel Angel","Morán Ibáñez, Manuel Ángel"],"shirtNumber":20,"primaryPosition":"MC","secondaryPositions":[],"positionGroup":"MID","age":22,"nationalities":["ESP"],"contractEnd":null,"referenceMarketValueEur":5000000,"importanceScore":61,"squadStatus":"rotation-development","transferStatus":"permanent-2026-09-01"},
+    {"name":"Tom Cairney","aliases":["Cairney, Thomas"],"shirtNumber":10,"primaryPosition":"MC","secondaryPositions":["AMC","MR"],"positionGroup":"MID","age":35,"nationalities":["SCO","ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":500000,"importanceScore":51,"squadStatus":"rotation-captain"},
+    {"name":"Cesar Palacios","aliases":["César Palacios","Palacios Perez, Cesar","Palacios Pérez, César"],"shirtNumber":8,"primaryPosition":"AMC","secondaryPositions":["MC","AML"],"positionGroup":"MID","age":21,"nationalities":["ESP"],"contractEnd":null,"referenceMarketValueEur":7500000,"importanceScore":72,"squadStatus":"first-team-development"},
+    {"name":"Emile Smith Rowe","aliases":["Smith Rowe, Emile"],"shirtNumber":32,"primaryPosition":"AMC","secondaryPositions":["AML","MC"],"positionGroup":"MID","age":26,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":20000000,"importanceScore":76,"squadStatus":"first-team"},
+
+    {"name":"Alex Iwobi","aliases":["Iwobi, Alexander Chuka"],"shirtNumber":17,"primaryPosition":"AML","secondaryPositions":["AMR","AMC"],"positionGroup":"ATT","age":30,"nationalities":["NGA","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":20000000,"importanceScore":88,"squadStatus":"key-player"},
+    {"name":"Kevin","aliases":["Santos Lopes de Macedo, Kevin","Kevin Santos Lopes de Macedo"],"shirtNumber":11,"primaryPosition":"AML","secondaryPositions":["AMR","ST"],"positionGroup":"ATT","age":23,"nationalities":["BRA"],"contractEnd":"2030-06-30","referenceMarketValueEur":25000000,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Oscar Bobb","aliases":["Bobb, Oscar"],"shirtNumber":14,"primaryPosition":"AMR","secondaryPositions":["AMC","AML"],"positionGroup":"ATT","age":23,"nationalities":["NOR","GAM"],"contractEnd":"2031-06-30","referenceMarketValueEur":28000000,"importanceScore":88,"squadStatus":"key-player"},
+    {"name":"Gonzalo Garcia","aliases":["Gonzalo García","Garcia Torres, Gonzalo","García Torres, Gonzalo"],"shirtNumber":7,"primaryPosition":"ST","secondaryPositions":["AML","AMR"],"positionGroup":"ATT","age":22,"nationalities":["ESP"],"contractEnd":null,"referenceMarketValueEur":30000000,"importanceScore":94,"squadStatus":"cornerstone"},
+    {"name":"Rodrigo Muniz","aliases":["Muniz Carvalho, Rodrigo","Muniz, Rodrigo"],"shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":25,"nationalities":["BRA"],"contractEnd":"2030-06-30","referenceMarketValueEur":20000000,"importanceScore":69,"squadStatus":"rotation-first-team"},
+    {"name":"Terrell Works","aliases":["Works, Terrell Lawrence Isaiah"],"shirtNumber":null,"primaryPosition":"AML","secondaryPositions":["AMR","AMC","ST"],"positionGroup":"ATT","age":21,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":null,"importanceScore":19,"squadStatus":"registered-development"},
+
+    {"name":"Josh King","aliases":["King, Joshua David Steven"],"shirtNumber":24,"primaryPosition":"AMC","secondaryPositions":["MC","DMC"],"positionGroup":"MID","age":19,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":25000000,"importanceScore":86,"squadStatus":"key-development","u21":true}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Harry Wilson","status":"not-in-post-window-PL-squad"},
+    {"name":"Sasa Lukic","status":"not-in-post-window-PL-squad"},
+    {"name":"Raul Jimenez","status":"not-in-post-window-PL-squad"},
+    {"name":"Adama Traore","status":"not-in-post-window-PL-squad"},
+    {"name":"Samuel Chukwueze","status":"not-in-post-window-PL-squad"},
+    {"name":"Issa Diop","status":"not-in-post-window-PL-squad"},
+    {"name":"Samuel Amissah","status":"loan-out","membershipEvidence":"Official Fulham U21 list marks player (Loan)"}
+  ],
+  "qa": {
+    "officialSeniorListCount": 25,
+    "firstTeamRelevantU21Count": 1,
+    "auditedSelectablePlayers": 26,
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "The 5 September matchday squad validates current shirt numbers for deadline arrivals Manuel Angel #20, Hugo Larsson #15 and David Affengruber #22, and confirms Josh King #24 as an active first-team U21 starter.",
+      "Michael Allen is correctly classified as a goalkeeper using Fulham's own academy profile.",
+      "Terrell Works is registered as senior depth and is positionally classified as an adaptable left winger/forward using Fulham's own profile.",
+      "Importance scores are Football Lab gameplay calibration, not factual external ratings."
+    ]
+  }
+}
