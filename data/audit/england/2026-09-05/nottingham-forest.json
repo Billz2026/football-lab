@@ -1,0 +1,48 @@
+{
+  "auditVersion": 2,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-65",
+  "clubName": "Nottingham Forest",
+  "status": "complete-factual-first-team",
+  "registrationAuthority": "Premier League post-window squad submission published 2026-09-03",
+  "shirtNumberAuthority": "Nottingham Forest official 2026/27 retail player list where available",
+  "seniorPlayers": [
+    {"name":"Matz Sels","shirtNumber":26,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"John Victor","shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Steven Benda","shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Aaron Bott","shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Ola Aina","shirtNumber":34,"primaryPosition":"DR","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Neco Williams","shirtNumber":3,"primaryPosition":"DR","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Murillo","shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Nikola Milenkovic","shirtNumber":31,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Ousmane Diomande","shirtNumber":2,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Luca Netz","shirtNumber":25,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF"},
+    {"name":"Nicolo Savona","shirtNumber":37,"primaryPosition":"DR","secondaryPositions":["DC"],"positionGroup":"DEF"},
+    {"name":"Nicolas Dominguez","shirtNumber":8,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Ibrahim Sangare","shirtNumber":6,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Morgan Gibbs-White","shirtNumber":10,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Ryan Yates","shirtNumber":22,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"James McAtee","shirtNumber":24,"primaryPosition":"AMC","secondaryPositions":["AMR"],"positionGroup":"MID"},
+    {"name":"Xaver Schlager","shirtNumber":21,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Callum Hudson-Odoi","shirtNumber":7,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT"},
+    {"name":"Dan Ndoye","shirtNumber":14,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT"},
+    {"name":"Igor Jesus","shirtNumber":11,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Chris Wood","shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Arnaud Kalimuendo","shirtNumber":15,"primaryPosition":"ST","secondaryPositions":["AML"],"positionGroup":"ATT"},
+    {"name":"Liam Delap","shirtNumber":19,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Daniel Munoz","shirtNumber":27,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF"},
+    {"name":"Felipe Rodrigues da Silva","shirtNumber":null,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","loanStatus":"loan-in"}
+  ],
+  "firstTeamRelevantU21": [
+    {"name":"Zach Abbott","shirtNumber":44,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","loanStatus":"loan-out"}
+  ],
+  "qa": {
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "Daniel Munoz is a Nottingham Forest senior player in the official 3 September registration and must not remain at Crystal Palace in runtime data.",
+      "The official registration list supersedes older Forest team pages that still show pre-window players.",
+      "Reference market values are intentionally deferred to the league-wide valuation pass."
+    ]
+  }
+}
