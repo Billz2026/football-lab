@@ -8,3 +8,4 @@ import './matchday-ux-v048.js?v=0.4.8';
 import './mobile-home-v049.js?v=0.4.9';
 import './career-transfers-ui-v050.js?v=0.5.2';
 import './career-season-v051.js?v=0.5.1';
+import './career-interactions-v053.js?v=0.5.3';
