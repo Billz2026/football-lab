@@ -1,13 +1,13 @@
 // Football Lab's API-Football squad feed does not provide a trustworthy market-value field
 // and its imported CA is explicitly low-confidence. These reviewed reputation floors stop
 // globally established stars being priced like ordinary squad players when the baseline CA
-// underrates them. They are GBP gameplay calibration floors, not copied transfer fees.
+// underrates them. They are rounded GBP gameplay calibration floors, not copied transfer fees.
 // Review date: 2026-09-05. Re-review when the player database is refreshed.
 
 export const MARKET_REPUTATION_REVIEW_DATE = '2026-09-05';
 
 const REFERENCES = [
-  { aliases: ['Haaland'], floor: 175_000_000, tier: 'global-superstar' },
+  { aliases: ['Haaland'], floor: 175_000_000, tier: 'world-icon' },
   { aliases: ['Rice'], floor: 105_000_000, tier: 'elite' },
   { aliases: ['Saka'], floor: 100_000_000, tier: 'global-superstar' },
   { aliases: ['Saliba'], floor: 88_000_000, tier: 'elite' },
