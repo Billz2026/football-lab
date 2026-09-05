@@ -1,0 +1,31 @@
+name: Premier League Audit QA
+
+on:
+  push:
+    branches:
+      - premier-league-full-audit-2026-09-05
+    paths:
+      - 'data/audit/england/2026-09-05/**'
+      - 'scripts/validate-premier-league-audit.js'
+      - '.github/workflows/premier-league-audit.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate Premier League audit
+        run: node scripts/validate-premier-league-audit.js --write-report
+      - name: Upload QA report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: premier-league-audit-report
+          path: data/audit/england/2026-09-05/qa/premier-league-validation-report.json
+          if-no-files-found: warn
