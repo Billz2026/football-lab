@@ -91,7 +91,8 @@ async function ensureNav() {
     });
   }
   const pending = getIncomingOffers(c, { includeResolved: false }).length;
-  button.innerHTML = pending ? `Transfers<small>${pending} OFFER${pending === 1 ? '' : 'S'}</small>` : 'Transfers';
+  const nextLabel = pending ? `Transfers<small>${pending} OFFER${pending === 1 ? '' : 'S'}</small>` : 'Transfers';
+  if (button.innerHTML !== nextLabel) button.innerHTML = nextLabel;
   button.disabled = Boolean(document.querySelector('[data-live-match]'));
   button.classList.toggle('is-active', open);
 }
