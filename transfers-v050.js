@@ -125,8 +125,43 @@ export function respondToIncomingOffer(career, db, offerId, action, counterFee =
   return withCalendarDate(career, () => legacy.respondToIncomingOffer(career, db, offerId, action, counterFee));
 }
 
-// Load profile transfer interaction only in the browser; Node/core tests stay DOM-free.
+export function migrateExistingRivalTransfers(career, db) {
+  return market.migrateExistingRivalTransfers(career, db);
+}
+
+// Load transfer interaction in the browser and immediately repair old AI-only hard-rival
+// transfers when a saved career opens. User-completed deals are never auto-reverted.
 if (typeof window !== 'undefined') {
   import('./career-transfer-negotiation-v061.js').catch(error => console.error('V0.6.2 transfer negotiation UI:', error));
   import('./career-transfer-negotiation-v061-finish.js').catch(error => console.error('V0.6.2 transfer completion UI:', error));
+
+  const checkedCareers = new WeakSet();
+  let migrationQueued = false;
+  const runRivalryMigration = async () => {
+    const career = window.FLMManager?.activeCareer;
+    if (!career || checkedCareers.has(career) || !window.FLMManager?.loadDatabase) return;
+    checkedCareers.add(career);
+    try {
+      const db = await window.FLMManager.loadDatabase();
+      const reverted = market.migrateExistingRivalTransfers(career, db);
+      if (reverted.length) {
+        localStorage.setItem('flm-career-save', JSON.stringify(career));
+        window.dispatchEvent(new CustomEvent('flm:rivalry-migration', { detail: { reverted } }));
+      }
+    } catch (error) {
+      checkedCareers.delete(career);
+      console.error('V0.6.2 rivalry save migration:', error);
+    }
+  };
+  const queueRivalryMigration = () => {
+    if (migrationQueued) return;
+    migrationQueued = true;
+    queueMicrotask(() => {
+      migrationQueued = false;
+      runRivalryMigration();
+    });
+  };
+  new MutationObserver(queueRivalryMigration).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('click', queueRivalryMigration, true);
+  queueRivalryMigration();
 }
