@@ -1,0 +1,51 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-1346",
+  "clubName": "Coventry City",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {"source":"Premier League post-window squad submission","published":"2026-09-03","url":"https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"},
+  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","note":"Official PL registration overrides the stale early-summer Coventry squad page."},
+  "players": [
+    {"name":"Carl Rushworth","aliases":["Rushworth, Carl Andrew"],"shirtNumber":19,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":25,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":16000000,"importanceScore":89,"squadStatus":"key-player"},
+    {"name":"Ben Wilson","aliases":["Wilson, Ben"],"shirtNumber":13,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":34,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":300000,"importanceScore":30,"squadStatus":"backup"},
+    {"name":"Daniel Bentley","aliases":["Bentley, Daniel Ian"],"shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":33,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":1000000,"importanceScore":31,"squadStatus":"backup"},
+
+    {"name":"Bobby Thomas","aliases":["Thomas, Bobby Craig"],"shirtNumber":4,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":25,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":16000000,"importanceScore":86,"squadStatus":"key-player"},
+    {"name":"Aurele Amenda","aliases":["Aurèle Amenda","Amenda, Aurele Florian"],"shirtNumber":24,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":23,"nationalities":["SUI","CMR"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":79,"squadStatus":"first-team"},
+    {"name":"Ethan Pinnock","aliases":["Pinnock, Ethan Rupert"],"shirtNumber":null,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":33,"nationalities":["JAM","ENG"],"contractEnd":null,"referenceMarketValueEur":3000000,"importanceScore":63,"squadStatus":"rotation-first-team"},
+    {"name":"Joel Latibeaudiere","aliases":["Latibeaudiere, Joel Owen"],"shirtNumber":22,"primaryPosition":"DC","secondaryPositions":["DR","DMC"],"positionGroup":"DEF","age":26,"nationalities":["JAM","ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":3000000,"importanceScore":61,"squadStatus":"rotation"},
+    {"name":"Luke Woolfenden","aliases":["Woolfenden, Luke Matthew"],"shirtNumber":26,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":27,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":2000000,"importanceScore":49,"squadStatus":"rotation"},
+    {"name":"Jay Dasilva","aliases":["Dasilva, Jay Rhys"],"shirtNumber":3,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF","age":28,"nationalities":["WAL","ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":9000000,"importanceScore":74,"squadStatus":"first-team"},
+    {"name":"Milan van Ewijk","aliases":["Van Ewijk, Milan Fabrizio"],"shirtNumber":27,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":25,"nationalities":["NED","SUR"],"contractEnd":"2027-06-30","referenceMarketValueEur":22000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Kaine Kesler-Hayden","aliases":["Hayden, Kaine Kesler","Kesler-Hayden, Kaine"],"shirtNumber":20,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":23,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":3000000,"importanceScore":54,"squadStatus":"rotation"},
+
+    {"name":"Matt Grimes","aliases":["Grimes, Matthew Jacob"],"shirtNumber":6,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":31,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":5000000,"importanceScore":96,"squadStatus":"cornerstone-captain"},
+    {"name":"Frank Onyeka","aliases":["Onyeka, Ogochukwu Frank"],"shirtNumber":16,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":28,"nationalities":["NGA"],"contractEnd":"2030-06-30","referenceMarketValueEur":8000000,"importanceScore":81,"squadStatus":"first-team"},
+    {"name":"Josh Eccles","aliases":["Eccles, Joshua Elliot"],"shirtNumber":28,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":26,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":9000000,"importanceScore":74,"squadStatus":"first-team"},
+    {"name":"Victor Torp","aliases":["Overgaard, Victor Torp","Victor Torp"],"shirtNumber":29,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID","age":27,"nationalities":["DEN"],"contractEnd":null,"referenceMarketValueEur":14000000,"importanceScore":79,"squadStatus":"first-team"},
+    {"name":"Gustavo Hamer","aliases":["Hamer, Gustavo Martin Emilio"],"shirtNumber":38,"primaryPosition":"MC","secondaryPositions":["DMC","ML"],"positionGroup":"MID","age":29,"nationalities":["NED","BRA"],"contractEnd":null,"referenceMarketValueEur":14000000,"importanceScore":90,"squadStatus":"key-player"},
+    {"name":"Jack Rudoni","aliases":["Rudoni, Jack Edward"],"shirtNumber":5,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID","age":25,"nationalities":["ENG","USA"],"contractEnd":"2028-06-30","referenceMarketValueEur":20000000,"importanceScore":89,"squadStatus":"key-player"},
+    {"name":"Caleb Yirenkyi","aliases":["Yirenkyi, Caleb Marfo"],"shirtNumber":8,"primaryPosition":"MC","secondaryPositions":["DMC","DR"],"positionGroup":"MID","age":20,"nationalities":["GHA"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":83,"squadStatus":"key-development","u21":true},
+
+    {"name":"Ephron Mason-Clark","aliases":["Mason-Clark, Ephron Jardell"],"shirtNumber":10,"primaryPosition":"ML","secondaryPositions":["AML"],"positionGroup":"MID","age":27,"nationalities":["JAM","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":16000000,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Tatsuhiro Sakamoto","aliases":["Sakamoto, Tatsuhiro"],"shirtNumber":7,"primaryPosition":"AMR","secondaryPositions":["MR"],"positionGroup":"ATT","age":29,"nationalities":["JPN"],"contractEnd":"2027-06-30","referenceMarketValueEur":4500000,"importanceScore":70,"squadStatus":"rotation-first-team"},
+    {"name":"Dario Osorio","aliases":["Darío Osorio","Osorio, Dario Esteban","Osorio Osorio, Dario Esteban"],"shirtNumber":null,"primaryPosition":"AMR","secondaryPositions":["MR"],"positionGroup":"ATT","age":22,"nationalities":["CHI"],"contractEnd":null,"referenceMarketValueEur":15000000,"importanceScore":80,"squadStatus":"first-team"},
+    {"name":"Loum Tchaouna","aliases":["Tchaouna, Loum"],"shirtNumber":18,"primaryPosition":"AMR","secondaryPositions":["ST"],"positionGroup":"ATT","age":23,"nationalities":["FRA","CHA"],"contractEnd":null,"referenceMarketValueEur":13000000,"importanceScore":76,"squadStatus":"first-team"},
+    {"name":"Haji Wright","aliases":["Wright, Haji Amir"],"shirtNumber":11,"primaryPosition":"ST","secondaryPositions":["AML"],"positionGroup":"ATT","age":28,"nationalities":["USA","LBR"],"contractEnd":"2027-06-30","referenceMarketValueEur":16000000,"importanceScore":86,"squadStatus":"key-player"},
+    {"name":"Brandon Thomas-Asante","aliases":["Thomas-Asante, Solomon Brandon Michael Clarke","Brandon Thomas-Asante"],"shirtNumber":23,"primaryPosition":"ST","secondaryPositions":["AMR"],"positionGroup":"ATT","age":27,"nationalities":["GHA","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":16000000,"importanceScore":78,"squadStatus":"first-team"},
+    {"name":"Ellis Simms","aliases":["Simms, Ellis Reco"],"shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":25,"nationalities":["ENG","POL"],"contractEnd":"2027-06-30","referenceMarketValueEur":12000000,"importanceScore":77,"squadStatus":"first-team"},
+    {"name":"Taiwo Awoniyi","aliases":["Awoniyi, Taiwo Micheal"],"shirtNumber":14,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":29,"nationalities":["NGA"],"contractEnd":null,"referenceMarketValueEur":8000000,"importanceScore":63,"squadStatus":"rotation-first-team"}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Oliver Dovin","status":"not-in-post-window-PL-squad"},
+    {"name":"Liam Kitching","status":"not-in-post-window-PL-squad"},
+    {"name":"Jake Bidwell","status":"not-in-post-window-PL-squad"},
+    {"name":"Miguel Angel Brau","status":"not-in-post-window-PL-squad"},
+    {"name":"Jahnoah Markelo","status":"not-in-post-window-PL-squad"},
+    {"name":"Norman Bassette","status":"not-in-post-window-PL-squad"},
+    {"name":"Kai Andrews","status":"loan-out","membershipEvidence":"Official PL U21 list marks player (Loan)"}
+  ],
+  "qa": {"officialSeniorListCount":25,"firstTeamRelevantU21Count":1,"auditedSelectablePlayers":26,"unresolvedSeniorOwnership":0,"notes":["The early-summer Transfermarkt squad is materially stale; the official Sep 3 PL list replaces it as the ownership authority.","Opening-day team sheets confirm current numbers for Rushworth #19, Amenda #24, Yirenkyi #8, Tchaouna #18, Hamer #38 and Awoniyi #14.","Matt Grimes is calibrated as Coventry's tactical cornerstone; Premier League analysis identifies him as captain/talisman and chief set-piece taker.","Importance scores are Football Lab gameplay calibration, not factual external ratings."]}
+}
