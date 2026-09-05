@@ -150,7 +150,7 @@ test('V0.4.8 Match Centre keeps the hard half-time stop with simplified tactics 
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(35);
   await page.locator('[data-finish-live-match]').click();
 
-  await expect(page.locator('.career-page-heading')).toContainText('ROUND 2');
+  await expect(page.locator('.career-page-heading')).toContainText('MATCHWEEK 2');
   await expect(page.locator('.career-commentary')).toContainText('PREVIOUS MATCH');
   await page.getByRole('button', { name: 'EXIT' }).click();
   await page.getByRole('button', { name: /LOAD GAME/ }).click();
