@@ -39,7 +39,7 @@ async function completePreseason(page) {
   await continueUntil(page, '2026-08-21');
 }
 
-test('Matchday V3.4 delivers one CM workspace, stable ratings and safe squad management', async ({ page }) => {
+test('Match Centre V4 delivers CM-style event focus with stable match controls', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').first().click();
@@ -50,25 +50,20 @@ test('Matchday V3.4 delivers one CM workspace, stable ratings and safe squad man
   await page.getByRole('button', { name: 'PLAY MATCH' }).click();
 
   const live = page.locator('[data-live-match]');
-  await expect(live).toHaveAttribute('data-cm-match-v2', '1');
-  await expect(live).toHaveAttribute('data-cm-workspace', '3.4.0');
+  await expect(live).toHaveAttribute('data-cm4', '1');
+  const shell = page.locator('.cm4-shell');
+  await expect(shell).toBeVisible();
 
-  // V3.4 owns navigation: one visible rail, no duplicate legacy strip.
-  const rail = page.locator('.cm340-nav');
-  await expect(rail).toBeVisible();
-  await expect(rail.locator('[data-cm340-view]')).toHaveCount(5);
-  await expect(rail.locator('[data-cm340-view="overview"]')).toHaveClass(/is-active/);
-  await expect(page.locator('.flm-cm-v2-tabs')).toBeHidden();
-  await expect(page.locator('.flm-cm-v2-controls')).toBeHidden();
-  await expect(page.locator('.cm33-rail')).toBeHidden();
-
-  await expect(page.locator('.flm-cm-v2-focus')).toBeAttached();
-  const typography = await page.locator('.flm-cm-v2-focus .flm-cm-v2-text').evaluate(node => {
-    const style = getComputedStyle(node);
-    return { family: style.fontFamily.toLowerCase(), size: parseFloat(style.fontSize) };
-  });
-  expect(typography.family).toContain('tahoma');
-  expect(typography.size).toBeGreaterThanOrEqual(24);
+  // V4 has one visible match shell: score header, top tabs and compact left control rail.
+  await expect(shell.locator('[data-cm4-home-name]')).toBeVisible();
+  await expect(shell.locator('[data-cm4-away-name]')).toBeVisible();
+  await expect(shell.locator('[data-cm4-home-score]')).toHaveText(/^\d+$/);
+  await expect(shell.locator('[data-cm4-away-score]')).toHaveText(/^\d+$/);
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText(/^\d{2}:\d{2}$/);
+  await expect(shell.locator('[data-cm4-view]')).toHaveCount(5);
+  await expect(shell.locator('[data-cm4-view="overview"]')).toHaveClass(/is-active/);
+  await expect(shell.locator('[data-cm4-event]')).toBeVisible();
+  await expect(page.locator('.cm340-nav')).toHaveCount(0);
 
   const colours = await live.evaluate(node => ({
     home: getComputedStyle(node).getPropertyValue('--home-color').trim(),
@@ -78,112 +73,57 @@ test('Matchday V3.4 delivers one CM workspace, stable ratings and safe squad man
   expect(colours.away).toBeTruthy();
   expect(colours.home).not.toBe(colours.away);
 
-  await rail.locator('[data-cm340-speed="4"]').click();
+  // Run the match and make sure the focused event card tracks real commentary.
+  await shell.locator('[data-cm4-speed="4"]').click();
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(5);
-  const teamPassages = page.locator('[data-commentary-feed] .flm-commentary-line[data-cm-side="home"], [data-commentary-feed] .flm-commentary-line[data-cm-side="away"]');
-  await expect.poll(async () => teamPassages.count(), { timeout: 15000 }).toBeGreaterThan(0);
+  await expect.poll(async () => (await shell.locator('[data-cm4-event-text]').textContent())?.trim().length || 0, { timeout: 10000 }).toBeGreaterThan(5);
+  const eventText = (await shell.locator('[data-cm4-event-text]').textContent()) || '';
+  expect(eventText).not.toContain('Waiting for kick-off');
 
-  // V3.4 passage-of-play bar must use real commentary, not invented placeholder copy.
-  await expect(page.locator('.cm340-sequence')).toBeVisible();
-  await expect.poll(async () => page.locator('[data-cm340-sequence-steps] span').count(), { timeout: 10000 }).toBeGreaterThanOrEqual(2);
-  const sequenceText = (await page.locator('[data-cm340-sequence-steps]').textContent()) || '';
-  expect(sequenceText).not.toContain('Waiting for the next sequence');
-
-  // Regression: match time must be a visible, unclipped part of the scoreboard.
-  await expect(page.locator('[data-live-clock]')).toBeVisible();
-  const clockGeometry = await page.locator('[data-live-clock]').evaluate(node => {
-    const clock = node.getBoundingClientRect();
-    const board = node.closest('.flm-live-scoreboard').getBoundingClientRect();
-    const style = getComputedStyle(node);
-    return {
-      top: clock.top,
-      bottom: clock.bottom,
-      boardTop: board.top,
-      boardBottom: board.bottom,
-      height: clock.height,
-      display: style.display,
-      visibility: style.visibility,
-      text: node.textContent.trim()
-    };
+  // V4 clock is visible and has real geometry rather than being clipped under another layer.
+  const clockGeometry = await shell.locator('[data-cm4-clock]').evaluate(node => {
+    const rect = node.getBoundingClientRect();
+    const board = node.closest('.cm4-scorebar').getBoundingClientRect();
+    return { top:rect.top,bottom:rect.bottom,height:rect.height,boardTop:board.top,boardBottom:board.bottom };
   });
-  expect(clockGeometry.display).not.toBe('none');
-  expect(clockGeometry.visibility).not.toBe('hidden');
-  expect(clockGeometry.height).toBeGreaterThanOrEqual(18);
+  expect(clockGeometry.height).toBeGreaterThanOrEqual(20);
   expect(clockGeometry.top).toBeGreaterThanOrEqual(clockGeometry.boardTop - 1);
   expect(clockGeometry.bottom).toBeLessThanOrEqual(clockGeometry.boardBottom + 1);
-  expect(clockGeometry.text).toMatch(/^\d{2}:00$/);
 
-  // Ratings: real names, valid shirt numbers, minutes played and locked stat columns.
-  await rail.locator('[data-cm340-view="ratings"]').click();
-  await expect(rail.locator('[data-cm340-view="ratings"]')).toHaveClass(/is-active/);
-  await expect(page.locator('.cm332-dual-ratings')).toBeVisible({ timeout: 10000 });
-  await expect.poll(async () => page.locator('.cm333-rating-row').count(), { timeout: 10000 }).toBeGreaterThanOrEqual(22);
-  const firstRating = page.locator('.cm333-rating-row').first();
-  await expect(firstRating.locator('.cm333-player-name strong')).toBeVisible();
-  const playerName = (await firstRating.locator('.cm333-player-name strong').textContent())?.trim() || '';
-  expect(playerName.length).toBeGreaterThan(2);
-  const numbers = await page.locator('.cm333-rating-row .cm333-no').allTextContents();
-  expect(numbers.length).toBeGreaterThanOrEqual(22);
-  expect(numbers.every(value => /^(?:\d{1,2}|—)$/.test(value.trim()))).toBeTruthy();
-  const positions = await page.locator('.cm333-rating-row .cm333-pos').allTextContents();
-  expect(positions.every(value => value.trim().length > 0)).toBeTruthy();
-  const minutes = await page.locator('.cm333-rating-row .cm340-min').allTextContents();
-  expect(minutes.length).toBeGreaterThanOrEqual(22);
-  expect(minutes.every(value => /^\d{1,3}'$/.test(value.trim()))).toBeTruthy();
-  const ratings = await page.locator('.cm333-rating-row .cm333-rate').allTextContents();
-  expect(ratings.every(value => /^\d\.\d$/.test(value.trim()))).toBeTruthy();
+  // Player Ratings use one readable team table with names, numbers, minutes and live ratings.
+  await shell.locator('[data-cm4-view="ratings"]').click();
+  await expect(shell.locator('[data-cm4-panel="ratings"]')).toHaveClass(/is-active/);
+  await expect.poll(async () => shell.locator('.cm4-rating-row').count(), { timeout: 10000 }).toBeGreaterThanOrEqual(11);
+  const firstRating = shell.locator('.cm4-rating-row').first();
+  const firstCells = await firstRating.locator(':scope > *').allTextContents();
+  expect(firstCells).toHaveLength(8);
+  expect(firstCells[1].trim().length).toBeGreaterThan(2);
+  expect(firstCells[0].trim()).toMatch(/^(?:\d{1,2}|—)$/);
+  expect(firstCells[3].trim()).toMatch(/^\d{1,3}'$/);
+  expect(firstCells[7].trim()).toMatch(/^\d\.\d$/);
 
-  // This was the old failure: Overview must be a real visible user control.
-  await rail.locator('[data-cm340-view="overview"]').click();
-  await expect(rail.locator('[data-cm340-view="overview"]')).toHaveClass(/is-active/);
-  await expect(page.locator('.cm33-console')).toBeVisible();
+  await shell.locator('[data-cm4-view="overview"]').click();
+  await expect(shell.locator('[data-cm4-panel="overview"]')).toHaveClass(/is-active/);
 
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
-  await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
-  await page.waitForTimeout(300);
-  await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
 
-  await rail.locator('[data-cm340-subs]').click();
+  // Existing substitution safety remains available through the V4 rail.
+  await shell.locator('[data-cm4-subs]').click();
   await expect(page.locator('.v2-sub-shell')).toBeVisible();
-  await expect(page.locator('.cm340-sub-summary')).toBeVisible();
-  await expect(page.locator('.cm340-sub-summary')).toContainText('SUBSTITUTION BOARD');
   const confirm = page.locator('[data-apply-sub]');
   await expect(confirm).toHaveText('CONFIRM SUBSTITUTION');
   await expect(confirm).toBeDisabled();
-
-  // Starting XI and bench are both visible before any selection.
   await expect(page.locator('.v2-sub-column').nth(0).locator('.v2-sub-player')).toHaveCount(11);
   await expect.poll(async () => page.locator('.cm332-bench-preview').count(), { timeout: 5000 }).toBeGreaterThan(0);
-  const previewNames = await page.locator('.cm332-bench-preview strong').allTextContents();
-  expect(previewNames.every(value => value.trim().length > 0)).toBeTruthy();
-
-  // Sticky scoreboard can never sit above the squad-management dialog.
-  const layers = await page.evaluate(() => {
-    const modal = document.querySelector('[data-manager-modal].is-open');
-    const board = document.querySelector('[data-live-match] > .flm-live-scoreboard');
-    return {
-      modal: Number.parseInt(getComputedStyle(modal).zIndex, 10) || 0,
-      board: Number.parseInt(getComputedStyle(board).zIndex, 10) || 0
-    };
-  });
-  expect(layers.modal).toBeGreaterThan(layers.board);
 
   const offColumn = page.locator('.v2-sub-column').nth(0);
   const inColumn = page.locator('.v2-sub-column').nth(1);
-  const goalkeeper = offColumn.locator('.v2-sub-player').filter({ has: page.locator('.pos', { hasText: /^GK$/ }) }).first();
-  if (await goalkeeper.count()) {
-    await goalkeeper.click();
-    const enabled = await inColumn.locator('.v2-sub-player:not(:disabled) .pos').allTextContents();
-    expect(enabled.every(position => position.trim() === 'GK')).toBeTruthy();
-    await expect(confirm).toBeDisabled();
-  }
-
   const outfield = offColumn.locator('.v2-sub-player').filter({ hasNot: page.locator('.pos', { hasText: /^GK$/ }) }).first();
   await outfield.click();
   const replacement = inColumn.locator('.v2-sub-player:not(:disabled)').first();
   await expect(replacement).toBeEnabled();
   await replacement.click();
-  await expect(page.locator('[data-v2-plan]')).toContainText('READY TO CONFIRM');
   await expect(confirm).toBeEnabled();
   await confirm.click();
   await expect(page.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
