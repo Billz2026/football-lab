@@ -6,6 +6,5 @@ import './career-preseason-ui-v0471-fix.js?v=0.4.7.1';
 import './career-tactics-v048.js?v=0.4.8';
 import './matchday-ux-v048.js?v=0.4.8';
 import './mobile-home-v049.js?v=0.4.9';
-import './career-transfers-ui-v050.js?v=0.5.0';
+import './career-transfers-ui-v050.js?v=0.5.2';
 import './career-season-v051.js?v=0.5.1';
-import './career-transfers-world-ui-v052.js?v=0.5.2';
