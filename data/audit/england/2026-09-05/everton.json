@@ -1,0 +1,68 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-45",
+  "clubName": "Everton",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {
+    "source": "Premier League post-window squad submission",
+    "published": "2026-09-03",
+    "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
+  },
+  "marketBenchmark": {
+    "source": "Transfermarkt",
+    "currency": "EUR",
+    "season": "2026/27",
+    "note": "Reference values are dated estimates. The 3 September official registration overrides pre-deadline squad pages."
+  },
+  "players": [
+    {"name":"Jordan Pickford","aliases":["Pickford, Jordan Lee"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":32,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":13000000,"importanceScore":100,"squadStatus":"cornerstone"},
+    {"name":"Mark Travers","aliases":["Travers, Mark John"],"shirtNumber":12,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":27,"nationalities":["IRL"],"contractEnd":"2029-06-30","referenceMarketValueEur":3000000,"importanceScore":37,"squadStatus":"backup"},
+    {"name":"Tom King","aliases":["King, Thomas Lloyd"],"shirtNumber":31,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":31,"nationalities":["WAL","ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":100000,"importanceScore":20,"squadStatus":"backup-depth"},
+    {"name":"Fraser Barnsley","aliases":["Barnsley, Fraser Paul"],"shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":20,"nationalities":["NIR"],"contractEnd":"2027-06-30","referenceMarketValueEur":null,"importanceScore":16,"squadStatus":"development-goalkeeper"},
+
+    {"name":"Jarrad Branthwaite","aliases":["Branthwaite, Jarrad Paul"],"shirtNumber":32,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":24,"nationalities":["ENG"],"contractEnd":"2030-06-30","referenceMarketValueEur":40000000,"importanceScore":96,"squadStatus":"cornerstone"},
+    {"name":"James Tarkowski","aliases":["Tarkowski, James Alan"],"shirtNumber":6,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":33,"nationalities":["ENG","POL"],"contractEnd":"2028-06-30","referenceMarketValueEur":5000000,"importanceScore":83,"squadStatus":"first-team-leader"},
+    {"name":"Michael Keane","aliases":["Keane, Michael Vincent"],"shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":33,"nationalities":["ENG","IRL"],"contractEnd":"2027-06-30","referenceMarketValueEur":3000000,"importanceScore":53,"squadStatus":"rotation"},
+    {"name":"Vitaliy Mykolenko","aliases":["Mykolenko, Vitalii"],"shirtNumber":16,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF","age":27,"nationalities":["UKR"],"contractEnd":"2029-06-30","referenceMarketValueEur":25000000,"importanceScore":88,"squadStatus":"key-player"},
+    {"name":"Jake O'Brien","aliases":["O'Brien, Jake Patrick"],"shirtNumber":15,"primaryPosition":"DR","secondaryPositions":["DC"],"positionGroup":"DEF","age":25,"nationalities":["IRL"],"contractEnd":"2028-06-30","referenceMarketValueEur":18000000,"importanceScore":76,"squadStatus":"first-team"},
+    {"name":"Ainsley Maitland-Niles","aliases":["Maitland-Niles, Ainsley Cory"],"shirtNumber":null,"primaryPosition":"DR","secondaryPositions":["MR","MC"],"positionGroup":"DEF","age":29,"nationalities":["ENG","JAM"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":73,"squadStatus":"first-team","transferStatus":"permanent-2026-09-01"},
+
+    {"name":"James Garner","aliases":["Garner, James David"],"shirtNumber":37,"primaryPosition":"DMC","secondaryPositions":["MC","DR"],"positionGroup":"MID","age":25,"nationalities":["ENG"],"contractEnd":"2030-06-30","referenceMarketValueEur":45000000,"importanceScore":94,"squadStatus":"cornerstone"},
+    {"name":"Hayden Hackney","aliases":["Hackney, Hayden Rhys"],"shirtNumber":30,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":24,"nationalities":["ENG","SCO"],"contractEnd":"2031-06-30","referenceMarketValueEur":32000000,"importanceScore":90,"squadStatus":"key-player"},
+    {"name":"Christian Norgaard","aliases":["Christian Nørgaard","Barsøe Nørgaard, Christian Thers"],"shirtNumber":23,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":32,"nationalities":["DEN"],"contractEnd":"2028-06-30","referenceMarketValueEur":5000000,"importanceScore":71,"squadStatus":"first-team-leader"},
+    {"name":"Kiernan Dewsbury-Hall","aliases":["Dewsbury-Hall, Kiernan Frank"],"shirtNumber":22,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID","age":27,"nationalities":["ENG","IRL"],"contractEnd":"2030-06-30","referenceMarketValueEur":35000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Carlos Alcaraz","aliases":["Alcaraz Duran, Carlos Jonas","Charly Alcaraz"],"shirtNumber":24,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID","age":23,"nationalities":["ARG"],"contractEnd":"2027-06-30","referenceMarketValueEur":15000000,"importanceScore":67,"squadStatus":"rotation-first-team"},
+    {"name":"Merlin Rohl","aliases":["Merlin Röhl","Rohl, Merlin"],"shirtNumber":34,"primaryPosition":"AMC","secondaryPositions":["MC","ST"],"positionGroup":"MID","age":24,"nationalities":["GER"],"contractEnd":"2029-06-30","referenceMarketValueEur":16000000,"importanceScore":73,"squadStatus":"first-team"},
+
+    {"name":"Jack Grealish","aliases":["Grealish, Jack Peter"],"shirtNumber":null,"primaryPosition":"AML","secondaryPositions":["AMC","ML"],"positionGroup":"ATT","age":30,"nationalities":["ENG","IRL"],"contractEnd":null,"referenceMarketValueEur":20000000,"importanceScore":90,"squadStatus":"key-player","loanStatus":"loan-in","parentClub":"Manchester City"},
+    {"name":"Brennan Johnson","aliases":["Johnson, Brennan Price"],"shirtNumber":null,"primaryPosition":"AMR","secondaryPositions":["ST"],"positionGroup":"ATT","age":25,"nationalities":["WAL","ENG"],"contractEnd":null,"referenceMarketValueEur":30000000,"importanceScore":90,"squadStatus":"key-player"},
+    {"name":"Thierno Barry","aliases":["Barry, Thierno Mamadou"],"shirtNumber":11,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":23,"nationalities":["FRA","GUI"],"contractEnd":"2029-06-30","referenceMarketValueEur":30000000,"importanceScore":91,"squadStatus":"key-player"},
+
+    {"name":"Harrison Armstrong","aliases":["Armstrong, Harrison David"],"shirtNumber":45,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":19,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":12000000,"importanceScore":66,"squadStatus":"first-team-development","u21":true},
+    {"name":"Tyrique George","aliases":["George, Tyrique Aaron Delali Yusuff"],"shirtNumber":19,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT","age":20,"nationalities":["ENG","NGA"],"contractEnd":"2030-06-30","referenceMarketValueEur":20000000,"importanceScore":74,"squadStatus":"first-team-development","u21":true},
+    {"name":"Tyler Dibling","aliases":["Dibling, Tyler-Jay Robert"],"shirtNumber":20,"primaryPosition":"AMR","secondaryPositions":["AMC"],"positionGroup":"ATT","age":20,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":17000000,"importanceScore":76,"squadStatus":"first-team-development","u21":true}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Iliman Ndiaye","status":"departed","destination":"Manchester City","evidence":"Deadline-day transfer confirmed in current reporting and omitted from Everton's Sep 3 submission."},
+    {"name":"Dwight McNeil","status":"departed","destination":"Crystal Palace","evidence":"Crystal Palace's Sep 3 official senior submission lists McNeil."},
+    {"name":"Nathan Patterson","status":"departed","destination":"Torino"},
+    {"name":"Tim Iroegbunam","status":"departed","destination":"Hull City"},
+    {"name":"Beto","status":"not-in-post-window-PL-squad"},
+    {"name":"Adam Aznou","status":"loan-out","membershipEvidence":"Everton U21 list marks player (Loan)"},
+    {"name":"Folarin Balogun","status":"transfer-collapsed","destination":"Monaco","evidence":"Everton's deadline-day move collapsed; he is not in the Sep 3 squad."}
+  ],
+  "qa": {
+    "officialSeniorListCount": 19,
+    "firstTeamRelevantU21Count": 3,
+    "auditedSelectablePlayers": 22,
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "Everton's official senior registration contains only 19 players, making U21 depth unusually important to the playable squad.",
+      "Grealish is represented as a Manchester City loan-in based on the 1 September confirmed return to Everton.",
+      "Fraser Barnsley is correctly classified as a goalkeeper; Everton's own academy report identifies him as an U21 goalkeeper despite his inclusion in the senior registration list.",
+      "Importance scores are Football Lab gameplay calibration, not factual external ratings."
+    ]
+  }
+}
