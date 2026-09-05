@@ -1,8 +1,9 @@
-const STYLE_HREF='./match-centre-v45.css?v=4.5.0';
+const STYLE_HREF='./match-centre-v45.css?v=4.5.2';
 const PRESEASON_DATES=['2026-07-11','2026-07-18','2026-07-25','2026-08-01','2026-08-08'];
 const stateByLive=new WeakMap();
 let dbPromise=null;
 let launching=false;
+let lastEntrySignature='';
 
 const clean=value=>String(value||'').replace(/\s+/g,' ').trim();
 const esc=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
@@ -20,7 +21,10 @@ function database(){
 }
 function stateFor(live){
   let state=stateByLive.get(live);
-  if(!state){state={seenGoals:0,goalTimer:0,lastGoalKey:''};stateByLive.set(live,state);}
+  if(!state){
+    state={seenGoals:0,goalTimer:0,lastGoalKey:'',scorerSignature:'',competitionLabel:'',ftOverlayCleared:false};
+    stateByLive.set(live,state);
+  }
   return state;
 }
 function nextFriendly(c){return c?.preseason?.fixtures?.find(f=>!f.played)||null;}
@@ -42,6 +46,14 @@ function goalMinute(goal){
   const flag=goal?.isOwnGoal||goal?.ownGoal?' OG':goal?.isPenalty||goal?.penalty?' P':'';
   return `${minute}'${flag}`;
 }
+function goalSignature(goals,snapshot){
+  return `${snapshot?.homeClubId||''}|${snapshot?.awayClubId||''}|${goals.map(goal=>[
+    goal.minute,goal.clubId,goal.playerId,goal.assistPlayerId,Boolean(goal.isPenalty||goal.penalty),Boolean(goal.isOwnGoal||goal.ownGoal)
+  ].join(':')).join('|')}`;
+}
+function setText(node,value){if(node&&node.textContent!==value)node.textContent=value;}
+function setData(node,key,value){if(node&&node.dataset[key]!==String(value))node.dataset[key]=String(value);}
+function setAttr(node,key,value){if(node&&node.getAttribute(key)!==String(value))node.setAttribute(key,String(value));}
 
 function pollFor(selector,{timeout=2500,interval=35}={}){
   return new Promise(resolve=>{
@@ -86,45 +98,45 @@ async function startCompetitiveDirect(){
 function syncEntryRoutes(db){
   const c=career();
   if(!c||document.querySelector('[data-live-match]'))return;
+  const friendly=c.preseason&&c.preseason.phase!=='complete'?nextFriendly(c):null;
+  const friendlyDate=friendly?nextFriendlyDate(c):null;
+  const league=(!c.preseason||c.preseason.phase==='complete')?nextLeagueFixture(c):null;
+  const signature=[c.currentDate,c.preseason?.phase,friendly?.id,friendly?.played,friendlyDate,league?.round,league?.date,c.roundIndex].join('|');
+  if(signature===lastEntrySignature)return;
+  lastEntrySignature=signature;
+
   const shellContinue=document.querySelector('[data-shell-continue]');
   const shellLabel=document.querySelector('[data-shell-continue-label]');
   const shellDetail=document.querySelector('[data-shell-continue-detail]');
   if(shellContinue)delete shellContinue.dataset.cm45Direct;
 
   if(c.preseason&&c.preseason.phase!=='complete'){
-    const friendly=nextFriendly(c);
-    const targetDate=nextFriendlyDate(c);
-    const ready=Boolean(friendly)&&dateReady(c.currentDate,targetDate);
+    const ready=Boolean(friendly)&&dateReady(c.currentDate,friendlyDate);
     if(friendly&&shellContinue?.dataset.shellAction==='preseason'){
       if(ready){
-        if(shellLabel)shellLabel.textContent='PLAY FRIENDLY';
-        if(shellDetail)shellDetail.textContent=`${clubName(db,friendly.homeClubId)} vs ${clubName(db,friendly.awayClubId)}`;
+        setText(shellLabel,'PLAY FRIENDLY');
+        setText(shellDetail,`${clubName(db,friendly.homeClubId)} vs ${clubName(db,friendly.awayClubId)}`);
         shellContinue.dataset.cm45Direct='friendly';
       }else{
-        if(shellLabel)shellLabel.textContent='CONTINUE GAME';
-        if(shellDetail)shellDetail.textContent=targetDate?`Advance to ${targetDate.split('-').reverse().slice(0,2).join('/')}`:'Advance calendar';
+        setText(shellLabel,'CONTINUE GAME');
+        setText(shellDetail,friendlyDate?`Advance to ${friendlyDate.split('-').reverse().slice(0,2).join('/')}`:'Advance calendar');
         shellContinue.dataset.cm45Direct='calendar';
       }
-      const fixtureTeams=document.querySelector('[data-shell-fixture-teams]');
-      const fixtureMeta=document.querySelector('[data-shell-fixture-meta]');
-      if(fixtureTeams)fixtureTeams.textContent=`${clubName(db,friendly.homeClubId)} vs ${clubName(db,friendly.awayClubId)}`;
-      if(fixtureMeta)fixtureMeta.textContent=`${friendly.dateLabel||targetDate||'Pre-season'} · FRIENDLY`;
+      setText(document.querySelector('[data-shell-fixture-teams]'),`${clubName(db,friendly.homeClubId)} vs ${clubName(db,friendly.awayClubId)}`);
+      setText(document.querySelector('[data-shell-fixture-meta]'),`${friendly.dateLabel||friendlyDate||'Pre-season'} · FRIENDLY`);
     }
   }else{
-    const fixture=nextLeagueFixture(c);
-    const ready=fixture&&dateReady(c.currentDate,fixture.date);
+    const ready=Boolean(league)&&dateReady(c.currentDate,league?.date);
     if(shellContinue?.dataset.shellAction==='matchday'){
-      if(ready){
-        if(shellLabel)shellLabel.textContent='PLAY MATCH';
-        shellContinue.dataset.cm45Direct='competitive';
-      }else{
-        if(shellLabel)shellLabel.textContent='CONTINUE GAME';
-        if(shellDetail)shellDetail.textContent=fixture?.date?`Advance to ${fixture.date}`:'Advance calendar';
+      if(ready){setText(shellLabel,'PLAY MATCH');shellContinue.dataset.cm45Direct='competitive';}
+      else{
+        setText(shellLabel,'CONTINUE GAME');
+        setText(shellDetail,league?.date?`Advance to ${league.date}`:'Advance calendar');
         shellContinue.dataset.cm45Direct='calendar';
       }
     }
     document.querySelectorAll('.career-next-match [data-career-tab="matchday"]').forEach(button=>{
-      button.textContent=ready?'PLAY MATCH':'GO TO MATCHDAY';
+      setText(button,ready?'PLAY MATCH':'GO TO MATCHDAY');
       if(ready)button.dataset.cm45DirectMatch='1';else delete button.dataset.cm45DirectMatch;
     });
   }
@@ -156,17 +168,25 @@ function renderGoalRows(items){
 }
 function syncScorers(live,shell,db){
   const panel=ensureScorers(shell);if(!panel)return;
+  const state=stateFor(live);
   const snapshot=window.__flmLiveStateV332;
   const goals=currentGoals();
+  const signature=goalSignature(goals,snapshot);
+  if(signature===state.scorerSignature)return;
+  state.scorerSignature=signature;
+
   const home=aggregateGoals(goals,snapshot?.homeClubId,db);
   const away=aggregateGoals(goals,snapshot?.awayClubId,db);
-  panel.querySelector('[data-cm45-home-goals]').innerHTML=renderGoalRows(home);
-  panel.querySelector('[data-cm45-away-goals]').innerHTML=renderGoalRows(away);
+  const homeNode=panel.querySelector('[data-cm45-home-goals]');
+  const awayNode=panel.querySelector('[data-cm45-away-goals]');
+  const homeHtml=renderGoalRows(home);const awayHtml=renderGoalRows(away);
+  if(homeNode&&homeNode.innerHTML!==homeHtml)homeNode.innerHTML=homeHtml;
+  if(awayNode&&awayNode.innerHTML!==awayHtml)awayNode.innerHTML=awayHtml;
   const visible=home.length+away.length>0;
-  panel.setAttribute('aria-hidden',String(!visible));
+  setAttr(panel,'aria-hidden',String(!visible));
   panel.classList.toggle('is-visible',visible);
-  shell.querySelector('[data-cm4-stage]')?.setAttribute('data-cm45-has-scorers',visible?'1':'0');
-  shell.dataset.cm45GoalCount=String(goals.length);
+  setAttr(shell.querySelector('[data-cm4-stage]'),'data-cm45-has-scorers',visible?'1':'0');
+  setData(shell,'cm45GoalCount',goals.length);
 }
 
 function ensureGoalOverlay(shell){
@@ -213,27 +233,32 @@ function syncGoalMoment(live,shell,db){
   playGoalMoment(live,shell,goal,db);
 }
 
-function syncCompetition(shell){
+function syncCompetition(live,shell){
   const node=shell.querySelector('[data-cm4-comp]');if(!node)return;
-  const c=career();
+  const state=stateFor(live);const c=career();
   let label='League Match';
   if(c?.preseason&&c.preseason.phase!=='complete')label='Pre-Season Friendly';
   else label=c?.competitionName||clean(node.textContent)||'League Match';
-  node.dataset.cm45Label=label;
+  if(label===state.competitionLabel)return;
+  state.competitionLabel=label;setData(node,'cm45Label',label);
 }
 function syncLive(live,db){
   const shell=live.querySelector(':scope > .cm4-shell');if(!shell)return;
-  shell.dataset.cm45='1';
-  syncCompetition(shell);syncScorers(live,shell,db);syncGoalMoment(live,shell,db);
-  if(live.dataset.cm44State==='fulltime'){
-    const overlay=shell.querySelector('[data-cm45-goal-overlay]');if(overlay){overlay.className='cm45-goal-overlay';overlay.innerHTML='';}
+  if(shell.dataset.cm45!=='1')shell.dataset.cm45='1';
+  syncCompetition(live,shell);syncScorers(live,shell,db);syncGoalMoment(live,shell,db);
+  const state=stateFor(live);
+  if(live.dataset.cm44State==='fulltime'&&!state.ftOverlayCleared){
+    state.ftOverlayCleared=true;
+    const overlay=shell.querySelector('[data-cm45-goal-overlay]');
+    if(overlay){clearTimeout(state.goalTimer);overlay.className='cm45-goal-overlay';overlay.innerHTML='';}
   }
 }
 
 async function syncAll(){
   ensureStyles();const db=await database();
-  syncEntryRoutes(db);
-  document.querySelectorAll('.flm-live-match[data-cm4="1"]').forEach(live=>syncLive(live,db));
+  if(document.querySelector('.flm-live-match[data-cm4="1"]')){
+    document.querySelectorAll('.flm-live-match[data-cm4="1"]').forEach(live=>syncLive(live,db));
+  }else syncEntryRoutes(db);
 }
 
 document.addEventListener('click',event=>{
@@ -265,5 +290,5 @@ document.addEventListener('click',event=>{
 },true);
 
 ensureStyles();
-setInterval(()=>syncAll().catch(()=>{}),140);
+setInterval(()=>syncAll().catch(()=>{}),250);
 syncAll();
