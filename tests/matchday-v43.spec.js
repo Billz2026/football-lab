@@ -85,7 +85,7 @@ test('V4.3 fixes Fold substitutions, duplicate commentary and full-time continua
   expect(commentaryGeometry.pseudo).not.toBe('none');
 
   await shell.locator('[data-cm4-pause]').click();
-  await expect(live).toBeDetached({ timeout: 10000 });
+  await expect(live).toHaveCount(0, { timeout: 10000 });
   await expect(page.locator('.v047-head h2')).toHaveText('Pre-Season');
   await expect(page.locator('.v047-fixture.is-played')).toHaveCount(1);
 });
