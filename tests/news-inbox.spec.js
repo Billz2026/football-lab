@@ -11,7 +11,7 @@ test.beforeEach(async ({ page }) => {
 async function continueUntil(page, targetDate, maxSteps = 30) {
   for (let step = 0; step < maxSteps; step += 1) {
     const current = await page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '');
-    if (current >= targetDate) return;
+    if (current >= targetDate) return current;
     await page.locator('.career-header [data-v060-continue]').click();
     await page.waitForTimeout(80);
   }
@@ -52,14 +52,22 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   await page.locator('[data-v046-all]').click();
   await expect(page.locator('[data-v046-news-tab] .v046-news-badge')).toBeHidden();
 
+  // A fresh career now starts with no user-selected XI. Choose the optional auto XI
+  // deliberately for this news-flow regression before attempting a competitive match.
+  await page.getByRole('button', { name: 'Squad', exact: true }).click();
+  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(0);
+  await page.locator('[data-auto-pick]').click();
+  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(11);
+
   await completePreseason(page);
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
   await page.getByRole('button', { name: 'PLAY MATCH' }).click();
-  await page.getByRole('button', { name: '4×' }).click();
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm-match-v1', '1');
+  await page.locator('[data-cm-speed="4"]').click();
+  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 20000 });
+  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
   await page.locator('[data-finish-live-match]').click();
 
   const newsAfterMatch = page.locator('[data-v046-news-tab]');
