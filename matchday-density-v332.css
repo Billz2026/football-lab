@@ -1,0 +1,223 @@
+/* Football Lab Match Centre V3.3.2 — density and hierarchy pass */
+.flm-live-match[data-cm-density="3.3.2"]{
+  --cm332-line:rgba(255,255,255,.085);
+  --cm332-muted:#777168;
+  --cm332-text:#e8e3da;
+  --cm332-gold:#e2bd55;
+}
+
+/* Keep the stable shell; only tighten the scoreboard slightly. */
+.flm-live-match[data-cm-density="3.3.2"] > .flm-live-scoreboard{
+  min-height:76px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .flm-live-team{
+  min-height:74px!important;
+  padding-top:10px!important;
+  padding-bottom:10px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .flm-live-score{
+  height:74px!important;
+  grid-template-rows:1fr 18px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .flm-live-score b{
+  font-size:clamp(36px,3.5vw,48px)!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] > .flm-cm-v2-tabs{top:80px!important}
+
+/* Overview: denser CM-style information wall. */
+.flm-live-match[data-cm-density="3.3.2"] .cm33-console{
+  grid-template-columns:118px minmax(430px,1fr) 306px!important;
+  min-height:500px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-rail-section>small{padding:7px 9px 4px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-rail button{min-height:34px!important;padding:0 9px!important;font-size:9px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-section-head{min-height:38px!important;padding:6px 10px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-latest{
+  min-height:50px!important;
+  grid-template-columns:48px minmax(0,1fr)!important;
+  padding:6px 11px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-latest>b{font-size:14px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-latest>span{font-size:12px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-feed{max-height:420px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line{
+  min-height:30px!important;
+  grid-template-columns:42px minmax(0,1fr)!important;
+  gap:6px!important;
+  padding:4px 9px!important;
+  border-left-width:3px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line>b{font-size:9px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line>span{font-size:10px!important;line-height:1.22!important}
+
+/* Event hierarchy — normal play recedes, chances and major incidents jump out. */
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-normal{color:#aaa49a!important;background:#080906!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-attack{
+  background:#0f100d!important;
+  border-left-color:color-mix(in srgb,var(--cm33-side) 70%,#bfae71)!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-chance{
+  min-height:34px!important;
+  background:#17160f!important;
+  border-left-color:#d8b748!important;
+  color:#f0eadf!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-chance>span{font-weight:900!important;font-size:10.5px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-card{border-left-color:#e4c74c!important;background:#17150c!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-major{
+  min-height:38px!important;
+  background:#211b0d!important;
+  color:#fff1bd!important;
+  border-left-width:5px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-major>span{font-size:11px!important;font-weight:950!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-goal{background:#2a220d!important;border-left-color:#efca4f!important;color:#ffe887!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-danger{background:#291013!important;border-left-color:#e75a62!important;color:#ffb2b7!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-line.cm332-injury{background:#251b0d!important;border-left-color:#d99145!important}
+
+/* Right intelligence column: keep useful data visible, increase top-performer meaning. */
+.flm-live-match[data-cm-density="3.3.2"] .cm33-pressure{padding:8px 10px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-stat-team,
+.flm-live-match[data-cm-density="3.3.2"] .cm33-stat{min-height:29px!important;padding:0 9px!important;grid-template-columns:66px 1fr 66px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-top{margin-top:5px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-top-row{
+  grid-template-columns:18px minmax(0,1fr) minmax(66px,auto) 38px!important;
+  min-height:38px!important;
+  padding:3px 8px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-top-row>strong{font-size:9px!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-top-row>small{
+  color:#9e9278!important;
+  font-size:6.5px!important;
+  white-space:nowrap;
+}
+
+/* Match Stats: comparative rows with a real dominance bar, not floating numbers. */
+.flm-live-match[data-cm-density="3.3.2"][data-cm-view="stats"] .flm-stat-row{
+  position:relative!important;
+  min-height:44px!important;
+  grid-template-columns:92px minmax(140px,1fr) 92px!important;
+  padding:8px 18px 11px!important;
+  overflow:hidden;
+}
+.flm-live-match[data-cm-density="3.3.2"][data-cm-view="stats"] .flm-stat-row strong{font-size:17px!important;z-index:1}
+.flm-live-match[data-cm-density="3.3.2"][data-cm-view="stats"] .flm-stat-row span{font-size:11px!important;z-index:1}
+.cm332-statbar{
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:4px;
+  height:3px;
+  display:flex;
+  overflow:hidden;
+  background:#181914;
+  pointer-events:none;
+}
+.cm332-statbar span{display:block!important;height:100%!important;min-width:0!important;transition:width .2s ease}
+.cm332-statbar .home{background:var(--home-color)!important}
+.cm332-statbar .away{background:var(--away-color)!important}
+
+/* Subs: bench is never visually empty; compact rows and keep the decision controls visible. */
+.flm-live-match[data-cm-density="3.3.2"] .flm-match-dialog.v2-sub-dialog{
+  width:min(1120px,96vw)!important;
+  max-height:min(760px,88vh)!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-shell{gap:8px!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-column-head{padding:8px 10px!important;min-height:38px!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-column-head strong{font-size:11px!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-column-head span{font-size:8px!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-list{max-height:390px!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-player{
+  min-height:38px!important;
+  grid-template-columns:44px minmax(0,1fr) 58px 92px!important;
+  gap:6px!important;
+  padding:4px 8px!important;
+  font-size:9px!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-player .pos{font-size:7px!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-player strong{font-size:9px!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-player small{font-size:7px!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-fit{justify-self:end;min-width:76px;padding:3px 5px!important;font-size:6px!important;text-align:center}
+.flm-live-match[data-cm-density="3.3.2"] .cm332-bench-preview{
+  opacity:.72!important;
+  cursor:default!important;
+  background:#0b0c09!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .cm332-bench-preview:hover{background:#0b0c09!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm332-ready{border-color:#5f604f!important;color:#a9a790!important;background:#17170f!important}
+.flm-live-match[data-cm-density="3.3.2"] .v2-sub-plan{
+  position:sticky!important;
+  bottom:46px!important;
+  z-index:8!important;
+  min-height:48px!important;
+  margin-top:6px!important;
+  background:#10110d!important;
+  border-top:1px solid #3a3420!important;
+  box-shadow:0 -8px 18px #0008!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .flm-match-dialog.v2-sub-dialog .flm-dialog-actions{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:9!important;
+  background:#090a08!important;
+  border-top:1px solid #2a2b26!important;
+}
+.flm-live-match[data-cm-density="3.3.2"] .flm-match-dialog.v2-sub-dialog [data-apply-sub]{min-width:210px!important;font-weight:950!important}
+
+/* Exact two-team ratings, only when a real engine snapshot exists. */
+.cm332-dual-ratings{display:none}
+.flm-live-match[data-cm-density="3.3.2"].cm332-has-dual-ratings[data-cm-view="ratings"] .cm33-ratings-panel,
+.flm-live-match[data-cm-density="3.3.2"].cm332-has-dual-ratings[data-cm-view="ratings"] .cm32-ratings-panel,
+.flm-live-match[data-cm-density="3.3.2"].cm332-has-dual-ratings[data-cm-view="ratings"] .flm-live-grid > .flm-panel,
+.flm-live-match[data-cm-density="3.3.2"].cm332-has-dual-ratings[data-cm-view="ratings"] .flm-side-stack,
+.flm-live-match[data-cm-density="3.3.2"].cm332-has-dual-ratings[data-cm-view="ratings"] .cm31-action-zones{display:none!important}
+.flm-live-match[data-cm-density="3.3.2"].cm332-has-dual-ratings[data-cm-view="ratings"] .cm332-dual-ratings{display:grid!important}
+.cm332-dual-ratings{
+  width:100%;
+  min-height:430px;
+  grid-template-rows:44px minmax(0,1fr);
+  border:1px solid #2d2f2a;
+  background:#080906;
+  color:#e9e5dc;
+  overflow:hidden;
+  font-family:Tahoma,Verdana,Arial,sans-serif;
+}
+.cm332-ratings-title{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px 12px;border-bottom:1px solid #2d2f2a;background:#10110e}
+.cm332-ratings-title small{display:block;color:#b99e49;font-size:7px;font-weight:900;letter-spacing:.11em}
+.cm332-ratings-title h3{margin:2px 0 0;color:#f3efe7;font-size:15px;line-height:1}
+.cm332-ratings-title>span{color:#7b766e;font-size:8px;font-weight:800}
+.cm332-ratings-teams{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#30312d}
+.cm332-ratings-teams>section{min-width:0;min-height:0;display:grid;grid-template-rows:34px 24px minmax(0,1fr);background:#080906;overflow:hidden}
+.cm332-ratings-teams>section>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 10px 0 14px;border-bottom:1px solid #272923;background:#0d0e0b}
+.cm332-ratings-teams>section:first-child>header{box-shadow:inset 4px 0 var(--home-color)}
+.cm332-ratings-teams>section:last-child>header{box-shadow:inset 4px 0 var(--away-color)}
+.cm332-ratings-teams>section>header strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#eeeae1;font-size:11px}
+.cm332-ratings-teams>section>header span{color:#716d65;font-size:7px;font-weight:900;letter-spacing:.1em}
+.cm332-rating-head,.cm332-rating-row{display:grid;grid-template-columns:34px minmax(118px,1fr) 46px 43px 28px 28px 43px;gap:4px;align-items:center}
+.cm332-rating-head{min-height:24px;padding:0 8px;border-bottom:1px solid #252722;background:#0b0c09;color:#6f6b64;font-size:6px;font-weight:950;letter-spacing:.06em}
+.cm332-rating-list{min-height:0;overflow:auto;scrollbar-width:thin}
+.cm332-rating-row{min-height:33px;padding:2px 8px;border-bottom:1px solid rgba(255,255,255,.05);background:#090a08}
+.cm332-rating-row:nth-child(even){background:#0c0d0a}.cm332-rating-row.is-off{opacity:.5}
+.cm332-rating-row .no{color:#8d877e;font-size:8px;font-weight:850}
+.cm332-rating-row .player{min-width:0;display:flex;align-items:center;gap:5px}.cm332-rating-row .player strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e8e4dc;font-size:9px}.cm332-rating-row .player small{padding:1px 3px;border:1px solid #ffffff17;color:#817b72;font-size:5px;font-weight:950}
+.cm332-rating-row .pos{color:#d2b759;font-size:7px;font-weight:900}.cm332-rating-row .con,.cm332-rating-row .return{text-align:center;color:#aaa49b;font-size:7px;font-weight:850}.cm332-rating-row .return.has{color:#f1cf5c;font-weight:950}
+.cm332-rating-row .rate{justify-self:end;min-width:36px;padding:3px 4px;border:1px solid #ffffff17;background:#151611;color:#d7d2c9;text-align:center;font-size:8px}
+.cm332-rating-row .rate.elite{border-color:#4b9861;background:#14301c;color:#8ce7a5}.cm332-rating-row .rate.good{border-color:#9d8130;background:#2b240e;color:#ffe071}.cm332-rating-row .rate.poor{border-color:#93444a;background:#301519;color:#ff9298}
+.cm332-rating-row *::before,.cm332-rating-row *::after{content:none!important;display:none!important}
+.cm332-ratings-empty{display:grid;place-items:center;height:100%;padding:30px;color:#777168;text-align:center;font-size:10px}
+
+/* Keep the strong goal concept, just make scorer/score hierarchy cleaner. */
+.flm-live-match[data-cm-density="3.3.2"] .cm33-goal>strong{font-size:clamp(28px,3.2vw,42px)!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-goal>div strong{font-size:clamp(34px,4.2vw,50px)!important}
+.flm-live-match[data-cm-density="3.3.2"] .cm33-goal>small{font-size:10px!important;color:#eee6d5!important}
+
+@media(max-width:1100px){
+  .flm-live-match[data-cm-density="3.3.2"] .cm33-console{grid-template-columns:108px minmax(360px,1fr) 265px!important}
+  .cm332-ratings-teams{grid-template-columns:1fr}
+  .cm332-dual-ratings{min-height:700px}
+}
+@media(max-width:760px){
+  .flm-live-match[data-cm-density="3.3.2"] .cm33-console{grid-template-columns:1fr!important}
+  .flm-live-match[data-cm-density="3.3.2"] .v2-sub-shell{grid-template-columns:1fr!important}
+  .flm-live-match[data-cm-density="3.3.2"] .v2-sub-list{max-height:300px!important}
+}
