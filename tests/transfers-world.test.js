@@ -36,25 +36,47 @@ function fixture() {
     managerName: 'Transfer Test'
   });
   ensurePreseason(career, db);
+  career.currentDate = '2026-06-15';
+  career.calendar ||= {};
+  career.calendar.currentDate = '2026-06-15';
+  career.worldClock ||= { schemaVersion: 1, totalDaysAdvanced: 0, history: [], acknowledgedMilestones: [] };
   return { career, db, playable };
 }
 
-test('V0.5.2 initializes one persistent transfer world with AI budgets, rumours and completed AI deals', () => {
+function setDate(career, value) {
+  career.currentDate = value;
+  career.calendar.currentDate = value;
+}
+
+function advanceMarketDays(career, db, days = 30, stop = () => false) {
+  const start = Date.parse(`${career.currentDate}T00:00:00Z`);
+  const results = [];
+  for (let offset = 0; offset < days; offset += 1) {
+    const date = new Date(start + offset * 86400000).toISOString().slice(0, 10);
+    setDate(career, date);
+    results.push(processTransferWorld(career, db));
+    if (stop()) break;
+  }
+  return results;
+}
+
+test('V0.6.1 keeps one persistent date-driven transfer world with restrained AI business', () => {
   const { career, db, playable } = fixture();
   assert.equal(ensureTransferState(career, db), true);
-  const result = processTransferWorld(career, db);
-  assert.equal(result.phaseKey, 'P0');
-  assert.equal(result.window.open, true);
+  const results = advanceMarketDays(career, db, 35, () => career.transfers.completed.some(item => item.source === 'ai') && career.transfers.rumours.length > 0);
+  assert.ok(results.every(result => /^D:\d{4}-\d{2}-\d{2}$/.test(result.phaseKey)));
   assert.equal(Object.keys(career.transfers.aiClubs).length, playable.length - 1);
   const aiDeals = career.transfers.completed.filter(item => item.source === 'ai');
-  assert.ok(aiDeals.length >= 1, 'expected at least one deterministic AI transfer at market initialization');
-  assert.ok(career.transfers.rumours.length >= 1, 'expected at least one transfer rumour');
+  assert.ok(aiDeals.length >= 1, 'expected intelligent AI business across several transfer-window days');
+  assert.ok(aiDeals.length < 20, 'the market should not manufacture a transfer every day');
+  assert.ok(career.transfers.rumours.length >= 1, 'expected transfer rumours across an active market period');
   const completed = aiDeals[0];
   assert.equal(career.transfers.ownership[completed.playerId], completed.toClubId);
+  assert.equal(completed.marketVersion, 61);
   assert.ok(career.news.items.some(item => item.category === 'Transfers'));
 });
 
-test('transfer-listed players attract bids that can be accepted without silently auto-picking a replacement', () => {
+test('transfer-listed players attract interest over time and accepted bids do not silently auto-pick a replacement', () => {
   const { career, db } = fixture();
   ensureTransferState(career, db);
   const squad = db.players
@@ -63,10 +85,10 @@ test('transfer-listed players attract bids that can be accepted without silently
   const listed = squad.find(player => player.positionGroup !== 'GK') || squad[0];
   assert.ok(listed);
   toggleTransferListed(career, db, listed.id);
-  processTransferWorld(career, db);
+  advanceMarketDays(career, db, 30, () => getIncomingOffers(career, { includeResolved: false }).some(item => item.playerId === listed.id));
   const pending = getIncomingOffers(career, { includeResolved: false });
-  assert.ok(pending.length >= 1, 'expected a pending offer after listing a player');
   const offer = pending.find(item => item.playerId === listed.id) || pending[0];
+  assert.ok(offer, 'expected a listed player to attract a bid during the transfer window, not necessarily instantly');
   const before = career.transfers.transferBudget;
   const wasSelected = career.lineupIds.includes(offer.playerId);
   const result = respondToIncomingOffer(career, db, offer.id, 'accept');
@@ -78,12 +100,12 @@ test('transfer-listed players attract bids that can be accepted without silently
   assert.equal(career.lineupIds.length, wasSelected ? 10 : 11);
 });
 
-test('counter-offers are constrained by the buying club maximum and can complete a sale', () => {
+test('incoming counter-offers respect the buying club maximum and can complete a sale', () => {
   const { career, db } = fixture();
   ensureTransferState(career, db);
   const listed = db.players.find(player => player.clubId === career.clubId && !player.isPlaceholder && player.positionGroup !== 'GK');
   toggleTransferListed(career, db, listed.id);
-  processTransferWorld(career, db);
+  advanceMarketDays(career, db, 30, () => getIncomingOffers(career, { includeResolved: false }).length > 0);
   const offer = getIncomingOffers(career, { includeResolved: false })[0];
   assert.ok(offer);
   const result = respondToIncomingOffer(career, db, offer.id, 'counter', offer.maxFee);
@@ -95,11 +117,8 @@ test('counter-offers are constrained by the buying club maximum and can complete
 test('the real 2026 summer deadline closes the market once the career calendar passes 1 September', () => {
   const { career, db } = fixture();
   ensureTransferState(career, db);
-  processTransferWorld(career, db);
+  setDate(career, '2026-09-02');
   career.preseason.phase = 'complete';
-  const closedIndex = career.fixtures.findIndex(round => round.some(fixture => fixture.date > '2026-09-01'));
-  assert.ok(closedIndex >= 0, 'expected a league matchweek after the transfer deadline');
-  career.roundIndex = closedIndex;
   const status = getTransferWindowStatus(career);
   assert.equal(status.open, false);
   assert.equal(status.closes, '2026-09-01');
