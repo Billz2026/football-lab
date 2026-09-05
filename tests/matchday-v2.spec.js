@@ -39,7 +39,7 @@ async function completePreseason(page) {
   await continueUntil(page, '2026-08-21');
 }
 
-test('Matchday V2 delivers CM-style clarity, club colours and safe click substitutions', async ({ page }) => {
+test('Matchday V2 delivers CM-style clarity, stable ratings and safe click substitutions', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').first().click();
@@ -79,6 +79,47 @@ test('Matchday V2 delivers CM-style clarity, club colours and safe click substit
   const currentTextSize = await page.locator('.flm-cm-v2-focus .flm-cm-v2-text').evaluate(node => parseFloat(getComputedStyle(node).fontSize));
   expect(currentTextSize).toBeGreaterThanOrEqual(24);
 
+  // Regression: match time must be a visible, unclipped part of the scoreboard.
+  await expect(page.locator('[data-live-clock]')).toBeVisible();
+  const clockGeometry = await page.locator('[data-live-clock]').evaluate(node => {
+    const clock = node.getBoundingClientRect();
+    const board = node.closest('.flm-live-scoreboard').getBoundingClientRect();
+    const style = getComputedStyle(node);
+    return {
+      top: clock.top,
+      bottom: clock.bottom,
+      boardTop: board.top,
+      boardBottom: board.bottom,
+      height: clock.height,
+      display: style.display,
+      visibility: style.visibility,
+      text: node.textContent.trim()
+    };
+  });
+  expect(clockGeometry.display).not.toBe('none');
+  expect(clockGeometry.visibility).not.toBe('hidden');
+  expect(clockGeometry.height).toBeGreaterThanOrEqual(18);
+  expect(clockGeometry.top).toBeGreaterThanOrEqual(clockGeometry.boardTop - 1);
+  expect(clockGeometry.bottom).toBeLessThanOrEqual(clockGeometry.boardBottom + 1);
+  expect(clockGeometry.text).toMatch(/^\d{2}:00$/);
+
+  // Regression: live ratings must show actual player names and keep every field in its column.
+  await page.locator('[data-cm33-view="ratings"]').click();
+  await expect(page.locator('.cm332-dual-ratings')).toBeVisible({ timeout: 10000 });
+  await expect.poll(async () => page.locator('.cm333-rating-row').count(), { timeout: 10000 }).toBeGreaterThanOrEqual(22);
+  const firstRating = page.locator('.cm333-rating-row').first();
+  await expect(firstRating.locator('.cm333-player-name strong')).toBeVisible();
+  const playerName = (await firstRating.locator('.cm333-player-name strong').textContent())?.trim() || '';
+  expect(playerName.length).toBeGreaterThan(2);
+  const numbers = await page.locator('.cm333-rating-row .cm333-no').allTextContents();
+  expect(numbers.length).toBeGreaterThanOrEqual(22);
+  expect(numbers.every(value => /^(?:\d{1,2}|—)$/.test(value.trim()))).toBeTruthy();
+  const positions = await page.locator('.cm333-rating-row .cm333-pos').allTextContents();
+  expect(positions.every(value => value.trim().length > 0)).toBeTruthy();
+  const ratings = await page.locator('.cm333-rating-row .cm333-rate').allTextContents();
+  expect(ratings.every(value => /^\d\.\d$/.test(value.trim()))).toBeTruthy();
+  await page.locator('[data-cm33-view="overview"]').click();
+
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await page.waitForTimeout(300);
@@ -89,6 +130,22 @@ test('Matchday V2 delivers CM-style clarity, club colours and safe click substit
   const confirm = page.locator('[data-apply-sub]');
   await expect(confirm).toHaveText('CONFIRM SUBSTITUTION');
   await expect(confirm).toBeDisabled();
+
+  // Regression: the bench must be visible before selecting the outgoing player.
+  await expect.poll(async () => page.locator('.cm332-bench-preview').count(), { timeout: 5000 }).toBeGreaterThan(0);
+  const previewNames = await page.locator('.cm332-bench-preview strong').allTextContents();
+  expect(previewNames.every(value => value.trim().length > 0)).toBeTruthy();
+
+  // Regression: the sticky scoreboard can never sit above the substitutions dialog.
+  const layers = await page.evaluate(() => {
+    const modal = document.querySelector('[data-manager-modal].is-open');
+    const board = document.querySelector('[data-live-match] > .flm-live-scoreboard');
+    return {
+      modal: Number.parseInt(getComputedStyle(modal).zIndex, 10) || 0,
+      board: Number.parseInt(getComputedStyle(board).zIndex, 10) || 0
+    };
+  });
+  expect(layers.modal).toBeGreaterThan(layers.board);
 
   const offColumn = page.locator('.v2-sub-column').nth(0);
   const inColumn = page.locator('.v2-sub-column').nth(1);
