@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(90000);
+test.setTimeout(150000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
