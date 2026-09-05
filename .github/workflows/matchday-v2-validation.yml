@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'manager-shell-v1.js'
       - 'matchday-cm-v2.js'
       - 'matchday-cm-v2.css'
       - 'matchday-density-v332.js'
@@ -29,6 +30,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'manager-shell-v1.js'
       - 'matchday-cm-v2.js'
       - 'matchday-cm-v2.css'
       - 'matchday-density-v332.js'
@@ -71,6 +73,7 @@ jobs:
 
       - name: Check Matchday syntax
         run: |
+          node --check manager-shell-v1.js
           node --check matchday-cm-v2.js
           node --check matchday-density-v332.js
           node --check matchday-stability-v333.js
