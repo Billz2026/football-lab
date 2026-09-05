@@ -1,0 +1,58 @@
+{
+  "auditVersion": 2,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-34",
+  "clubName": "Newcastle United",
+  "status": "complete-factual-first-team",
+  "ownershipAuthority": "Newcastle United current men's-team page",
+  "registrationAuthority": "Premier League post-window squad submission published 2026-09-03",
+  "seniorPlayers": [
+    {"name":"Nick Pope","shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Lukas Hornicek","shirtNumber":21,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Mark Gillespie","shirtNumber":29,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Lewis Hall","shirtNumber":3,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF"},
+    {"name":"Sven Botman","shirtNumber":4,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Fabian Schar","shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Malick Thiaw","shirtNumber":12,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Tino Livramento","shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Dan Burn","shirtNumber":33,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Amar Dedic","shirtNumber":37,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF"},
+    {"name":"Nico Gonzalez","shirtNumber":6,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Joelinton","shirtNumber":7,"primaryPosition":"MC","secondaryPositions":["DMC","AML"],"positionGroup":"MID"},
+    {"name":"Jacob Murphy","shirtNumber":23,"primaryPosition":"AMR","secondaryPositions":["MR"],"positionGroup":"MID"},
+    {"name":"Joe Willock","shirtNumber":28,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID"},
+    {"name":"Jacob Ramsey","shirtNumber":41,"primaryPosition":"MC","secondaryPositions":["AMC","AML"],"positionGroup":"MID"},
+    {"name":"Yoane Wissa","shirtNumber":9,"primaryPosition":"ST","secondaryPositions":["AML"],"positionGroup":"ATT"},
+    {"name":"William Osula","shirtNumber":10,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Harvey Barnes","shirtNumber":11,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT"},
+    {"name":"Anthony Elanga","shirtNumber":19,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT"}
+  ],
+  "firstTeamRelevantU21": [
+    {"name":"Aladji Bamba","shirtNumber":8,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Sean Steur","shirtNumber":14,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID"},
+    {"name":"Bazoumana Toure","shirtNumber":17,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT"},
+    {"name":"Matias Fernandez-Pardo","shirtNumber":20,"primaryPosition":"AMR","secondaryPositions":["AML","ST"],"positionGroup":"ATT"},
+    {"name":"Ewen Jaouen","shirtNumber":24,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Lewis Miley","shirtNumber":67,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"}
+  ],
+  "onLoanOut": [
+    {"name":"Nick Woltemade","shirtNumber":27,"status":"loan-out"},
+    {"name":"Sean Neave","shirtNumber":62,"status":"loan-out"},
+    {"name":"Alex Murphy","status":"loan-out"}
+  ],
+  "notAtClub": [
+    {"name":"Bruno Guimaraes","status":"departed","hardExclusion":true},
+    {"name":"Anthony Gordon","status":"departed","hardExclusion":true},
+    {"name":"Sandro Tonali","status":"departed","hardExclusion":true},
+    {"name":"Kieran Trippier","status":"departed","hardExclusion":true}
+  ],
+  "qa": {
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "Earlier Football Lab audit data retaining Bruno Guimaraes, Anthony Gordon, Sandro Tonali or Kieran Trippier at Newcastle must be overridden.",
+      "Bazoumana Toure, Aladji Bamba, Sean Steur and Ewen Jaouen are current first-team signings despite U21 eligibility.",
+      "Reference market values are intentionally deferred to the league-wide valuation pass."
+    ]
+  }
+}
