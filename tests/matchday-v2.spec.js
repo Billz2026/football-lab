@@ -140,12 +140,13 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await shell.locator('[data-cm4-view="overview"]').click();
   await expect(shell.locator('[data-cm4-panel="overview"]')).toHaveClass(/is-active/);
 
-  // Halftime belongs to V4 too: the hidden native resume action is bridged to the visible V4 control.
+  // V4.2 regression: the clock must reach half-time rather than starving at 43/44 minutes.
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 30000 });
   await expect(page.locator('[data-resume-second-half]')).toBeAttached();
   await expect(shell.locator('[data-cm4-pause]')).toHaveText('Resume 2nd Half');
 
-  // Existing substitution safety remains available through the V4 rail.
+  // On an unfolded Fold the substitution board is a full-screen XI ↔ bench workspace.
+  await page.setViewportSize({ width: 720, height: 900 });
   await shell.locator('[data-cm4-subs]').click();
   await expect(page.locator('.v2-sub-shell')).toBeVisible();
   const confirm = page.locator('[data-apply-sub]');
@@ -153,6 +154,24 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await expect(confirm).toBeDisabled();
   await expect(page.locator('.v2-sub-column').nth(0).locator('.v2-sub-player')).toHaveCount(11);
   await expect.poll(async () => page.locator('.cm332-bench-preview').count(), { timeout: 5000 }).toBeGreaterThan(0);
+
+  const subGeometry = await page.evaluate(() => {
+    const columns=[...document.querySelectorAll('.v2-sub-column')];
+    const confirm=document.querySelector('[data-apply-sub]');
+    const modal=document.querySelector('[data-manager-modal]');
+    const a=columns[0]?.getBoundingClientRect();
+    const b=columns[1]?.getBoundingClientRect();
+    const c=confirm?.getBoundingClientRect();
+    return {
+      modalPosition: modal ? getComputedStyle(modal).position : '',
+      sideBySide: Boolean(a && b && Math.abs(a.top-b.top)<=2 && a.right<=b.left+2),
+      confirmVisible: Boolean(c && c.top>=0 && c.bottom<=window.innerHeight+1),
+      viewportHeight: window.innerHeight
+    };
+  });
+  expect(subGeometry.modalPosition).toBe('fixed');
+  expect(subGeometry.sideBySide).toBe(true);
+  expect(subGeometry.confirmVisible).toBe(true);
 
   const offColumn = page.locator('.v2-sub-column').nth(0);
   const inColumn = page.locator('.v2-sub-column').nth(1);
@@ -164,4 +183,11 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await expect(confirm).toBeEnabled();
   await confirm.click();
   await expect(page.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
+
+  // Close the management screen, resume through the V4 halftime bridge and prove play continues.
+  await page.locator('.flm-match-dialog [data-close-manager]').first().click();
+  await expect(page.locator('[data-manager-modal]')).not.toHaveClass(/is-open/);
+  await expect(shell.locator('[data-cm4-pause]')).toHaveText('Resume 2nd Half');
+  await shell.locator('[data-cm4-pause]').click();
+  await expect.poll(async () => Number(((await shell.locator('[data-cm4-clock]').textContent()) || '0').split(':')[0]), { timeout: 8000 }).toBeGreaterThan(45);
 });
