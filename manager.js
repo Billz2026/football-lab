@@ -8,5 +8,6 @@ import './matchday-ux-v048.js?v=0.4.8';
 import './mobile-home-v049.js?v=0.4.9';
 import './career-season-v051.js?v=0.5.1';
 import './career-interactions-v053.js?v=0.5.3';
+import './career-flow-v054-bridge.js?v=0.5.4';
 import './career-flow-v054.js?v=0.5.4';
 import './career-transfers-gate-v054.js?v=0.5.4';
