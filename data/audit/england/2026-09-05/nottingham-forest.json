@@ -1,5 +1,5 @@
 {
-  "auditVersion": 2,
+  "auditVersion": 3,
   "reviewDate": "2026-09-05",
   "season": "2026/27",
   "clubId": "flm-club-api-football-65",
@@ -31,18 +31,23 @@
     {"name":"Chris Wood","shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
     {"name":"Arnaud Kalimuendo","shirtNumber":15,"primaryPosition":"ST","secondaryPositions":["AML"],"positionGroup":"ATT"},
     {"name":"Liam Delap","shirtNumber":19,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
-    {"name":"Daniel Munoz","shirtNumber":27,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF"},
-    {"name":"Felipe Rodrigues da Silva","shirtNumber":null,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","loanStatus":"loan-in"}
+    {"name":"Daniel Munoz","shirtNumber":27,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF"}
   ],
   "firstTeamRelevantU21": [
     {"name":"Zach Abbott","shirtNumber":44,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","loanStatus":"loan-out"}
   ],
+  "onLoanOut": [
+    {"name":"Morato","aliases":["Felipe Rodrigues da Silva","Felipe Rodrigues Da Silva"],"status":"loan-out","destination":"West Ham United","effective":"2026-09-01","referenceMarketValueEur":14000000}
+  ],
   "qa": {
     "unresolvedSeniorOwnership": 0,
+    "identityCorrections": [
+      {"canonicalName":"Morato","alias":"Felipe Rodrigues da Silva","resolution":"same-player-not-duplicate","runtimeSelectableAtForest":false}
+    ],
     "notes": [
       "Daniel Munoz is a Nottingham Forest senior player in the official 3 September registration and must not remain at Crystal Palace in runtime data.",
-      "The official registration list supersedes older Forest team pages that still show pre-window players.",
-      "Reference market values are intentionally deferred to the league-wide valuation pass."
+      "Morato's full name is Felipe Rodrigues da Silva. He is one player, not two; he is on loan at West Ham United for 2026/27 and is not selectable for Forest.",
+      "Reference market values are supplied by the league-wide valuation overlay."
     ]
   }
 }
