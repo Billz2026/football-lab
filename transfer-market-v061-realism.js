@@ -1,6 +1,11 @@
 import * as base from './transfer-market-v061.js';
 import * as legacy from './transfers-v050-legacy.js';
 import { marketReputationReference, marketValueFloor } from './market-reputation-v061.js';
+import {
+  getMoveWillingness,
+  getPlayerDynamics,
+  personalTermsDemand
+} from './player-dynamics-v062.js';
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const moneyRound = (value, step = 250000) => Math.max(step, Math.round(Number(value || 0) / step) * step);
@@ -37,8 +42,6 @@ function marketSimulationDb(career, db) {
     const reference = marketReputationReference(player);
     const calibration = calibratedAbility(reference);
     let simulated = calibration ? { ...player, ...calibration } : player;
-    // A new signing must still count toward his new club's squad depth/quality, but the
-    // same player should not become an AI sale target again during the same window.
     if (moved.has(player.id)) simulated = { ...simulated, reportedAge: 99, marketProtectedThisWindow: true };
     return simulated;
   });
@@ -76,15 +79,54 @@ export function estimatePlayerValue(player) {
 
 export const estimateWeeklyWage = base.estimateWeeklyWage;
 
+function dynamicsAdjustedStance(player, db, career, stance) {
+  if (!career || !stance || !player) return stance;
+  const dynamics = getPlayerDynamics(career, db, player.id);
+  if (!dynamics) return stance;
+  const requested = Boolean(dynamics.transferRequest?.active);
+  const unhappy = dynamics.happiness < 38;
+  const veryHappy = dynamics.happiness >= 84;
+  let askingPrice = stance.askingPrice;
+  let minimumAcceptable = stance.minimumAcceptable;
+  let label = stance.label;
+  let tone = stance.tone;
+
+  if (!stance.listed && requested) {
+    askingPrice = moneyRound(askingPrice * .86);
+    minimumAcceptable = moneyRound(minimumAcceptable * .80);
+    label = 'Transfer requested — player wants to leave';
+    tone = 'open';
+  } else if (!stance.listed && unhappy) {
+    askingPrice = moneyRound(askingPrice * .93);
+    minimumAcceptable = moneyRound(minimumAcceptable * .89);
+    label = stance.key ? 'Unsettled key player' : 'Unsettled — open to a move';
+    tone = stance.tone === 'resistant' ? 'reluctant' : 'open';
+  } else if (!stance.listed && veryHappy && stance.key) {
+    askingPrice = moneyRound(askingPrice * 1.03);
+    minimumAcceptable = moneyRound(minimumAcceptable * 1.03);
+  }
+
+  return {
+    ...stance,
+    askingPrice,
+    minimumAcceptable: Math.min(askingPrice, minimumAcceptable),
+    label,
+    tone,
+    playerHappiness: dynamics.happiness,
+    squadRole: dynamics.squadRole,
+    transferRequested: requested
+  };
+}
+
 export function getTransferStance(player, db, career = null, buyerClubId = career?.clubId || null) {
   const ordinary = base.getTransferStance(player, db, career, buyerClubId);
   const reference = marketReputationReference(player);
-  if (!reference || !ordinary) return ordinary;
+  if (!reference || !ordinary) return dynamicsAdjustedStance(player, db, career, ordinary);
 
   const value = estimatePlayerValue(player);
   const listed = Boolean(career?.transfers?.listedPlayerIds?.includes(player.id));
   if (listed) {
-    return {
+    return dynamicsAdjustedStance(player, db, career, {
       ...ordinary,
       value,
       askingPrice: moneyRound(value * 1.08),
@@ -94,7 +136,7 @@ export function getTransferStance(player, db, career = null, buyerClubId = caree
       label: 'Available for transfer',
       tone: 'available',
       marketReputationTier: reference.tier
-    };
+    });
   }
 
   const years = ordinary.contractYears || 2;
@@ -123,7 +165,7 @@ export function getTransferStance(player, db, career = null, buyerClubId = caree
     minimumMultiplier += .06;
   }
 
-  return {
+  return dynamicsAdjustedStance(player, db, career, {
     ...ordinary,
     value,
     askingPrice: moneyRound(value * askingMultiplier),
@@ -133,7 +175,7 @@ export function getTransferStance(player, db, career = null, buyerClubId = caree
     label: settings.label,
     tone: settings.tone,
     marketReputationTier: tier
-  };
+  });
 }
 
 export function getAskingPrice(player, db, career = null) {
@@ -153,20 +195,25 @@ export function getNegotiation(career, db, playerId) {
   career.transfers.negotiations ||= {};
   let negotiation = career.transfers.negotiations[playerId];
   const validV61Record = negotiation
-    && [61, 611].includes(negotiation.marketVersion)
+    && [61, 611, 612].includes(negotiation.marketVersion)
     && negotiation.sellingClubId === player.clubId;
 
   if (!validV61Record) negotiation = base.getNegotiation(career, db, playerId);
   if (!negotiation) return null;
 
   const stance = getTransferStance(player, db, career, career.clubId);
-  negotiation.marketVersion = 611;
+  const terms = personalTermsDemand(career, db, playerId, career.clubId);
+  negotiation.marketVersion = 612;
   negotiation.sellerStance = stance.label;
   negotiation.sellerTone = stance.tone;
+  negotiation.playerInterest = terms?.willingness || null;
+  negotiation.agent = terms?.agent || null;
+  negotiation.squadRole = terms?.squadRole || null;
   if (!['fee-accepted', 'contract-countered', 'completed'].includes(negotiation.status)) {
     negotiation.askingPrice = stance.askingPrice;
     negotiation.minimumAcceptable = stance.minimumAcceptable;
   }
+  if (!['completed'].includes(negotiation.status) && terms?.weeklyWage) negotiation.wageDemand = terms.weeklyWage;
   return negotiation;
 }
 
@@ -236,7 +283,52 @@ export function acceptSellerCounter(career, db, playerId) {
   return { status: 'accepted', negotiation: clone(negotiation) };
 }
 
-export const submitContractOffer = base.submitContractOffer;
+export function submitContractOffer(career, db, playerId, weeklyWage, years = 4) {
+  legacy.ensureTransferState(career, db);
+  const negotiation = getNegotiation(career, db, playerId);
+  if (!negotiation || !['fee-accepted', 'contract-countered'].includes(negotiation.status)) {
+    throw new Error('Agree a transfer fee before discussing the contract.');
+  }
+  const terms = personalTermsDemand(career, db, playerId, career.clubId);
+  const wage = Number(weeklyWage);
+  if (!Number.isFinite(wage) || wage <= 0) throw new Error('Enter a valid weekly wage.');
+  negotiation.wageDemand = terms.weeklyWage;
+  negotiation.playerInterest = terms.willingness;
+  negotiation.agent = terms.agent;
+
+  if (terms.willingness.score < 25) {
+    negotiation.messages.push(`${terms.agent.name} has informed you that the player is not interested in the move, regardless of the current salary proposal.`);
+    return {
+      status: 'player-refused',
+      willingness: clone(terms.willingness),
+      wageDemand: terms.weeklyWage,
+      negotiation: clone(negotiation)
+    };
+  }
+  if (terms.willingness.score < 40 && wage < terms.weeklyWage * 1.15) {
+    negotiation.status = 'contract-countered';
+    const counterWage = Math.round(terms.weeklyWage * 1.15 / 500) * 500;
+    negotiation.wageDemand = counterWage;
+    negotiation.messages.push(`${terms.agent.name} says the player needs a major financial incentive to consider this move.`);
+    return {
+      status: 'countered',
+      wageDemand: counterWage,
+      willingness: clone(terms.willingness),
+      negotiation: clone(negotiation)
+    };
+  }
+
+  const result = base.submitContractOffer(career, db, playerId, weeklyWage, years);
+  if (result?.status === 'completed') {
+    const dynamics = getPlayerDynamics(career, db, playerId);
+    dynamics.squadRole = 'Rotation';
+    dynamics.expectedStartShare = .30;
+    dynamics.happiness = Math.max(76, dynamics.happiness);
+    dynamics.morale = Math.max(72, dynamics.morale);
+    if (dynamics.transferRequest?.active) dynamics.transferRequest = { ...dynamics.transferRequest, active: false, resolvedDate: career.currentDate || null };
+  }
+  return { ...result, willingness: clone(terms.willingness), agent: clone(terms.agent) };
+}
 
 export function processTransferWorld(career, db) {
   legacy.ensureTransferState(career, db);
