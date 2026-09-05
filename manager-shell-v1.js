@@ -1,12 +1,13 @@
 // Football Lab Manager Shell V1
 // Presentation/navigation layer only: existing career systems remain authoritative.
 
-const SHELL_VERSION = '1.0.0';
+const SHELL_VERSION = '1.0.1';
 const STYLE_HREF = `./manager-shell-v1.css?v=${SHELL_VERSION}`;
 const MILESTONES = [
   { date: '2026-06-15', label: 'CONTINUE TO 15 JUNE', detail: 'Summer transfer window opens' },
   { date: '2026-06-19', label: 'CONTINUE TO 19 JUNE', detail: 'Premier League fixture release' }
 ];
+const PRESEASON_DATES = ['2026-07-11','2026-07-18','2026-07-25','2026-08-01','2026-08-08'];
 
 let queued = false;
 let enhancing = false;
@@ -77,6 +78,15 @@ function nextFriendly(c) {
   return c?.preseason?.fixtures?.find(fixture => !fixture.played) || null;
 }
 
+function nextFriendlyDate(c) {
+  const played = c?.preseason?.fixtures?.filter(fixture => fixture.played).length || 0;
+  return PRESEASON_DATES[Math.min(played, PRESEASON_DATES.length - 1)] || null;
+}
+
+function dateReady(current, target) {
+  return !target || String(current || '') >= String(target);
+}
+
 function stageText(c) {
   if (!c) return 'CAREER';
   const milestone = currentMilestone(c);
@@ -100,11 +110,16 @@ function shellState(c, db) {
   if (milestone) return { ...milestone, disabled: false, action: 'milestone' };
   if (c.preseason && c.preseason.phase !== 'complete') {
     const friendly = nextFriendly(c);
+    if (!friendly) return { label: 'PRE-SEASON', detail: 'Complete season preparation', disabled: false, action: 'preseason' };
+    const targetDate = nextFriendlyDate(c);
+    const ready = dateReady(isoDate(c), targetDate);
     return {
-      label: friendly ? 'NEXT FRIENDLY' : 'PRE-SEASON',
-      detail: friendly?.dateLabel || 'Complete season preparation',
+      label: ready ? 'PLAY FRIENDLY' : 'CONTINUE GAME',
+      detail: ready
+        ? `${clubName(db, friendly.homeClubId)} vs ${clubName(db, friendly.awayClubId)}`
+        : `Next friendly · ${targetDate || friendly.dateLabel || 'date pending'}`,
       disabled: false,
-      action: 'preseason'
+      action: ready ? 'friendly' : 'calendar'
     };
   }
   if (c.status === 'complete') {
@@ -113,11 +128,12 @@ function shellState(c, db) {
   const fixture = nextLeagueFixture(c);
   if (fixture) {
     const opponentId = fixture.homeClubId === c.clubId ? fixture.awayClubId : fixture.homeClubId;
+    const ready = dateReady(isoDate(c), fixture.date);
     return {
-      label: 'GO TO MATCH',
+      label: ready ? 'PLAY MATCH' : 'CONTINUE GAME',
       detail: `${clubName(db, opponentId)} · ${fixture.date || `Round ${fixture.round || c.roundIndex + 1}`}`,
       disabled: false,
-      action: 'matchday'
+      action: ready ? 'play-match' : 'calendar'
     };
   }
   return { label: 'CONTINUE', detail: 'Return to overview', disabled: false, action: 'overview' };
@@ -139,6 +155,25 @@ function activatePreseason() {
     return true;
   }
   return activateBaseTab('overview');
+}
+
+function waitAndClick(selector, attempts = 20) {
+  const target = document.querySelector(selector);
+  if (target && !target.disabled) {
+    target.click();
+    return;
+  }
+  if (attempts > 0) setTimeout(() => waitAndClick(selector, attempts - 1), 45);
+}
+
+function playFriendlyDirect() {
+  activatePreseason();
+  setTimeout(() => waitAndClick('[data-v047-play]'), 25);
+}
+
+function playMatchDirect() {
+  activateBaseTab('matchday');
+  setTimeout(() => waitAndClick('[data-play-match]'), 25);
 }
 
 function runMilestoneAdvance() {
@@ -196,6 +231,9 @@ function handleContinue(control) {
   const action = control?.dataset.shellAction;
   if (!action || control.disabled) return;
   if (action === 'milestone') runMilestoneAdvance();
+  else if (action === 'calendar') clickOriginal('.career-header [data-v060-continue]');
+  else if (action === 'friendly') playFriendlyDirect();
+  else if (action === 'play-match') playMatchDirect();
   else if (action === 'preseason') activatePreseason();
   else if (action === 'matchday') activateBaseTab('matchday');
   else if (action === 'table') activateBaseTab('table');
@@ -284,13 +322,18 @@ async function syncShell(root = app()) {
   const fixture = nextLeagueFixture(c);
   const fixtureTeams = sidebar.querySelector('[data-shell-fixture-teams]');
   const fixtureMeta = sidebar.querySelector('[data-shell-fixture-meta]');
-  if (fixture && db) {
+  if (fixture && db && (!c.preseason || c.preseason.phase === 'complete')) {
     if (fixtureTeams) fixtureTeams.textContent = `${clubName(db, fixture.homeClubId)} vs ${clubName(db, fixture.awayClubId)}`;
     if (fixtureMeta) fixtureMeta.textContent = `${fixture.date || 'Date pending'} · ${fixture.homeClubId === c.clubId ? 'HOME' : 'AWAY'}`;
   } else if (c.preseason && c.preseason.phase !== 'complete') {
     const friendly = nextFriendly(c);
-    if (fixtureTeams) fixtureTeams.textContent = friendly ? 'Pre-season friendly' : 'Pre-season programme';
-    if (fixtureMeta) fixtureMeta.textContent = friendly?.dateLabel || 'Preparation in progress';
+    const targetDate = nextFriendlyDate(c);
+    if (fixtureTeams) fixtureTeams.textContent = friendly && db
+      ? `${clubName(db, friendly.homeClubId)} vs ${clubName(db, friendly.awayClubId)}`
+      : (friendly ? 'Pre-season friendly' : 'Pre-season programme');
+    if (fixtureMeta) fixtureMeta.textContent = friendly
+      ? `${friendly.dateLabel || targetDate || 'Date pending'} · FRIENDLY`
+      : 'Preparation in progress';
   } else {
     if (fixtureTeams) fixtureTeams.textContent = c.status === 'complete' ? 'Season complete' : 'Schedule pending';
     if (fixtureMeta) fixtureMeta.textContent = c.status === 'complete' ? 'View final table' : 'No fixture available';
