@@ -18,6 +18,13 @@ async function continueUntil(page, targetDate, maxSteps = 30) {
   throw new Error(`Continue Game did not reach ${targetDate}`);
 }
 
+async function autoPickOptionalXI(page) {
+  await page.getByRole('button', { name: 'Squad', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Squad' })).toBeVisible();
+  await page.locator('[data-auto-pick]').click();
+  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(11);
+}
+
 async function completePreseason(page) {
   const dates = ['2026-07-11','2026-07-18','2026-07-25','2026-08-01','2026-08-08'];
   const tab = page.locator('[data-v047-preseason-tab]');
@@ -47,6 +54,20 @@ test('V0.4.8 squad stars and CM-style drag/drop tactics are accurate and usable'
   await expect(page.locator('.v044-list')).toContainText('M. Ødegaard');
   await expect(page.locator('.v044-head')).not.toContainText('CA');
   expect(await page.locator('.v044-row').count()).toBeGreaterThan(11);
+
+  // The manager owns the XI. A fresh career must not silently select 11 players.
+  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(0);
+  await expect(page.locator('[data-lineup-counter]')).toContainText('0 / 11');
+  await expect(page.locator('[data-clear-xi]')).toBeVisible();
+  await expect(page.locator('[data-auto-pick]')).toContainText('OPTIONAL');
+
+  // Auto Pick remains a deliberate convenience, and Clear XI genuinely resets it.
+  await page.locator('[data-auto-pick]').click();
+  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(11);
+  await page.locator('[data-clear-xi]').click();
+  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(0);
+  await page.locator('[data-auto-pick]').click();
+  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(11);
 
   await page.getByRole('button', { name: 'Tactics', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Tactics', exact: true })).toBeVisible();
@@ -99,24 +120,20 @@ test('V0.4.8 Match Centre keeps the hard half-time stop with simplified tactics 
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').first().click();
   await expect(page.locator('[data-career-save-status]')).toContainText(/AUTOSAVE|SAVED/);
+  await autoPickOptionalXI(page);
   await completePreseason(page);
 
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
   await page.getByRole('button', { name: 'PLAY MATCH' }).click();
   await expect(page.locator('[data-live-match]')).toHaveAttribute('data-v045-match', '1');
-  await expect(page.getByRole('heading', { name: 'Match Centre' })).toBeVisible();
-  await expect(page.locator('[data-v045-context]')).toContainText('VENUE');
-  await expect(page.locator('[data-v045-context]')).toContainText('ATTENDANCE');
-  await expect(page.locator('[data-v045-view]')).toHaveCount(4);
+  await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm-match-v1', '1');
+  await expect(page.locator('.flm-cm-match-tabs [data-cm-view-button]')).toHaveCount(5);
+  await expect(page.locator('[data-cm-pause]')).toBeVisible();
+  await page.locator('[data-cm-view-button="stats"]').click();
+  await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm-view', 'stats');
+  await page.locator('[data-cm-view-button="overview"]').click();
 
-  await page.locator('[data-v045-view="stats"]').click();
-  await expect(page.locator('[data-v045-custom-view]')).toContainText('Match Stats');
-  await page.locator('[data-v045-bottom="latest"]').click();
-  await expect(page.locator('[data-v045-custom-view]')).toContainText('Latest Scores');
-  expect(await page.locator('.v045-score-row').count()).toBeGreaterThanOrEqual(4);
-  await page.locator('[data-v045-view="overview"]').click();
-
-  await page.getByRole('button', { name: '4×' }).click();
+  await page.locator('[data-cm-speed="4"]').click();
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
@@ -160,7 +177,7 @@ test('V0.4.8 Match Centre keeps the hard half-time stop with simplified tactics 
   await page.locator('[data-resume-second-half]').click();
   await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
   await expect(page.locator('[data-finish-live-match]')).toBeVisible();
-  await expect(page.locator('[data-v045-event]')).toContainText('FULL TIME');
+  await expect(page.locator('[data-match-status]')).toHaveText('FULL TIME');
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(35);
   await page.locator('[data-finish-live-match]').click();
 
