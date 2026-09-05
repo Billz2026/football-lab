@@ -83,4 +83,4 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run Matchday acceptance tests
-        run: npx playwright test tests/matchday-v2.spec.js tests/matchday-v43.spec.js --config=playwright.ci.config.js --reporter=line
+        run: npx playwright test tests/matchday-v2.spec.js tests/matchday-v43.spec.js --config=playwright.ci.config.js --reporter=line --workers=1
