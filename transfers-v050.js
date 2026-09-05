@@ -1,5 +1,5 @@
 import * as legacy from './transfers-v050-legacy.js';
-import * as market from './transfer-market-v061-realism.js';
+import * as market from './transfer-market-v062-rivalry.js';
 
 export * from './transfers-v050-legacy.js';
 
@@ -91,8 +91,9 @@ function withCalendarDate(career, callback, { uniquePhase = false } = {}) {
   }
 }
 
-// V0.6.1 explicit exports override the legacy star exports while preserving the proven
-// ownership, contract and budget infrastructure underneath.
+// V0.6.2 explicit exports override the legacy star exports while preserving the proven
+// ownership, contract and budget infrastructure underneath. Rivalry rules are enforced
+// by the market wrapper for user, incoming and AI-to-AI business.
 export const estimatePlayerValue = market.estimatePlayerValue;
 export const estimateWeeklyWage = market.estimateWeeklyWage;
 export const getTransferStance = market.getTransferStance;
@@ -126,6 +127,6 @@ export function respondToIncomingOffer(career, db, offerId, action, counterFee =
 
 // Load profile transfer interaction only in the browser; Node/core tests stay DOM-free.
 if (typeof window !== 'undefined') {
-  import('./career-transfer-negotiation-v061.js').catch(error => console.error('V0.6.1 transfer negotiation UI:', error));
-  import('./career-transfer-negotiation-v061-finish.js').catch(error => console.error('V0.6.1 transfer completion UI:', error));
+  import('./career-transfer-negotiation-v061.js').catch(error => console.error('V0.6.2 transfer negotiation UI:', error));
+  import('./career-transfer-negotiation-v061-finish.js').catch(error => console.error('V0.6.2 transfer completion UI:', error));
 }
