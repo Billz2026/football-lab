@@ -21,8 +21,8 @@ async function continueUntil(page, targetDate, maxSteps = 30) {
 async function autoPickOptionalXI(page) {
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Squad' })).toBeVisible();
-  await page.locator('[data-auto-pick]').click();
-  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(11);
+  await page.locator('[data-v044-auto-pick]').click();
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
 }
 
 async function completePreseason(page) {
@@ -47,11 +47,11 @@ test('squad and tactics remain manager-controlled and position-aware', async ({ 
 
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Squad' })).toBeVisible();
-  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(0);
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(0);
   await expect(page.locator('[data-lineup-counter]')).toContainText('0 / 11');
-  await expect(page.locator('[data-auto-pick]')).toContainText('OPTIONAL');
-  await page.locator('[data-auto-pick]').click();
-  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(11);
+  await expect(page.locator('[data-v044-auto-pick]')).toHaveText('AUTO PICK XI');
+  await page.locator('[data-v044-auto-pick]').click();
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
 
   await page.getByRole('button', { name: 'Tactics', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Tactics', exact: true })).toBeVisible();
