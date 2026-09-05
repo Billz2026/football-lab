@@ -6,6 +6,8 @@ on:
     paths:
       - 'matchday-cm-v2.js'
       - 'matchday-cm-v2.css'
+      - 'matchday-mode-v34.js'
+      - 'matchday-mode-v34.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
@@ -14,6 +16,8 @@ on:
     paths:
       - 'matchday-cm-v2.js'
       - 'matchday-cm-v2.css'
+      - 'matchday-mode-v34.js'
+      - 'matchday-mode-v34.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
@@ -35,9 +39,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Check V2 syntax
+      - name: Check Matchday syntax
         run: |
           node --check matchday-cm-v2.js
+          node --check matchday-mode-v34.js
           node --check tests/matchday-v2.spec.js
 
       - name: Install dependencies
