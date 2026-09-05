@@ -1,4 +1,5 @@
 import * as legacy from './transfers-v050-legacy.js';
+import * as market from './transfer-market-v061.js';
 
 export * from './transfers-v050-legacy.js';
 
@@ -90,26 +91,41 @@ function withCalendarDate(career, callback, { uniquePhase = false } = {}) {
   }
 }
 
+// V0.6.1 explicit exports override the legacy star exports while preserving the proven
+// ownership, contract and budget infrastructure underneath.
+export const estimatePlayerValue = market.estimatePlayerValue;
+export const estimateWeeklyWage = market.estimateWeeklyWage;
+export const getTransferStance = market.getTransferStance;
+export const getAskingPrice = market.getAskingPrice;
+export const searchTransferMarket = market.searchTransferMarket;
+export const getNegotiation = market.getNegotiation;
+
 export function getTransferWindowStatus(career) {
   return withCalendarDate(career, () => legacy.getTransferWindowStatus(career));
 }
 
 export function processTransferWorld(career, db) {
-  return withCalendarDate(career, () => legacy.processTransferWorld(career, db), { uniquePhase: true });
+  return withCalendarDate(career, () => market.processTransferWorld(career, db), { uniquePhase: true });
 }
 
 export function submitTransferOffer(career, db, playerId, fee) {
-  return withCalendarDate(career, () => legacy.submitTransferOffer(career, db, playerId, fee));
+  return withCalendarDate(career, () => market.submitTransferOffer(career, db, playerId, fee));
 }
 
 export function acceptSellerCounter(career, db, playerId) {
-  return withCalendarDate(career, () => legacy.acceptSellerCounter(career, db, playerId));
+  return withCalendarDate(career, () => market.acceptSellerCounter(career, db, playerId));
 }
 
 export function submitContractOffer(career, db, playerId, weeklyWage, years = 4) {
-  return withCalendarDate(career, () => legacy.submitContractOffer(career, db, playerId, weeklyWage, years));
+  return withCalendarDate(career, () => market.submitContractOffer(career, db, playerId, weeklyWage, years));
 }
 
 export function respondToIncomingOffer(career, db, offerId, action, counterFee = null) {
   return withCalendarDate(career, () => legacy.respondToIncomingOffer(career, db, offerId, action, counterFee));
+}
+
+// Load the profile negotiation surface only in the browser. Keeping this dynamic avoids
+// contaminating Node/core tests with DOM requirements.
+if (typeof window !== 'undefined') {
+  import('./career-transfer-negotiation-v061.js').catch(error => console.error('V0.6.1 transfer negotiation UI:', error));
 }
