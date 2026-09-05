@@ -17,5 +17,6 @@ import './manager-shell-v1.js?v=1.0.0';
 import './team-selection-v1.js?v=1.0.1';
 import './manual-tactics-guard-v1.js?v=1.0.0';
 import './matchday-cm-v2.js?v=2.0.0';
+import './matchday-cm-v3.js?v=3.0.0';
 import './matchday-xg-ui-v1.js?v=1.0.0';
 import './database-readonly-v1.js?v=1.0.0';
