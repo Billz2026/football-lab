@@ -30,8 +30,9 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   await selectXI(page);
   await continueUntil(page, '2026-07-11');
 
-  await page.locator('[data-v047-preseason-tab]').click();
-  await page.locator('[data-v047-play]').click();
+  // V4.6 deliberately removes the duplicate central PLAY FRIENDLY CTA.
+  await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY');
+  await page.locator('[data-shell-continue]').click();
 
   const live=page.locator('[data-live-match]');
   const shell=page.locator('.cm4-shell');
