@@ -139,13 +139,14 @@ test('transfer-world phases become date based once V0.6 world clock is active', 
   career.calendar.currentDate = '2026-06-15';
   const first = processTransferWorld(career, db);
   assert.equal(first.window.currentDate, '2026-06-15');
-  assert.match(first.phaseKey, /^R\d+$/);
+  assert.equal(first.phaseKey, 'D:2026-06-15');
   const firstPhase = first.phaseKey;
 
   career.currentDate = '2026-06-19';
   career.calendar.currentDate = '2026-06-19';
   const second = processTransferWorld(career, db);
   assert.equal(second.window.currentDate, '2026-06-19');
+  assert.equal(second.phaseKey, 'D:2026-06-19');
   assert.notEqual(second.phaseKey, firstPhase);
   assert.equal(career.roundIndex, 0, 'the real league matchweek must not be changed by transfer processing');
   assert.equal(career.preseason.phase, 'active', 'the real pre-season phase must be restored after transfer processing');
