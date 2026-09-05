@@ -172,8 +172,9 @@ export function submitTransferOffer(career, db, playerId, fee) {
   ensureTransferState(career, db);
   const player = playerById(db, playerId);
   if (!player || player.clubId === career.clubId) throw new Error('Choose a player from another club.');
-  const offer = moneyRound(Number(fee) || 0);
-  if (offer <= 0) throw new Error('Enter a valid transfer fee.');
+  const rawOffer = Number(fee);
+  if (!Number.isFinite(rawOffer) || rawOffer <= 0) throw new Error('Enter a valid transfer fee.');
+  const offer = moneyRound(rawOffer);
   if (offer > career.transfers.transferBudget) throw new Error('That offer is above your remaining transfer budget.');
 
   const negotiation = getNegotiation(career, db, playerId);
@@ -202,9 +203,16 @@ export function submitTransferOffer(career, db, playerId, fee) {
 }
 
 export function acceptSellerCounter(career, db, playerId) {
+  ensureTransferState(career, db);
   const negotiation = getNegotiation(career, db, playerId);
   if (!negotiation?.counterFee) throw new Error('There is no active counter-offer to accept.');
-  return submitTransferOffer(career, db, playerId, negotiation.counterFee);
+  if (negotiation.counterFee > career.transfers.transferBudget) throw new Error('The counter-offer is above your remaining transfer budget.');
+  const acceptedFee = negotiation.counterFee;
+  negotiation.lastOffer = acceptedFee;
+  negotiation.counterFee = null;
+  negotiation.status = 'fee-accepted';
+  negotiation.messages.push(`Counter-offer accepted at £${acceptedFee.toLocaleString('en-GB')}.`);
+  return { status: 'accepted', negotiation: clone(negotiation) };
 }
 
 function transferDateLabel(career) {
@@ -242,9 +250,11 @@ function addTransferNews(career, db, transaction) {
 export function submitContractOffer(career, db, playerId, weeklyWage, years = 4) {
   ensureTransferState(career, db);
   const negotiation = getNegotiation(career, db, playerId);
-  if (!negotiation || negotiation.status !== 'fee-accepted') throw new Error('Agree a transfer fee before discussing the contract.');
+  if (!negotiation || !['fee-accepted', 'contract-countered'].includes(negotiation.status)) throw new Error('Agree a transfer fee before discussing the contract.');
 
-  const wage = wageRound(Number(weeklyWage) || 0);
+  const rawWage = Number(weeklyWage);
+  if (!Number.isFinite(rawWage) || rawWage <= 0) throw new Error('Enter a valid weekly wage.');
+  const wage = wageRound(rawWage);
   const contractYears = clamp(Math.round(Number(years) || 4), 2, 5);
   if (wage > career.transfers.wageRoom) throw new Error('That salary is above your remaining wage room.');
 
