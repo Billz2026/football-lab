@@ -7,4 +7,7 @@ if (!document.getElementById(id)) {
   document.head.appendChild(link);
 }
 
+const heroNote = document.querySelector('.hero-note');
+if (heroNote) heroNote.textContent = 'PLAYABLE BETA · 20 CLUBS · 19 ROUNDS';
+
 document.documentElement.dataset.mobileHome = 'v049';
