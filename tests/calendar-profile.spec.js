@@ -13,9 +13,10 @@ test('career starts in June, gates transfers and releases fixtures on 19 June', 
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
   await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
 
-  const transfer = page.locator('[data-v050-transfer-tab]');
-  await expect(transfer).toHaveClass(/v054-lock-nav/);
-  await expect(transfer).toContainText('15 JUN');
+  const transferGate = page.locator('[data-v054-transfer-gate]');
+  await expect(transferGate).toHaveClass(/v054-lock-nav/);
+  await expect(transferGate).toContainText('15 JUN');
+  await expect(page.locator('[data-v050-transfer-tab]')).toHaveCount(0);
 
   const fixtures = page.locator('[data-v051-fixtures]');
   await expect(fixtures).toHaveClass(/v054-lock-nav/);
@@ -25,7 +26,8 @@ test('career starts in June, gates transfers and releases fixtures on 19 June', 
 
   await page.locator('[data-v054-advance]').click();
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
-  await expect(transfer).not.toHaveClass(/v054-lock-nav/);
+  await expect(transferGate).toHaveCount(0);
+  await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
 
   await expect(page.locator('[data-v054-advance]')).toBeVisible();
   await page.locator('[data-v054-advance]').click();
@@ -41,6 +43,7 @@ test('career starts in June, gates transfers and releases fixtures on 19 June', 
   expect(saved.calendar.fixturesReleased).toBeTruthy();
   expect(saved.news.items.some(item => item.key === 'fixture-release')).toBeTruthy();
   expect(saved.news.items.some(item => item.key === 'summer-window-opens')).toBeTruthy();
+  expect((saved.transfers?.completed || []).every(item => item.round !== 0 || item.source !== 'ai')).toBeTruthy();
 });
 
 test('player profiles browse instantly with next previous and jump controls', async ({ page }) => {
@@ -52,7 +55,8 @@ test('player profiles browse instantly with next previous and jump controls', as
   await expect(page.locator('#appModal')).toHaveClass(/is-open/);
   await expect(page.locator('.v054-browser')).toBeVisible();
   const firstName = await page.locator('#modalTitle').textContent();
-  await expect(page.locator('[data-v054-jump] option')).toHaveCount(await page.locator('.v044-row').count());
+  const squadCount = await page.locator('.v044-row').count();
+  await expect(page.locator('[data-v054-jump] option')).toHaveCount(squadCount);
 
   const next = page.locator('[data-v054-next]');
   await expect(next).toBeEnabled();
