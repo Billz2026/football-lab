@@ -13,6 +13,8 @@ on:
       - 'match-centre-v4.js'
       - 'match-centre-v4.css'
       - 'match-centre-v4-mode.js'
+      - 'match-centre-v4-fold-v41.js'
+      - 'match-centre-v4-fold-v41.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
@@ -28,6 +30,8 @@ on:
       - 'match-centre-v4.js'
       - 'match-centre-v4.css'
       - 'match-centre-v4-mode.js'
+      - 'match-centre-v4-fold-v41.js'
+      - 'match-centre-v4-fold-v41.css'
       - 'manager.js'
       - 'tests/matchday-v2.spec.js'
       - '.github/workflows/matchday-v2-validation.yml'
@@ -56,6 +60,7 @@ jobs:
           node --check matchday-stability-v333.js
           node --check match-centre-v4.js
           node --check match-centre-v4-mode.js
+          node --check match-centre-v4-fold-v41.js
           node --check tests/matchday-v2.spec.js
 
       - name: Install dependencies
