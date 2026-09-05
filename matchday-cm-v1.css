@@ -1,0 +1,224 @@
+/* Football Lab Matchday V1 — Championship Manager information architecture, modern Football Lab skin */
+
+.flm-cm-prematch-tabs,
+.flm-cm-match-tabs{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  border:1px solid rgba(239,185,63,.26);
+  background:#090806;
+}
+.flm-cm-match-tabs{grid-template-columns:repeat(5,minmax(0,1fr));grid-area:tabs}
+.flm-cm-prematch-tabs button,
+.flm-cm-match-tabs button{
+  min-height:42px;
+  padding:0 10px;
+  border:0;
+  border-right:1px solid rgba(239,185,63,.17);
+  border-radius:0;
+  background:#11100d;
+  color:#a8a298;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.055em;
+  cursor:pointer;
+}
+.flm-cm-prematch-tabs button:last-child,
+.flm-cm-match-tabs button:last-child{border-right:0}
+.flm-cm-prematch-tabs button:hover,
+.flm-cm-match-tabs button:hover,
+.flm-cm-prematch-tabs button.is-active,
+.flm-cm-match-tabs button.is-active{
+  background:#221a0b;
+  color:#ffd66a;
+  box-shadow:inset 0 -3px #efb93f;
+}
+.flm-cm-prematch-shortcuts{display:flex;gap:7px;flex-wrap:wrap}
+.flm-cm-prematch-shortcuts button{
+  min-height:38px;
+  padding:0 12px;
+  border:1px solid rgba(239,185,63,.28);
+  border-radius:5px;
+  background:#11100d;
+  color:#eee8dc;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.flm-live-match[data-cm-match-v1="1"]{
+  min-height:0!important;
+  gap:8px!important;
+  grid-template-columns:166px minmax(0,1fr)!important;
+  grid-template-areas:
+    "score score"
+    "tabs tabs"
+    "rail content"
+    "rail halftime"
+    "rail fulltime";
+  align-content:start;
+}
+.flm-live-match[data-cm-match-v1="1"] > .career-page-heading{display:none!important}
+.flm-live-match[data-cm-match-v1="1"] > .flm-live-scoreboard{
+  grid-area:score;
+  min-height:88px;
+  border-radius:2px!important;
+  border:1px solid rgba(239,185,63,.36)!important;
+  background:linear-gradient(180deg,#17140d,#0c0b08)!important;
+  box-shadow:0 6px 24px rgba(0,0,0,.28);
+  padding:11px 18px!important;
+}
+.flm-live-match[data-cm-match-v1="1"] .flm-live-team small{font-size:8px!important;letter-spacing:.12em;color:#8f887d;opacity:1!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-live-team strong{font-size:clamp(18px,2vw,30px)!important;line-height:1.05}
+.flm-live-match[data-cm-match-v1="1"] .flm-live-score b{font-size:clamp(32px,4vw,52px)!important;line-height:.9;color:#fff}
+.flm-live-match[data-cm-match-v1="1"] .flm-live-score span{font-size:22px;color:#7d766b;opacity:1!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-live-clock{font-size:11px!important;color:#ffd66a!important;margin-top:2px}
+
+.flm-cm-match-rail{
+  grid-area:rail;
+  display:grid;
+  align-content:start;
+  gap:5px;
+  min-height:480px;
+  padding:8px;
+  border:1px solid rgba(239,185,63,.24);
+  background:#080705;
+}
+.flm-cm-rail-label{
+  padding:5px 4px 9px;
+  color:#7f786d;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.13em;
+}
+.flm-cm-match-rail > button{
+  min-height:38px;
+  padding:0 9px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:2px;
+  background:#12110e;
+  color:#e2ddd3;
+  text-align:left;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+.flm-cm-match-rail > button:hover{border-color:rgba(239,185,63,.5);color:#ffd66a;background:#1a160d}
+.flm-cm-match-rail > .flm-cm-primary-control{
+  min-height:48px;
+  border-color:#dba72f;
+  background:linear-gradient(180deg,#f2c451,#d9a52f);
+  color:#151006;
+  text-align:center;
+}
+.flm-cm-match-rail > .flm-cm-primary-control.is-paused{background:#efe9dd;color:#14120e;border-color:#efe9dd}
+.flm-cm-speed{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:4px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.flm-cm-speed span{grid-column:1/-1;color:#777167;font-size:7px;font-weight:900;letter-spacing:.08em}
+.flm-cm-speed button{
+  min-height:32px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:2px;
+  background:#11100d;
+  color:#aaa397;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+}
+.flm-cm-speed button.is-active{border-color:#efb93f;color:#ffd66a;background:#211a0d}
+
+.flm-live-match[data-cm-match-v1="1"] > .flm-live-grid{
+  grid-area:content;
+  grid-template-columns:minmax(0,1.6fr) minmax(235px,.62fr)!important;
+  gap:8px!important;
+  min-width:0;
+}
+.flm-live-match[data-cm-match-v1="1"] .flm-panel{
+  border-radius:2px!important;
+  border-color:rgba(255,255,255,.09)!important;
+  background:#0b0a08!important;
+  padding:11px!important;
+}
+.flm-live-match[data-cm-match-v1="1"] .flm-panel-head{
+  margin:-11px -11px 9px!important;
+  padding:9px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  background:#15130f;
+}
+.flm-live-match[data-cm-match-v1="1"] .flm-panel-head p{font-size:8px!important;font-weight:950;opacity:1!important;color:#b5aea2}
+.flm-live-match[data-cm-match-v1="1"] .flm-panel-head strong{font-size:8px!important;color:#ffd66a}
+.flm-live-match[data-cm-match-v1="1"] .flm-commentary-feed{height:min(58vh,510px)!important;gap:2px!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-commentary-line{
+  grid-template-columns:38px 1fr!important;
+  padding:7px 8px!important;
+  border-radius:0!important;
+  border-width:0 0 1px!important;
+  border-color:rgba(255,255,255,.055)!important;
+  background:transparent!important;
+  font-size:11px;
+}
+.flm-live-match[data-cm-match-v1="1"] .flm-commentary-line b{color:#d4aa3f!important;font-size:10px}
+.flm-live-match[data-cm-match-v1="1"] .flm-commentary-line.goal{background:rgba(239,185,63,.11)!important;border-left:3px solid #efb93f!important;font-weight:900}
+.flm-live-match[data-cm-match-v1="1"] .flm-commentary-line.red{background:rgba(190,45,45,.12)!important;border-left:3px solid #d14949!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-commentary-line.injury{background:rgba(215,127,40,.08)!important;border-left:3px solid #d68032!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-side-stack{gap:8px!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-side-stack > .flm-panel:nth-child(2){display:none!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-stat-list{gap:0!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-stat-row{
+  padding:7px 2px;
+  border-bottom:1px solid rgba(255,255,255,.055);
+  grid-template-columns:42px 1fr 42px!important;
+}
+.flm-live-match[data-cm-match-v1="1"] .flm-stat-row strong{font-size:12px}
+.flm-live-match[data-cm-match-v1="1"] .flm-stat-row span{font-size:9px!important;color:#8d867b;opacity:1!important}
+.flm-live-match[data-cm-match-v1="1"] > .career-match-actions{display:none!important}
+.flm-live-match[data-cm-match-v1="1"] > .flm-ht-card{grid-area:halftime;border-radius:2px!important}
+.flm-live-match[data-cm-match-v1="1"] > .flm-ft-card{grid-area:fulltime;border-radius:2px!important}
+
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="stats"] > .flm-live-grid,
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="report"] > .flm-live-grid{grid-template-columns:1fr!important}
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="stats"] > .flm-live-grid > .flm-panel{display:none!important}
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="stats"] .flm-side-stack{display:block!important}
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="stats"] .flm-side-stack > .flm-panel:first-child{min-height:360px}
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="stats"] .flm-stat-row{grid-template-columns:110px 1fr 110px!important;padding:12px 18px}
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="stats"] .flm-stat-row strong{font-size:18px}
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="stats"] .flm-stat-row span{font-size:11px!important}
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="report"] .flm-side-stack{display:none!important}
+.flm-live-match[data-cm-match-v1="1"][data-cm-view="report"] .flm-commentary-feed{height:min(66vh,610px)!important}
+
+.flm-live-match[data-cm-match-v1="1"] .flm-match-modal{border-radius:2px!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-match-dialog{border-radius:3px!important}
+.flm-live-match[data-cm-match-v1="1"] .flm-goal-flash{border-radius:2px!important}
+
+@media(max-width:980px){
+  .flm-live-match[data-cm-match-v1="1"]{
+    grid-template-columns:1fr!important;
+    grid-template-areas:"score" "tabs" "rail" "content" "halftime" "fulltime";
+  }
+  .flm-cm-match-rail{min-height:0;grid-template-columns:repeat(3,minmax(0,1fr));position:sticky;top:0;z-index:8}
+  .flm-cm-rail-label{grid-column:1/-1;padding-bottom:3px}
+  .flm-cm-speed{grid-column:1/-1;grid-template-columns:auto repeat(3,70px);align-items:center;margin-top:2px;padding-top:5px}
+  .flm-cm-speed span{grid-column:auto}
+}
+@media(max-width:720px){
+  .flm-cm-prematch-tabs,.flm-cm-match-tabs{display:flex;overflow-x:auto;scrollbar-width:none}
+  .flm-cm-prematch-tabs::-webkit-scrollbar,.flm-cm-match-tabs::-webkit-scrollbar{display:none}
+  .flm-cm-prematch-tabs button,.flm-cm-match-tabs button{flex:0 0 auto;min-width:126px;min-height:39px;font-size:8px}
+  .flm-live-match[data-cm-match-v1="1"] > .flm-live-scoreboard{padding:9px 8px!important;gap:6px!important}
+  .flm-live-match[data-cm-match-v1="1"] .flm-live-team strong{font-size:14px!important}
+  .flm-live-match[data-cm-match-v1="1"] .flm-live-team small{font-size:6px!important}
+  .flm-live-match[data-cm-match-v1="1"] .flm-live-score b{font-size:28px!important}
+  .flm-cm-match-rail{grid-template-columns:repeat(2,minmax(0,1fr));padding:6px}
+  .flm-cm-match-rail > button{min-height:36px;font-size:8px;text-align:center}
+  .flm-cm-match-rail > .flm-cm-primary-control{grid-column:1/-1}
+  .flm-cm-speed{grid-template-columns:1fr repeat(3,1fr)}
+  .flm-live-match[data-cm-match-v1="1"] > .flm-live-grid{grid-template-columns:1fr!important}
+  .flm-live-match[data-cm-match-v1="1"] .flm-side-stack{display:none}
+  .flm-live-match[data-cm-match-v1="1"][data-cm-view="stats"] .flm-side-stack{display:block}
+  .flm-live-match[data-cm-match-v1="1"] .flm-commentary-feed{height:43vh!important}
+}
