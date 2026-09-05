@@ -31,12 +31,23 @@ const players = clubs.flatMap((club, clubIndex) => groups.map((group, playerInde
 })));
 const db = { clubs, players };
 
-test('round robin gives eight clubs seven rounds and every pairing once', () => {
+test('double round robin gives eight clubs 14 matchweeks and every pairing home and away', () => {
   const rounds = createFixtures(clubs.map(club => club.id));
-  assert.equal(rounds.length, 7);
+  assert.equal(rounds.length, 14);
   assert.ok(rounds.every(round => round.length === 4));
-  const pairings = rounds.flat().map(fixture => [fixture.homeClubId, fixture.awayClubId].sort().join(':'));
-  assert.equal(new Set(pairings).size, 28);
+  const pairings = new Map();
+  for (const fixture of rounds.flat()) {
+    const key = [fixture.homeClubId, fixture.awayClubId].sort().join(':');
+    const list = pairings.get(key) || [];
+    list.push(fixture);
+    pairings.set(key, list);
+  }
+  assert.equal(pairings.size, 28);
+  for (const matches of pairings.values()) {
+    assert.equal(matches.length, 2);
+    assert.equal(matches[0].homeClubId, matches[1].awayClubId);
+    assert.equal(matches[0].awayClubId, matches[1].homeClubId);
+  }
 });
 
 test('auto pick creates a legal balanced XI', () => {
@@ -51,21 +62,21 @@ test('invalid lineup cannot be saved', () => {
   assert.throws(() => updateLineup(career, career.lineupIds.slice(0, 10), players), /exactly 11/);
 });
 
-test('a deterministic seven-round season updates every club and completes', () => {
+test('a deterministic 14-matchweek season updates every club and completes', () => {
   let first = createCareer({ clubId: clubs[0].id, clubs, players, seed: 'fixed-season' });
   let second = createCareer({ clubId: clubs[0].id, clubs, players, seed: 'fixed-season' });
   assert.ok(getNextFixture(first));
-  for (let round = 0; round < 7; round += 1) {
+  for (let round = 0; round < 14; round += 1) {
     first = simulateNextRound(first, db);
     second = simulateNextRound(second, db);
   }
   assert.equal(first.status, 'complete');
   assert.equal(getNextFixture(first), null);
   assert.deepEqual(first.fixtures, second.fixtures);
-  assert.ok(first.table.every(row => row.played === 7));
+  assert.ok(first.table.every(row => row.played === 14));
   assert.equal(first.table.reduce((total, row) => total + row.won, 0), first.table.reduce((total, row) => total + row.lost, 0));
   const totalPoints = first.table.reduce((total, row) => total + row.points, 0);
-  assert.ok(totalPoints >= 56 && totalPoints <= 84);
+  assert.ok(totalPoints >= 112 && totalPoints <= 168);
   assert.equal(sortedTable(first.table).length, 8);
 });
 
@@ -73,4 +84,13 @@ test('career saves round trip and reject unknown versions', () => {
   const career = createCareer({ clubId: clubs[2].id, clubs, players, seed: 'save-test' });
   assert.deepEqual(parseCareer(serializeCareer(career), db), career);
   assert.throws(() => parseCareer({ ...career, version: 99 }, db), /unsupported/);
+});
+
+test('legacy single-round saves are upgraded with a return leg', () => {
+  const career = createCareer({ clubId: clubs[1].id, clubs, players, seed: 'legacy-test' });
+  const legacy = { ...career, version: 1, fixtures: career.fixtures.slice(0, 7) };
+  const upgraded = parseCareer(legacy, db);
+  assert.equal(upgraded.version, 2);
+  assert.equal(upgraded.fixtures.length, 14);
+  assert.equal(upgraded.competitionFormat, 'double-round-robin');
 });
