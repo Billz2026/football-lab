@@ -1,0 +1,185 @@
+/* Football Lab Match Centre V4.3 — commentary, full-time and management cohesion */
+
+/* V4.1 renders the cleaned commentary through ::after. V4.2 accidentally restored
+   the underlying text size on Fold, so both copies became visible. Keep one line only. */
+.flm-live-match[data-cm4="1"] .cm4-event>strong{
+  font-size:0!important;
+}
+.flm-live-match[data-cm4="1"] .cm4-event>strong::after{
+  font-size:clamp(18px,1.8vw,25px)!important;
+}
+@media (min-width:560px) and (max-width:900px){
+  .flm-live-match[data-cm4="1"] .cm4-event>strong{font-size:0!important}
+  .flm-live-match[data-cm4="1"] .cm4-event>strong::after{font-size:17px!important;line-height:1.22!important}
+}
+
+/* Full time is a state, not another live minute. Retire live management controls
+   and turn the primary rail action into the route back to the career screen. */
+.flm-live-match[data-cm43-full-time="1"] .cm4-rail [data-cm4-tactics],
+.flm-live-match[data-cm43-full-time="1"] .cm4-rail [data-cm4-subs],
+.flm-live-match[data-cm43-full-time="1"] .cm4-speed-label,
+.flm-live-match[data-cm43-full-time="1"] .cm4-speed{
+  display:none!important;
+}
+.flm-live-match[data-cm43-full-time="1"] [data-cm4-pause].cm43-continue{
+  display:grid!important;
+  place-items:center!important;
+  min-height:64px!important;
+  border-color:#f1cf4a!important;
+  background:linear-gradient(180deg,#f5d85c,#d9ad2f)!important;
+  color:#101820!important;
+  font-weight:950!important;
+  letter-spacing:.025em!important;
+  text-transform:uppercase!important;
+}
+.flm-live-match[data-cm43-full-time="1"] .cm4-minute{
+  background:#152e49!important;
+}
+.flm-live-match[data-cm43-full-time="1"] .cm43-full-time-event{
+  --event-color:#f1cf4a!important;
+}
+.flm-live-match[data-cm43-full-time="1"] .cm43-full-time-event .cm4-event-context{
+  background:#142b43!important;
+}
+.flm-live-match[data-cm43-full-time="1"] .cm43-full-time-event>strong{
+  background:linear-gradient(180deg,#0e2c48,#0a2035)!important;
+  color:#f1cf4a!important;
+}
+
+/* Management screens use the same visual language as the match centre. */
+.flm-live-match[data-cm4="1"] [data-manager-modal].is-open{
+  background:rgba(3,10,18,.97)!important;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog.v2-sub-dialog[data-cm43="1"]{
+  --cm43-navy:#071725;
+  --cm43-panel:#0a2034;
+  --cm43-panel-2:#0d2943;
+  --cm43-line:#244b6a;
+  --cm43-gold:#f1cf4a;
+  --cm43-cyan:#5ec2f2;
+  background:var(--cm43-navy)!important;
+  border-color:var(--cm43-line)!important;
+  color:#f5f7fa!important;
+  box-shadow:0 24px 80px rgba(0,0,0,.55)!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .flm-dialog-head{
+  padding:8px 10px!important;
+  border-bottom:1px solid var(--cm43-line)!important;
+  background:linear-gradient(180deg,#0e2b46,#091d30)!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .flm-dialog-head p{
+  color:var(--cm43-gold)!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .flm-dialog-head button{
+  border-color:#355f80!important;
+  background:#0a1d30!important;
+  color:#fff!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .flm-sub-status{
+  border:1px solid #214563!important;
+  background:#081d30!important;
+  color:#dce7ef!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-column{
+  border-color:#1e4565!important;
+  background:#061523!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-column-head{
+  border-bottom-color:#244b6a!important;
+  background:linear-gradient(180deg,#10304d,#0b243b)!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-column-head strong{
+  color:#f5f7fa!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-column-head span{
+  color:#94adc0!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player{
+  border-bottom-color:#17364f!important;
+  background:#081a2a!important;
+  color:#f4f7fa!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player:hover{
+  background:#0d2942!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player .pos{
+  color:var(--cm43-gold)!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player small{
+  color:#a7bac8!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player.is-selected-out{
+  background:#4b2028!important;
+  box-shadow:inset 5px 0 var(--home-color,#ef4b55)!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player.is-selected-in{
+  background:#0b3858!important;
+  box-shadow:inset 5px 0 var(--cm43-cyan)!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-fit.natural{color:#77d69a!important}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-fit.cover{color:#f1cf4a!important}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-fit.poor{color:#ee8686!important}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .cm32-fit-group{
+  border-color:#244b6a!important;
+  background:#0d2943!important;
+  color:#b7cee0!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-plan{
+  border-color:#365d78!important;
+  background:#0b2135!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-plan span{
+  color:#9bb2c4!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-plan em{
+  color:var(--cm43-gold)!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .flm-dialog-actions{
+  border-top:1px solid #244b6a!important;
+  background:#071725!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .flm-dialog-actions button{
+  border-color:#355b79!important;
+  background:#0c2237!important;
+  color:#fff!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] [data-apply-sub]{
+  border-color:#f1cf4a!important;
+  background:linear-gradient(180deg,#f5d85c,#d9ad2f)!important;
+  color:#0f1820!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] [data-apply-sub]:disabled{
+  opacity:.5!important;
+  filter:saturate(.55)!important;
+}
+
+/* The old density helper inserts repeated BENCH strips inside the new two-column
+   selector. They duplicate information and consume the space needed for the XI. */
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .cm332-bench-preview{
+  display:none!important;
+}
+
+/* On an unfolded Fold, all eleven starting players must be visible at once. */
+@media (min-width:560px) and (max-width:900px){
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-column:first-child .v2-sub-list{
+    display:grid!important;
+    grid-template-rows:repeat(11,minmax(31px,1fr))!important;
+    align-content:stretch!important;
+    overflow:hidden!important;
+  }
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-column:first-child .v2-sub-player{
+    min-height:0!important;
+    height:auto!important;
+    padding:2px 6px!important;
+  }
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player{
+    min-height:34px!important;
+    grid-template-columns:38px minmax(0,1fr) 48px!important;
+    gap:5px!important;
+    padding:3px 6px!important;
+  }
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player strong{font-size:10px!important}
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player .pos{font-size:8.5px!important}
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-player small{font-size:8px!important}
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm43="1"] .v2-sub-fit{font-size:6.5px!important}
+}
