@@ -1,8 +1,8 @@
 // Football Lab's API-Football squad feed does not provide a trustworthy market-value field
 // and its imported CA is explicitly low-confidence. These reviewed reputation floors stop
 // globally established stars being priced like ordinary squad players when the baseline CA
-// underrates them. Runtime club audits can also supply a reviewed GBP gameplay value floor.
-// These are gameplay calibrations, not copied transfer fees.
+// underrates them. Runtime club audits can also supply a reviewed GBP gameplay value floor
+// and a real-world squad-importance score. These are gameplay calibrations, not copied fees.
 // Review date: 2026-09-05. Re-review when the player database is refreshed.
 
 export const MARKET_REPUTATION_REVIEW_DATE = '2026-09-05';
@@ -53,17 +53,26 @@ function staticReference(player) {
   return REFERENCES.find(reference => matches(player, reference.aliases)) || null;
 }
 
+function auditedImportanceTier(player) {
+  const score = Number(player?.importanceScore ?? player?.audit?.importance ?? 0);
+  // 90+ means a genuinely central first-team player in the audited club context.
+  // It should make the selling club resistant without falsely labelling every key
+  // starter a global superstar or forcing an elite ability calibration.
+  return score >= 90 ? 'squad-key' : null;
+}
+
 export function marketReputationReference(player) {
   if (!player) return null;
   const staticRef = staticReference(player);
-  const auditedTier = player?.audit?.marketTier || null;
+  const auditedTier = player?.audit?.marketTier || auditedImportanceTier(player);
   if (!staticRef && !auditedTier) return null;
 
   return {
     ...(staticRef || { aliases: [player.lastName || player.name] }),
     floor: Math.max(Number(staticRef?.floor || 0), Number(player?.auditedMarketValue || player?.audit?.valueFloor || 0)),
-    tier: auditedTier || staticRef?.tier || null,
-    audited: Boolean(auditedTier)
+    tier: player?.audit?.marketTier || staticRef?.tier || auditedTier,
+    audited: Boolean(player?.audit),
+    importance: Number(player?.importanceScore ?? player?.audit?.importance ?? 0)
   };
 }
 
@@ -75,5 +84,5 @@ export function marketValueFloor(player) {
 }
 
 export function marketReputationTier(player) {
-  return player?.audit?.marketTier || staticReference(player)?.tier || null;
+  return player?.audit?.marketTier || staticReference(player)?.tier || auditedImportanceTier(player);
 }
