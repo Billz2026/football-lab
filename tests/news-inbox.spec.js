@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(60000);
+test.setTimeout(90000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -8,14 +8,27 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+async function continueUntil(page, targetDate, maxSteps = 30) {
+  for (let step = 0; step < maxSteps; step += 1) {
+    const current = await page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '');
+    if (current >= targetDate) return;
+    await page.locator('.career-header [data-v060-continue]').click();
+    await page.waitForTimeout(80);
+  }
+  throw new Error(`Continue Game did not reach ${targetDate}`);
+}
+
 async function completePreseason(page) {
-  await page.locator('[data-v047-preseason-tab]').click();
+  const dates = ['2026-07-11','2026-07-18','2026-07-25','2026-08-01','2026-08-08'];
   for (let count = 1; count <= 5; count += 1) {
+    await continueUntil(page, dates[count - 1]);
+    await page.locator('[data-v047-preseason-tab]').click();
+    await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
     await page.locator('[data-v047-sim]').click();
     await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count);
   }
   await page.locator('[data-v047-start]').click();
-  await expect(page.getByRole('button', { name: 'Matchday', exact: true })).toBeEnabled();
+  await continueUntil(page, '2026-08-21');
 }
 
 test('News & Inbox persists read state and generates pre-season plus real round stories', async ({ page }) => {
