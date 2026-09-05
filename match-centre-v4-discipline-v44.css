@@ -41,7 +41,8 @@
 }
 .flm-live-match[data-cm44-state="halftime"] [data-cm4-phase]::after{
   content:'HALF TIME';
-  font-size:inherit!important;
+  font-size:21px!important;
+  font-weight:950!important;
   color:#f1cf4a;
 }
 .flm-live-match[data-cm44-state="halftime"] [data-cm4-half]::after{
@@ -76,7 +77,8 @@
 }
 .flm-live-match[data-cm44-state="fulltime"] [data-cm4-phase]::after{
   content:'FULL TIME';
-  font-size:inherit!important;
+  font-size:21px!important;
+  font-weight:950!important;
   color:#f1cf4a;
 }
 .flm-live-match[data-cm44-state="fulltime"] [data-cm4-half]::after{
@@ -228,6 +230,8 @@
   .flm-live-match[data-cm4="1"] .cm4-event>strong::after{font-size:17px!important;line-height:1.22!important}
   .flm-live-match[data-cm4="1"] .cm4-event[data-cm44-type="yellow"]>strong::after,
   .flm-live-match[data-cm4="1"] .cm4-event[data-cm44-type="red"]>strong::after{font-size:22px!important}
+  .flm-live-match[data-cm44-state="halftime"] [data-cm4-phase]::after,
+  .flm-live-match[data-cm44-state="fulltime"] [data-cm4-phase]::after{font-size:18px!important}
   .flm-live-match[data-cm44-state="fulltime"] [data-cm4-pause]::after{font-size:10px!important}
   .cm44-continue-main{min-width:180px;min-height:38px;bottom:18px;font-size:10px}
 
