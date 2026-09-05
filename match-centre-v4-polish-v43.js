@@ -9,6 +9,10 @@ function ensureStyles(){
 }
 
 const clean = value => String(value || '').replace(/\s+/g,' ').trim();
+const POSITION_LABELS = Object.freeze({
+  DMC:'DM', AMC:'AM', MC:'CM', DC:'CB', DL:'LB', DR:'RB', AML:'LW', AMR:'RW',
+  WBL:'LWB', WBR:'RWB', SC:'ST', FC:'ST'
+});
 
 function fullTime(live){
   const clock = clean(live.querySelector('[data-live-clock]')?.textContent || live.querySelector('[data-cm4-clock]')?.textContent);
@@ -58,10 +62,19 @@ function syncFullTime(live,shell){
   }
 }
 
+function normalizePositionLabels(dialog){
+  dialog.querySelectorAll('.v2-sub-player .pos').forEach(node => {
+    const raw = clean(node.textContent).toUpperCase();
+    const normalized = POSITION_LABELS[raw];
+    if (normalized && node.textContent !== normalized) node.textContent = normalized;
+  });
+}
+
 function syncSubs(live){
   const dialog = live.querySelector('.flm-match-dialog.v2-sub-dialog');
   if (!dialog) return;
   dialog.dataset.cm43 = '1';
+  normalizePositionLabels(dialog);
 }
 
 function enhance(live){
