@@ -1,0 +1,189 @@
+/* Football Lab Match Centre V4.1 — Fold/tablet density and CM-style fit */
+.flm-live-match[data-cm4="1"] .cm4-scorebar{
+  position:sticky;
+  top:0;
+  z-index:120;
+  min-height:78px;
+  grid-template-columns:minmax(190px,1fr) 72px 126px 72px minmax(190px,1fr);
+}
+.flm-live-match[data-cm4="1"] .cm4-team{padding:0 20px}
+.flm-live-match[data-cm4="1"] .cm4-team strong{font-size:clamp(23px,2.2vw,36px)}
+.flm-live-match[data-cm4="1"] .cm4-scorebox{font-size:44px}
+.flm-live-match[data-cm4="1"] .cm4-clockbox{gap:3px}
+.flm-live-match[data-cm4="1"] .cm4-clockbox b{font-size:22px}
+.flm-live-match[data-cm4="1"] .cm4-clockbox span{font-size:8px}
+
+.flm-live-match[data-cm4="1"] .cm4-tabs button{
+  min-height:46px;
+  font-size:12px;
+}
+
+.flm-live-match[data-cm4="1"] .cm4-main{
+  grid-template-columns:118px minmax(0,1fr);
+  gap:6px;
+  min-height:0;
+}
+.flm-live-match[data-cm4="1"] .cm4-rail{
+  grid-auto-rows:auto;
+  align-self:start;
+}
+.flm-live-match[data-cm4="1"] .cm4-minute{min-height:62px;font-size:27px}
+.flm-live-match[data-cm4="1"] .cm4-rail>button{min-height:52px;font-size:11px}
+.flm-live-match[data-cm4="1"] .cm4-speed-label{min-height:55px;font-size:10px}
+.flm-live-match[data-cm4="1"] .cm4-speed button{min-height:42px;font-size:11px}
+
+.flm-live-match[data-cm4="1"] .cm4-panel{min-height:0}
+.flm-live-match[data-cm4="1"] .cm4-phase{
+  min-height:62px;
+  grid-template-rows:auto auto;
+  gap:4px;
+  padding:8px 16px 7px;
+}
+.flm-live-match[data-cm4="1"] .cm4-phase>strong{font-size:21px}
+.flm-live-match[data-cm4="1"] .cm4-phase>div{font-size:10px}
+
+.flm-live-match[data-cm4="1"] .cm4-stage{
+  min-height:310px;
+  padding:20px 26px;
+}
+.flm-live-match[data-cm4="1"] .cm4-event{
+  width:min(1040px,88%);
+  min-height:92px;
+}
+.flm-live-match[data-cm4="1"] .cm4-event-context{
+  min-height:29px;
+  padding:0 14px;
+}
+.flm-live-match[data-cm4="1"] .cm4-event-context span{font-size:12px}
+.flm-live-match[data-cm4="1"] .cm4-event-context small{font-size:8px}
+.flm-live-match[data-cm4="1"] .cm4-event>strong{
+  min-height:62px;
+  padding:11px 22px;
+  font-size:0!important;
+}
+.flm-live-match[data-cm4="1"] .cm4-event>strong::after{
+  content:attr(data-cm41-text);
+  display:block;
+  color:inherit;
+  font-size:clamp(18px,1.8vw,25px);
+  line-height:1.2;
+  font-weight:900;
+  text-align:center;
+}
+.flm-live-match[data-cm4="1"] .cm4-event.is-yellow>strong::after,
+.flm-live-match[data-cm4="1"] .cm4-event.is-red>strong::after{font-size:clamp(24px,2.4vw,34px)}
+
+.flm-live-match[data-cm4="1"] .cm4-pressure{
+  min-height:56px;
+  grid-template-columns:118px minmax(180px,1fr) 160px;
+  gap:12px;
+  padding:7px 16px;
+}
+.flm-live-match[data-cm4="1"] .cm4-pressure>strong{font-size:12px}
+.flm-live-match[data-cm4="1"] .cm4-pressure-track{height:24px}
+.flm-live-match[data-cm4="1"] .cm4-pressure>b{font-size:0;text-align:center}
+.flm-live-match[data-cm4="1"] .cm4-pressure>b::after{
+  content:attr(data-cm41-copy);
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.015em;
+}
+.flm-live-match[data-cm4="1"] .cm4-shell[data-cm41-pressure-clash="1"] .cm4-pressure-track .away{
+  background:linear-gradient(90deg,#173451,#0b2135)!important;
+}
+
+.flm-live-match[data-cm4="1"] .cm4-meta{
+  min-height:46px;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:14px;
+  padding:0 18px;
+  font-size:10px;
+}
+
+/* The large duplicate event line under the CM-style stage is deliberately retired. */
+.flm-live-match[data-cm4="1"] .cm4-bottom-player{display:none!important}
+
+/* Keep the classic vertical control rail on unfolded Fold/tablet widths. */
+@media (min-width:561px) and (max-width:900px){
+  .flm-live-match[data-cm4="1"] .cm4-shell{gap:4px}
+  .flm-live-match[data-cm4="1"] .cm4-scorebar{
+    grid-template-columns:minmax(125px,1fr) 54px 96px 54px minmax(125px,1fr);
+    min-height:68px;
+  }
+  .flm-live-match[data-cm4="1"] .cm4-team{padding:0 11px}
+  .flm-live-match[data-cm4="1"] .cm4-team strong{font-size:20px}
+  .flm-live-match[data-cm4="1"] .cm4-scorebox{font-size:34px}
+  .flm-live-match[data-cm4="1"] .cm4-clockbox b{font-size:17px}
+  .flm-live-match[data-cm4="1"] .cm4-clockbox span{font-size:6.5px}
+
+  .flm-live-match[data-cm4="1"] .cm4-tabs{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    overflow:visible!important;
+  }
+  .flm-live-match[data-cm4="1"] .cm4-tabs button{
+    min-width:0!important;
+    min-height:40px!important;
+    font-size:9.5px!important;
+  }
+
+  .flm-live-match[data-cm4="1"] .cm4-main{
+    display:grid!important;
+    grid-template-columns:100px minmax(0,1fr)!important;
+    gap:4px!important;
+    min-height:0!important;
+  }
+  .flm-live-match[data-cm4="1"] .cm4-rail{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-auto-rows:auto!important;
+    overflow:hidden!important;
+    position:relative!important;
+  }
+  .flm-live-match[data-cm4="1"] .cm4-minute{min-height:54px!important;font-size:22px!important}
+  .flm-live-match[data-cm4="1"] .cm4-rail>button{min-height:45px!important;font-size:9.5px!important}
+  .flm-live-match[data-cm4="1"] .cm4-speed-label{min-height:48px!important;font-size:8.5px!important}
+  .flm-live-match[data-cm4="1"] .cm4-speed{display:grid!important;grid-template-columns:1fr!important}
+  .flm-live-match[data-cm4="1"] .cm4-speed button{min-height:36px!important;font-size:9.5px!important}
+
+  .flm-live-match[data-cm4="1"] .cm4-panel{min-height:0!important}
+  .flm-live-match[data-cm4="1"] .cm4-phase{min-height:54px!important;padding:6px 12px!important;gap:2px!important}
+  .flm-live-match[data-cm4="1"] .cm4-phase>strong{font-size:18px!important}
+  .flm-live-match[data-cm4="1"] .cm4-phase>div{font-size:8.5px!important}
+  .flm-live-match[data-cm4="1"] .cm4-stage{min-height:268px!important;padding:14px 14px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event{width:94%!important;min-height:82px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event-context{min-height:26px!important;padding:0 10px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event-context span{font-size:10px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event-context small{font-size:7px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event>strong{min-height:56px!important;padding:8px 12px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event>strong::after{font-size:16px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event.is-yellow>strong::after,
+  .flm-live-match[data-cm4="1"] .cm4-event.is-red>strong::after{font-size:22px!important}
+
+  .flm-live-match[data-cm4="1"] .cm4-pressure{
+    grid-template-columns:96px minmax(120px,1fr) 134px!important;
+    min-height:50px!important;
+    gap:8px!important;
+    padding:5px 10px!important;
+  }
+  .flm-live-match[data-cm4="1"] .cm4-pressure>strong{font-size:10px!important}
+  .flm-live-match[data-cm4="1"] .cm4-pressure-track{height:21px!important}
+  .flm-live-match[data-cm4="1"] .cm4-pressure>b{grid-column:auto!important}
+  .flm-live-match[data-cm4="1"] .cm4-pressure>b::after{font-size:9px!important}
+
+  .flm-live-match[data-cm4="1"] .cm4-meta{
+    grid-template-columns:1fr 1fr 1fr!important;
+    min-height:40px!important;
+    gap:8px!important;
+    padding:0 10px!important;
+    font-size:8px!important;
+  }
+  .flm-live-match[data-cm4="1"] .cm4-meta span:nth-child(2){text-align:center!important}
+  .flm-live-match[data-cm4="1"] .cm4-meta span:last-child{text-align:right!important}
+}
+
+/* Truly narrow phones can still collapse the controls horizontally. */
+@media (max-width:560px){
+  .flm-live-match[data-cm4="1"] .cm4-scorebar{position:relative;top:auto}
+  .flm-live-match[data-cm4="1"] .cm4-bottom-player{display:none!important}
+}
