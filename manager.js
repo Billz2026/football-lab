@@ -12,3 +12,4 @@ import './career-world-v060.js?v=0.6.0';
 import './career-transfers-gate-v054.js?v=0.6.0';
 import './career-dynamics-sync-v062.js?v=0.6.2';
 import './career-dynamics-ui-v062.js?v=0.6.2';
+import './career-transfer-dynamics-v062.js?v=0.6.2';
