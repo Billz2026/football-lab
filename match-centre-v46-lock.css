@@ -1,0 +1,239 @@
+/* Football Lab Match Centre V4.6 — final presentation lock */
+
+/* Persistent scorers: keep the minute physically attached to the scorer name. */
+.cm45-scorers[data-cm46="1"] section{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:3px!important;
+}
+.cm45-scorers[data-cm46="1"] section.away{align-items:flex-end!important;text-align:right!important}
+.cm45-scorers[data-cm46="1"] .cm45-scorer-row,
+.cm45-scorers[data-cm46="1"] .cm46-scorer-row{
+  width:max-content!important;
+  max-width:100%!important;
+  min-height:24px!important;
+  display:inline-flex!important;
+  grid-template-columns:none!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:7px!important;
+  padding:3px 8px!important;
+  background:rgba(4,10,15,.78)!important;
+  border-radius:2px!important;
+}
+.cm45-scorers[data-cm46="1"] section.away .cm45-scorer-row,
+.cm45-scorers[data-cm46="1"] section.away .cm46-scorer-row{justify-content:flex-end!important}
+.cm45-scorers[data-cm46="1"] section.away .cm45-scorer-row strong,
+.cm45-scorers[data-cm46="1"] section.away .cm45-scorer-row span,
+.cm45-scorers[data-cm46="1"] section.away .cm46-scorer-row strong,
+.cm45-scorers[data-cm46="1"] section.away .cm46-scorer-row span{
+  grid-column:auto!important;
+  grid-row:auto!important;
+}
+.cm45-scorers[data-cm46="1"] .cm45-scorer-row strong{font-size:13px!important}
+.cm45-scorers[data-cm46="1"] .cm45-scorer-row span{font-size:12px!important}
+
+/* Routine commentary is compact. Major incidents are allowed to own more space. */
+.flm-live-match[data-cm4="1"] .cm4-event[data-cm46-major="0"]{
+  width:min(900px,76%)!important;
+  min-height:86px!important;
+}
+.flm-live-match[data-cm4="1"] .cm4-event[data-cm46-major="0"] .cm4-event-context{min-height:28px!important}
+.flm-live-match[data-cm4="1"] .cm4-event[data-cm46-major="0"]>strong{min-height:58px!important;padding:10px 20px!important}
+.flm-live-match[data-cm4="1"] .cm4-event[data-cm46-major="0"]>strong::after{font-size:clamp(17px,1.55vw,23px)!important}
+.flm-live-match[data-cm4="1"] .cm4-event[data-cm46-major="1"]{width:min(1060px,86%)!important;min-height:112px!important}
+
+/* One coherent goal package — no disconnected white splash. */
+.cm45-goal-overlay.is-visible{
+  background:rgba(2,8,14,.64)!important;
+  backdrop-filter:blur(2px);
+}
+.cm45-goal-card{
+  border:1px solid rgba(255,255,255,.45)!important;
+  border-top:6px solid var(--home-color,#d6454f)!important;
+  background:linear-gradient(180deg,#0d2133,#071522)!important;
+  color:#fff!important;
+}
+.cm45-goal-overlay.away .cm45-goal-card{border-top-color:var(--away-color,#5aa9df)!important}
+.cm45-goal-card.announce{
+  background:linear-gradient(180deg,#10283e,#071724)!important;
+  color:#fff!important;
+}
+.cm45-goal-card.announce strong{color:#fff!important;text-shadow:0 2px 4px #0008}
+.cm45-goal-card.scorer,
+.cm45-goal-card.result{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--home-color) 70%,#071724),#071724 72%)!important;
+}
+.cm45-goal-overlay.away .cm45-goal-card.scorer,
+.cm45-goal-overlay.away .cm45-goal-card.result{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--away-color) 70%,#071724),#071724 72%)!important;
+}
+
+/* Pre-season has one authoritative play action. */
+.v047-actions[data-cm46-shell-play="1"]{grid-template-columns:1fr!important}
+.v047-actions [data-v047-play][data-cm46-hidden="1"]{display:none!important}
+.cm46-ready-note{
+  grid-column:1/-1;
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  padding:8px 10px;
+  border:1px solid #314f6d;
+  background:#0b2135;
+  color:#d8e8f4;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+.v047-actions[data-cm46-shell-play="1"] [data-v047-sim]{border-color:#4b6782!important;background:#10263a!important;color:#eaf2f8!important}
+
+/* Management context keeps Tactics/Subs anchored to the match rather than looking like admin dialogs. */
+.cm46-manager-context{
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:-4px 0 10px;
+  border-top:1px solid #284761;
+  border-bottom:1px solid #284761;
+  background:#091c2d;
+  color:#f2d952;
+  font:900 11px Tahoma,Verdana,Arial,sans-serif;
+  letter-spacing:.03em;
+  text-align:center;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog]{
+  width:min(1220px,96vw)!important;
+  max-height:94dvh!important;
+  border-radius:3px!important;
+  border-color:#2c506d!important;
+  background:#071725!important;
+  color:#f3f6f9!important;
+  box-shadow:0 26px 90px #000b!important;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog] .flm-dialog-head{
+  margin-bottom:8px!important;
+  padding:10px 12px!important;
+  border-bottom:1px solid #2c506d!important;
+  background:linear-gradient(180deg,#11304b,#0a2034)!important;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog] .flm-dialog-head h3{color:#fff!important}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog] .flm-dialog-head p{color:#f2d952!important}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog] .flm-dialog-actions{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:8!important;
+  margin-top:10px!important;
+  padding:10px 12px!important;
+  border-top:1px solid #2a4c68!important;
+  background:#071725f2!important;
+}
+
+/* Tactics gets the same Match Centre language and uses the available space. */
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-preset-row{
+  gap:8px!important;
+  margin:10px 0 14px!important;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-preset-row button{
+  min-height:46px!important;
+  border:1px solid #31597a!important;
+  border-radius:2px!important;
+  background:#0d2942!important;
+  color:#edf3f8!important;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-preset-row button:hover{border-color:#f2d952!important;color:#f2d952!important}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-tactic-form{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-tactic-field{
+  padding:10px!important;
+  border:1px solid #244866!important;
+  background:#0a1f32!important;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-tactic-field span{color:#9cb5c8!important;opacity:1!important}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-tactic-field select{
+  border-color:#355d7b!important;
+  border-radius:2px!important;
+  background:#0c2942!important;
+  color:#fff!important;
+}
+.flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] [data-apply-live-tactics]{
+  border-color:#f2d952!important;
+  background:linear-gradient(180deg,#f6df63,#d7b52e)!important;
+  color:#0b1620!important;
+}
+
+/* Subs: player identity first, then condition/rating. */
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player{
+  grid-template-columns:42px minmax(0,1fr) 58px 42px!important;
+  min-height:44px!important;
+  padding:5px 8px!important;
+  gap:6px!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player strong{
+  font-size:12px!important;
+  font-weight:950!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player .pos{font-size:8px!important;color:#f2d952!important}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player small{font-size:8px!important}
+.cm46-rating{
+  min-width:32px;
+  justify-self:end;
+  padding:3px 5px;
+  border:1px solid #355d7b;
+  background:#0c2942;
+  color:#fff;
+  font-size:9px;
+  font-weight:950;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.cm46-card{
+  position:absolute;
+  right:4px;
+  top:4px;
+  min-width:19px;
+  padding:2px 3px;
+  font-size:7px;
+  font-weight:1000;
+  text-align:center;
+}
+.cm46-card.yellow{background:#f5df33;color:#151515}.cm46-card.red{background:#d51f2f;color:#fff}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player{position:relative!important}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-plan{
+  min-height:62px!important;
+  border-color:#315875!important;
+  background:#0a1f32!important;
+}
+.flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] [data-apply-sub]{
+  min-width:260px!important;
+  border-color:#f2d952!important;
+  background:linear-gradient(180deg,#f6df63,#d7b52e)!important;
+  color:#0a1620!important;
+  font-weight:950!important;
+}
+
+@media (min-width:560px) and (max-width:900px){
+  .cm45-scorers[data-cm46="1"] .cm45-scorer-row,
+  .cm45-scorers[data-cm46="1"] .cm46-scorer-row{min-height:20px!important;padding:2px 5px!important;gap:4px!important}
+  .cm45-scorers[data-cm46="1"] .cm45-scorer-row strong{font-size:10px!important}
+  .cm45-scorers[data-cm46="1"] .cm45-scorer-row span{font-size:9px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event[data-cm46-major="0"]{width:78%!important;min-height:72px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event[data-cm46-major="0"]>strong{min-height:46px!important;padding:7px 12px!important}
+  .flm-live-match[data-cm4="1"] .cm4-event[data-cm46-major="0"]>strong::after{font-size:15px!important}
+  .flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog]{width:98vw!important;max-height:96dvh!important;padding:8px!important}
+  .cm46-manager-context{min-height:30px;margin:-2px 0 6px;font-size:9px}
+  .flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-tactic-form{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player{grid-template-columns:34px minmax(0,1fr) 46px 34px!important;min-height:32px!important;padding:2px 5px!important}
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player strong{font-size:10.5px!important}
+  .cm46-rating{font-size:7.5px!important;min-width:28px;padding:2px 3px}
+}
+
+@media (max-width:559px){
+  .flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog]{width:100%!important;max-height:100dvh!important;border-radius:0!important}
+  .flm-live-match[data-cm4="1"] .flm-match-dialog[data-cm46-dialog="tactics"] .flm-tactic-form{grid-template-columns:1fr!important}
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player{grid-template-columns:32px minmax(0,1fr) 42px 32px!important}
+  .cm46-ready-note{display:none!important}
+}
