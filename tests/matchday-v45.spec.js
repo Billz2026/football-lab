@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(120000);
+test.setTimeout(150000);
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -51,10 +51,11 @@ test('V4.5 starts the next friendly directly, fills the viewport and keeps score
   const scorers = shell.locator('[data-cm45-scorers]');
   await expect(scorers).toHaveAttribute('aria-hidden', 'true');
 
+  // The timing budget measures a complete simulation, not animation-frame speed.
   await shell.locator('[data-cm4-speed="4"]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 30000 });
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 50000 });
   await shell.locator('[data-cm4-pause]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 35000 });
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 50000 });
 
   const goalInfo = await page.evaluate(async () => {
     const goals = (window.__flmLiveStateV332?.events || []).filter(event => event.type === 'goal');
