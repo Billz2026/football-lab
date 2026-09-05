@@ -1,16 +1,16 @@
 {
-  "auditVersion": 1,
+  "auditVersion": 2,
   "reviewDate": "2026-09-05",
   "season": "2026/27",
   "clubId": "flm-club-api-football-36",
   "clubName": "Fulham",
   "status": "complete-factual-first-team",
   "membershipAuthority": {
-    "source": "Premier League post-window squad submission + 2026-09-05 Premier League matchday squad",
+    "source": "Premier League post-window squad submission + current Fulham squad/shop evidence",
     "published": "2026-09-03",
     "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
   },
-  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","note":"Dated external estimates; official registration and current matchday evidence override stale club ownership."},
+  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","note":"Dated external estimates; official registration and current club evidence override stale numbering."},
   "players": [
     {"name":"Bernd Leno","aliases":["Leno, Bernd"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":34,"nationalities":["GER"],"contractEnd":"2027-06-30","referenceMarketValueEur":6000000,"importanceScore":91,"squadStatus":"key-player"},
     {"name":"Benjamin Lecomte","aliases":["Lecomte, Benjamin"],"shirtNumber":23,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":35,"nationalities":["FRA"],"contractEnd":"2027-06-30","referenceMarketValueEur":800000,"importanceScore":34,"squadStatus":"backup"},
@@ -19,7 +19,7 @@
     {"name":"Joachim Andersen","aliases":["Andersen, Joachim Christian"],"shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":30,"nationalities":["DEN"],"contractEnd":"2029-06-30","referenceMarketValueEur":20000000,"importanceScore":91,"squadStatus":"key-player"},
     {"name":"Calvin Bassey","aliases":["Bassey, Calvin Ughelumba"],"shirtNumber":3,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":26,"nationalities":["NGA","ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":28000000,"importanceScore":92,"squadStatus":"key-player"},
     {"name":"David Affengruber","aliases":["Affengruber, David Leopold"],"shirtNumber":22,"primaryPosition":"DC","secondaryPositions":["DMC"],"positionGroup":"DEF","age":25,"nationalities":["AUT"],"contractEnd":null,"referenceMarketValueEur":20000000,"importanceScore":79,"squadStatus":"first-team"},
-    {"name":"Jorge Cuenca","aliases":["Cuenca Barreno, Jorge"],"shirtNumber":15,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":26,"nationalities":["ESP"],"contractEnd":"2028-06-30","referenceMarketValueEur":8000000,"importanceScore":58,"squadStatus":"rotation-first-team"},
+    {"name":"Jorge Cuenca","aliases":["Cuenca Barreno, Jorge"],"shirtNumber":4,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":26,"nationalities":["ESP"],"contractEnd":"2028-06-30","referenceMarketValueEur":8000000,"importanceScore":58,"squadStatus":"rotation-first-team"},
     {"name":"Timothy Castagne","aliases":["Castagne, Timothy"],"shirtNumber":21,"primaryPosition":"DR","secondaryPositions":["MR","DL"],"positionGroup":"DEF","age":30,"nationalities":["BEL"],"contractEnd":"2027-06-30","referenceMarketValueEur":8000000,"importanceScore":70,"squadStatus":"first-team"},
     {"name":"Kenny Tete","aliases":["Tete, Kenny Joelle"],"shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["DC","DL"],"positionGroup":"DEF","age":30,"nationalities":["NED","MOZ"],"contractEnd":"2028-06-30","referenceMarketValueEur":8000000,"importanceScore":61,"squadStatus":"rotation-first-team"},
     {"name":"Antonee Robinson","aliases":["Robinson, Antonee"],"shirtNumber":33,"primaryPosition":"DL","secondaryPositions":["ML"],"positionGroup":"DEF","age":28,"nationalities":["USA","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":22000000,"importanceScore":94,"squadStatus":"cornerstone"},
@@ -58,7 +58,8 @@
     "auditedSelectablePlayers": 26,
     "unresolvedSeniorOwnership": 0,
     "notes": [
-      "The 5 September matchday squad validates current shirt numbers for deadline arrivals Manuel Angel #20, Hugo Larsson #15 and David Affengruber #22, and confirms Josh King #24 as an active first-team U21 starter.",
+      "Current Fulham first-team/shop evidence confirms Jorge Cuenca #4 and deadline signing Hugo Larsson #15; the older Cuenca #15 assignment is obsolete.",
+      "Deadline arrivals Manuel Angel #20 and David Affengruber #22 remain current, and Josh King #24 is an active first-team U21.",
       "Michael Allen is correctly classified as a goalkeeper using Fulham's own academy profile.",
       "Terrell Works is registered as senior depth and is positionally classified as an adaptable left winger/forward using Fulham's own profile.",
       "Importance scores are Football Lab gameplay calibration, not factual external ratings."
