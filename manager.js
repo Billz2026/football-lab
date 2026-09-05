@@ -10,3 +10,4 @@ import './career-season-v051.js?v=0.5.1';
 import './career-interactions-v053.js?v=0.5.3';
 import './career-world-v060.js?v=0.6.0';
 import './career-transfers-gate-v054.js?v=0.6.0';
+import './career-dynamics-ui-v062.js?v=0.6.2';
