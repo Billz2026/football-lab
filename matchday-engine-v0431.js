@@ -2,6 +2,7 @@ import './match-centre-v0451.js?v=0.4.5.1';
 import {
   ROLE_DEFINITIONS,
   advanceInteractiveMatch as baseAdvanceInteractiveMatch,
+  completeInteractiveRound as baseCompleteInteractiveRound,
   createInteractiveMatch as baseCreateInteractiveMatch,
   getUserShape,
   makeSubstitution as baseMakeSubstitution
@@ -14,7 +15,6 @@ export {
   TACTIC_OPTIONS,
   assignPlayersToFormation,
   changeTactics,
-  completeInteractiveRound,
   getOpponentSnapshot,
   getUserShape,
   setPlayerDuty,
@@ -22,10 +22,18 @@ export {
   swapShapePlayers
 } from './matchday-engine-v043.js';
 
-export const LIVE_ENGINE_VERSION = 8;
+export const LIVE_ENGINE_VERSION = 9;
+export const XG_MODEL = Object.freeze({
+  version: 1,
+  method: 'shot-derived-contextual',
+  spatial: false,
+  bigChanceThreshold: 0.30
+});
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const round2 = value => Math.round(Number(value || 0) * 100) / 100;
+const SHOT_TYPES = new Set(['goal', 'save', 'woodwork', 'miss', 'corner']);
 
 function playerById(db, id) {
   return db.players.find(player => player.id === id);
@@ -87,17 +95,122 @@ function adjustedDatabase(db, userClubId, factor) {
   };
 }
 
+function ensureXgState(state) {
+  if (!state?.stats) return state;
+  for (const side of ['home', 'away']) {
+    state.stats[side] ||= {};
+    if (!Number.isFinite(state.stats[side].xG)) state.stats[side].xG = 0;
+    if (!Number.isFinite(state.stats[side].bigChances)) state.stats[side].bigChances = 0;
+    if (!Number.isFinite(state.stats[side].xgShots)) state.stats[side].xgShots = 0;
+  }
+  state.xgModel ||= {
+    version: XG_MODEL.version,
+    method: XG_MODEL.method,
+    spatial: XG_MODEL.spatial,
+    note: 'Shot coordinates are not yet simulated; xG is derived from generated chance context.'
+  };
+  return state;
+}
+
+function exposeXg(state) {
+  if (typeof window === 'undefined' || !state?.stats) return;
+  window.__flmLiveXg = {
+    fixtureId: state.fixtureId,
+    minute: state.minute,
+    home: round2(state.stats.home.xG),
+    away: round2(state.stats.away.xG),
+    homeBigChances: state.stats.home.bigChances || 0,
+    awayBigChances: state.stats.away.bigChances || 0,
+    model: state.xgModel
+  };
+  window.dispatchEvent(new CustomEvent('flm:live-xg', { detail: window.__flmLiveXg }));
+}
+
+function chanceText(event) {
+  return `${event?.text || ''} ${(event?.lines || []).join(' ')}`.toLowerCase();
+}
+
+function contextualXg(event) {
+  const text = chanceText(event);
+  // Chance quality is based on the situation that generated the attempt. The
+  // outcome itself (goal/save/miss) does not make the xG higher or lower.
+  if (/penalt/.test(text)) return 0.76;
+  if (/six[- ]yard|open goal|tap[- ]?in/.test(text)) return 0.58;
+  if (/in behind|is through|one[- ]on[- ]one|clear through/.test(text)) return 0.34;
+  if (/close range|point[- ]blank/.test(text)) return 0.31;
+  if (/header|headed|cross/.test(text)) return 0.13;
+  if (/edge of the area|edge of area|lets fly|long range|distance/.test(text)) return 0.06;
+  if (/blocked|drives toward goal/.test(text)) return 0.055;
+  if (/pocket of space|clever pass|attacks the space|breaks forward/.test(text)) return 0.12;
+  return 0.10;
+}
+
+function attachEventXg(state, event, value) {
+  event.xg = round2(value);
+  const stored = [...(state.events || [])].reverse().find(item =>
+    item.minute === event.minute && item.type === event.type &&
+    item.clubId === event.clubId && item.playerId === event.playerId &&
+    !Number.isFinite(item.xg)
+  );
+  if (stored) stored.xg = event.xg;
+}
+
+function annotateNewShots(state, events, beforeShots) {
+  for (const side of ['home', 'away']) {
+    const after = Number(state.stats[side].shots || 0);
+    let remaining = Math.max(0, after - Number(beforeShots[side] || 0));
+    if (!remaining) continue;
+
+    const clubId = side === 'home' ? state.homeClubId : state.awayClubId;
+    const candidates = (events || []).filter(event => event.clubId === clubId && SHOT_TYPES.has(event.type));
+    for (const event of candidates) {
+      if (!remaining) break;
+      const xg = contextualXg(event);
+      state.stats[side].xG = round2(state.stats[side].xG + xg);
+      state.stats[side].xgShots += 1;
+      if (xg >= XG_MODEL.bigChanceThreshold) state.stats[side].bigChances += 1;
+      attachEventXg(state, event, xg);
+      remaining -= 1;
+    }
+
+    // Some legacy branches increment the shot count without returning a dedicated
+    // shot event. Keep xG tied to that real attempt with a conservative neutral value.
+    while (remaining > 0) {
+      state.stats[side].xG = round2(state.stats[side].xG + 0.08);
+      state.stats[side].xgShots += 1;
+      remaining -= 1;
+    }
+  }
+}
+
 export function createInteractiveMatch(career, db) {
-  const state = baseCreateInteractiveMatch(career, db);
+  const state = ensureXgState(baseCreateInteractiveMatch(career, db));
+  state.liveEngineVersion = LIVE_ENGINE_VERSION;
   state.userReadiness = readinessFor(career);
+  exposeXg(state);
   return state;
 }
 
 export function advanceInteractiveMatch(inputState, career, db) {
-  const factor = inputState.userReadiness?.factor ?? readinessFor(career).factor;
-  const result = baseAdvanceInteractiveMatch(inputState, career, adjustedDatabase(db, inputState.userClubId || career.clubId, factor));
-  result.state.userReadiness = inputState.userReadiness || readinessFor(career);
-  return result;
+  const prepared = ensureXgState(clone(inputState));
+  const beforeShots = {
+    home: Number(prepared.stats.home.shots || 0),
+    away: Number(prepared.stats.away.shots || 0)
+  };
+  const factor = prepared.userReadiness?.factor ?? readinessFor(career).factor;
+  const result = baseAdvanceInteractiveMatch(prepared, career, adjustedDatabase(db, prepared.userClubId || career.clubId, factor));
+  const state = ensureXgState(result.state);
+  state.liveEngineVersion = LIVE_ENGINE_VERSION;
+  state.userReadiness = prepared.userReadiness || readinessFor(career);
+  annotateNewShots(state, result.events, beforeShots);
+  exposeXg(state);
+  return { state, events: result.events };
+}
+
+export function completeInteractiveRound(career, inputState, db) {
+  const state = ensureXgState(clone(inputState));
+  exposeXg(state);
+  return baseCompleteInteractiveRound(career, state, db);
 }
 
 export function makeSubstitution(inputState, outId, inId, db, career = {}) {
@@ -107,7 +220,7 @@ export function makeSubstitution(inputState, outId, inId, db, career = {}) {
 
   if (!vacated) return result;
 
-  const state = result.state;
+  const state = ensureXgState(result.state);
   const slot = beforeShape.slots.find(item => item.id === vacated.slotId);
   const nextShape = clone(beforeShape);
   const assignment = nextShape.assignments.find(item => item.slotId === vacated.slotId);
@@ -123,6 +236,7 @@ export function makeSubstitution(inputState, outId, inId, db, career = {}) {
     `${playerById(db, inId)?.name || 'The substitute'} takes over at ${slot.label} as ${assignment.role}.`
   ];
   result.event.text = result.event.lines.join(' ');
+  exposeXg(state);
 
   return { state, event: result.event };
 }
