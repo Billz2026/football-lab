@@ -47,7 +47,7 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await completePreseason(page);
 
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
-  await page.getByRole('button', { name: 'PLAY MATCH' }).click();
+  await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
 
   const live = page.locator('[data-live-match]');
   await expect(live).toHaveAttribute('data-cm4', '1');
