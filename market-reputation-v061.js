@@ -1,7 +1,8 @@
 // Football Lab's API-Football squad feed does not provide a trustworthy market-value field
 // and its imported CA is explicitly low-confidence. These reviewed reputation floors stop
 // globally established stars being priced like ordinary squad players when the baseline CA
-// underrates them. They are rounded GBP gameplay calibration floors, not copied transfer fees.
+// underrates them. Runtime club audits can also supply a reviewed GBP gameplay value floor.
+// These are gameplay calibrations, not copied transfer fees.
 // Review date: 2026-09-05. Re-review when the player database is refreshed.
 
 export const MARKET_REPUTATION_REVIEW_DATE = '2026-09-05';
@@ -48,16 +49,31 @@ function matches(player, aliases) {
   });
 }
 
+function staticReference(player) {
+  return REFERENCES.find(reference => matches(player, reference.aliases)) || null;
+}
+
 export function marketReputationReference(player) {
   if (!player) return null;
-  const found = REFERENCES.find(reference => matches(player, reference.aliases));
-  return found ? { ...found } : null;
+  const staticRef = staticReference(player);
+  const auditedTier = player?.audit?.marketTier || null;
+  if (!staticRef && !auditedTier) return null;
+
+  return {
+    ...(staticRef || { aliases: [player.lastName || player.name] }),
+    floor: Math.max(Number(staticRef?.floor || 0), Number(player?.auditedMarketValue || player?.audit?.valueFloor || 0)),
+    tier: auditedTier || staticRef?.tier || null,
+    audited: Boolean(auditedTier)
+  };
 }
 
 export function marketValueFloor(player) {
-  return marketReputationReference(player)?.floor || 0;
+  return Math.max(
+    Number(player?.auditedMarketValue || player?.audit?.valueFloor || 0),
+    Number(staticReference(player)?.floor || 0)
+  );
 }
 
 export function marketReputationTier(player) {
-  return marketReputationReference(player)?.tier || null;
+  return player?.audit?.marketTier || staticReference(player)?.tier || null;
 }
