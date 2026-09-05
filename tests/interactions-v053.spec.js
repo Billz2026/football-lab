@@ -10,6 +10,14 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 });
 
+async function openTransferWindow(page) {
+  if (await page.locator('[data-v050-transfer-tab]').count()) return;
+  await page.getByRole('button', { name: 'Overview', exact: true }).click();
+  await page.locator('[data-v054-advance]').click();
+  await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
+  await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
+}
+
 test('V0.5.3 opens player profiles from career lists and exposes live value plus comparison data', async ({ page }) => {
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   const squadName = page.locator('[data-v044-row] .v044-name strong').first();
@@ -28,6 +36,7 @@ test('V0.5.3 opens player profiles from career lists and exposes live value plus
   await expect(page.locator('.v053-compare-summary')).toContainText('Apps / Goals / Assists');
   await page.locator('.modal-close').click();
 
+  await openTransferWindow(page);
   await page.locator('[data-v050-transfer-tab]').click();
   await expect(page.getByRole('heading', { name: 'Transfers' })).toBeVisible();
   const marketName = page.locator('[data-v050-player] strong').first();
@@ -56,6 +65,7 @@ async function seedListedOffer(page, playedCount) {
 }
 
 test('V0.5.3 incoming transfer offers can be rejected, countered and accepted from the UI', async ({ page }) => {
+  await openTransferWindow(page);
   const rejected = await seedListedOffer(page, 1);
   await page.locator('[data-v050-transfer-tab]').click();
   await page.getByRole('button', { name: /^OFFERS/ }).click();
