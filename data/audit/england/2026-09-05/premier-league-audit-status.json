@@ -2,7 +2,7 @@
   "auditDate": "2026-09-05",
   "season": "2026/27",
   "branch": "premier-league-full-audit-2026-09-05",
-  "scope": "Premier League factual first-team roster audit",
+  "scope": "Premier League factual first-team roster, position and dated market-value audit",
   "clubs": [
     {"clubId":"flm-club-api-football-35","club":"AFC Bournemouth","status":"complete-factual-first-team"},
     {"clubId":"flm-club-api-football-42","club":"Arsenal","status":"complete-factual-first-team"},
@@ -30,17 +30,31 @@
     "factualRosterPass": "complete",
     "postWindowOwnershipPass": "complete",
     "positionsPass": "complete-first-team",
+    "marketValueBenchmarkPass": "complete-with-explicit-source-null-warnings",
+    "crossFileValidation": "pass",
+    "validationRunId": 33972898237,
+    "validationSummary": {
+      "activePlayers": 549,
+      "verifiedMarketValues": 503,
+      "explicitUnvaluedMarketValues": 46,
+      "missingMarketValues": 0,
+      "errors": 0,
+      "warnings": 46
+    },
+    "warningPolicy": "Explicit null benchmark values are permitted only when the benchmark source itself publishes no current value. Null is not zero and must not be converted into a fabricated Football Lab market value.",
     "knownHardConflictResolutions": [
       "Jadon Sancho is not a Manchester United player and is excluded as a free agent.",
       "Carlos Baleba is Manchester United, not Brighton.",
+      "Darío Osorio is Crystal Palace, not Coventry City.",
       "Bruno Guimaraes, Anthony Gordon and Sandro Tonali are not Newcastle players in the current audit.",
       "Daniel Munoz is Nottingham Forest, not Crystal Palace.",
+      "Morato and Felipe Rodrigues da Silva are the same player; Morato is recorded on loan away from Nottingham Forest.",
       "Kevin Danso is on loan at Sunderland and unavailable to Tottenham.",
       "Pape Matar Sarr is on loan at Juventus and unavailable to Tottenham.",
-      "Richarlison is retained as Tottenham-owned but Premier League-unregistered unless registration evidence changes."
+      "Richarlison is retained as Tottenham-owned but Premier League-unregistered unless registration evidence changes.",
+      "Fulham current numbering is Jorge Cuenca No. 4 and Hugo Larsson No. 15."
     ],
-    "marketValueBenchmarkPass": "pending",
-    "runtimeIntegration": "blocked-until-market-value-and-cross-file-final-check"
+    "runtimeIntegration": "ready-for-controlled-integration"
   },
-  "nextGate": "Run the league-wide dated market-value benchmark and final cross-file runtime integration check before replacing live data/current/players.json."
+  "nextGate": "Integrate the audited Premier League layer into the runtime player database with an automated before/after reconciliation report; do not start the Championship import until that integration test is green."
 }
