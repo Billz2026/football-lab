@@ -1,0 +1,70 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-42",
+  "clubName": "Arsenal",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {
+    "source": "Premier League post-window squad list",
+    "published": "2026-09-03",
+    "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
+  },
+  "marketBenchmark": {
+    "source": "Transfermarkt",
+    "currency": "EUR",
+    "season": "2026/27",
+    "url": "https://www.transfermarkt.com/fc-arsenal/kader/verein/11/saison_id/2026",
+    "note": "Reference market values are estimates, not guaranteed transfer fees. Official PL membership overrides stale third-party club ownership."
+  },
+  "players": [
+    {"name":"David Raya","aliases":["Raya Martin, David"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":30,"nationalities":["ESP"],"contractEnd":"2028-06-30","referenceMarketValueEur":30000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Illan Meslier","aliases":["Meslier, Illan"],"shirtNumber":30,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":26,"nationalities":["FRA"],"contractEnd":"2028-06-30","referenceMarketValueEur":8000000,"importanceScore":38,"squadStatus":"backup"},
+    {"name":"Kepa Arrizabalaga","aliases":["Arrizabalaga Revuelta, Kepa","Kepa"],"shirtNumber":13,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":31,"nationalities":["ESP"],"contractEnd":"2028-06-30","referenceMarketValueEur":5000000,"importanceScore":42,"squadStatus":"backup"},
+    {"name":"Tommy Setford","aliases":["Setford, Tommy Hogan"],"shirtNumber":35,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":20,"nationalities":["ENG","NED"],"contractEnd":"2028-06-30","referenceMarketValueEur":500000,"importanceScore":22,"squadStatus":"development-goalkeeper"},
+
+    {"name":"William Saliba","aliases":["Saliba, William"],"shirtNumber":2,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":25,"nationalities":["FRA","CMR"],"contractEnd":"2030-06-30","referenceMarketValueEur":100000000,"importanceScore":98,"squadStatus":"cornerstone"},
+    {"name":"Gabriel Magalhaes","aliases":["Gabriel","Dos Santos Magalhaes, Gabriel"],"shirtNumber":6,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":28,"nationalities":["BRA"],"contractEnd":"2029-06-30","referenceMarketValueEur":75000000,"importanceScore":96,"squadStatus":"cornerstone"},
+    {"name":"Piero Hincapie","aliases":["Piero Hincapié","Hincapie Reyna, Piero Martin"],"shirtNumber":5,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF","age":24,"nationalities":["ECU"],"contractEnd":"2031-06-30","referenceMarketValueEur":50000000,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Cristhian Mosquera","aliases":["Mosquera Ibargüen, Cristhian Andrey"],"shirtNumber":3,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":22,"nationalities":["ESP","COL"],"contractEnd":"2030-06-30","referenceMarketValueEur":40000000,"importanceScore":71,"squadStatus":"rotation-first-team"},
+    {"name":"Ezri Konsa","aliases":["Konsa, Ezri","Ezri Konsa Ngoyo"],"shirtNumber":4,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":28,"nationalities":["ENG","COD"],"contractEnd":"2028-06-30","referenceMarketValueEur":40000000,"importanceScore":84,"squadStatus":"first-team"},
+    {"name":"Riccardo Calafiori","aliases":["Calafiori, Riccardo"],"shirtNumber":33,"primaryPosition":"DL","secondaryPositions":["DC"],"positionGroup":"DEF","age":24,"nationalities":["ITA"],"contractEnd":"2029-06-30","referenceMarketValueEur":55000000,"importanceScore":83,"squadStatus":"first-team"},
+    {"name":"Myles Lewis-Skelly","aliases":["Lewis-Skelly, Myles Anthony"],"shirtNumber":49,"primaryPosition":"DL","secondaryPositions":["DMC","MC"],"positionGroup":"DEF","age":19,"nationalities":["ENG","BRB"],"contractEnd":"2030-06-30","referenceMarketValueEur":45000000,"importanceScore":79,"squadStatus":"first-team-development"},
+    {"name":"Jurrien Timber","aliases":["Jurriën Timber","Timber, Jurrien"],"shirtNumber":12,"primaryPosition":"DR","secondaryPositions":["DC","DL"],"positionGroup":"DEF","age":25,"nationalities":["NED","CUW"],"contractEnd":"2028-06-30","referenceMarketValueEur":70000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Ben White","aliases":["White, Benjamin","Benjamin White"],"shirtNumber":4,"primaryPosition":"DR","secondaryPositions":["DC"],"positionGroup":"DEF","age":28,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":30000000,"importanceScore":68,"squadStatus":"rotation-first-team","shirtNumberConfidence":"needs-post-transfer-number-check"},
+
+    {"name":"Martin Zubimendi","aliases":["Martín Zubimendi","Zubimendi Ibanez, Martin","Zubimendi Ibáñez, Martín"],"shirtNumber":36,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":27,"nationalities":["ESP"],"contractEnd":"2030-06-30","referenceMarketValueEur":75000000,"importanceScore":94,"squadStatus":"cornerstone"},
+    {"name":"Declan Rice","aliases":["Rice, Declan"],"shirtNumber":41,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":27,"nationalities":["ENG","IRL"],"contractEnd":"2028-06-30","referenceMarketValueEur":120000000,"importanceScore":100,"squadStatus":"cornerstone"},
+    {"name":"Bruno Guimaraes","aliases":["Bruno Guimarães","Guimaraes Rodriguez Moura, Bruno"],"shirtNumber":39,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":28,"nationalities":["BRA","ESP"],"contractEnd":"2030-06-30","referenceMarketValueEur":70000000,"importanceScore":94,"squadStatus":"key-player"},
+    {"name":"Mikel Merino","aliases":["Merino Zazon, Mikel"],"shirtNumber":23,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":30,"nationalities":["ESP"],"contractEnd":"2028-06-30","referenceMarketValueEur":25000000,"importanceScore":70,"squadStatus":"rotation-first-team"},
+    {"name":"Martin Odegaard","aliases":["Martin Ødegaard","Odegaard, Martin"],"shirtNumber":8,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID","age":27,"nationalities":["NOR"],"contractEnd":"2028-06-30","referenceMarketValueEur":70000000,"importanceScore":95,"squadStatus":"cornerstone"},
+    {"name":"Eberechi Eze","aliases":["Eze, Eberechi Oluchi"],"shirtNumber":10,"primaryPosition":"AMC","secondaryPositions":["AML","MC"],"positionGroup":"MID","age":28,"nationalities":["ENG","NGA"],"contractEnd":"2029-06-30","referenceMarketValueEur":65000000,"importanceScore":88,"squadStatus":"key-player"},
+
+    {"name":"Christos Tzolis","aliases":["Tzolis, Christos"],"shirtNumber":24,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT","age":24,"nationalities":["GRE"],"contractEnd":"2031-06-30","referenceMarketValueEur":40000000,"importanceScore":82,"squadStatus":"first-team"},
+    {"name":"Bukayo Saka","aliases":["Saka, Bukayo"],"shirtNumber":7,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT","age":24,"nationalities":["ENG","NGA"],"contractEnd":"2030-06-30","referenceMarketValueEur":110000000,"importanceScore":100,"squadStatus":"global-superstar"},
+    {"name":"Noni Madueke","aliases":["Madueke, Chukwunonso Azuka Tristan"],"shirtNumber":20,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT","age":24,"nationalities":["ENG","NGA"],"contractEnd":"2030-06-30","referenceMarketValueEur":50000000,"importanceScore":78,"squadStatus":"rotation-first-team"},
+    {"name":"Max Dowman","aliases":["Dowman, Max Robert"],"shirtNumber":56,"primaryPosition":"AMR","secondaryPositions":["AMC"],"positionGroup":"ATT","age":16,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":30000000,"importanceScore":67,"squadStatus":"elite-prospect"},
+    {"name":"Viktor Gyokeres","aliases":["Viktor Gyökeres","Gyokeres, Viktor Einar"],"shirtNumber":14,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":28,"nationalities":["SWE","HUN"],"contractEnd":"2030-06-30","referenceMarketValueEur":65000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Kai Havertz","aliases":["Havertz, Kai"],"shirtNumber":29,"primaryPosition":"ST","secondaryPositions":["AMC"],"positionGroup":"ATT","age":27,"nationalities":["GER"],"contractEnd":"2028-06-30","referenceMarketValueEur":55000000,"importanceScore":82,"squadStatus":"first-team"}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Ethan Nwaneri","status":"loan","membershipEvidence":"Official Premier League U21 list marks player (Loan)"},
+    {"name":"Gabriel Jesus","status":"departed","destination":"Barcelona"},
+    {"name":"Gabriel Martinelli","status":"not-in-post-window-PL-squad","note":"Remove from Arsenal selectable squad unless a separate authoritative registration source supersedes the 2026-09-03 list."},
+    {"name":"Fabio Vieira","status":"not-in-post-window-PL-squad"},
+    {"name":"Reiss Nelson","status":"not-in-post-window-PL-squad"},
+    {"name":"Leandro Trossard","status":"departed","destination":"Besiktas"},
+    {"name":"Christian Norgaard","status":"departed","destination":"Everton"}
+  ],
+  "qa": {
+    "officialSeniorListCount": 22,
+    "firstTeamRelevantU21Count": 3,
+    "auditedSelectablePlayers": 25,
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "Ezri Konsa is confirmed on the official Arsenal post-window list; his Transfermarkt profile was still showing Aston Villa when crawled, so official membership wins.",
+      "Ben White shirt number is flagged for a post-transfer number check because third-party squad pages can be stale after late-window moves.",
+      "Importance scores are Football Lab gameplay calibration, not factual external ratings."
+    ]
+  }
+}
