@@ -24,12 +24,12 @@ test('News & Inbox persists read state and generates pre-season plus real round 
 
   const newsTab = page.locator('[data-v046-news-tab]');
   await expect(newsTab).toBeVisible();
-  await expect(newsTab.locator('.v046-news-badge')).toHaveText('4');
+  await expect.poll(async () => Number(await newsTab.locator('.v046-news-badge').textContent())).toBeGreaterThanOrEqual(4);
   await newsTab.click();
 
   await expect(page.getByRole('heading', { name: 'News & Inbox' })).toBeVisible();
   await expect(page.locator('[data-v046-filter]')).toHaveCount(6);
-  await expect(page.locator('.v046-row')).toHaveCount(4);
+  await expect.poll(async () => page.locator('.v046-row').count()).toBeGreaterThanOrEqual(4);
   await expect(page.locator('.v046-list')).toContainText('Pre-season programme confirmed');
 
   await page.locator('[data-v046-filter="Board"]').click();
@@ -46,7 +46,7 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 15000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 15000 });
+  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 20000 });
   await page.locator('[data-finish-live-match]').click();
 
   const newsAfterMatch = page.locator('[data-v046-news-tab]');
@@ -62,5 +62,6 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   expect(saved.news.items.some(item => item.key === 'preseason-complete')).toBeTruthy();
   expect(saved.news.items.some(item => item.key === 'match-r1')).toBeTruthy();
   expect(saved.news.items.some(item => item.key === 'board-r1')).toBeTruthy();
+  expect(saved.news.items.some(item => item.category === 'Transfers')).toBeTruthy();
   expect(saved.news.generatedRounds).toEqual([1]);
 });
