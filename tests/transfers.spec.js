@@ -8,12 +8,19 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+async function openTransferWindow(page) {
+  await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
+  await page.locator('[data-v054-advance]').click();
+  await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
+  await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
+}
+
 test('V0.5.2 transfer market completes a signing and exposes the living football world', async ({ page }) => {
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+  await openTransferWindow(page);
 
   const transferTab = page.locator('[data-v050-transfer-tab]');
-  await expect(transferTab).toBeVisible();
   await transferTab.click();
   await expect(page.getByRole('heading', { name: 'Transfers' })).toBeVisible();
   await expect(page.locator('.v052-window-strip')).toBeVisible();
@@ -57,6 +64,7 @@ test('V0.5.2 transfer market completes a signing and exposes the living football
 test('transfer market remains usable on a Fold-sized viewport', async ({ page }) => {
   await page.setViewportSize({ width: 760, height: 900 });
   await page.getByRole('button', { name: /QUICK START/ }).click();
+  await openTransferWindow(page);
   await page.locator('[data-v050-transfer-tab]').click();
   await expect(page.getByRole('heading', { name: 'Transfers' })).toBeVisible();
   await expect(page.locator('.v050-market-layout')).toBeVisible();
