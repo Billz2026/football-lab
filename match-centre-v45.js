@@ -1,4 +1,5 @@
 const STYLE_HREF='./match-centre-v45.css?v=4.5.0';
+const PRESEASON_DATES=['2026-07-11','2026-07-18','2026-07-25','2026-08-01','2026-08-08'];
 const stateByLive=new WeakMap();
 let dbPromise=null;
 let launching=false;
@@ -23,6 +24,16 @@ function stateFor(live){
   return state;
 }
 function nextFriendly(c){return c?.preseason?.fixtures?.find(f=>!f.played)||null;}
+function nextFriendlyDate(c){
+  const played=c?.preseason?.fixtures?.filter(f=>f.played).length||0;
+  return PRESEASON_DATES[Math.min(played,PRESEASON_DATES.length-1)]||null;
+}
+function nextLeagueFixture(c){
+  const round=c?.fixtures?.[c?.roundIndex||0];
+  if(!Array.isArray(round))return null;
+  return round.find(f=>f.homeClubId===c.clubId||f.awayClubId===c.clubId)||round[0]||null;
+}
+function dateReady(current,target){return !target||String(current||'')>=String(target);}
 function clubName(db,id){const club=db?.clubs?.find(item=>item.id===id);return club?.shortName||club?.name||'Unknown';}
 function currentGoals(){return (window.__flmLiveStateV332?.events||[]).filter(event=>event.type==='goal');}
 function playerName(db,id){return db?.players?.find(player=>player.id===id)?.name||'Unknown scorer';}
@@ -43,6 +54,10 @@ function pollFor(selector,{timeout=2500,interval=35}={}){
     };
     tick();
   });
+}
+function continueWorld(){
+  const button=document.querySelector('.career-header [data-v060-continue]')||document.querySelector('.career-content [data-v060-continue]');
+  if(button&&!button.disabled)button.click();
 }
 async function startFriendlyDirect(){
   if(launching||document.querySelector('[data-live-match]'))return;
@@ -74,24 +89,45 @@ function syncEntryRoutes(db){
   const shellContinue=document.querySelector('[data-shell-continue]');
   const shellLabel=document.querySelector('[data-shell-continue-label]');
   const shellDetail=document.querySelector('[data-shell-continue-detail]');
+  if(shellContinue)delete shellContinue.dataset.cm45Direct;
+
   if(c.preseason&&c.preseason.phase!=='complete'){
     const friendly=nextFriendly(c);
+    const targetDate=nextFriendlyDate(c);
+    const ready=Boolean(friendly)&&dateReady(c.currentDate,targetDate);
     if(friendly&&shellContinue?.dataset.shellAction==='preseason'){
-      if(shellLabel)shellLabel.textContent='PLAY FRIENDLY';
-      if(shellDetail)shellDetail.textContent=`${clubName(db,friendly.homeClubId)} vs ${clubName(db,friendly.awayClubId)}`;
-      shellContinue.dataset.cm45Direct='friendly';
+      if(ready){
+        if(shellLabel)shellLabel.textContent='PLAY FRIENDLY';
+        if(shellDetail)shellDetail.textContent=`${clubName(db,friendly.homeClubId)} vs ${clubName(db,friendly.awayClubId)}`;
+        shellContinue.dataset.cm45Direct='friendly';
+      }else{
+        if(shellLabel)shellLabel.textContent='CONTINUE GAME';
+        if(shellDetail)shellDetail.textContent=targetDate?`Advance to ${targetDate.split('-').reverse().slice(0,2).join('/')}`:'Advance calendar';
+        shellContinue.dataset.cm45Direct='calendar';
+      }
       const fixtureTeams=document.querySelector('[data-shell-fixture-teams]');
       const fixtureMeta=document.querySelector('[data-shell-fixture-meta]');
       if(fixtureTeams)fixtureTeams.textContent=`${clubName(db,friendly.homeClubId)} vs ${clubName(db,friendly.awayClubId)}`;
-      if(fixtureMeta)fixtureMeta.textContent=`${friendly.dateLabel||'Pre-season'} · FRIENDLY`;
+      if(fixtureMeta)fixtureMeta.textContent=`${friendly.dateLabel||targetDate||'Pre-season'} · FRIENDLY`;
     }
-  }else if(shellContinue?.dataset.shellAction==='matchday'){
-    if(shellLabel)shellLabel.textContent='PLAY MATCH';
-    shellContinue.dataset.cm45Direct='competitive';
+  }else{
+    const fixture=nextLeagueFixture(c);
+    const ready=fixture&&dateReady(c.currentDate,fixture.date);
+    if(shellContinue?.dataset.shellAction==='matchday'){
+      if(ready){
+        if(shellLabel)shellLabel.textContent='PLAY MATCH';
+        shellContinue.dataset.cm45Direct='competitive';
+      }else{
+        if(shellLabel)shellLabel.textContent='CONTINUE GAME';
+        if(shellDetail)shellDetail.textContent=fixture?.date?`Advance to ${fixture.date}`:'Advance calendar';
+        shellContinue.dataset.cm45Direct='calendar';
+      }
+    }
+    document.querySelectorAll('.career-next-match [data-career-tab="matchday"]').forEach(button=>{
+      button.textContent=ready?'PLAY MATCH':'GO TO MATCHDAY';
+      if(ready)button.dataset.cm45DirectMatch='1';else delete button.dataset.cm45DirectMatch;
+    });
   }
-  document.querySelectorAll('.career-next-match [data-career-tab="matchday"]').forEach(button=>{
-    button.textContent='PLAY MATCH';button.dataset.cm45DirectMatch='1';
-  });
 }
 
 function ensureScorers(shell){
@@ -114,7 +150,7 @@ function aggregateGoals(goals,clubId,db){
   }
   return [...grouped.values()];
 }
-function renderGoalRows(items,side){
+function renderGoalRows(items){
   if(!items.length)return '';
   return items.map(item=>`<div class="cm45-scorer-row"><strong>${esc(item.name)}</strong><span>${esc(item.minutes.join(', '))}</span></div>`).join('');
 }
@@ -124,8 +160,8 @@ function syncScorers(live,shell,db){
   const goals=currentGoals();
   const home=aggregateGoals(goals,snapshot?.homeClubId,db);
   const away=aggregateGoals(goals,snapshot?.awayClubId,db);
-  panel.querySelector('[data-cm45-home-goals]').innerHTML=renderGoalRows(home,'home');
-  panel.querySelector('[data-cm45-away-goals]').innerHTML=renderGoalRows(away,'away');
+  panel.querySelector('[data-cm45-home-goals]').innerHTML=renderGoalRows(home);
+  panel.querySelector('[data-cm45-away-goals]').innerHTML=renderGoalRows(away);
   const visible=home.length+away.length>0;
   panel.setAttribute('aria-hidden',String(!visible));
   panel.classList.toggle('is-visible',visible);
@@ -201,17 +237,29 @@ async function syncAll(){
 }
 
 document.addEventListener('click',event=>{
-  const control=event.target.closest?.('[data-shell-continue],[data-cm45-direct-match],.career-next-match [data-career-tab="matchday"]');
+  const control=event.target.closest?.('[data-shell-continue],[data-v060-continue],[data-cm45-direct-match],.career-next-match [data-career-tab="matchday"]');
   if(!control)return;
+  const c=career();
+  const friendlyReady=Boolean(c?.preseason&&c.preseason.phase!=='complete'&&nextFriendly(c)&&dateReady(c.currentDate,nextFriendlyDate(c)));
+  const fixture=(!c?.preseason||c.preseason.phase==='complete')?nextLeagueFixture(c):null;
+  const competitiveReady=Boolean(fixture&&dateReady(c?.currentDate,fixture.date));
+
+  if(control.matches('[data-v060-continue]')){
+    if(friendlyReady){event.preventDefault();event.stopImmediatePropagation();startFriendlyDirect();}
+    else if(competitiveReady){event.preventDefault();event.stopImmediatePropagation();startCompetitiveDirect();}
+    return;
+  }
   if(control.matches('[data-shell-continue]')){
-    if(control.dataset.shellAction==='preseason'||control.dataset.cm45Direct==='friendly'){
+    if(control.dataset.cm45Direct==='calendar'){
+      event.preventDefault();event.stopImmediatePropagation();continueWorld();
+    }else if(control.dataset.cm45Direct==='friendly'||(control.dataset.shellAction==='preseason'&&friendlyReady)){
       event.preventDefault();event.stopImmediatePropagation();startFriendlyDirect();
-    }else if(control.dataset.shellAction==='matchday'||control.dataset.cm45Direct==='competitive'){
+    }else if(control.dataset.cm45Direct==='competitive'||(control.dataset.shellAction==='matchday'&&competitiveReady)){
       event.preventDefault();event.stopImmediatePropagation();startCompetitiveDirect();
     }
     return;
   }
-  if(control.closest('.career-next-match')){
+  if(control.closest('.career-next-match')&&competitiveReady){
     event.preventDefault();event.stopImmediatePropagation();startCompetitiveDirect();
   }
 },true);
