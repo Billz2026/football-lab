@@ -1,8 +1,9 @@
-const VERSION='4.6.0';
+const VERSION='4.6.1';
 const STYLE_HREF=`./match-centre-v46-lock.css?v=${VERSION}`;
 let queued=false;
 let dbPromise=null;
 let nameIndex=null;
+let playersBySurname=null;
 
 const manager=()=>window.FLMManager;
 const career=()=>manager()?.activeCareer||null;
@@ -27,13 +28,39 @@ function visible(node){return Boolean(node&&node.isConnected&&getComputedStyle(n
 function buildNameIndex(db){
   if(nameIndex||!db?.players)return nameIndex;
   nameIndex=new Map();
+  playersBySurname=new Map();
   for(const player of db.players){
     const key=norm(player.name);
     if(key&&!nameIndex.has(key))nameIndex.set(key,player);
+    const parts=key.split(' ').filter(Boolean);
+    const surname=parts.at(-1);
+    if(surname){
+      const list=playersBySurname.get(surname)||[];
+      list.push(player);
+      playersBySurname.set(surname,list);
+      if(parts.length>1){
+        const short=`${parts[0][0]} ${surname}`;
+        if(!nameIndex.has(short))nameIndex.set(short,player);
+      }
+    }
   }
   return nameIndex;
 }
-function playerForName(db,name){return buildNameIndex(db)?.get(norm(name))||null;}
+function playerForName(db,name){
+  const index=buildNameIndex(db);
+  const key=norm(name);
+  const direct=index?.get(key);
+  if(direct)return direct;
+  const parts=key.split(' ').filter(Boolean);
+  const surname=parts.at(-1);
+  const candidates=playersBySurname?.get(surname)||[];
+  if(candidates.length===1)return candidates[0];
+  if(parts.length>1){
+    const initial=parts[0][0];
+    return candidates.find(player=>norm(player.name).split(' ')[0]?.startsWith(initial))||null;
+  }
+  return null;
+}
 
 function syncScorerPresentation(shell){
   const panel=shell?.querySelector('[data-cm45-scorers]');
