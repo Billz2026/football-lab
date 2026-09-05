@@ -6,6 +6,7 @@ import {
   estimatePlayerValue,
   getAskingPrice,
   getNegotiation,
+  getTransferStance,
   searchTransferMarket,
   submitContractOffer,
   submitTransferOffer,
@@ -69,11 +70,12 @@ test('counter-offers can be accepted before contract talks', () => {
   const { db, career } = fixture();
   fundNegotiation(career, db);
   const target = db.players.find(player => player.id === 'b2');
-  const asking = getAskingPrice(target, db, career);
-  const response = submitTransferOffer(career, db, target.id, asking * .85);
+  const stance = getTransferStance(target, db, career, career.clubId);
+  const response = submitTransferOffer(career, db, target.id, stance.minimumAcceptable * .85);
   assert.equal(response.status, 'countered');
   const accepted = acceptSellerCounter(career, db, target.id);
   assert.equal(accepted.status, 'accepted');
+  assert.equal(getNegotiation(career, db, target.id).status, 'fee-accepted');
 });
 
 test('completed contract changes ownership, budgets and transfer news', () => {
