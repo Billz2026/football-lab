@@ -55,7 +55,7 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await expect(shell).toBeVisible();
   await expect(shell).toHaveAttribute('data-cm41', '1');
 
-  // V4.1 keeps the classic vertical match-control rail on unfolded Fold/tablet widths.
+  // V4.5 keeps the classic vertical rail while deliberately filling the unfolded Fold viewport.
   await page.setViewportSize({ width: 720, height: 900 });
   const foldGeometry = await page.evaluate(() => {
     const shell = document.querySelector('.cm4-shell');
@@ -73,6 +73,7 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
       workspaceTop: wr.top,
       workspaceLeft: wr.left,
       shellHeight: sr.height,
+      viewportHeight: innerHeight,
       scorePosition: getComputedStyle(scorebar).position,
       tabsDisplay: getComputedStyle(tabs).display,
       bottomDisplay: bottom ? getComputedStyle(bottom).display : 'none'
@@ -80,7 +81,8 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   });
   expect(Math.abs(foldGeometry.railTop - foldGeometry.workspaceTop)).toBeLessThanOrEqual(2);
   expect(foldGeometry.railRight).toBeLessThanOrEqual(foldGeometry.workspaceLeft + 2);
-  expect(foldGeometry.shellHeight).toBeLessThan(760);
+  expect(foldGeometry.shellHeight).toBeGreaterThanOrEqual(foldGeometry.viewportHeight * 0.9);
+  expect(foldGeometry.shellHeight).toBeLessThanOrEqual(foldGeometry.viewportHeight + 2);
   expect(foldGeometry.scorePosition).toBe('sticky');
   expect(foldGeometry.tabsDisplay).toBe('grid');
   expect(foldGeometry.bottomDisplay).toBe('none');
@@ -140,7 +142,7 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await shell.locator('[data-cm4-view="overview"]').click();
   await expect(shell.locator('[data-cm4-panel="overview"]')).toHaveClass(/is-active/);
 
-  // V4.2 regression: the clock must reach half-time rather than starving at 43/44 minutes.
+  // Clock progression is a hard regression gate: presentation work must never starve the engine.
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 30000 });
   await expect(page.locator('[data-resume-second-half]')).toBeAttached();
   await expect(shell.locator('[data-cm4-pause]')).toHaveText('Resume 2nd Half');
