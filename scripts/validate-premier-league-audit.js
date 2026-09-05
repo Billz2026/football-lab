@@ -13,7 +13,7 @@ const GROUP_ALLOWED = {
   GK: new Set(['GK']),
   DEF: new Set(['DC','DL','DR','WBL','WBR']),
   MID: new Set(['DMC','MC','AMC','ML','MR','AML','AMR']),
-  ATT: new Set(['AML','AMR','SS','ST'])
+  ATT: new Set(['ML','MR','AML','AMR','SS','ST'])
 };
 
 function normalizeName(value) {
