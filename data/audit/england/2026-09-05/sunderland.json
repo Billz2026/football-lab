@@ -1,0 +1,51 @@
+{
+  "auditVersion": 2,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-746",
+  "clubName": "Sunderland",
+  "status": "complete-factual-first-team",
+  "registrationAuthority": "Premier League post-window squad submission published 2026-09-03",
+  "supportingAuthority": "Sunderland AFC and UEFA current-season squad evidence",
+  "seniorPlayers": [
+    {"name":"Robin Roefs","shirtNumber":22,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Simon Moore","shirtNumber":21,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Melker Ellborg","shirtNumber":null,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Dan Ballard","shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Kevin Danso","shirtNumber":4,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","loanStatus":"loan-in-from-tottenham"},
+    {"name":"Omar Alderete","shirtNumber":15,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Aji Alese","shirtNumber":null,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Trai Hume","shirtNumber":32,"primaryPosition":"DR","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Reinildo","shirtNumber":17,"primaryPosition":"DL","secondaryPositions":["DC"],"positionGroup":"DEF"},
+    {"name":"Thomas Meunier","shirtNumber":12,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF"},
+    {"name":"Nordi Mukiele","shirtNumber":20,"primaryPosition":"DR","secondaryPositions":["DC"],"positionGroup":"DEF"},
+    {"name":"Luke O'Nien","shirtNumber":13,"primaryPosition":"DC","secondaryPositions":["DMC"],"positionGroup":"DEF"},
+    {"name":"Granit Xhaka","shirtNumber":34,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Noah Sadiki","shirtNumber":27,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Enzo Le Fee","shirtNumber":28,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Habib Diarra","shirtNumber":19,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Alan Browne","shirtNumber":null,"primaryPosition":"MC","secondaryPositions":[],"positionGroup":"MID"},
+    {"name":"Abdoullah Ba","shirtNumber":null,"primaryPosition":"AMR","secondaryPositions":["AMC"],"positionGroup":"MID"},
+    {"name":"Brian Brobbey","shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Wilson Isidor","shirtNumber":18,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Nilson Angulo","shirtNumber":10,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT"},
+    {"name":"Romaine Mundle","shirtNumber":14,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT"}
+  ],
+  "firstTeamRelevantU21": [
+    {"name":"Chris Rigg","shirtNumber":11,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Malick Fofana","shirtNumber":39,"primaryPosition":"AML","secondaryPositions":["AMR"],"positionGroup":"ATT"},
+    {"name":"Chemsdine Talbi","shirtNumber":null,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT"},
+    {"name":"Dayann Methalie","shirtNumber":6,"primaryPosition":"DL","secondaryPositions":["DC"],"positionGroup":"DEF"},
+    {"name":"Jules Ahoka","shirtNumber":29,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID"},
+    {"name":"Jocelin Ta Bi","shirtNumber":null,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"}
+  ],
+  "qa": {
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "Kevin Danso is a Sunderland loan-in for 2026/27 and must be unavailable to Tottenham while the loan is active.",
+      "Malick Fofana, Chris Rigg, Chemsdine Talbi and Dayann Methalie are U21-eligible but first-team relevant and therefore remain selectable.",
+      "Unknown shirt numbers are kept null rather than guessed.",
+      "Reference market values are intentionally deferred to the league-wide valuation pass."
+    ]
+  }
+}
