@@ -1,4 +1,4 @@
-name: Football Lab Manager V0.3 validation
+name: Football Lab Manager validation
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: football-lab-manager-v03-${{ github.event.pull_request.number || github.ref }}
+  group: football-lab-manager-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -34,9 +34,14 @@ jobs:
           for file in \
             manager.js \
             manager-core.js \
+            world-clock-v060.js \
+            career-world-v060.js \
+            transfers-v050.js \
             scripts/validate-database.mjs \
             tests/manager-career.spec.js \
-            tests/manager-core.test.js; do
+            tests/manager-core.test.js \
+            tests/world-clock.test.js \
+            tests/world-clock.spec.js; do
             echo "Checking ${file}"
             node --check "${file}"
           done
@@ -48,7 +53,7 @@ jobs:
         run: npm run validate:database
 
       - name: Test career simulation
-        run: node --test tests/manager-core.test.js
+        run: node --test tests/manager-core.test.js tests/world-clock.test.js
 
       - name: Install Chromium
         timeout-minutes: 10
@@ -65,7 +70,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: manager-v03-validation-${{ github.run_id }}
+          name: manager-validation-${{ github.run_id }}
           path: |
             playwright-output.txt
             playwright-report/

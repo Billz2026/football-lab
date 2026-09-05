@@ -47,21 +47,25 @@ test('V0.5.3 opens player profiles from career lists and exposes live value plus
   await expect(page.locator('.v053-profile-summary')).toContainText('LIVE VALUE');
 });
 
-async function seedListedOffer(page, playedCount) {
-  return page.evaluate(async count => {
+async function seedListedOffer(page, phaseNumber) {
+  return page.evaluate(async number => {
     const c = window.FLMManager.activeCareer;
     const db = await window.FLMManager.loadDatabase();
-    const transfers = await import('./transfers-v050.js?v=0.5.2');
+    const transfers = await import('./transfers-v050.js?v=0.6.0');
     const own = transfers.listOwnPlayersForTransfer(c, db).find(player => player.positionGroup !== 'GK');
     if (!own) throw new Error('No outfield player available to list.');
     if (!c.transfers.listedPlayerIds.includes(own.id)) transfers.toggleTransferListed(c, db, own.id);
-    c.preseason.fixtures.forEach((fixture, index) => { fixture.played = index < count; });
+    const dates = ['2026-06-19','2026-06-23','2026-06-27','2026-07-01'];
+    const date = dates[Math.min(Math.max(number - 1, 0), dates.length - 1)];
+    c.currentDate = date;
+    c.calendar.currentDate = date;
+    c.calendar.fixturesReleased = date >= '2026-06-19';
     const result = transfers.processTransferWorld(c, db);
     localStorage.setItem('flm-career-save', JSON.stringify(c));
-    const offer = c.transfers.incomingOffers.find(item => item.status === 'pending');
+    const offer = [...c.transfers.incomingOffers].reverse().find(item => item.status === 'pending');
     if (!offer) throw new Error(`No pending offer generated in phase ${result.phaseKey}.`);
     return { id: offer.id, playerId: offer.playerId, offeredFee: offer.offeredFee };
-  }, playedCount);
+  }, phaseNumber);
 }
 
 test('V0.5.3 incoming transfer offers can be rejected, countered and accepted from the UI', async ({ page }) => {
