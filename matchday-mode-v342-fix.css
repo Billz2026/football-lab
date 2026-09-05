@@ -1,0 +1,4 @@
+.flm-live-match[data-cm-mode="3.4"][data-cm34-manager] > .flm-ht-card,
+.flm-live-match[data-cm-mode="3.4"][data-cm34-manager] > .flm-ft-card{
+  display:none!important;
+}
