@@ -1,12 +1,12 @@
 {
-  "auditVersion": 1,
+  "auditVersion": 2,
   "reviewDate": "2026-09-05",
   "season": "2026/27",
   "clubId": "flm-club-api-football-1346",
   "clubName": "Coventry City",
   "status": "complete-factual-first-team",
-  "membershipAuthority": {"source":"Premier League post-window squad submission","published":"2026-09-03","url":"https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"},
-  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","note":"Official PL registration overrides the stale early-summer Coventry squad page."},
+  "membershipAuthority": {"source":"Premier League post-window squad submission plus current club transfer evidence","published":"2026-09-03","url":"https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"},
+  "marketBenchmark": {"source":"Transfermarkt","currency":"EUR","season":"2026/27","note":"Official current ownership overrides stale earlier squad snapshots."},
   "players": [
     {"name":"Carl Rushworth","aliases":["Rushworth, Carl Andrew"],"shirtNumber":19,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":25,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":16000000,"importanceScore":89,"squadStatus":"key-player"},
     {"name":"Ben Wilson","aliases":["Wilson, Ben"],"shirtNumber":13,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":34,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":300000,"importanceScore":30,"squadStatus":"backup"},
@@ -31,7 +31,6 @@
 
     {"name":"Ephron Mason-Clark","aliases":["Mason-Clark, Ephron Jardell"],"shirtNumber":10,"primaryPosition":"ML","secondaryPositions":["AML"],"positionGroup":"MID","age":27,"nationalities":["JAM","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":16000000,"importanceScore":82,"squadStatus":"first-team"},
     {"name":"Tatsuhiro Sakamoto","aliases":["Sakamoto, Tatsuhiro"],"shirtNumber":7,"primaryPosition":"AMR","secondaryPositions":["MR"],"positionGroup":"ATT","age":29,"nationalities":["JPN"],"contractEnd":"2027-06-30","referenceMarketValueEur":4500000,"importanceScore":70,"squadStatus":"rotation-first-team"},
-    {"name":"Dario Osorio","aliases":["Darío Osorio","Osorio, Dario Esteban","Osorio Osorio, Dario Esteban"],"shirtNumber":null,"primaryPosition":"AMR","secondaryPositions":["MR"],"positionGroup":"ATT","age":22,"nationalities":["CHI"],"contractEnd":null,"referenceMarketValueEur":15000000,"importanceScore":80,"squadStatus":"first-team"},
     {"name":"Loum Tchaouna","aliases":["Tchaouna, Loum"],"shirtNumber":18,"primaryPosition":"AMR","secondaryPositions":["ST"],"positionGroup":"ATT","age":23,"nationalities":["FRA","CHA"],"contractEnd":null,"referenceMarketValueEur":13000000,"importanceScore":76,"squadStatus":"first-team"},
     {"name":"Haji Wright","aliases":["Wright, Haji Amir"],"shirtNumber":11,"primaryPosition":"ST","secondaryPositions":["AML"],"positionGroup":"ATT","age":28,"nationalities":["USA","LBR"],"contractEnd":"2027-06-30","referenceMarketValueEur":16000000,"importanceScore":86,"squadStatus":"key-player"},
     {"name":"Brandon Thomas-Asante","aliases":["Thomas-Asante, Solomon Brandon Michael Clarke","Brandon Thomas-Asante"],"shirtNumber":23,"primaryPosition":"ST","secondaryPositions":["AMR"],"positionGroup":"ATT","age":27,"nationalities":["GHA","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":16000000,"importanceScore":78,"squadStatus":"first-team"},
@@ -39,6 +38,7 @@
     {"name":"Taiwo Awoniyi","aliases":["Awoniyi, Taiwo Micheal"],"shirtNumber":14,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":29,"nationalities":["NGA"],"contractEnd":null,"referenceMarketValueEur":8000000,"importanceScore":63,"squadStatus":"rotation-first-team"}
   ],
   "resolvedDeparturesOrLoans": [
+    {"name":"Dario Osorio","aliases":["Darío Osorio","Osorio, Dario Esteban","Osorio Osorio, Dario Esteban"],"status":"transferred-out","destination":"Crystal Palace","effective":"2026-09-02","hardExclusion":true,"evidence":"Crystal Palace official transfer announcement"},
     {"name":"Oliver Dovin","status":"not-in-post-window-PL-squad"},
     {"name":"Liam Kitching","status":"not-in-post-window-PL-squad"},
     {"name":"Jake Bidwell","status":"not-in-post-window-PL-squad"},
@@ -47,5 +47,5 @@
     {"name":"Norman Bassette","status":"not-in-post-window-PL-squad"},
     {"name":"Kai Andrews","status":"loan-out","membershipEvidence":"Official PL U21 list marks player (Loan)"}
   ],
-  "qa": {"officialSeniorListCount":25,"firstTeamRelevantU21Count":1,"auditedSelectablePlayers":26,"unresolvedSeniorOwnership":0,"notes":["The early-summer Transfermarkt squad is materially stale; the official Sep 3 PL list replaces it as the ownership authority.","Opening-day team sheets confirm current numbers for Rushworth #19, Amenda #24, Yirenkyi #8, Tchaouna #18, Hamer #38 and Awoniyi #14.","Matt Grimes is calibrated as Coventry's tactical cornerstone; Premier League analysis identifies him as captain/talisman and chief set-piece taker.","Importance scores are Football Lab gameplay calibration, not factual external ratings."]}
+  "qa": {"officialSeniorListCount":25,"firstTeamRelevantU21Count":1,"auditedSelectablePlayers":25,"unresolvedSeniorOwnership":0,"notes":["Darío Osorio transferred to Crystal Palace on 2 September 2026 and is hard-excluded from Coventry's selectable squad.","The early-summer Transfermarkt squad is materially stale; current official transfer/registration evidence is authoritative.","Opening-day team sheets confirm current numbers for Rushworth #19, Amenda #24, Yirenkyi #8, Tchaouna #18, Hamer #38 and Awoniyi #14.","Matt Grimes is calibrated as Coventry's tactical cornerstone; Premier League analysis identifies him as captain/talisman and chief set-piece taker.","Importance scores are Football Lab gameplay calibration, not factual external ratings."]}
 }
