@@ -1,4 +1,4 @@
-const VERSION='4.6.1';
+const VERSION='4.6.2';
 const STYLE_HREF=`./match-centre-v46-lock.css?v=${VERSION}`;
 let queued=false;
 let dbPromise=null;
@@ -146,6 +146,10 @@ function ensureManagerContext(dialog){
   }
   setText(node,scoreContext());
 }
+function clearManagerContext(dialog){
+  delete dialog.dataset.cm46Dialog;
+  dialog.querySelector('[data-cm46-manager-context]')?.remove();
+}
 function cardForPlayer(snapshot,id){
   if(!id)return '';
   const events=snapshot?.events||[];
@@ -183,6 +187,8 @@ function syncDialog(db){
   }else if(dialog.querySelector('[data-live-tactic]')){
     dialog.dataset.cm46Dialog='tactics';
     ensureManagerContext(dialog);
+  }else if(dialog.dataset.cm46Dialog){
+    clearManagerContext(dialog);
   }
 }
 
