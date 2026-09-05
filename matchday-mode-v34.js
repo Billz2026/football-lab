@@ -1,7 +1,11 @@
-const STYLE_HREF = './matchday-mode-v34.css?v=3.4.0';
+const STYLE_HREF = './matchday-mode-v34.css?v=3.4.1';
 let queued = false;
+let databasePromise = null;
 
 const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
+const esc = value => String(value ?? '')
+  .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+  .replaceAll('"','&quot;').replaceAll("'",'&#039;');
 
 function ensureStyles(){
   if ([...document.styleSheets].some(sheet => sheet.href?.includes('matchday-mode-v34.css'))) return;
@@ -9,6 +13,52 @@ function ensureStyles(){
   link.rel = 'stylesheet';
   link.href = STYLE_HREF;
   document.head.appendChild(link);
+}
+
+function database(){
+  if (!databasePromise) databasePromise = Promise.resolve(window.FLMManager?.loadDatabase?.()).catch(() => null);
+  return databasePromise;
+}
+
+/* Read-only observer: the match engine already serialises its immutable state every minute.
+   This wrapper delegates JSON.stringify unchanged and only copies the fields needed by V3.4 UI. */
+function installStateObserver(){
+  if (window.__flmNativeJSONStringifyV34) return;
+  const native = JSON.stringify;
+  window.__flmNativeJSONStringifyV34 = native;
+  JSON.stringify = function(value,...rest){
+    try {
+      const isLiveState = value && typeof value === 'object'
+        && typeof value.minute === 'number'
+        && typeof value.fixtureId === 'string'
+        && Array.isArray(value.homeLineupIds)
+        && Array.isArray(value.awayLineupIds)
+        && value.ratings && value.conditions && value.stats;
+      if (isLiveState) {
+        window.__flmLiveStateV34 = {
+          minute:value.minute,
+          fixtureId:value.fixtureId,
+          homeClubId:value.homeClubId,
+          awayClubId:value.awayClubId,
+          userClubId:value.userClubId,
+          homeLineupIds:[...value.homeLineupIds],
+          awayLineupIds:[...value.awayLineupIds],
+          ratings:{...value.ratings},
+          conditions:{...value.conditions},
+          minutesPlayed:{...(value.minutesPlayed || {})},
+          subbedOffIds:[...(value.subbedOffIds || [])],
+          events:(value.events || []).map(event => ({
+            minute:event.minute,
+            type:event.type,
+            clubId:event.clubId,
+            playerId:event.playerId,
+            assistPlayerId:event.assistPlayerId
+          }))
+        };
+      }
+    } catch (_) {}
+    return Reflect.apply(native,this,[value,...rest]);
+  };
 }
 
 function compactCommentary(input){
@@ -136,6 +186,10 @@ function syncManagerWorkspace(live){
   const modal = live.querySelector('[data-manager-modal]');
   const dialog = live.querySelector('[data-manager-dialog]');
   if (!modal || !dialog) return;
+  if (live.classList.contains('cm33-capturing') || live.classList.contains('cm32-capturing')) {
+    delete live.dataset.cm34Manager;
+    return;
+  }
   const open = modal.classList.contains('is-open');
   if (!open) {
     delete live.dataset.cm34Manager;
@@ -157,14 +211,90 @@ function syncManagerWorkspace(live){
   }
 }
 
-function syncRatingsHeader(live){
-  const panel = live.querySelector('.cm33-ratings-panel');
+function ratingTone(value){ return value >= 8 ? 'elite' : value >= 7 ? 'good' : value < 6 ? 'poor' : 'steady'; }
+
+function contributions(snapshot){
+  const map = new Map();
+  for (const event of snapshot?.events || []) {
+    if (event.type !== 'goal') continue;
+    if (event.playerId) {
+      const item = map.get(event.playerId) || {goals:0,assists:0};
+      item.goals += 1; map.set(event.playerId,item);
+    }
+    if (event.assistPlayerId) {
+      const item = map.get(event.assistPlayerId) || {goals:0,assists:0};
+      item.assists += 1; map.set(event.assistPlayerId,item);
+    }
+  }
+  return map;
+}
+
+function playedIds(snapshot,side,database){
+  const current = side === 'home' ? snapshot.homeLineupIds : snapshot.awayLineupIds;
+  const clubId = side === 'home' ? snapshot.homeClubId : snapshot.awayClubId;
+  const set = new Set(current);
+  for (const [id,minutes] of Object.entries(snapshot.minutesPlayed || {})) {
+    const player = database.players?.find(item => item.id === id);
+    if (minutes > 0 && player?.clubId === clubId) set.add(id);
+  }
+  return [...current,...[...set].filter(id => !current.includes(id))];
+}
+
+function ratingRow(player,snapshot,contrib,active){
+  const returnData = contrib.get(player.id) || {goals:0,assists:0};
+  const value = Number(snapshot.ratings?.[player.id] ?? 6.5);
+  const condition = Math.round(Number(snapshot.conditions?.[player.id] ?? 100));
+  return `<div class="cm34-rating-row ${active?'':'is-off'}">
+    <span class="no">${esc(player.shirtNumber ?? '—')}</span>
+    <span class="player"><strong>${esc(player.name)}</strong>${active?'':'<small>OFF</small>'}</span>
+    <span class="pos">${esc(player.primaryPosition || player.positionGroup || '—')}</span>
+    <span class="con">${condition}%</span>
+    <span class="return ${returnData.goals?'has':''}">${returnData.goals || '—'}</span>
+    <span class="return ${returnData.assists?'has':''}">${returnData.assists || '—'}</span>
+    <strong class="rate ${ratingTone(value)}">${value.toFixed(1)}</strong>
+  </div>`;
+}
+
+async function ensureDualRatings(live){
+  const grid = live.querySelector('.flm-live-grid');
+  if (!grid) return null;
+  let panel = grid.querySelector('.cm34-dual-ratings');
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.className = 'cm34-dual-ratings';
+    panel.innerHTML = '<div class="cm34-ratings-empty">Live ratings initialise after kick-off.</div>';
+    grid.appendChild(panel);
+  }
+  return panel;
+}
+
+async function syncDualRatings(live){
+  const panel = await ensureDualRatings(live);
   if (!panel) return;
-  const teams = [...live.querySelectorAll('.flm-live-team strong')].map(node => clean(node.textContent));
-  const header = panel.querySelector('.cm33-ratings-head');
-  if (!header) return;
-  const note = header.querySelector(':scope > span');
-  if (note) note.textContent = `${teams[0] || 'HOME'} · live XI ratings`;
+  const snapshot = window.__flmLiveStateV34;
+  const db = await database();
+  if (!snapshot || !db || snapshot.fixtureId !== window.__flmLiveStateV34?.fixtureId) return;
+  const homeClub = db.clubs?.find(item => item.id === snapshot.homeClubId);
+  const awayClub = db.clubs?.find(item => item.id === snapshot.awayClubId);
+  const contrib = contributions(snapshot);
+  const buildTeam = side => {
+    const ids = playedIds(snapshot,side,db);
+    const current = new Set(side === 'home' ? snapshot.homeLineupIds : snapshot.awayLineupIds);
+    const players = ids.map(id => db.players?.find(item => item.id === id)).filter(Boolean);
+    return players.map(player => ratingRow(player,snapshot,contrib,current.has(player.id))).join('');
+  };
+  const signature = JSON.stringify([
+    snapshot.minute,snapshot.homeLineupIds,snapshot.awayLineupIds,snapshot.ratings,
+    snapshot.conditions,(snapshot.events || []).filter(event => event.type === 'goal')
+  ]);
+  if (panel.dataset.signature === signature) return;
+  panel.dataset.signature = signature;
+  panel.innerHTML = `
+    <header class="cm34-ratings-title"><div><small>LIVE PERFORMANCE</small><h3>PLAYER RATINGS</h3></div><span>${snapshot.minute}' · both teams</span></header>
+    <div class="cm34-ratings-teams">
+      <section><header><strong>${esc(homeClub?.name || 'HOME')}</strong><span>HOME</span></header><div class="cm34-rating-head"><span>NO.</span><span>PLAYER</span><span>POS</span><span>CON</span><span>G</span><span>A</span><span>RTG</span></div><div class="cm34-rating-list">${buildTeam('home')}</div></section>
+      <section><header><strong>${esc(awayClub?.name || 'AWAY')}</strong><span>AWAY</span></header><div class="cm34-rating-head"><span>NO.</span><span>PLAYER</span><span>POS</span><span>CON</span><span>G</span><span>A</span><span>RTG</span></div><div class="cm34-rating-list">${buildTeam('away')}</div></section>
+    </div>`;
 }
 
 function syncRail(live){
@@ -190,7 +320,7 @@ function syncHalfTime(live){
   if (button) button.textContent = 'START SECOND HALF';
 }
 
-function sync(live){
+async function sync(live){
   if (!live?.isConnected || live.dataset.cmConsole !== '3.3') return;
   ensureStyles();
   enterMatchMode(live);
@@ -198,21 +328,22 @@ function sync(live){
   syncCommentary(live);
   syncPressure(live);
   syncManagerWorkspace(live);
-  syncRatingsHeader(live);
   syncHalfTime(live);
+  if (live.dataset.cmView === 'ratings') await syncDualRatings(live);
 }
 
 function queue(){
   if (queued) return;
   queued = true;
-  requestAnimationFrame(() => {
+  requestAnimationFrame(async () => {
     queued = false;
     const lives = [...document.querySelectorAll('.flm-live-match[data-cm-console="3.3"]')];
-    lives.forEach(sync);
+    for (const live of lives) await sync(live);
     if (!lives.length) leaveMatchMode();
   });
 }
 
+installStateObserver();
 ensureStyles();
 window.addEventListener('flm:live-xg',queue);
 new MutationObserver(queue).observe(document.body,{
