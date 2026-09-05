@@ -1,0 +1,75 @@
+{
+  "auditVersion": 1,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-35",
+  "clubName": "AFC Bournemouth",
+  "status": "complete-factual-first-team",
+  "membershipAuthority": {
+    "source": "Premier League post-window squad list",
+    "published": "2026-09-03",
+    "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
+  },
+  "marketBenchmark": {
+    "source": "Transfermarkt",
+    "currency": "EUR",
+    "season": "2026/27",
+    "note": "Dated reference estimates only. Official Premier League membership overrides stale third-party ownership or squad pages."
+  },
+  "players": [
+    {"name":"Djordje Petrovic","aliases":["Đorđe Petrović","Petrovic, Djorde"],"shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":26,"nationalities":["SRB"],"contractEnd":"2030-06-30","referenceMarketValueEur":28000000,"importanceScore":88,"squadStatus":"key-player"},
+    {"name":"Michele Di Gregorio","aliases":["Di Gregorio, Michele"],"shirtNumber":20,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":29,"nationalities":["ITA"],"contractEnd":null,"parentClub":"Juventus","loanStatus":"loan-in","referenceMarketValueEur":10000000,"importanceScore":56,"squadStatus":"rotation-goalkeeper"},
+    {"name":"Fraser Forster","aliases":["Forster, Fraser Gerard"],"shirtNumber":17,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK","age":38,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":400000,"importanceScore":31,"squadStatus":"backup"},
+
+    {"name":"Bafode Diakite","aliases":["Bafodé Diakité","Diakite, Bafode"],"shirtNumber":18,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":25,"nationalities":["FRA","GUI"],"contractEnd":"2030-06-30","referenceMarketValueEur":25000000,"importanceScore":84,"squadStatus":"first-team"},
+    {"name":"Antonio Silva","aliases":["António Silva","Pereira De Albuquerque Tavares Da Silva, Antonio Joao"],"shirtNumber":14,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":22,"nationalities":["POR"],"contractEnd":null,"referenceMarketValueEur":25000000,"importanceScore":86,"squadStatus":"key-player","transferStatus":"permanent-2026-08-01"},
+    {"name":"James Hill","aliases":["Hill, James"],"shirtNumber":23,"primaryPosition":"DC","secondaryPositions":["DR"],"positionGroup":"DEF","age":24,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":23000000,"importanceScore":70,"squadStatus":"rotation-first-team"},
+    {"name":"Adrien Truffert","aliases":["Truffert, Adrien Lillan Gaetan"],"shirtNumber":3,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF","age":24,"nationalities":["FRA","BEL"],"contractEnd":"2030-06-30","referenceMarketValueEur":30000000,"importanceScore":91,"squadStatus":"key-player"},
+    {"name":"Julian Araujo","aliases":["Julián Araujo","Araujo Zuniga, Julian Vicente"],"shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":25,"nationalities":["MEX","USA"],"contractEnd":"2029-06-30","referenceMarketValueEur":8000000,"importanceScore":54,"squadStatus":"rotation"},
+    {"name":"Max Aarons","aliases":["Aarons, Maximillian James"],"shirtNumber":28,"primaryPosition":"DR","secondaryPositions":["WBR"],"positionGroup":"DEF","age":26,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":2500000,"importanceScore":43,"squadStatus":"rotation"},
+    {"name":"Adam Smith","aliases":["Smith, Adam James"],"shirtNumber":15,"primaryPosition":"DR","secondaryPositions":["DL"],"positionGroup":"DEF","age":35,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":300000,"importanceScore":39,"squadStatus":"backup-leader"},
+
+    {"name":"Tyler Adams","aliases":["Adams, Tyler Shaan"],"shirtNumber":12,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":27,"nationalities":["USA"],"contractEnd":"2028-06-30","referenceMarketValueEur":25000000,"importanceScore":87,"squadStatus":"key-player"},
+    {"name":"Ben Winterburn","aliases":["Winterburn, Benjamin George"],"shirtNumber":null,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID","age":20,"nationalities":["ENG"],"contractEnd":"2027-06-30","referenceMarketValueEur":350000,"importanceScore":20,"squadStatus":"development"},
+    {"name":"Alex Scott","aliases":["Scott, Alex Jay"],"shirtNumber":8,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID","age":23,"nationalities":["ENG","GGY"],"contractEnd":"2028-06-30","referenceMarketValueEur":50000000,"importanceScore":97,"squadStatus":"cornerstone"},
+    {"name":"Lewis Cook","aliases":["Cook, Lewis John"],"shirtNumber":4,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID","age":29,"nationalities":["ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":11000000,"importanceScore":78,"squadStatus":"first-team"},
+    {"name":"Ryan Christie","aliases":["Christie, Ryan"],"shirtNumber":10,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID","age":31,"nationalities":["SCO"],"contractEnd":"2029-06-30","referenceMarketValueEur":8000000,"importanceScore":72,"squadStatus":"first-team"},
+    {"name":"Marcus Tavernier","aliases":["Tavernier, Marcus Joseph"],"shirtNumber":16,"primaryPosition":"AMC","secondaryPositions":["AML","ML"],"positionGroup":"MID","age":27,"nationalities":["ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":25000000,"importanceScore":81,"squadStatus":"first-team"},
+    {"name":"Justin Kluivert","aliases":["Kluivert, Justin Dean"],"shirtNumber":19,"primaryPosition":"AMC","secondaryPositions":["AML","AMR","ST"],"positionGroup":"MID","age":27,"nationalities":["NED","SUR"],"contractEnd":"2028-06-30","referenceMarketValueEur":25000000,"importanceScore":83,"squadStatus":"first-team"},
+    {"name":"Juanlu Sanchez","aliases":["Juanlu Sánchez","Sanchez Velasco, Juan Luis"],"shirtNumber":24,"primaryPosition":"DR","secondaryPositions":["AMR","MC"],"positionGroup":"DEF","age":23,"nationalities":["ESP"],"contractEnd":"2031-06-30","referenceMarketValueEur":10000000,"importanceScore":73,"squadStatus":"rotation-first-team","transferStatus":"permanent-2026-08-06"},
+
+    {"name":"Amine Adli","aliases":["Adli, Amine"],"shirtNumber":21,"primaryPosition":"AML","secondaryPositions":["AMR","AMC"],"positionGroup":"ATT","age":26,"nationalities":["MAR","FRA"],"contractEnd":"2030-06-30","referenceMarketValueEur":20000000,"importanceScore":76,"squadStatus":"first-team"},
+    {"name":"David Brooks","aliases":["Brooks, David Robert"],"shirtNumber":7,"primaryPosition":"AMR","secondaryPositions":["AMC"],"positionGroup":"ATT","age":29,"nationalities":["WAL","ENG"],"contractEnd":"2029-06-30","referenceMarketValueEur":12000000,"importanceScore":66,"squadStatus":"rotation-first-team"},
+    {"name":"Evanilson","aliases":["De Lima Barbosa, Francisco Evanilson","Francisco Evanilson"],"shirtNumber":9,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":26,"nationalities":["BRA"],"contractEnd":"2029-06-30","referenceMarketValueEur":35000000,"importanceScore":87,"squadStatus":"key-player"},
+    {"name":"Daniel Jebbison","aliases":["Jebbison, Daniel David"],"shirtNumber":29,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":23,"nationalities":["CAN","ENG"],"contractEnd":"2028-06-30","referenceMarketValueEur":6000000,"importanceScore":45,"squadStatus":"rotation-development"},
+    {"name":"Alvaro Rodriguez","aliases":["Álvaro Rodríguez","Rodriguez Munoz, Alvaro Daniel"],"shirtNumber":30,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":22,"nationalities":["URU","ESP"],"contractEnd":null,"referenceMarketValueEur":10000000,"importanceScore":63,"squadStatus":"rotation-first-team"},
+
+    {"name":"Veljko Milosavljevic","aliases":["Veljko Milosavljević","Milosavljevic, Veljko"],"shirtNumber":44,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF","age":19,"nationalities":["SRB"],"contractEnd":"2030-06-30","referenceMarketValueEur":20000000,"importanceScore":64,"squadStatus":"first-team-development","u21":true},
+    {"name":"Julio Soler","aliases":["Soler Barreto, Julio Cesar"],"shirtNumber":6,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF","age":21,"nationalities":["ARG","PAR"],"contractEnd":"2029-06-30","referenceMarketValueEur":8000000,"importanceScore":54,"squadStatus":"rotation-development","u21":true},
+    {"name":"Alex Toth","aliases":["Alex Tóth","Toth, Alex Laszlo"],"shirtNumber":27,"primaryPosition":"MC","secondaryPositions":["DMC","AMC"],"positionGroup":"MID","age":20,"nationalities":["HUN"],"contractEnd":"2031-06-30","referenceMarketValueEur":12000000,"importanceScore":67,"squadStatus":"first-team-development","u21":true},
+    {"name":"Ben Gannon-Doak","aliases":["Doak, Ben Gannon"],"shirtNumber":11,"primaryPosition":"AMR","secondaryPositions":["AML"],"positionGroup":"ATT","age":20,"nationalities":["SCO"],"contractEnd":"2030-06-30","referenceMarketValueEur":15000000,"importanceScore":70,"squadStatus":"first-team-development","u21":true},
+    {"name":"Rayan","aliases":["Simplicio Rocha, Rayan Vitor","Rayan Vitor"],"shirtNumber":37,"primaryPosition":"AMR","secondaryPositions":["ST"],"positionGroup":"ATT","age":20,"nationalities":["BRA"],"contractEnd":"2031-06-30","referenceMarketValueEur":60000000,"importanceScore":94,"squadStatus":"key-player","u21":true},
+    {"name":"Junior Kroupi","aliases":["Kroupi, Eli Junior","Eli Junior Kroupi"],"shirtNumber":22,"primaryPosition":"ST","secondaryPositions":["AMC"],"positionGroup":"ATT","age":20,"nationalities":["FRA","POR"],"contractEnd":"2030-06-30","referenceMarketValueEur":70000000,"importanceScore":93,"squadStatus":"key-development","u21":true},
+    {"name":"Remy Rees-Dottin","aliases":["Rees-Dottin, Remy William James"],"shirtNumber":50,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT","age":20,"nationalities":["ENG"],"contractEnd":null,"referenceMarketValueEur":300000,"importanceScore":22,"squadStatus":"development","u21":true}
+  ],
+  "resolvedDeparturesOrLoans": [
+    {"name":"Matai Akinmboni","status":"loan-out","membershipEvidence":"Official Premier League U21 list marks player (Loan)"},
+    {"name":"Alex Jimenez","status":"loan-out","membershipEvidence":"Official Premier League U21 list marks player (Loan)"},
+    {"name":"Will Dennis","status":"not-in-post-window-PL-squad","note":"Appears on a stale UEFA squad page but is omitted from the official 2026-09-03 PL senior list and is not U21 eligible."},
+    {"name":"Enes Unal","status":"not-in-post-window-PL-squad"},
+    {"name":"Alex Paulsen","status":"not-in-post-window-PL-squad"},
+    {"name":"Christos Mandas","status":"not-in-post-window-PL-squad"}
+  ],
+  "qa": {
+    "officialSeniorListCount": 23,
+    "firstTeamRelevantU21Count": 7,
+    "auditedSelectablePlayers": 30,
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "The official Premier League submission is the membership authority; UEFA and Transfermarkt are secondary for numbers/biography/value and can lag transfers.",
+      "Michele Di Gregorio is treated as a Bournemouth loan-in from Juventus based on current independent transfer data while official PL registration confirms Bournemouth eligibility.",
+      "Antonio Silva and Juanlu Sanchez are confirmed permanent summer 2026 transfers.",
+      "Importance scores are Football Lab gameplay calibration, not external factual ratings."
+    ]
+  }
+}
