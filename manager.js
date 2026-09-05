@@ -30,5 +30,5 @@ import './match-centre-v4-mode.js?v=4.0.0';
 import './match-centre-v4-fold-v41.js?v=4.1.0';
 import './match-centre-v4-mobile-v42.js?v=4.2.0';
 import './match-centre-v4-discipline-v44.js?v=4.4.1';
-import './match-centre-v45.js?v=4.5.0';
+import './match-centre-v45.js?v=4.5.1';
 import './database-readonly-v1.js?v=1.0.0';
