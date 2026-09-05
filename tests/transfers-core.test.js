@@ -6,6 +6,7 @@ import {
   estimatePlayerValue,
   getAskingPrice,
   getNegotiation,
+  getTransferStance,
   searchTransferMarket,
   submitContractOffer,
   submitTransferOffer,
@@ -36,6 +37,12 @@ function fixture() {
   return { db, career };
 }
 
+function fundNegotiation(career, db) {
+  ensureTransferState(career, db);
+  career.transfers.transferBudget = 500_000_000;
+  career.transfers.wageRoom = 2_000_000;
+}
+
 test('transfer state creates budgets and the market excludes the user club', () => {
   const { db, career } = fixture();
   assert.equal(ensureTransferState(career, db), true);
@@ -47,11 +54,11 @@ test('transfer state creates budgets and the market excludes the user club', () 
   assert.ok(estimatePlayerValue(market[0]) > 0);
 });
 
-test('selling club rejects a low bid and accepts the asking price', () => {
+test('selling club rejects a low bid and accepts a sufficiently strong asking-price bid', () => {
   const { db, career } = fixture();
-  ensureTransferState(career, db);
+  fundNegotiation(career, db);
   const target = db.players.find(player => player.id === 'b1');
-  const asking = getAskingPrice(target, db);
+  const asking = getAskingPrice(target, db, career);
   const rejected = submitTransferOffer(career, db, target.id, asking * .5);
   assert.equal(rejected.status, 'rejected');
   const accepted = submitTransferOffer(career, db, target.id, asking);
@@ -61,20 +68,21 @@ test('selling club rejects a low bid and accepts the asking price', () => {
 
 test('counter-offers can be accepted before contract talks', () => {
   const { db, career } = fixture();
-  ensureTransferState(career, db);
+  fundNegotiation(career, db);
   const target = db.players.find(player => player.id === 'b2');
-  const asking = getAskingPrice(target, db);
-  const response = submitTransferOffer(career, db, target.id, asking * .85);
+  const stance = getTransferStance(target, db, career, career.clubId);
+  const response = submitTransferOffer(career, db, target.id, stance.minimumAcceptable * .85);
   assert.equal(response.status, 'countered');
   const accepted = acceptSellerCounter(career, db, target.id);
   assert.equal(accepted.status, 'accepted');
+  assert.equal(getNegotiation(career, db, target.id).status, 'fee-accepted');
 });
 
 test('completed contract changes ownership, budgets and transfer news', () => {
   const { db, career } = fixture();
-  ensureTransferState(career, db);
+  fundNegotiation(career, db);
   const target = db.players.find(player => player.id === 'b1');
-  const asking = getAskingPrice(target, db);
+  const asking = getAskingPrice(target, db, career);
   submitTransferOffer(career, db, target.id, asking);
   const negotiation = getNegotiation(career, db, target.id);
   const low = submitContractOffer(career, db, target.id, negotiation.wageDemand * .5, 4);

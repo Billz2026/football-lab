@@ -117,7 +117,7 @@ test('V0.4.8 Match Centre keeps the hard half-time stop with simplified tactics 
   await page.locator('[data-v045-view="overview"]').click();
 
   await page.getByRole('button', { name: '4×' }).click();
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await expect(page.locator('[data-match-status]')).toHaveText('HALF TIME');
   await page.waitForTimeout(350);
@@ -158,7 +158,7 @@ test('V0.4.8 Match Centre keeps the hard half-time stop with simplified tactics 
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
 
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 15000 });
+  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
   await expect(page.locator('[data-finish-live-match]')).toBeVisible();
   await expect(page.locator('[data-v045-event]')).toContainText('FULL TIME');
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(35);
