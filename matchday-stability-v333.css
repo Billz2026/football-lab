@@ -40,25 +40,23 @@
 }
 .flm-live-match[data-cm-stability="3.3.3"] > .flm-cm-v2-tabs{top:94px!important}
 
-/* Ratings: use explicit grid placement so a generic .player rule elsewhere can never
-   collapse the name cell and shift every statistic into the wrong column again. */
+/* Ratings: every field has an explicit grid column and a unique class. */
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-head,
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row{
   grid-template-columns:38px minmax(150px,1fr) 48px 46px 30px 30px 46px!important;
   column-gap:5px!important;
 }
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row{
-  min-height:35px!important;
-}
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row{min-height:35px!important}
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-no,
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .no{
   display:block!important;
   visibility:visible!important;
+  opacity:1!important;
   grid-column:1!important;
   min-width:0!important;
   color:#aaa49a!important;
   font-variant-numeric:tabular-nums!important;
 }
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .player,
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-player-name{
   display:flex!important;
   visibility:visible!important;
@@ -70,8 +68,9 @@
   align-items:center!important;
   gap:5px!important;
   overflow:hidden!important;
+  position:static!important;
+  transform:none!important;
 }
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .player strong,
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-player-name strong{
   display:block!important;
   visibility:visible!important;
@@ -85,11 +84,20 @@
   font-size:9px!important;
   font-weight:850!important;
 }
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .pos{display:block!important;grid-column:3!important;color:#d5b958!important}
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .con{display:block!important;grid-column:4!important;text-align:center!important}
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .return:nth-of-type(4){grid-column:5!important}
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .return:nth-of-type(5){grid-column:6!important}
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .rate{display:block!important;grid-column:7!important;justify-self:end!important}
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-player-name small{
+  display:inline-block!important;
+  flex:0 0 auto!important;
+  padding:1px 3px!important;
+  border:1px solid #ffffff17!important;
+  color:#817b72!important;
+  font-size:5px!important;
+  font-weight:950!important;
+}
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-pos{display:block!important;grid-column:3!important;color:#d5b958!important}
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-con{display:block!important;grid-column:4!important;text-align:center!important}
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-goals{display:block!important;grid-column:5!important;text-align:center!important}
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-assists{display:block!important;grid-column:6!important;text-align:center!important}
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > .cm333-rate{display:block!important;grid-column:7!important;justify-self:end!important}
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > *::before,
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-rating-row > *::after{content:none!important;display:none!important}
 
@@ -97,27 +105,23 @@
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-ratings-title{min-height:46px!important}
 .flm-live-match[data-cm-stability="3.3.3"] .cm332-ratings-title>span{font-size:9px!important;color:#a19a90!important}
 
-/* Manager dialogs must own the visual layer. The sticky scoreboard may remain behind
-   the modal but can never cover Subs/Tactics content again. */
+/* Manager dialogs must own the visual layer. */
 .flm-live-match[data-cm-stability="3.3.3"] [data-manager-modal].is-open,
-.flm-live-match[data-cm-stability="3.3.3"] .flm-match-modal.is-open{
-  z-index:240!important;
-}
+.flm-live-match[data-cm-stability="3.3.3"] .flm-match-modal.is-open{z-index:240!important}
 .flm-live-match[data-cm-stability="3.3.3"] [data-manager-modal].is-open [data-manager-dialog],
 .flm-live-match[data-cm-stability="3.3.3"] .flm-match-modal.is-open .flm-match-dialog{
   position:relative!important;
   z-index:241!important;
 }
 .flm-live-match[data-cm-stability="3.3.3"]:has([data-manager-modal].is-open) > .flm-live-scoreboard,
-.flm-live-match[data-cm-stability="3.3.3"]:has(.flm-match-modal.is-open) > .flm-live-scoreboard{
-  z-index:1!important;
-}
+.flm-live-match[data-cm-stability="3.3.3"]:has(.flm-match-modal.is-open) > .flm-live-scoreboard{z-index:1!important}
 
-/* Bench preview should look actionable as information, but not selectable until an
-   outgoing player has been chosen. */
-.flm-live-match[data-cm-stability="3.3.3"] .cm332-bench-preview strong{
+/* Bench preview names cannot be hidden by generic player/name selectors. */
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-bench-preview strong,
+.flm-live-match[data-cm-stability="3.3.3"] .cm332-bench-preview .cm333-bench-name{
   display:block!important;
   visibility:visible!important;
+  opacity:1!important;
   color:#e7e2d9!important;
 }
 
