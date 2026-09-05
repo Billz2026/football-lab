@@ -27,9 +27,13 @@
   },
   "warning": "Development snapshot: imported names, broad positions, reported ages and squad membership come from API-Football seasonless squad endpoints. 2026/27 season statistics are not available on the free tier, so attributes are clearly marked low-confidence FLM positional baselines rather than claimed real-world ratings.",
   "playableDemo": {
-    "version": "0.5.0",
+    "version": "0.5.1",
     "competitionName": "Football Lab Premier League",
-    "format": "single-round-robin",
+    "format": "double-round-robin",
+    "matchweeks": 38,
+    "matchesPerClub": 38,
+    "seasonStartDate": "2026-08-21",
+    "seasonEndDate": "2027-05-30",
     "clubIds": [
       "flm-club-api-football-35",
       "flm-club-api-football-42",
