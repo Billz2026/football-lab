@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-'use strict';
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 const root = process.cwd();
 const auditDir = path.join(root, 'data', 'audit', 'england', '2026-09-05');
