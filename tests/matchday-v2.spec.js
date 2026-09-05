@@ -54,7 +54,9 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   const shell = page.locator('.cm4-shell');
   await expect(shell).toBeVisible();
 
-  // V4 has one visible match shell: score header, top tabs and compact left control rail.
+  // V4 owns the full match workspace: the career shell collapses, leaving one navigation system.
+  await expect(page.locator('.flm-cm-sidebar')).toBeHidden();
+  await expect(page.locator('.career-header')).toBeHidden();
   await expect(shell.locator('[data-cm4-home-name]')).toBeVisible();
   await expect(shell.locator('[data-cm4-away-name]')).toBeVisible();
   await expect(shell.locator('[data-cm4-home-score]')).toHaveText(/^\d+$/);
@@ -105,8 +107,10 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await shell.locator('[data-cm4-view="overview"]').click();
   await expect(shell.locator('[data-cm4-panel="overview"]')).toHaveClass(/is-active/);
 
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
+  // Halftime belongs to V4 too: the hidden native resume action is bridged to the visible V4 control.
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 30000 });
+  await expect(page.locator('[data-resume-second-half]')).toBeAttached();
+  await expect(shell.locator('[data-cm4-pause]')).toHaveText('Resume 2nd Half');
 
   // Existing substitution safety remains available through the V4 rail.
   await shell.locator('[data-cm4-subs]').click();
