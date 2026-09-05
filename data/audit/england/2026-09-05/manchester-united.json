@@ -1,0 +1,63 @@
+{
+  "auditVersion": 2,
+  "reviewDate": "2026-09-05",
+  "season": "2026/27",
+  "clubId": "flm-club-api-football-33",
+  "clubName": "Manchester United",
+  "status": "complete-factual-first-team",
+  "ownershipAuthority": "Manchester United current men's-team page",
+  "registrationAuthority": "Premier League post-window squad submission published 2026-09-03",
+  "seniorPlayers": [
+    {"name":"Senne Lammens","shirtNumber":1,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Karl Darlow","shirtNumber":12,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Tom Heaton","shirtNumber":22,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"},
+    {"name":"Diogo Dalot","shirtNumber":2,"primaryPosition":"DR","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Noussair Mazraoui","shirtNumber":3,"primaryPosition":"DR","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Matthijs de Ligt","shirtNumber":4,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Harry Maguire","shirtNumber":5,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Lisandro Martinez","shirtNumber":6,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Patrick Dorgu","shirtNumber":13,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF"},
+    {"name":"Luke Shaw","shirtNumber":23,"primaryPosition":"DL","secondaryPositions":["DC"],"positionGroup":"DEF"},
+    {"name":"Mason Mount","shirtNumber":7,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Bruno Fernandes","shirtNumber":8,"primaryPosition":"AMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Andrey Santos","shirtNumber":17,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Youri Tielemans","shirtNumber":18,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Carlos Baleba","shirtNumber":20,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Manuel Ugarte","shirtNumber":25,"primaryPosition":"DMC","secondaryPositions":["MC"],"positionGroup":"MID"},
+    {"name":"Marcus Rashford","shirtNumber":9,"primaryPosition":"AML","secondaryPositions":["ST","AMR"],"positionGroup":"ATT"},
+    {"name":"Matheus Cunha","shirtNumber":10,"primaryPosition":"ST","secondaryPositions":["AMC"],"positionGroup":"ATT"},
+    {"name":"Joshua Zirkzee","shirtNumber":11,"primaryPosition":"ST","secondaryPositions":["AMC"],"positionGroup":"ATT"},
+    {"name":"Amad Diallo","shirtNumber":16,"primaryPosition":"AMR","secondaryPositions":["AMC"],"positionGroup":"ATT"},
+    {"name":"Bryan Mbeumo","shirtNumber":19,"primaryPosition":"AMR","secondaryPositions":["ST"],"positionGroup":"ATT"},
+    {"name":"Benjamin Sesko","shirtNumber":30,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Dermot Mee","shirtNumber":45,"primaryPosition":"GK","secondaryPositions":[],"positionGroup":"GK"}
+  ],
+  "firstTeamRelevantU21": [
+    {"name":"Leny Yoro","shirtNumber":15,"primaryPosition":"DC","secondaryPositions":[],"positionGroup":"DEF"},
+    {"name":"Ayden Heaven","shirtNumber":26,"primaryPosition":"DC","secondaryPositions":["DL"],"positionGroup":"DEF"},
+    {"name":"Harry Amass","shirtNumber":41,"primaryPosition":"DL","secondaryPositions":["WBL"],"positionGroup":"DEF"},
+    {"name":"Kobbie Mainoo","shirtNumber":37,"primaryPosition":"MC","secondaryPositions":["DMC"],"positionGroup":"MID"},
+    {"name":"Jack Fletcher","shirtNumber":38,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID"},
+    {"name":"Tyler Fletcher","shirtNumber":39,"primaryPosition":"MC","secondaryPositions":["AMC"],"positionGroup":"MID"},
+    {"name":"Chido Obi","shirtNumber":null,"primaryPosition":"ST","secondaryPositions":[],"positionGroup":"ATT"},
+    {"name":"Shea Lacey","shirtNumber":31,"primaryPosition":"AMR","secondaryPositions":["AMC"],"positionGroup":"ATT"}
+  ],
+  "notAtClub": [
+    {"name":"Jadon Sancho","status":"free-agent","effective":"2026-07-01","hardExclusion":true},
+    {"name":"Casemiro","status":"departed","hardExclusion":true},
+    {"name":"Tyrell Malacia","status":"departed","hardExclusion":true}
+  ],
+  "onLoanOut": [
+    {"name":"Altay Bayindir","status":"loan-out"},
+    {"name":"Andre Onana","status":"loan-out"}
+  ],
+  "qa": {
+    "sanchoAtManchesterUnited": false,
+    "unresolvedSeniorOwnership": 0,
+    "notes": [
+      "Jadon Sancho is explicitly excluded. A stale Premier League squad page must not reintroduce him.",
+      "Marcus Rashford is retained because he appears on both the current Manchester United first-team page and the 2026-09-03 Premier League submission.",
+      "Reference market values are intentionally deferred to the league-wide valuation pass."
+    ]
+  }
+}
