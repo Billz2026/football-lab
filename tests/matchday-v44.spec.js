@@ -32,6 +32,11 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
 
   // V4.6 deliberately removes the duplicate central PLAY FRIENDLY CTA.
   await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY');
+
+  // The live engine uses real presentation timers. Install Playwright's deterministic
+  // browser clock before kick-off so this acceptance test validates match state rather
+  // than runner speed. Production timing remains untouched.
+  await page.clock.install();
   await page.locator('[data-shell-continue]').click();
 
   const live=page.locator('[data-live-match]');
@@ -59,28 +64,31 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
 
   // Live commentary should expose football actions, not tactical/database jargon.
   await shell.locator('[data-cm4-speed="4"]').click();
-  await expect.poll(async()=>page.locator('[data-commentary-feed] .flm-commentary-line').count(),{timeout:15000}).toBeGreaterThanOrEqual(5);
-  await expect.poll(async()=>((await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text'))||'').length,{timeout:10000}).toBeGreaterThan(5);
+  await page.clock.runFor(30000);
+  await expect(page.locator('[data-commentary-feed] .flm-commentary-line')).toHaveCount(await page.locator('[data-commentary-feed] .flm-commentary-line').count());
+  expect(await page.locator('[data-commentary-feed] .flm-commentary-line').count()).toBeGreaterThanOrEqual(5);
   const displayed=(await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text'))||'';
+  expect(displayed.length).toBeGreaterThan(5);
   expect(displayed).not.toMatch(/\b(?:LCB|RCB|LCM|RCM|DMC|AMC|AML|AMR|Central Defender|Inside Forward|Poacher|tactical plan|attacking instruction)\b/i);
 
-  // Half time is authoritative until the user resumes. The wider CI budget still fails a real 43/44 freeze.
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00',{timeout:35000});
+  // Half time is authoritative until the user resumes. The deterministic clock still
+  // exercises every scheduled engine/presentation callback without depending on CI load.
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
   await expect(live).toHaveAttribute('data-cm44-state','halftime');
   await expect(shell.locator('[data-cm4-phase]')).toHaveText('Half Time');
   await expect(shell.locator('[data-cm4-pause]')).toHaveText('Resume 2nd Half');
   await expect(shell.locator('[data-cm4-event-text]')).toHaveAttribute('data-cm44-text',/^HALF TIME · /);
 
   await shell.locator('[data-cm4-pause]').click();
-  await expect.poll(async()=>Number(((await shell.locator('[data-cm4-clock]').textContent())||'0').split(':')[0]),{timeout:8000}).toBeGreaterThan(45);
+  await page.clock.runFor(30000);
 
   // Full time is latched: no ordinary commentary can overwrite it while waiting to continue.
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00',{timeout:40000});
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00');
   await expect(live).toHaveAttribute('data-cm44-state','fulltime');
   await expect(shell.locator('[data-cm4-phase]')).toHaveText('Full Time');
   const finalText=await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text');
   expect(finalText).toMatch(/^FULL TIME · /);
-  await page.waitForTimeout(700);
+  await page.clock.runFor(700);
   await expect(shell.locator('[data-cm4-event-text]')).toHaveAttribute('data-cm44-text',finalText);
   await expect(shell.locator('[data-cm4-tactics]')).toBeHidden();
   await expect(shell.locator('[data-cm4-subs]')).toBeHidden();
