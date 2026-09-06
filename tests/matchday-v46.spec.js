@@ -43,9 +43,24 @@ test('V4.6 locks matchday presentation and management screens', async ({ page })
   const shell = page.locator('.cm4-shell');
   await expect(shell).toHaveAttribute('data-cm46', '1', { timeout: 7000 });
 
-  await shell.locator('[data-cm4-speed="4"]').click();
-  await expect.poll(async () => Number(await shell.getAttribute('data-cm45-goal-count') || 0), { timeout: 45000 }).toBeGreaterThan(0);
+  // Match-engine randomness is covered by the lock/calibration suite. Freeze this
+  // presentation test and inject one deterministic goal so a valid 0-0 cannot flake CI.
   await shell.locator('[data-cm4-pause]').click();
+  await page.evaluate(() => {
+    const state = window.__flmLiveStateV332;
+    if (!state) throw new Error('Live match state unavailable');
+    state.events ||= [];
+    const playerId = state.homeLineupIds?.[0] || state.awayLineupIds?.[0];
+    const clubId = state.homeLineupIds?.includes(playerId) ? state.homeClubId : state.awayClubId;
+    if (!playerId || !clubId) throw new Error('Live match scorer fixture unavailable');
+    state.events.push({
+      type: 'goal',
+      minute: Math.max(1, Number(state.minute) || 1),
+      clubId,
+      playerId
+    });
+  });
+  await expect.poll(async () => Number(await shell.getAttribute('data-cm45-goal-count') || 0), { timeout: 3000 }).toBeGreaterThan(0);
 
   const firstScorer = shell.locator('.cm45-scorer-row').first();
   await expect(firstScorer).toBeVisible();
