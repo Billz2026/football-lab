@@ -177,7 +177,10 @@ function annotateNewShots(state, events, beforeShots) {
     const candidates = (events || []).filter(event => event.clubId === clubId && eventRepresentsShot(event));
     for (const event of candidates) {
       if (!remaining) break;
-      const xg = contextualXg(event);
+      // The event ledger is authoritative. Store a two-decimal shot value first,
+      // then derive aggregate xG from exactly those stored values so the headline
+      // number can always be reconstructed from the match history without drift.
+      const xg = round2(contextualXg(event));
       state.stats[side].xG = round2(state.stats[side].xG + xg);
       state.stats[side].xgShots += 1;
       if (xg >= XG_MODEL.bigChanceThreshold) state.stats[side].bigChances += 1;
@@ -185,14 +188,9 @@ function annotateNewShots(state, events, beforeShots) {
       remaining -= 1;
     }
 
-    // A shot counter increment without an explicit shot event is still a real attempt.
-    // Preserve accounting with a conservative neutral value, while the calibration
-    // suite guards that these fallbacks do not become a dominant hidden path.
-    while (remaining > 0) {
-      state.stats[side].xG = round2(state.stats[side].xG + 0.08);
-      state.stats[side].xgShots += 1;
-      remaining -= 1;
-    }
+    // Do not silently fabricate xG for a shot that has no auditable shot event.
+    // Current engine paths all emit explicit shot events; leaving xgShots behind the
+    // shot counter makes any future broken path fail the lock tests instead of hiding it.
   }
 }
 
