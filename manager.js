@@ -42,3 +42,4 @@ import './player-profile-v2.js?v=2.1.0';
 import './career-integrity-v067.js?v=0.6.7';
 import './match-fulltime-single-continue-v064.js?v=0.6.7';
 import './recording-fixes-v068.js?v=0.6.8';
+import './matchday-runtime-fixes-v070.js?v=0.7.0';
