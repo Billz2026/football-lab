@@ -47,4 +47,4 @@ import './commentary-engine-v1.js?v=1.0.1';
 import './commentary-realtime-v1.js?v=1.1.0';
 import './commentary-match-fixes-v11.js?v=1.1.0';
 import './commentary-v2.js?v=2.0.0';
-import './commentary-v3.js?v=3.0.0';
+import './commentary-v3.js?v=3.0.1';
