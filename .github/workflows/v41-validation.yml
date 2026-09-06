@@ -38,11 +38,15 @@ jobs:
             career-world-v060.js \
             transfers-v050.js \
             career-manager-start-v064.js \
+            career-personality-v2.js \
+            player-profile-v2.js \
             match-fulltime-single-continue-v064.js \
             scripts/validate-database.mjs \
             tests/manager-career.spec.js \
             tests/manager-core.test.js \
             tests/career-manager-v064.spec.js \
+            tests/personality-v2.test.js \
+            tests/player-profile-v2.spec.js \
             tests/world-clock.test.js \
             tests/world-clock.spec.js; do
             echo "Checking ${file}"
@@ -56,7 +60,7 @@ jobs:
         run: npm run validate:database
 
       - name: Test career simulation
-        run: node --test tests/manager-core.test.js tests/world-clock.test.js
+        run: node --test tests/manager-core.test.js tests/world-clock.test.js tests/personality-v2.test.js
 
       - name: Install Chromium
         timeout-minutes: 10
