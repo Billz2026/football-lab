@@ -106,6 +106,7 @@ function seededRandom(seed) {
 function playerById(db,id){ return db.players.find(player=>player.id===id); }
 function userSide(state){ return state.userClubId===state.homeClubId?'home':'away'; }
 function lineupFor(state,side){ return side==='home'?state.homeLineupIds:state.awayLineupIds; }
+function clubIdForSide(state,side){ return side==='home'?state.homeClubId:state.awayClubId; }
 
 function positionCodes(player) {
   const raw = String(player?.primaryPosition || '').toUpperCase();
@@ -260,30 +261,42 @@ export function swapShapePlayers(inputState, firstSlotId, secondSlotId, career, 
   return {state,event};
 }
 
+function roleShapeForSide(state, db, side) {
+  if (side === userSide(state)) return state.userShape;
+  const formation = baseGetOpponentSnapshot(state, db)?.tactics?.formation || '4-3-3';
+  return assignPlayersToFormation(lineupFor(state, side), formation, db);
+}
+
 function roleEvent(state, career, db) {
-  if (!state.userShape?.assignments?.length) return null;
-  const random = seededRandom(`${state.seed}:${state.fixtureId}:roles:${state.minute}:${JSON.stringify(state.userShape.assignments.map(a=>[a.slotId,a.playerId,a.role]))}`);
+  // One role event opportunity per minute, but the affected side is neutral. The
+  // user keeps editable roles; the opponent gets a deterministic AI formation and
+  // default role assignment from the same role definitions.
+  const random = seededRandom(`${state.seed}:${state.fixtureId}:roles:${state.minute}:${state.substitutions.length}`);
   if (random() > .12) return null;
-  const candidates = state.userShape.assignments.filter(a=>!state.sentOffIds?.includes(a.playerId));
+  const side = random() < .5 ? 'home' : 'away';
+  const shape = roleShapeForSide(state, db, side);
+  const candidates = (shape?.assignments || []).filter(a=>a?.playerId && !state.sentOffIds?.includes(a.playerId));
+  if (!candidates.length) return null;
   const assignment = candidates[Math.floor(random()*candidates.length)];
-  const slot = state.userShape.slots.find(item=>item.id===assignment.slotId);
+  const slot = shape.slots.find(item=>item.id===assignment.slotId);
   const p = playerById(db,assignment.playerId);
+  if (!slot || !p) return null;
   const role = ROLE_DEFINITIONS[assignment.role] || ROLE_DEFINITIONS['Central Midfielder'];
-  const side = userSide(state);
+  const teamId = clubIdForSide(state, side);
   const fit = suitability(p,slot.family);
   const fitFactor = clamp((fit+20)/90,.35,1.2);
   let lines=[]; let type='role';
 
   if (fit < 18 && random() < .45) {
     state.ratings[assignment.playerId] = clamp((state.ratings[assignment.playerId]||6.5)-.07,4,10);
-    lines=[`${p?.name || 'The player'} looks uncomfortable at ${slot.label}. The positional mismatch leaves space for the opposition.`];
+    lines=[`${p.name} looks uncomfortable at ${slot.label}. The positional mismatch leaves space for the opposition.`];
   } else if (role.duty === 'Defend') {
     state.ratings[assignment.playerId]=clamp((state.ratings[assignment.playerId]||6.5)+.035*fitFactor,4,10);
-    lines=[`${p?.name || 'The defender'} reads the danger from ${slot.label} and holds the shape as a ${assignment.role}.`];
+    lines=[`${p.name} reads the danger from ${slot.label} and holds the shape as a ${assignment.role}.`];
   } else if (role.duty === 'Support') {
     state.stats[side].possessionTicks += 1;
     state.ratings[assignment.playerId]=clamp((state.ratings[assignment.playerId]||6.5)+.03*fitFactor,4,10);
-    lines=[`${p?.name || 'The midfielder'} finds space from ${slot.label}, linking the play in the ${assignment.role} role.`];
+    lines=[`${p.name} finds space from ${slot.label}, linking the play in the ${assignment.role} role.`];
   } else {
     const chance = (.18 + role.attack) * fitFactor;
     if (random() < chance) {
@@ -294,14 +307,18 @@ function roleEvent(state, career, db) {
         if (side==='home') state.homeGoals += 1; else state.awayGoals += 1;
         state.ratings[assignment.playerId]=clamp((state.ratings[assignment.playerId]||6.5)+.75,4,10);
         type='goal';
-        lines=[`${p?.name || 'The attacker'} attacks the space from ${slot.label}...`, `${assignment.role.toUpperCase()}! ${p?.name || 'He'} is through!`, `GOAL! The role and position combine perfectly.`];
+        lines=[`${p.name} attacks the space from ${slot.label}...`, `${assignment.role.toUpperCase()}! ${p.name} is through!`, `GOAL! The role and position combine perfectly.`];
+      } else if (onTarget) {
+        type='save';
+        lines=[`${p.name} breaks from ${slot.label} in the ${assignment.role} role and gets a shot away.`, `The goalkeeper makes the save.`];
       } else {
-        lines=[`${p?.name || 'The attacker'} breaks from ${slot.label} in the ${assignment.role} role and gets into a dangerous area.`];
+        type='miss';
+        lines=[`${p.name} breaks from ${slot.label} in the ${assignment.role} role and gets a shot away.`, `The effort misses the target.`];
       }
-    } else lines=[`${p?.name || 'The attacker'} keeps stretching the defence from ${slot.label} as a ${assignment.role}.`];
+    } else lines=[`${p.name} keeps stretching the defence from ${slot.label} as a ${assignment.role}.`];
   }
 
-  const event={minute:state.minute,type,clubId:state.userClubId,playerId:assignment.playerId,text:lines.join(' '),lines};
+  const event={minute:state.minute,type,clubId:teamId,playerId:assignment.playerId,text:lines.join(' '),lines};
   state.events.push(event);
   return event;
 }
