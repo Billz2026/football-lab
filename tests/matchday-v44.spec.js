@@ -2,10 +2,17 @@ import { test, expect } from '@playwright/test';
 
 test.setTimeout(120000);
 
+const TEST_TIME = new Date('2026-07-01T12:00:00Z');
+
 test.beforeEach(async ({ page }) => {
+  // Install before the application creates any timers. V4.4 is explicitly a
+  // scheduler/latch acceptance test, so the test owns passage of browser time.
+  await page.clock.install({ time: TEST_TIME });
+  await page.clock.pauseAt(TEST_TIME);
   await page.goto('/index.html');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await page.clock.runFor(250);
 });
 
 async function continueUntil(page, targetDate, maxSteps = 30) {
@@ -24,14 +31,18 @@ async function selectXI(page) {
   await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
 }
 
-async function engageNativeTestSpeed(page, multiplier = 1000) {
-  await page.evaluate(value => {
-    const control = [...document.querySelectorAll('[data-match-speed]')]
-      .find(button => button.dataset.matchSpeed === '4');
-    if (!control) throw new Error('Native Matchday speed control was not found.');
-    control.dataset.matchSpeed = String(value);
-    control.click();
-  }, multiplier);
+async function runMatchClockTo(page, shell, targetMinute, maxVirtualMs = 180000) {
+  const clock = shell.locator('[data-cm4-clock]');
+  let elapsed = 0;
+  while (elapsed < maxVirtualMs) {
+    const raw = (await clock.textContent()) || '0:00';
+    const minute = Number(raw.split(':')[0]) || 0;
+    if (minute >= targetMinute) return minute;
+    await page.clock.runFor(1000);
+    elapsed += 1000;
+  }
+  const finalClock = (await clock.textContent()) || 'unknown';
+  throw new Error(`Virtual Matchday clock did not reach ${targetMinute}:00 after ${maxVirtualMs} ms; stopped at ${finalClock}`);
 }
 
 test('V4.4 latches match states and keeps Fold matchday playable', async ({ page }) => {
@@ -67,33 +78,41 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   expect(positions).not.toMatch(/\b(?:DMC|AMC|MC|DC|DL|DR|AML|AMR)\b/);
   await dialog.locator('[data-close-manager]').first().click();
 
-  // Exercise the real Matchday scheduler at its native 60 ms minimum tick. This is a
-  // test-only control value: no production timing code is changed or bypassed.
-  await engageNativeTestSpeed(page);
+  // Advance the real Matchday scheduler with Playwright's controlled browser clock.
+  // Small slices execute every nested timer consistently, including commentary and
+  // goal-flash sleeps, while the engine's own 45' latch stops first-half progress.
+  await runMatchClockTo(page, shell, 45);
 
   // Live commentary should expose football actions, not tactical/database jargon.
-  await expect.poll(async()=>page.locator('[data-commentary-feed] .flm-commentary-line').count(),{timeout:10000,intervals:[50,100,250]}).toBeGreaterThanOrEqual(5);
-  await expect.poll(async()=>((await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text'))||'').length,{timeout:10000,intervals:[50,100,250]}).toBeGreaterThan(5);
+  expect(await page.locator('[data-commentary-feed] .flm-commentary-line').count()).toBeGreaterThanOrEqual(5);
   const displayed=(await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text'))||'';
+  expect(displayed.length).toBeGreaterThan(5);
   expect(displayed).not.toMatch(/\b(?:LCB|RCB|LCM|RCM|DMC|AMC|AML|AMR|Central Defender|Inside Forward|Poacher|tactical plan|attacking instruction)\b/i);
 
   // Half time is authoritative until the user resumes.
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00',{timeout:20000});
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
   await expect(live).toHaveAttribute('data-cm44-state','halftime');
   await expect(shell.locator('[data-cm4-phase]')).toHaveText('Half Time');
   await expect(shell.locator('[data-cm4-pause]')).toHaveText('Resume 2nd Half');
   await expect(shell.locator('[data-cm4-event-text]')).toHaveAttribute('data-cm44-text',/^HALF TIME · /);
 
+  // Prove the latch is authoritative: virtual time alone cannot advance the match.
+  await page.clock.runFor(5000);
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
+
   await shell.locator('[data-cm4-pause]').click();
-  await expect.poll(async()=>Number(((await shell.locator('[data-cm4-clock]').textContent())||'0').split(':')[0]),{timeout:5000,intervals:[50,100,250]}).toBeGreaterThan(45);
+  await page.clock.runFor(1000);
+  expect(Number((((await shell.locator('[data-cm4-clock]').textContent())||'0').split(':')[0]))).toBeGreaterThan(45);
 
   // Full time is latched: no ordinary commentary can overwrite it while waiting to continue.
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00',{timeout:20000});
+  await runMatchClockTo(page, shell, 90);
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00');
   await expect(live).toHaveAttribute('data-cm44-state','fulltime');
   await expect(shell.locator('[data-cm4-phase]')).toHaveText('Full Time');
   const finalText=await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text');
   expect(finalText).toMatch(/^FULL TIME · /);
-  await page.waitForTimeout(300);
+  await page.clock.runFor(5000);
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00');
   await expect(shell.locator('[data-cm4-event-text]')).toHaveAttribute('data-cm44-text',finalText);
   await expect(shell.locator('[data-cm4-tactics]')).toBeHidden();
   await expect(shell.locator('[data-cm4-subs]')).toBeHidden();
