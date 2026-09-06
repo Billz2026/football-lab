@@ -15,7 +15,7 @@ export {
   swapShapePlayers
 } from './matchday-engine-v0431.js?v=0.4.3.1';
 
-export const MATCH_RULES_VERSION = '0.7.1';
+export const MATCH_RULES_VERSION = '0.7.2';
 export const MATCH_DRAMA_ENGINE_VERSION = MATCH_DRAMA_VERSION;
 export const PREMIER_LEAGUE_BENCH_LIMIT = 9;
 export const PREMIER_LEAGUE_SUBSTITUTION_LIMIT = 5;
@@ -23,6 +23,7 @@ export const PREMIER_LEAGUE_WINDOW_LIMIT = 3;
 export const FRIENDLY_SUBSTITUTION_LIMIT = 11;
 
 const clone = value => JSON.parse(JSON.stringify(value));
+const round2 = value => Math.round(Number(value || 0) * 100) / 100;
 
 function fixtureForState(career = {}, state = {}) {
   const fixture = (career.fixtures || []).flat().find(item => item?.id === state.fixtureId);
@@ -101,6 +102,20 @@ function applyRules(inputState, career, db) {
   return state;
 }
 
+function publishLiveXg(state) {
+  if (typeof window === 'undefined' || !state?.stats?.home || !state?.stats?.away) return;
+  window.__flmLiveXg = {
+    fixtureId: state.fixtureId,
+    minute: state.minute,
+    home: round2(state.stats.home.xG),
+    away: round2(state.stats.away.xG),
+    homeBigChances: Number(state.stats.home.bigChances || 0),
+    awayBigChances: Number(state.stats.away.bigChances || 0),
+    model: state.xgModel || { version: 1, method: 'shot-derived-contextual', spatial: false }
+  };
+  try { window.dispatchEvent(new CustomEvent('flm:live-xg', { detail: window.__flmLiveXg })); } catch (_) {}
+}
+
 function isHalfTimeSubstitution(state) {
   return Number(state.minute) === 45;
 }
@@ -128,9 +143,9 @@ function recordWindow(state, rules) {
 
 export function createInteractiveMatch(career, db) {
   const state = applyRules(base.createInteractiveMatch(career, db), career, db);
-  // Initialise the V3 narrative state without forcing an incident at kick-off.
   state.matchDrama ||= { version: MATCH_DRAMA_ENGINE_VERSION, serial: 0, counts: {}, atmosphere: [] };
   state.matchDrama.version = MATCH_DRAMA_ENGINE_VERSION;
+  publishLiveXg(state);
   return state;
 }
 
@@ -139,6 +154,7 @@ export function advanceInteractiveMatch(inputState, career, db) {
   let state = applyRules(result.state, career, db);
   const drama = applyMatchDrama(state, db, result.events);
   state = applyRules(drama.state, career, db);
+  publishLiveXg(state);
   return { ...result, state, events: [...(result.events || []), ...(drama.events || [])] };
 }
 
@@ -155,5 +171,6 @@ export function makeSubstitution(inputState, outId, inId, db, career = {}) {
   const result = base.makeSubstitution(state, outId, inId, db, career);
   const next = applyRules(result.state, career, db);
   recordWindow(next, rules);
+  publishLiveXg(next);
   return { ...result, state: next };
 }
