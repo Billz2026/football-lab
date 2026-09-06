@@ -9,6 +9,11 @@ import {
   goalQualityFor,
   selectFinishType
 } from '../commentary-engine-v1.js';
+import {
+  COMMENTARY_V2_VERSION,
+  commentaryFamilyFor,
+  rewriteCommentaryText
+} from '../commentary-v2.js';
 
 test('late winner receives premium moment importance', () => {
   const memory=createCommentaryMemory();
@@ -97,4 +102,20 @@ test('a spectacular last-minute winner combines finish quality with match drama'
   assert.ok(result.momentImportance>=95);
   assert.match(result.beats.final,/AT THE DEATH/);
   assert.equal(COMMENTARY_ENGINE_VERSION,'1.0.0');
+});
+
+test('Commentary V2 recognises woodwork, red-card and injury incidents',()=>{
+  assert.equal(commentaryFamilyFor('Saka hits the crossbar!'),'crossbar');
+  assert.equal(commentaryFamilyFor('RED CARD! Rice is sent off.'),'red');
+  assert.equal(commentaryFamilyFor('Saliba cannot continue after that injury.'),'injury');
+  assert.equal(COMMENTARY_V2_VERSION,'2.0.0');
+});
+
+test('Commentary V2 rotates repeated family wording instead of using one fixed line',()=>{
+  const memory={lastVariant:{}};
+  const first=rewriteCommentaryText({text:'Saka hits the post',family:'post',player:'Bukayo Saka',team:'Arsenal',key:'post-1',memory});
+  const second=rewriteCommentaryText({text:'Saka hits the post',family:'post',player:'Bukayo Saka',team:'Arsenal',key:'post-2',memory});
+  assert.notEqual(first,second);
+  assert.match(first,/POST|post|upright|fraction/i);
+  assert.match(second,/POST|post|upright|fraction/i);
 });
