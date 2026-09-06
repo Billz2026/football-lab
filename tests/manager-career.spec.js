@@ -88,9 +88,10 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await expect(live).toHaveAttribute('data-cm-match-v2', '1');
   await expect(page.locator('.flm-cm-v2-tabs [data-cm-v2-view]')).toHaveCount(4);
   await expect(page.locator('.flm-cm-v2-focus')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'PAUSE MATCH', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'MAKE SUB', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'TACTICS', exact: true }).last()).toBeVisible();
+  const shell = page.locator('.cm4-shell');
+  await expect(shell.locator('[data-cm4-pause]')).toBeVisible();
+  await expect(shell.locator('[data-cm4-subs]')).toBeVisible();
+  await expect(shell.locator('[data-cm4-tactics]')).toBeVisible();
 
   const typography = await page.locator('.flm-cm-v2-focus').evaluate(node => {
     const text = node.querySelector('.flm-cm-v2-text');
@@ -117,7 +118,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await page.waitForTimeout(300);
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
 
-  await page.getByRole('button', { name: 'MAKE SUB', exact: true }).click();
+  await shell.locator('[data-cm4-subs]').click();
   await expect(page.locator('.v2-sub-shell')).toBeVisible();
   const confirm = page.locator('[data-apply-sub]');
   await expect(confirm).toHaveText('CONFIRM SUBSTITUTION');
