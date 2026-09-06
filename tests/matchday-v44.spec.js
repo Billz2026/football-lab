@@ -45,6 +45,13 @@ async function runMatchClockTo(page, shell, targetMinute, maxVirtualMs = 180000)
   throw new Error(`Virtual Matchday clock did not reach ${targetMinute}:00 after ${maxVirtualMs} ms; stopped at ${finalClock}`);
 }
 
+async function stateLabelStyle(locator) {
+  return locator.evaluate(node => ({
+    fontSize: getComputedStyle(node).fontSize,
+    after: getComputedStyle(node, '::after').content
+  }));
+}
+
 test('V4.4 latches match states and keeps Fold matchday playable', async ({ page }) => {
   await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
   await page.locator('[data-start-club]').first().click();
@@ -65,10 +72,11 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   await expect(shell.locator('[data-cm4-referee]')).not.toHaveText('Referee — Match Official');
   await expect(shell.locator('[data-cm4-weather]')).not.toHaveText('Weather —');
 
-  // Fold substitutions: full XI visible, normalised positions and coherent V4 skin.
-  await page.setViewportSize({ width:720, height:900 });
+  // User-device Fold regression: the 11th XI row must be physically reachable,
+  // and a striker substitution must complete through the real native workflow.
+  await page.setViewportSize({ width:720, height:760 });
   await shell.locator('[data-cm4-subs]').click();
-  const dialog=page.locator('.flm-match-dialog.v2-sub-dialog');
+  let dialog=page.locator('.flm-match-dialog.v2-sub-dialog');
   await expect(dialog).toHaveAttribute('data-cm44','1');
   const xi=dialog.locator('.v2-sub-column').nth(0).locator('.v2-sub-list');
   await expect(xi.locator('.v2-sub-player')).toHaveCount(11);
@@ -76,7 +84,35 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   expect(xiGeometry.scrollHeight).toBeLessThanOrEqual(xiGeometry.clientHeight+3);
   const positions=(await dialog.locator('.v2-sub-player .pos').allTextContents()).join(' ');
   expect(positions).not.toMatch(/\b(?:DMC|AMC|MC|DC|DL|DR|AML|AMR)\b/);
+
+  const striker=xi.locator('.v2-sub-player').filter({hasText:/^ST\b/});
+  await expect(striker).toHaveCount(1);
+  const strikerName=(await striker.locator('strong').textContent())?.trim() || '';
+  expect(strikerName.length).toBeGreaterThan(1);
+  const strikerGeometry=await striker.evaluate(node=>{
+    const row=node.getBoundingClientRect();
+    const list=node.parentElement.getBoundingClientRect();
+    return {rowTop:row.top,rowBottom:row.bottom,listTop:list.top,listBottom:list.bottom};
+  });
+  expect(strikerGeometry.rowTop).toBeGreaterThanOrEqual(strikerGeometry.listTop-1);
+  expect(strikerGeometry.rowBottom).toBeLessThanOrEqual(strikerGeometry.listBottom+1);
+
+  await striker.click();
+  const bench=dialog.locator('.v2-sub-column').nth(1).locator('.v2-sub-player:not(:disabled)');
+  await expect(bench.first()).toBeVisible();
+  await bench.first().click();
+  const confirm=dialog.locator('[data-apply-sub]');
+  await expect(confirm).toBeEnabled();
+  await confirm.click();
+  await expect(dialog).toBeHidden();
+
+  // Re-open to prove the substitution was committed, not merely selectable.
+  await shell.locator('[data-cm4-subs]').click();
+  dialog=page.locator('.flm-match-dialog.v2-sub-dialog');
+  await expect(dialog.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
+  await expect(dialog.locator('.v2-sub-column').nth(0).getByText(strikerName,{exact:true})).toHaveCount(0);
   await dialog.locator('[data-close-manager]').first().click();
+  await page.setViewportSize({ width:720, height:900 });
 
   // Advance the real Matchday scheduler with Playwright's controlled browser clock.
   // Small slices execute every nested timer consistently, including commentary and
@@ -95,6 +131,12 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   await expect(shell.locator('[data-cm4-phase]')).toHaveText('Half Time');
   await expect(shell.locator('[data-cm4-pause]')).toHaveText('Resume 2nd Half');
   await expect(shell.locator('[data-cm4-event-text]')).toHaveAttribute('data-cm44-text',/^HALF TIME · /);
+  const halfPhaseStyle=await stateLabelStyle(shell.locator('[data-cm4-phase]'));
+  const halfClockStyle=await stateLabelStyle(shell.locator('[data-cm4-half]'));
+  expect(halfPhaseStyle.fontSize).toBe('0px');
+  expect(halfPhaseStyle.after).toContain('HALF TIME');
+  expect(halfClockStyle.fontSize).toBe('0px');
+  expect(halfClockStyle.after).toContain('HALF TIME');
 
   // Prove the latch is authoritative: virtual time alone cannot advance the match.
   await page.clock.runFor(5000);
@@ -111,6 +153,20 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   await expect(shell.locator('[data-cm4-phase]')).toHaveText('Full Time');
   const finalText=await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text');
   expect(finalText).toMatch(/^FULL TIME · /);
+
+  // Guard the exact Fold cascade that produced Full TimeFULL TIME and
+  // Full TimeCONTINUE in the user screenshot. Native text is hidden and only
+  // the authoritative generated state label is visible.
+  const fullPhaseStyle=await stateLabelStyle(shell.locator('[data-cm4-phase]'));
+  const fullClockStyle=await stateLabelStyle(shell.locator('[data-cm4-half]'));
+  const fullPauseStyle=await stateLabelStyle(shell.locator('[data-cm4-pause]'));
+  expect(fullPhaseStyle.fontSize).toBe('0px');
+  expect(fullPhaseStyle.after).toContain('FULL TIME');
+  expect(fullClockStyle.fontSize).toBe('0px');
+  expect(fullClockStyle.after).toContain('FULL TIME');
+  expect(fullPauseStyle.fontSize).toBe('0px');
+  expect(fullPauseStyle.after).toContain('CONTINUE');
+
   await page.clock.runFor(5000);
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00');
   await expect(shell.locator('[data-cm4-event-text]')).toHaveAttribute('data-cm44-text',finalText);
