@@ -44,7 +44,12 @@ jobs:
             board-expectations-v067.js \
             match-integrity-core-v067.js \
             career-integrity-v067.js \
+            matchday-live-v04.js \
+            matchday-engine-v069.js \
             matchday-engine-v0431.js \
+            matchday-engine-v043.js \
+            matchday-engine-v042.js \
+            match-centre-v0451.js \
             player-profile-v2.js \
             match-fulltime-single-continue-v064.js \
             scripts/validate-database.mjs \
