@@ -5,9 +5,9 @@ import {
   createCommentaryMemory,
   goalQualityFor,
   selectFinishType
-} from './commentary-engine-v1.js?v=1.0.0';
+} from './commentary-engine-v1.js?v=1.0.1';
 
-export const COMMENTARY_REALTIME_VERSION='1.0.0';
+export const COMMENTARY_REALTIME_VERSION='1.1.0';
 
 const clean=value=>String(value||'').replace(/\s+/g,' ').trim();
 const memories=new WeakMap();
@@ -83,6 +83,12 @@ function parseScorer(text){
   if(match)return clean(match[1]);
   match=source.match(/^(.+?)\s+(?:SHOOTS|attacks the space|breaks forward)/i);
   if(match)return clean(match[1]);
+  match=source.match(/^(.+?)\s+places the ball on the spot\b/i);
+  if(match)return clean(match[1]);
+  match=source.match(/^(.+?)\s+stands over it\b/i);
+  if(match)return clean(match[1]);
+  match=source.match(/^(.+?)\s+(?:STEPS UP|GOES FOR GOAL|CURLS IT|STRIKES IT)/i);
+  if(match)return clean(match[1]);
   match=source.match(/^GOAL!\s*(.+?)\s+scores for\b/i);
   return clean(match?.[1]||'');
 }
@@ -99,6 +105,11 @@ function seedFor(live,group){
 
 function chooseRealtimeFinish(live,group){
   if(group.finishType)return group.finishType;
+  if(group.kind==='penalty'||group.kind==='free-kick'){
+    group.finishType='normal';
+    group.goalQuality=group.kind==='free-kick'?84:42;
+    return group.finishType;
+  }
   if(!group.scorerName)return'normal';
   const selected=selectFinishType({
     fixtureId:seedFor(live,group),
@@ -126,7 +137,11 @@ function startGroup(live,row,memory,raw){
   const before={...after,[side]:Math.max(0,Number(after[side]||0)-1)};
   const scorerName=parseScorer(raw);
   const creatorName=parseCreator(raw);
-  const kind=/sees the run|threads the ball|opens up the defence|is in behind/i.test(raw)?'through':'role';
+  const normal=clean(raw).toLowerCase();
+  const kind=/penalty|penalty area|spot/.test(normal)?'penalty'
+    :/free[- ]kick|yards? from goal|yards? out/.test(normal)?'free-kick'
+    :/sees the run|threads the ball|opens up the defence|is in behind/i.test(raw)?'through'
+    :'role';
   const group={
     minute,
     side,
@@ -145,7 +160,7 @@ function startGroup(live,row,memory,raw){
   };
   memory.active=group;
   writeScore(live,before);
-  phase(live,'ATTACK');
+  phase(live,kind==='penalty'?'PENALTY':kind==='free-kick'?'FREE KICK':'ATTACK');
   return group;
 }
 
@@ -174,8 +189,9 @@ function setBuildPresentation(live,row,group,index){
   row.dataset.flcV1='1';
   row.dataset.flcGoalKey=group.key;
   row.dataset.flcSuspense='build';
+  if(group.kind==='penalty'||group.kind==='free-kick')row.dataset.flcSetPiece=group.kind;
   writeScore(live,group.before);
-  phase(live,index===0?'ATTACK':'CHANCE');
+  phase(live,group.kind==='penalty'?'PENALTY':group.kind==='free-kick'?'FREE KICK':index===0?'ATTACK':'CHANCE');
 }
 
 function finaliseGoal(live,row,group,memory,raw){
@@ -196,9 +212,14 @@ function finaliseGoal(live,row,group,memory,raw){
     finishType,
     moment
   });
-  const quality=group.goalQuality||goalQualityFor({finishType,fixtureId:seedFor(live,group),minute:group.minute,playerId:group.scorerName,eventIndex:group.serial});
+  const dramatic=new Set(moment.tags||[]);
+  const hasBigMoment=['late-winner','comeback-complete','late-equaliser','comeback-level','immediate-response','hat-trick'].some(tag=>dramatic.has(tag));
+  let finalText=beats.final;
+  if(!hasBigMoment&&group.kind==='penalty')finalText=`GOAL! ${group.teamName.toUpperCase()} SCORE FROM THE SPOT!`;
+  if(!hasBigMoment&&group.kind==='free-kick')finalText=`WHAT A FREE-KICK! ${group.scorerName.toUpperCase()} HAS BURIED IT!`;
+  const quality=group.goalQuality||(group.kind==='free-kick'?84:group.kind==='penalty'?42:goalQualityFor({finishType,fixtureId:seedFor(live,group),minute:group.minute,playerId:group.scorerName,eventIndex:group.serial}));
   const tier=quality>=86&&moment.importance>=86?'iconic':moment.importance>=80?'dramatic':quality>=78?'signature':'standard';
-  spanOf(row).textContent=beats.final;
+  spanOf(row).textContent=finalText;
   row.classList.add('goal');
   row.classList.remove('flc-build','flc-chance');
   row.dataset.flcV1='1';
@@ -206,8 +227,9 @@ function finaliseGoal(live,row,group,memory,raw){
   row.dataset.flcFinal='1';
   row.dataset.flcTier=tier;
   row.dataset.flcSuspense='final';
+  if(group.kind==='penalty'||group.kind==='free-kick')row.dataset.flcSetPiece=group.kind;
   writeScore(live,group.after);
-  phase(live,'GOAL');
+  phase(live,group.kind==='penalty'?'PENALTY GOAL':group.kind==='free-kick'?'FREE-KICK GOAL':'GOAL');
   group.closed=true;
   memory.latest={
     key:group.key,
@@ -218,7 +240,8 @@ function finaliseGoal(live,row,group,memory,raw){
     goalQuality:quality,
     momentImportance:moment.importance,
     momentTags:moment.tags,
-    tier
+    tier,
+    kind:group.kind
   };
 }
 
@@ -239,6 +262,13 @@ function processRow(live,row,memory){
   group.creatorName=group.creatorName||parseCreator(raw);
   group.scorerName=group.scorerName||parseScorer(raw);
   const index=group.lineIndex++;
+  if(group.kind==='penalty'||group.kind==='free-kick'){
+    // These are already authored as football incident chains by Match Drama V3.
+    // Preserve the factual sequence and only use this layer for score suspense.
+    spanOf(row).textContent=raw;
+    setBuildPresentation(live,row,group,index);
+    return;
+  }
   const beats=provisionalBeats(live,group);
   let replacement;
   if(index===0){
@@ -265,6 +295,7 @@ function styleVisibleFeed(live){
     row.classList.toggle('flc-chance',source.classList.contains('flc-chance'));
     if(source.dataset.flcTier)row.dataset.flcTier=source.dataset.flcTier;
     if(source.dataset.flcFinal==='1')row.dataset.flcFinal='1';
+    if(source.dataset.flcSetPiece)row.dataset.flcSetPiece=source.dataset.flcSetPiece;
   }
 }
 
@@ -280,6 +311,8 @@ function enhanceFlash(live,memory){
     if(tags.has('late-winner'))word.textContent='LATE WINNER!';
     else if(tags.has('comeback-complete'))word.textContent='COMEBACK!';
     else if(tags.has('late-equaliser'))word.textContent='LATE GOAL!';
+    else if(latest.kind==='free-kick')word.textContent='WHAT A FREE-KICK!';
+    else if(latest.kind==='penalty')word.textContent='GOAL!';
     else if(latest.tier==='iconic')word.textContent='UNBELIEVABLE!';
     else if(latest.tier==='signature')word.textContent='WHAT A GOAL!';
     else word.textContent='GOAL!';
@@ -288,7 +321,7 @@ function enhanceFlash(live,memory){
   if(inner){
     let detail=inner.querySelector('.flc-goal-detail');
     if(!detail){detail=document.createElement('span');detail.className='flc-goal-detail';inner.appendChild(detail);}
-    const finish=latest.finishType==='normal'?'':latest.finishType.replaceAll('-',' ');
+    const finish=latest.kind==='free-kick'?'direct free kick':latest.kind==='penalty'?'penalty':latest.finishType==='normal'?'':latest.finishType.replaceAll('-',' ');
     const moment=tags.has('late-winner')?'last-minute winner':tags.has('comeback-complete')?'comeback complete':tags.has('late-equaliser')?'late equaliser':tags.has('comeback-level')?'comeback level':'';
     detail.textContent=[finish,moment].filter(Boolean).join(' · ');
     detail.hidden=!detail.textContent;
@@ -302,6 +335,8 @@ function ensureStyles(){
   style.textContent=`
     .flm-commentary-line.flc-build,.cm33-line.flc-build{border-color:rgba(100,183,255,.2)!important;background:rgba(100,183,255,.035)!important;font-weight:750}
     .flm-commentary-line.flc-chance,.cm33-line.flc-chance{border-color:rgba(230,191,82,.28)!important;background:rgba(230,191,82,.045)!important;font-weight:850}
+    .flm-commentary-line[data-flc-set-piece="penalty"],.cm33-line[data-flc-set-piece="penalty"]{border-color:rgba(241,207,74,.5)!important;background:rgba(241,207,74,.075)!important}
+    .flm-commentary-line[data-flc-set-piece="free-kick"],.cm33-line[data-flc-set-piece="free-kick"]{border-color:rgba(99,196,238,.38)!important;background:rgba(99,196,238,.055)!important}
     .flm-commentary-line[data-flc-final="1"] span,.cm33-line[data-flc-final="1"] span{font-weight:1000!important}
   `;
   document.head.appendChild(style);
@@ -332,6 +367,6 @@ function queue(){
 if(typeof window!=='undefined'&&typeof document!=='undefined'){
   ensureStyles();
   queue();
-  new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','data-cm-side','data-flc-v1','data-flc-final']});
+  new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','data-cm-side','data-flc-v1','data-flc-final','data-flc-set-piece']});
   window.FLMCommentaryRealtimeV1=Object.freeze({version:COMMENTARY_REALTIME_VERSION,refresh:queue});
 }
