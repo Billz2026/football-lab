@@ -237,3 +237,35 @@
   .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-player{grid-template-columns:32px minmax(0,1fr) 42px 32px!important}
   .cm46-ready-note{display:none!important}
 }
+
+/* V1 lock: V4.1 Fold rules have higher element specificity than V4.4's state
+   selectors. Keep the native state text visually suppressed so only V4.4's
+   authoritative ::after label is rendered — never Full TimeFULL TIME or
+   Full TimeCONTINUE. */
+.flm-live-match[data-cm4="1"][data-cm44-state="halftime"] .cm4-phase>strong[data-cm4-phase],
+.flm-live-match[data-cm4="1"][data-cm44-state="fulltime"] .cm4-phase>strong[data-cm4-phase],
+.flm-live-match[data-cm4="1"][data-cm44-state="halftime"] .cm4-clockbox>[data-cm4-half],
+.flm-live-match[data-cm4="1"][data-cm44-state="fulltime"] .cm4-clockbox>[data-cm4-half],
+.flm-live-match[data-cm4="1"][data-cm44-state="fulltime"] .cm4-rail>[data-cm4-pause]{
+  font-size:0!important;
+}
+
+/* V1 lock: on Fold/tablet widths <=760px the V2 300px list cap and the V4.4
+   overflow:hidden rule used to clip the 11th XI player (normally the striker).
+   Fit all eleven rows into the available column and keep touch scrolling as a
+   fallback if browser font metrics make the content a few pixels taller. */
+@media (min-width:560px) and (max-width:760px){
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-column:first-child .v2-sub-list{
+    grid-template-rows:repeat(11,minmax(27px,1fr))!important;
+    max-height:308px!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-gutter:stable;
+  }
+  .flm-live-match[data-cm4="1"] .v2-sub-dialog[data-cm46-dialog="subs"] .v2-sub-column:first-child .v2-sub-player{
+    min-height:27px!important;
+    padding:1px 5px!important;
+  }
+}
