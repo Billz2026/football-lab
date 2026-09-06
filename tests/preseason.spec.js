@@ -33,11 +33,17 @@ test('V0.4.7 pre-season blocks Round 1, builds readiness and hands off to the se
   await expect(page.locator('.v047-card')).toHaveCount(4);
   await page.locator('[data-v047-focus]').selectOption('Tactical');
 
+  // Playing a live friendly requires a legal XI. Choose one explicitly so this
+  // regression tests the pre-season flow rather than failing on squad validation.
+  await page.getByRole('button', { name: 'Squad', exact: true }).click();
+  await page.locator('[data-v044-auto-pick]').click();
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
+
   await continueUntil(page, '2026-07-11');
   await page.locator('[data-v047-preseason-tab]').click();
 
   // V0.6 consolidates the real friendly launch into the authoritative shell CTA;
-  // the old in-panel data-v047-play control was intentionally removed.
+  // the old in-panel data-v047-play control is visually suppressed.
   await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY');
   await page.locator('[data-shell-continue]').click();
   await expect(page.locator('[data-live-match]')).toBeVisible();
