@@ -22,9 +22,9 @@ export {
   swapShapePlayers
 } from './matchday-engine-v043.js';
 
-export const LIVE_ENGINE_VERSION = 9;
+export const LIVE_ENGINE_VERSION = 10;
 export const XG_MODEL = Object.freeze({
-  version: 1,
+  version: 2,
   method: 'shot-derived-contextual',
   spatial: false,
   bigChanceThreshold: 0.30
@@ -33,7 +33,7 @@ export const XG_MODEL = Object.freeze({
 const clone = value => JSON.parse(JSON.stringify(value));
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const round2 = value => Math.round(Number(value || 0) * 100) / 100;
-const SHOT_TYPES = new Set(['goal', 'save', 'woodwork', 'miss', 'corner']);
+const DIRECT_SHOT_TYPES = new Set(['goal', 'save', 'woodwork', 'miss']);
 
 function playerById(db, id) {
   return db.players.find(player => player.id === id);
@@ -109,6 +109,8 @@ function ensureXgState(state) {
     spatial: XG_MODEL.spatial,
     note: 'Shot coordinates are not yet simulated; xG is derived from generated chance context.'
   };
+  state.xgModel.version = XG_MODEL.version;
+  exposeXg(state);
   return state;
 }
 
@@ -128,6 +130,16 @@ function exposeXg(state) {
 
 function chanceText(event) {
   return `${event?.text || ''} ${(event?.lines || []).join(' ')}`.toLowerCase();
+}
+
+function eventRepresentsShot(event) {
+  if (DIRECT_SHOT_TYPES.has(event?.type)) return true;
+  if (event?.type !== 'corner') return false;
+  const text = chanceText(event);
+  // attackSequence can end in a blocked shot and a corner. crossSequence can also
+  // end in a corner, but that is not recorded as a shot. Only the former belongs
+  // in xG accounting.
+  return /shot is blocked|drives toward goal/.test(text);
 }
 
 function contextualXg(event) {
@@ -162,7 +174,7 @@ function annotateNewShots(state, events, beforeShots) {
     if (!remaining) continue;
 
     const clubId = side === 'home' ? state.homeClubId : state.awayClubId;
-    const candidates = (events || []).filter(event => event.clubId === clubId && SHOT_TYPES.has(event.type));
+    const candidates = (events || []).filter(event => event.clubId === clubId && eventRepresentsShot(event));
     for (const event of candidates) {
       if (!remaining) break;
       const xg = contextualXg(event);
@@ -173,8 +185,9 @@ function annotateNewShots(state, events, beforeShots) {
       remaining -= 1;
     }
 
-    // Some legacy branches increment the shot count without returning a dedicated
-    // shot event. Keep xG tied to that real attempt with a conservative neutral value.
+    // A shot counter increment without an explicit shot event is still a real attempt.
+    // Preserve accounting with a conservative neutral value, while the calibration
+    // suite guards that these fallbacks do not become a dominant hidden path.
     while (remaining > 0) {
       state.stats[side].xG = round2(state.stats[side].xG + 0.08);
       state.stats[side].xgShots += 1;
