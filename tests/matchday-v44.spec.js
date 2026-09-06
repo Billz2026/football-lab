@@ -108,11 +108,10 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   const confirm=dialog.locator('[data-apply-sub]');
   await expect(confirm).toBeEnabled();
   await confirm.click();
-  await expect(dialog).toBeHidden();
 
-  // Re-open to prove the substitution was committed, not merely selectable.
-  await shell.locator('[data-cm4-subs]').click();
-  dialog=page.locator('.flm-match-dialog.v2-sub-dialog');
+  // V4 keeps the substitution manager open after a confirmed change so another
+  // legal substitution can be made. Prove the change committed in-place instead
+  // of depending on the retired auto-close behaviour.
   await expect(dialog.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
   await expect(dialog.locator('.v2-sub-column').nth(0).getByText(strikerName,{exact:true})).toHaveCount(0);
   await dialog.locator('[data-close-manager]').first().click();
