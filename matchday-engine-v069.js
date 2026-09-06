@@ -1,4 +1,5 @@
 import * as base from './matchday-engine-v0431.js?v=0.4.3.1';
+import { applyMatchDrama, MATCH_DRAMA_VERSION } from './match-drama-v3.js?v=3.0.0';
 
 export {
   FORMATION_LAYOUTS,
@@ -14,7 +15,8 @@ export {
   swapShapePlayers
 } from './matchday-engine-v0431.js?v=0.4.3.1';
 
-export const MATCH_RULES_VERSION = '0.6.9';
+export const MATCH_RULES_VERSION = '0.7.1';
+export const MATCH_DRAMA_ENGINE_VERSION = MATCH_DRAMA_VERSION;
 export const PREMIER_LEAGUE_BENCH_LIMIT = 9;
 export const PREMIER_LEAGUE_SUBSTITUTION_LIMIT = 5;
 export const PREMIER_LEAGUE_WINDOW_LIMIT = 3;
@@ -84,6 +86,7 @@ function applyRules(inputState, career, db) {
   state.fixtureType = fixture.type || state.fixtureType || '';
   state.competitionName = fixture.competitionName || state.competitionName || '';
   state.matchRulesVersion = MATCH_RULES_VERSION;
+  state.matchDramaVersion = MATCH_DRAMA_ENGINE_VERSION;
   state.matchRulesKind = rules.kind;
   state.substitutionLimit = rules.maxSubstitutions;
   state.substitutionWindowLimit = rules.maxInPlayWindows;
@@ -124,12 +127,19 @@ function recordWindow(state, rules) {
 }
 
 export function createInteractiveMatch(career, db) {
-  return applyRules(base.createInteractiveMatch(career, db), career, db);
+  const state = applyRules(base.createInteractiveMatch(career, db), career, db);
+  // Initialise the V3 narrative state without forcing an incident at kick-off.
+  state.matchDrama ||= { version: MATCH_DRAMA_ENGINE_VERSION, serial: 0, counts: {}, atmosphere: [] };
+  state.matchDrama.version = MATCH_DRAMA_ENGINE_VERSION;
+  return state;
 }
 
 export function advanceInteractiveMatch(inputState, career, db) {
   const result = base.advanceInteractiveMatch(inputState, career, db);
-  return { ...result, state: applyRules(result.state, career, db) };
+  let state = applyRules(result.state, career, db);
+  const drama = applyMatchDrama(state, db, result.events);
+  state = applyRules(drama.state, career, db);
+  return { ...result, state, events: [...(result.events || []), ...(drama.events || [])] };
 }
 
 export function completeInteractiveRound(career, inputState, db) {
