@@ -28,21 +28,22 @@ function enhanceAttributes(profile){
   scored.sort((a,b)=>b.value-a.value).slice(0,5).forEach(x=>x.row.classList.add('is-top-attribute'));
 }
 function ensureStatusStrip(profile){
-  const head=profile.querySelector('.flm-profile-head'),tabs=profile.querySelector('.flm-profile-tabs'),panel=profile.querySelector('[data-profile-panel]');if(!head||!tabs||!panel)return;
+  const tabs=profile.querySelector('.flm-profile-tabs'),panel=profile.querySelector('[data-profile-panel]');if(!tabs||!panel)return;
+  if(!rowByLabel(panel,'Condition')||!rowByLabel(panel,'Injuries')||!rowByLabel(panel,'Suspension'))return;
   let strip=profile.querySelector('.flm-profile-status-strip');if(!strip){strip=document.createElement('section');strip.className='flm-profile-status-strip';tabs.before(strip);}
   const values=[['CONDITION',statusValue(panel,'Condition')],['SHARPNESS',statusValue(panel,'Match Sharpness')],['MORALE',statusValue(panel,'Morale')],['FORM',statusValue(panel,'Form')],['INJURY',statusValue(panel,'Injuries','None')],['SUSPENSION',statusValue(panel,'Suspension','None')]];
   const signature=values.map(x=>x.join(':')).join('|');if(strip.dataset.signature===signature)return;strip.dataset.signature=signature;
   strip.innerHTML=values.map(([label,value])=>{const danger=/injur|suspend|red|ban/i.test(`${label} ${value}`)&&!/none|no|—/i.test(value);const positive=(label==='CONDITION'||label==='SHARPNESS')&&Number.parseFloat(value)>=85;return`<div class="flm-status-chip ${danger?'is-danger':positive?'is-positive':''}"><small>${label}</small><strong>${value}</strong></div>`;}).join('');
 }
 function enhanceIdentity(profile){
-  const sub=clean(profile.querySelector('.flm-profile-sub')?.textContent);const club=sub.split('·')[0]?.trim()||'';profile.style.setProperty('--flm-profile-club',clubColour(club));
-  profile.closest('.modal')?.classList.add('flm-profile-v2-open');
+  const sub=clean(profile.querySelector('.flm-profile-sub')?.textContent);const club=sub.split('·')[0]?.trim()||'';const colour=clubColour(club);profile.style.setProperty('--flm-profile-club',colour);
+  const modal=profile.closest('.modal');modal?.classList.add('flm-profile-v2-open');modal?.style.setProperty('--flm-profile-club',colour);
   rowByLabel(profile,'Personality')?.classList.add('is-personality-row');rowByLabel(profile,'Squad Status')?.classList.add('is-squad-row');
   const actions=profile.querySelector('.flm-profile-actions');
   if(actions&&!actions.querySelector('[data-profile-v2-role]')){const node=document.createElement('div');node.className='flm-profile-value flm-profile-role';node.dataset.profileV2Role='1';node.innerHTML=`<small>SQUAD ROLE</small><strong>${statusValue(profile,'Squad Status','Not set')}</strong>`;actions.insertBefore(node,actions.querySelector('button')||null);}
 }
 function enhanceProfile(profile){if(!profile?.isConnected)return;profile.dataset.profileVersion=VERSION;enhanceIdentity(profile);enhanceAttributes(profile);ensureStatusStrip(profile);}
-function clearModalState(){if(document.querySelector('.flm-profile'))return;document.querySelectorAll('.modal.flm-profile-v2-open').forEach(x=>x.classList.remove('flm-profile-v2-open'));}
+function clearModalState(){if(document.querySelector('.flm-profile'))return;document.querySelectorAll('.modal.flm-profile-v2-open').forEach(x=>{x.classList.remove('flm-profile-v2-open');x.style.removeProperty('--flm-profile-club');});}
 function sync(){queued=false;ensureStyles();document.querySelectorAll('.flm-profile').forEach(enhanceProfile);clearModalState();}
 function queue(){if(queued)return;queued=true;requestAnimationFrame(sync);}
 ensureStyles();new MutationObserver(queue).observe(document.body,{childList:true,subtree:true,characterData:true});queue();window.FLMPlayerProfileV2=Object.freeze({version:VERSION,refresh:queue});
