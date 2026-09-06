@@ -50,6 +50,7 @@ jobs:
             scripts/validate-database.mjs \
             tests/manager-career.spec.js \
             tests/manager-core.test.js \
+            tests/match-integrity-engine-v067.test.js \
             tests/career-manager-v064.spec.js \
             tests/personality-v2.test.js \
             tests/appointment-media-v1.test.js \
@@ -69,7 +70,7 @@ jobs:
         run: npm run validate:database
 
       - name: Test career simulation
-        run: node --test tests/manager-core.test.js tests/world-clock.test.js tests/personality-v2.test.js tests/appointment-media-v1.test.js tests/integrity-v067.test.js
+        run: node --test tests/manager-core.test.js tests/match-integrity-engine-v067.test.js tests/world-clock.test.js tests/personality-v2.test.js tests/appointment-media-v1.test.js tests/integrity-v067.test.js
 
       - name: Install Chromium
         timeout-minutes: 10
