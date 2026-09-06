@@ -11,6 +11,13 @@ on:
       - 'matchday-density-v332.css'
       - 'matchday-stability-v333.js'
       - 'matchday-stability-v333.css'
+      - 'matchday-live-v04.js'
+      - 'matchday-ux-v048.js'
+      - 'matchday-engine-v041.js'
+      - 'matchday-engine-v042.js'
+      - 'matchday-engine-v043.js'
+      - 'matchday-engine-v0431.js'
+      - 'match-centre-v0451.js'
       - 'match-centre-v4.js'
       - 'match-centre-v4.css'
       - 'match-centre-v4-mode.js'
@@ -25,6 +32,9 @@ on:
       - 'match-centre-v46-lock.js'
       - 'match-centre-v46-lock.css'
       - 'manager.js'
+      - 'tests/matchday-engine.test.js'
+      - 'tests/xg-matchday.test.js'
+      - 'tests/matchday-calibration.test.js'
       - 'tests/matchday-v2.spec.js'
       - 'tests/matchday-v44.spec.js'
       - 'tests/matchday-v45.spec.js'
@@ -40,6 +50,13 @@ on:
       - 'matchday-density-v332.css'
       - 'matchday-stability-v333.js'
       - 'matchday-stability-v333.css'
+      - 'matchday-live-v04.js'
+      - 'matchday-ux-v048.js'
+      - 'matchday-engine-v041.js'
+      - 'matchday-engine-v042.js'
+      - 'matchday-engine-v043.js'
+      - 'matchday-engine-v0431.js'
+      - 'match-centre-v0451.js'
       - 'match-centre-v4.js'
       - 'match-centre-v4.css'
       - 'match-centre-v4-mode.js'
@@ -54,6 +71,9 @@ on:
       - 'match-centre-v46-lock.js'
       - 'match-centre-v46-lock.css'
       - 'manager.js'
+      - 'tests/matchday-engine.test.js'
+      - 'tests/xg-matchday.test.js'
+      - 'tests/matchday-calibration.test.js'
       - 'tests/matchday-v2.spec.js'
       - 'tests/matchday-v44.spec.js'
       - 'tests/matchday-v45.spec.js'
@@ -83,6 +103,13 @@ jobs:
           node --check matchday-cm-v2.js
           node --check matchday-density-v332.js
           node --check matchday-stability-v333.js
+          node --check matchday-live-v04.js
+          node --check matchday-ux-v048.js
+          node --check matchday-engine-v041.js
+          node --check matchday-engine-v042.js
+          node --check matchday-engine-v043.js
+          node --check matchday-engine-v0431.js
+          node --check match-centre-v0451.js
           node --check match-centre-v4.js
           node --check match-centre-v4-mode.js
           node --check match-centre-v4-fold-v41.js
@@ -90,10 +117,18 @@ jobs:
           node --check match-centre-v4-discipline-v44.js
           node --check match-centre-v45.js
           node --check match-centre-v46-lock.js
+          node --check tests/matchday-engine.test.js
+          node --check tests/xg-matchday.test.js
+          node --check tests/matchday-calibration.test.js
           node --check tests/matchday-v2.spec.js
           node --check tests/matchday-v44.spec.js
           node --check tests/matchday-v45.spec.js
           node --check tests/matchday-v46.spec.js
+
+      - name: Run Match Engine lock tests
+        env:
+          MATCH_CALIBRATION_RUNS: 96
+        run: node --test tests/matchday-engine.test.js tests/xg-matchday.test.js tests/matchday-calibration.test.js
 
       - name: Install dependencies
         run: npm ci

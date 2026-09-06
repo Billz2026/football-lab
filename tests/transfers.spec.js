@@ -20,6 +20,18 @@ test('V0.6.1 transfer market completes a signing and exposes the living football
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
   await openTransferWindow(page);
 
+  // This is a transfer-workflow regression, not a budget-balancing test. Give the
+  // fixture enough headroom to complete one deterministic non-rival deal; separate
+  // core tests enforce real club budgets, scarcity and rivalry pricing.
+  await page.evaluate(() => {
+    const c = window.FLMManager.activeCareer;
+    c.transfers.transferBudget = 500_000_000;
+    c.transfers.initialTransferBudget = Math.max(c.transfers.initialTransferBudget || 0, 500_000_000);
+    c.transfers.wageRoom = 1_000_000;
+    c.transfers.initialWageRoom = Math.max(c.transfers.initialWageRoom || 0, 1_000_000);
+    localStorage.setItem('flm-career-save', JSON.stringify(c));
+  });
+
   const transferTab = page.locator('[data-v050-transfer-tab]');
   await transferTab.click();
   await expect(page.getByRole('heading', { name: 'Transfers' })).toBeVisible();
@@ -34,8 +46,12 @@ test('V0.6.1 transfer market completes a signing and exposes the living football
 
   await expect(page.locator('.v050-player-row')).not.toHaveCount(0);
   await expect(page.locator('.v050-budget')).toContainText('TRANSFER BUDGET');
+  await expect(page.locator('.v050-budget')).toContainText('£500');
 
-  const targetRow = page.locator('.v050-player-row').last();
+  // Arsenal's North London rivalry can legitimately block Tottenham business.
+  // Select a non-Tottenham player so the test exercises a completable negotiation.
+  const targetRow = page.locator('.v050-player-row').filter({ hasNotText: 'Tottenham Hotspur' }).last();
+  await expect(targetRow).toBeVisible();
   const targetName = (await targetRow.locator('strong').textContent()).trim();
   await targetRow.click();
   await expect(page.locator('.v050-detail')).toContainText(targetName);

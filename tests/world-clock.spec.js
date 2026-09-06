@@ -98,6 +98,13 @@ test('finishing pre-season no longer jumps straight to opening day; Continue Gam
 
 test('a Premier League fixture cannot be played before its calendar date', async ({ page }) => {
   await quickStart(page);
+
+  // Remove squad-readiness as a confounder: this test is specifically proving the
+  // calendar gate, so make a legal XI before moving the career to the day before R1.
+  await page.getByRole('button', { name: 'Squad', exact: true }).click();
+  await page.locator('[data-v044-auto-pick]').click();
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
+
   await page.evaluate(() => {
     const c = window.FLMManager.activeCareer;
     c.preseason.fixtures.forEach(fixture => { fixture.played = true; });
@@ -108,11 +115,23 @@ test('a Premier League fixture cannot be played before its calendar date', async
     c.worldClock.acknowledgedMilestones = ['summer-window-open', 'fixture-release'];
     localStorage.setItem('flm-career-save', JSON.stringify(c));
   });
+
   await page.locator('.career-nav [data-career-tab="matchday"]').click();
-  await expect(page.locator('[data-play-match]')).toBeVisible();
-  await page.locator('[data-play-match]').click();
-  await expect(page.locator('.career-toast')).toContainText('21 AUG 2026');
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
+  const play = page.locator('[data-play-match]');
+  await expect(play).toBeVisible();
+  await expect(play).toBeDisabled();
+  await expect(page.locator('[data-shell-continue-label]')).toHaveText('CONTINUE GAME');
+
+  let saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
   expect(saved.roundIndex).toBe(0);
   expect(saved.currentDate).toBe('2026-08-20');
+
+  // The exact same legal XI becomes playable when the world clock reaches the
+  // fixture date, proving the block above was temporal rather than squad-related.
+  await continueUntil(page, '2026-08-21');
+  await page.locator('.career-nav [data-career-tab="matchday"]').click();
+  await expect(play).toBeEnabled();
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
+  expect(saved.roundIndex).toBe(0);
+  expect(saved.currentDate).toBe('2026-08-21');
 });

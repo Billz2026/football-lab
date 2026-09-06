@@ -12,8 +12,11 @@ test('Football Database player profiles are read-only even after a career has ex
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
-  const exit = page.locator('[data-exit-career]').first();
-  if (await exit.count()) await exit.click();
+  // The responsive career shell can render multiple EXIT controls, including a
+  // hidden compact variant. Only click an actually visible exit; otherwise close
+  // the shell directly so this test remains about database read-only behaviour.
+  const visibleExit = page.locator('[data-exit-career]:visible').first();
+  if (await visibleExit.count()) await visibleExit.click();
   else await page.evaluate(() => document.querySelector('.career-app')?.classList.remove('is-open'));
 
   await page.locator('[data-action="database"]').first().click();

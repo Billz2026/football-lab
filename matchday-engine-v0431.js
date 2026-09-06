@@ -22,9 +22,9 @@ export {
   swapShapePlayers
 } from './matchday-engine-v043.js';
 
-export const LIVE_ENGINE_VERSION = 9;
+export const LIVE_ENGINE_VERSION = 10;
 export const XG_MODEL = Object.freeze({
-  version: 1,
+  version: 2,
   method: 'shot-derived-contextual',
   spatial: false,
   bigChanceThreshold: 0.30
@@ -33,7 +33,7 @@ export const XG_MODEL = Object.freeze({
 const clone = value => JSON.parse(JSON.stringify(value));
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const round2 = value => Math.round(Number(value || 0) * 100) / 100;
-const SHOT_TYPES = new Set(['goal', 'save', 'woodwork', 'miss', 'corner']);
+const DIRECT_SHOT_TYPES = new Set(['goal', 'save', 'woodwork', 'miss']);
 
 function playerById(db, id) {
   return db.players.find(player => player.id === id);
@@ -109,6 +109,7 @@ function ensureXgState(state) {
     spatial: XG_MODEL.spatial,
     note: 'Shot coordinates are not yet simulated; xG is derived from generated chance context.'
   };
+  state.xgModel.version = XG_MODEL.version;
   return state;
 }
 
@@ -130,6 +131,16 @@ function chanceText(event) {
   return `${event?.text || ''} ${(event?.lines || []).join(' ')}`.toLowerCase();
 }
 
+function eventRepresentsShot(event) {
+  if (DIRECT_SHOT_TYPES.has(event?.type)) return true;
+  if (event?.type !== 'corner') return false;
+  const text = chanceText(event);
+  // attackSequence can end in a blocked shot and a corner. crossSequence can also
+  // end in a corner, but that is not recorded as a shot. Only the former belongs
+  // in xG accounting.
+  return /shot is blocked|drives toward goal/.test(text);
+}
+
 function contextualXg(event) {
   const text = chanceText(event);
   // Chance quality is based on the situation that generated the attempt. The
@@ -146,13 +157,26 @@ function contextualXg(event) {
 }
 
 function attachEventXg(state, event, value) {
-  event.xg = round2(value);
-  const stored = [...(state.events || [])].reverse().find(item =>
+  const xg = round2(value);
+  const history = state.events || [];
+
+  // Most engine layers return the exact event object they already inserted into
+  // state.events. Preserve that object identity first; otherwise setting event.xg
+  // before searching can make the real event look "already annotated" and stamp a
+  // sibling event from the same minute instead.
+  const identical = history.find(item => item === event);
+  if (identical) {
+    identical.xg = xg;
+    return;
+  }
+
+  event.xg = xg;
+  const stored = [...history].reverse().find(item =>
     item.minute === event.minute && item.type === event.type &&
     item.clubId === event.clubId && item.playerId === event.playerId &&
-    !Number.isFinite(item.xg)
+    item.text === event.text && !Number.isFinite(item.xg)
   );
-  if (stored) stored.xg = event.xg;
+  if (stored) stored.xg = xg;
 }
 
 function annotateNewShots(state, events, beforeShots) {
@@ -162,10 +186,13 @@ function annotateNewShots(state, events, beforeShots) {
     if (!remaining) continue;
 
     const clubId = side === 'home' ? state.homeClubId : state.awayClubId;
-    const candidates = (events || []).filter(event => event.clubId === clubId && SHOT_TYPES.has(event.type));
+    const candidates = (events || []).filter(event => event.clubId === clubId && eventRepresentsShot(event));
     for (const event of candidates) {
       if (!remaining) break;
-      const xg = contextualXg(event);
+      // The event ledger is authoritative. Store a two-decimal shot value first,
+      // then derive aggregate xG from exactly those stored values so the headline
+      // number can always be reconstructed from the match history without drift.
+      const xg = round2(contextualXg(event));
       state.stats[side].xG = round2(state.stats[side].xG + xg);
       state.stats[side].xgShots += 1;
       if (xg >= XG_MODEL.bigChanceThreshold) state.stats[side].bigChances += 1;
@@ -173,13 +200,9 @@ function annotateNewShots(state, events, beforeShots) {
       remaining -= 1;
     }
 
-    // Some legacy branches increment the shot count without returning a dedicated
-    // shot event. Keep xG tied to that real attempt with a conservative neutral value.
-    while (remaining > 0) {
-      state.stats[side].xG = round2(state.stats[side].xG + 0.08);
-      state.stats[side].xgShots += 1;
-      remaining -= 1;
-    }
+    // Do not silently fabricate xG for a shot that has no auditable shot event.
+    // Current engine paths all emit explicit shot events; leaving xgShots behind the
+    // shot counter makes any future broken path fail the lock tests instead of hiding it.
   }
 }
 
