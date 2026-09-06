@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { boardTierForClub, getBoardExpectation } from '../board-expectations-v067.js';
 import { FRIENDLY_SUBSTITUTION_LIMIT, COMPETITIVE_SUBSTITUTION_LIMIT, substitutionLimitForFixture, scaledConditionAfterMinute } from '../match-integrity-core-v067.js';
 
-test('Manchester United board expectation is Champions League qualification',()=>{
+test('Manchester United board expectation is a top-four Champions League finish',()=>{
   const club={name:'Manchester United',leagueId:'eng-premier-league',reputation:1000};
   assert.equal(boardTierForClub(club),'championsLeague');
   const expectation=getBoardExpectation(club);
-  assert.equal(expectation.primary,'Qualify for the UEFA Champions League');
+  assert.equal(expectation.primary,'Finish in the top four and qualify for the UEFA Champions League');
   assert.equal(expectation.targetPosition,4);
   assert.equal(expectation.minimumPosition,6);
 });
