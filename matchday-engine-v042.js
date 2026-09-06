@@ -171,21 +171,27 @@ function situationalEvent(state, db) {
 }
 
 function applyInstructionImpact(state, db, random) {
-  const side = userSide(state);
+  // Duties exist for both XIs. Select the affected side independently of the user
+  // so this layer cannot inject a permanent user-only possession/shot/goal bonus.
+  const side = random() < .5 ? 'home' : 'away';
+  const opponentSide = otherSide(side);
+  const teamId = side === 'home' ? state.homeClubId : state.awayClubId;
+  const opponentId = opponentSide === 'home' ? state.homeClubId : state.awayClubId;
   const lineup = lineupFor(state, side).filter(id => !state.sentOffIds.includes(id));
   if (!lineup.length || random() > .115) return null;
   const candidates = lineup.filter(id => playerById(db, id)?.positionGroup !== 'GK');
+  if (!candidates.length) return null;
   const id = candidates[Math.floor(random() * candidates.length)];
   const player = playerById(db, id);
   if (!player) return null;
   const duty = state.playerDuties[id] || defaultDuty(player);
-  const team = clubName(db, state.userClubId);
-  const opponent = clubName(db, side === 'home' ? state.awayClubId : state.homeClubId);
+  const team = clubName(db, teamId);
+  const opponent = clubName(db, opponentId);
 
   if (duty === 'Defend') {
     state.ratings[id] = clamp((state.ratings[id] ?? 6.5) + .025, 4, 10);
     return recordEvent(state, {
-      type: 'instruction', clubId: state.userClubId, playerId: id,
+      type: 'instruction', clubId: teamId, playerId: id,
       lines: [`${player.name} holds his position exactly as instructed and cuts out the danger before ${opponent} can break.`]
     });
   }
@@ -194,7 +200,7 @@ function applyInstructionImpact(state, db, random) {
     state.stats[side].possessionTicks += 1;
     state.ratings[id] = clamp((state.ratings[id] ?? 6.5) + .018, 4, 10);
     return recordEvent(state, {
-      type: 'instruction', clubId: state.userClubId, playerId: id,
+      type: 'instruction', clubId: teamId, playerId: id,
       lines: [`${player.name} drops into support, gives ${team} an extra passing option and helps recycle possession.`]
     });
   }
@@ -209,12 +215,12 @@ function applyInstructionImpact(state, db, random) {
       if (side === 'home') state.homeGoals += 1; else state.awayGoals += 1;
       state.ratings[id] = clamp((state.ratings[id] ?? 6.5) + .7, 4, 10);
       return recordEvent(state, {
-        type: 'goal', clubId: state.userClubId, playerId: id,
+        type: 'goal', clubId: teamId, playerId: id,
         lines: [`${player.name} attacks the space exactly as instructed...`, `${player.name} SHOOTS!`, `GOAL! The attacking duty pays off for ${team}!`]
       });
     }
     return recordEvent(state, {
-      type: onTarget ? 'save' : 'miss', clubId: state.userClubId, playerId: id,
+      type: onTarget ? 'save' : 'miss', clubId: teamId, playerId: id,
       lines: onTarget
         ? [`${player.name} breaks forward from his attacking duty and gets a shot away.`, `${opponent} survive as the goalkeeper makes the stop.`]
         : [`${player.name} drives forward on his attacking instruction but cannot keep the effort on target.`]
@@ -222,7 +228,7 @@ function applyInstructionImpact(state, db, random) {
   }
 
   return recordEvent(state, {
-    type: 'instruction', clubId: state.userClubId, playerId: id,
+    type: 'instruction', clubId: teamId, playerId: id,
     lines: [`${player.name} keeps pushing beyond his normal position, trying to turn the attacking instruction into an overload.`]
   });
 }
