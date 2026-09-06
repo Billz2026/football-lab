@@ -12,7 +12,7 @@ const TIERS = Object.freeze({
   },
   championsLeague: {
     id: 'champions-league',
-    primary: 'Qualify for the UEFA Champions League',
+    primary: 'Finish in the top four and qualify for the UEFA Champions League',
     minimum: 'Finish in the top six',
     stretch: 'Mount a Premier League title challenge',
     targetPosition: 4,
