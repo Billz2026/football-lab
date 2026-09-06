@@ -4,7 +4,7 @@ export const MEDIA_STYLES = Object.freeze({
   confident: { id:'confident', label:'Confident', authority:3, diplomacy:0, motivation:1, mediaHandling:1, playerProtection:0 },
   humble: { id:'humble', label:'Humble', authority:-1, diplomacy:3, motivation:0, mediaHandling:2, playerProtection:1 },
   demanding: { id:'demanding', label:'Demanding', authority:3, diplomacy:-1, motivation:2, mediaHandling:0, playerProtection:-1 },
-  protective: { id:'protective', label:'Protective', authority:0, diplomacy:2, motivation:1, mediaHandling:1, playerProtection:3 },
+  protective: { id:'protective', label:'Protective', authority:0, diplomacy:1, motivation:1, mediaHandling:1, playerProtection:3 },
   defiant: { id:'defiant', label:'Defiant', authority:2, diplomacy:-1, motivation:3, mediaHandling:-1, playerProtection:0 }
 });
 
