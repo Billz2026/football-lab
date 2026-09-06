@@ -44,6 +44,7 @@ import './match-fulltime-single-continue-v064.js?v=0.6.7';
 import './recording-fixes-v068.js?v=0.6.8';
 import './matchday-runtime-fixes-v070.js?v=0.7.0';
 import './commentary-engine-v1.js?v=1.0.1';
+import './commentary-side-guard-v1.js?v=1.0.0';
 import './commentary-realtime-v1.js?v=1.1.0';
 import './commentary-match-fixes-v11.js?v=1.1.0';
 import './commentary-v2.js?v=2.0.0';
