@@ -157,13 +157,26 @@ function contextualXg(event) {
 }
 
 function attachEventXg(state, event, value) {
-  event.xg = round2(value);
-  const stored = [...(state.events || [])].reverse().find(item =>
+  const xg = round2(value);
+  const history = state.events || [];
+
+  // Most engine layers return the exact event object they already inserted into
+  // state.events. Preserve that object identity first; otherwise setting event.xg
+  // before searching can make the real event look "already annotated" and stamp a
+  // sibling event from the same minute instead.
+  const identical = history.find(item => item === event);
+  if (identical) {
+    identical.xg = xg;
+    return;
+  }
+
+  event.xg = xg;
+  const stored = [...history].reverse().find(item =>
     item.minute === event.minute && item.type === event.type &&
     item.clubId === event.clubId && item.playerId === event.playerId &&
-    !Number.isFinite(item.xg)
+    item.text === event.text && !Number.isFinite(item.xg)
   );
-  if (stored) stored.xg = event.xg;
+  if (stored) stored.xg = xg;
 }
 
 function annotateNewShots(state, events, beforeShots) {
