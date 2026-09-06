@@ -84,7 +84,12 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   const positions=(await dialog.locator('.v2-sub-player .pos').allTextContents()).join(' ');
   expect(positions).not.toMatch(/\b(?:DMC|AMC|MC|DC|DL|DR|AML|AMR)\b/);
 
-  const striker=xi.locator('.v2-sub-player').filter({hasText:/^ST\b/});
+  // Position is rendered in a child .pos node, not at the start of the row text.
+  // Target the semantic position field so this regression proves the actual ST row
+  // is present/reachable without depending on incidental name/text ordering.
+  const striker=xi.locator('.v2-sub-player').filter({
+    has: page.locator('.pos').filter({hasText:/^ST$/})
+  });
   await expect(striker).toHaveCount(1);
   const strikerName=(await striker.locator('strong').textContent())?.trim() || '';
   expect(strikerName.length).toBeGreaterThan(1);
