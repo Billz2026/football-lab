@@ -82,8 +82,41 @@ function syncRoutineEventScale(shell){
   event.dataset.cm46Major=major?'1':'0';
 }
 
+function syncCompetitionText(shell){
+  const node=shell?.querySelector('[data-cm4-comp]');
+  const label=node?.dataset.cm45Label;
+  if(node&&label&&clean(node.textContent)!==clean(label))setText(node,label);
+}
+
 function currentFriendly(c){return c?.preseason?.fixtures?.find(fixture=>!fixture.played)||null;}
+function nextLeagueFixture(c){
+  const round=c?.fixtures?.[c?.roundIndex||0];
+  if(!Array.isArray(round))return null;
+  return round.find(fixture=>fixture.homeClubId===c.clubId||fixture.awayClubId===c.clubId)||round[0]||null;
+}
 function clubName(db,id){const club=db?.clubs?.find(item=>item.id===id);return club?.shortName||club?.name||'Unknown';}
+function syncCompetitiveDateGate(){
+  const c=career();
+  const play=document.querySelector('[data-play-match]');
+  if(!c||!play)return;
+  const fixture=nextLeagueFixture(c);
+  const current=c.currentDate||c.calendar?.currentDate||'';
+  const early=Boolean(fixture?.date&&current&&String(current)<String(fixture.date));
+  if(early){
+    play.disabled=true;
+    play.dataset.cm46DateLocked='1';
+    play.setAttribute('aria-disabled','true');
+    play.title=`Available on ${fixture.date}`;
+    return;
+  }
+  if(play.dataset.cm46DateLocked==='1'){
+    delete play.dataset.cm46DateLocked;
+    play.removeAttribute('aria-disabled');
+    play.removeAttribute('title');
+    const status=clean(play.closest('.career-match-actions')?.querySelector('strong')?.textContent).toUpperCase();
+    play.disabled=status!=='TEAM READY';
+  }
+}
 function syncSidebarFixture(db){
   const c=career();
   if(!c||document.querySelector('[data-live-match]')||!c.preseason||c.preseason.phase==='complete')return;
@@ -200,10 +233,12 @@ async function sync(){
     shell.dataset.cm46='1';
     syncScorerPresentation(shell);
     syncRoutineEventScale(shell);
+    syncCompetitionText(shell);
   }else{
     syncSidebarFixture(db);
     syncPreseasonCTA();
   }
+  syncCompetitiveDateGate();
   syncDialog(db);
 }
 function queue(){
@@ -211,6 +246,19 @@ function queue(){
   queued=true;
   requestAnimationFrame(()=>{queued=false;sync();});
 }
+
+document.addEventListener('click',event=>{
+  const play=event.target.closest?.('[data-play-match]');
+  if(!play)return;
+  const c=career();
+  const fixture=nextLeagueFixture(c);
+  const current=c?.currentDate||c?.calendar?.currentDate||'';
+  if(fixture?.date&&current&&String(current)<String(fixture.date)){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    syncCompetitiveDateGate();
+  }
+},true);
 
 ensureStyles();
 new MutationObserver(queue).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','hidden','aria-hidden','data-cm44-type']});
