@@ -65,8 +65,8 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   // Live commentary should expose football actions, not tactical/database jargon.
   await shell.locator('[data-cm4-speed="4"]').click();
   await page.clock.runFor(30000);
-  await expect(page.locator('[data-commentary-feed] .flm-commentary-line')).toHaveCount(await page.locator('[data-commentary-feed] .flm-commentary-line').count());
-  expect(await page.locator('[data-commentary-feed] .flm-commentary-line').count()).toBeGreaterThanOrEqual(5);
+  const commentaryCount=await page.locator('[data-commentary-feed] .flm-commentary-line').count();
+  expect(commentaryCount).toBeGreaterThanOrEqual(5);
   const displayed=(await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text'))||'';
   expect(displayed.length).toBeGreaterThan(5);
   expect(displayed).not.toMatch(/\b(?:LCB|RCB|LCM|RCM|DMC|AMC|AML|AMR|Central Defender|Inside Forward|Poacher|tactical plan|attacking instruction)\b/i);
