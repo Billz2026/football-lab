@@ -118,7 +118,7 @@ jobs:
 
       - name: Run Match Engine lock tests
         env:
-          MATCH_CALIBRATION_RUNS: 64
+          MATCH_CALIBRATION_RUNS: 96
         run: node --test tests/matchday-engine.test.js tests/xg-matchday.test.js tests/matchday-calibration.test.js
 
       - name: Install dependencies
