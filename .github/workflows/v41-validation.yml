@@ -37,9 +37,12 @@ jobs:
             world-clock-v060.js \
             career-world-v060.js \
             transfers-v050.js \
+            career-manager-start-v064.js \
+            match-fulltime-single-continue-v064.js \
             scripts/validate-database.mjs \
             tests/manager-career.spec.js \
             tests/manager-core.test.js \
+            tests/career-manager-v064.spec.js \
             tests/world-clock.test.js \
             tests/world-clock.spec.js; do
             echo "Checking ${file}"
