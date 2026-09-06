@@ -1,4 +1,4 @@
-export const COMMENTARY_V3_VERSION='3.0.0';
+export const COMMENTARY_V3_VERSION='3.0.1';
 
 const clean=value=>String(value||'').replace(/\s+/g,' ').trim();
 const lower=value=>clean(value).toLowerCase();
@@ -18,7 +18,7 @@ function memoryFor(live){
 }
 
 function minuteText(row){return clean(row?.querySelector?.('b')?.textContent)||'—';}
-function minuteNumber(row){return parseInt(minuteText(row),10)||0;}
+function minuteKey(row){return minuteText(row).replace(/'$/,'');}
 function side(row){return row?.dataset?.cmSide==='home'?'home':row?.dataset?.cmSide==='away'?'away':'neutral';}
 function visibleText(row){return clean(row?.querySelector?.('span')?.textContent||row?.textContent);}
 function rawText(row){const span=row?.querySelector?.('span');return clean(span?.dataset?.cv2Raw||span?.dataset?.cm332Raw||span?.textContent||row?.textContent);}
@@ -35,10 +35,10 @@ function teams(live){
 function teamFor(live,s){const names=teams(live);return s==='home'?names.home:s==='away'?names.away:'MATCH';}
 
 function allRows(live){return[...live.querySelectorAll('[data-commentary-feed] .flm-commentary-line')];}
-function rowsAtMinute(live,minute){return allRows(live).filter(row=>minuteText(row)===String(minute).replace(/'$/,''));}
+function rowsAtMinute(live,minute){const key=String(minute||'').replace(/'$/,'');return allRows(live).filter(row=>minuteKey(row)===key);}
 
 function minuteContext(live,row){
-  const minute=minuteText(row);
+  const minute=minuteKey(row);
   const rows=rowsAtMinute(live,minute);
   const raw=rows.map(rawText).join(' ');
   return{
@@ -59,14 +59,13 @@ function shouldRestore(context,row){
   if(row.dataset.flcV1==='1')return false;
   const raw=rawText(row);
   if(!raw)return false;
-  if(context.penalty||context.freeKick||context.var||context.dogso||context.simulation||context.crowd)return true;
-  return false;
+  return Boolean(context.penalty||context.freeKick||context.var||context.dogso||context.simulation||context.crowd);
 }
 
 function restoreDramaSequences(live){
   const visited=new Set();
   for(const row of allRows(live)){
-    const minute=minuteText(row);
+    const minute=minuteKey(row);
     if(visited.has(minute))continue;
     visited.add(minute);
     const context=minuteContext(live,row);
@@ -88,13 +87,13 @@ function restoreDramaSequences(live){
   }
 }
 
-function dedupe(live,memory){
+function dedupe(live){
   const perMinute=new Set();
   for(const row of allRows(live)){
     if(row.dataset.cv2Duplicate==='1')continue;
     const text=visibleText(row);
     if(!text)continue;
-    const key=`${minuteText(row)}|${side(row)}|${normalKey(text)}`;
+    const key=`${minuteKey(row)}|${side(row)}|${normalKey(text)}`;
     if(perMinute.has(key)){
       row.dataset.cv3Duplicate='1';
       row.setAttribute('aria-hidden','true');
@@ -127,7 +126,7 @@ function syncCentre(live,memory){
   if(live.dataset.cm44State==='fulltime'||live.dataset.cm44FullTime==='1')return;
   const row=latestVisibleRow(live);if(!row)return;
   const classified=classifyCurrent(live,row);if(!classified)return;
-  const text=visibleText(row),minute=minuteText(row),s=side(row);
+  const text=visibleText(row),minute=minuteText(row);
   const key=`${minute}|${classified.label}|${text}`;if(memory.centreKey===key)return;memory.centreKey=key;
   const event=live.querySelector('[data-cm4-event]');
   const textNode=live.querySelector('[data-cm4-event-text]');
@@ -193,7 +192,7 @@ function sync(){
     try{
       const memory=memoryFor(live);
       restoreDramaSequences(live);
-      dedupe(live,memory);
+      dedupe(live);
       rememberMatchNarrative(live,memory);
       syncCentre(live,memory);
       live.dataset.commentaryV3=COMMENTARY_V3_VERSION;
