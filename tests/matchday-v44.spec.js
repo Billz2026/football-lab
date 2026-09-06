@@ -5,14 +5,13 @@ test.setTimeout(120000);
 const TEST_TIME = new Date('2026-07-01T12:00:00Z');
 
 test.beforeEach(async ({ page }) => {
-  // Install before the application creates any timers. V4.4 is explicitly a
-  // scheduler/latch acceptance test, so the test owns passage of browser time.
+  // Install before the application creates any timers, but let time flow during
+  // page/bootstrap interactions. Playwright explicitly recommends pausing only
+  // after the page has loaded so timer-driven UI cannot deadlock during setup.
   await page.clock.install({ time: TEST_TIME });
-  await page.clock.pauseAt(TEST_TIME);
   await page.goto('/index.html');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await page.clock.runFor(250);
 });
 
 async function continueUntil(page, targetDate, maxSteps = 30) {
@@ -114,6 +113,11 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   await dialog.locator('[data-close-manager]').first().click();
   await page.setViewportSize({ width:720, height:900 });
 
+  // Setup is complete. Freeze the browser at its current installed-clock time
+  // only now, then drive the real Matchday scheduler deterministically.
+  const currentBrowserTime = await page.evaluate(() => Date.now());
+  await page.clock.pauseAt(currentBrowserTime);
+
   // Advance the real Matchday scheduler with Playwright's controlled browser clock.
   // Small slices execute every nested timer consistently, including commentary and
   // goal-flash sleeps, while the engine's own 45' latch stops first-half progress.
@@ -154,27 +158,29 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   const finalText=await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text');
   expect(finalText).toMatch(/^FULL TIME · /);
 
-  // Guard the exact Fold cascade that produced Full TimeFULL TIME and
-  // Full TimeCONTINUE in the user screenshot. Native text is hidden and only
-  // the authoritative generated state label is visible.
+  // Guard the exact Fold cascade that produced Full TimeFULL TIME. Native text
+  // stays suppressed and only the authoritative generated state label is visible.
   const fullPhaseStyle=await stateLabelStyle(shell.locator('[data-cm4-phase]'));
   const fullClockStyle=await stateLabelStyle(shell.locator('[data-cm4-half]'));
-  const fullPauseStyle=await stateLabelStyle(shell.locator('[data-cm4-pause]'));
   expect(fullPhaseStyle.fontSize).toBe('0px');
   expect(fullPhaseStyle.after).toContain('FULL TIME');
   expect(fullClockStyle.fontSize).toBe('0px');
   expect(fullClockStyle.after).toContain('FULL TIME');
-  expect(fullPauseStyle.fontSize).toBe('0px');
-  expect(fullPauseStyle.after).toContain('CONTINUE');
+
+  // Full time must expose exactly one authoritative Continue action. The rail
+  // pause/continue control is removed; the large central button remains.
+  await expect(shell.locator('[data-cm4-pause]')).toBeHidden();
+  await expect(shell.locator('[data-cm44-continue]')).toBeVisible();
+  await expect(live.getByRole('button',{name:'CONTINUE',exact:true})).toHaveCount(1);
 
   await page.clock.runFor(5000);
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00');
   await expect(shell.locator('[data-cm4-event-text]')).toHaveAttribute('data-cm44-text',finalText);
   await expect(shell.locator('[data-cm4-tactics]')).toBeHidden();
   await expect(shell.locator('[data-cm4-subs]')).toBeHidden();
-  await expect(shell.locator('[data-cm44-continue]')).toBeVisible();
 
   await shell.locator('[data-cm44-continue]').click();
+  await page.clock.runFor(250);
   await expect(live).toHaveCount(0,{timeout:10000});
   await expect(page.locator('.v047-head h2')).toHaveText('Pre-Season');
   await expect(page.locator('.v047-fixture.is-played')).toHaveCount(1);
