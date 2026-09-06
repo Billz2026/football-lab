@@ -35,14 +35,19 @@ test('V0.4.7 pre-season blocks Round 1, builds readiness and hands off to the se
 
   await continueUntil(page, '2026-07-11');
   await page.locator('[data-v047-preseason-tab]').click();
-  await page.locator('[data-v047-play]').click();
+
+  // V0.6 consolidates the real friendly launch into the authoritative shell CTA;
+  // the old in-panel data-v047-play control was intentionally removed.
+  await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY');
+  await page.locator('[data-shell-continue]').click();
   await expect(page.locator('[data-live-match]')).toBeVisible();
-  await page.getByRole('button', { name: '4×' }).click();
+  await page.getByRole('button', { name: '4×', exact: true }).click();
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await page.locator('[data-resume-second-half]').click();
   await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
-  await page.locator('[data-finish-live-match]').click();
+  await expect(page.locator('[data-cm44-continue]')).toBeVisible();
+  await page.locator('[data-cm44-continue]').click();
 
   await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
   await expect(page.locator('.v047-fixture.is-played')).toHaveCount(1);
