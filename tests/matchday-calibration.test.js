@@ -5,12 +5,17 @@ import {
   createInteractiveMatch
 } from '../matchday-engine-v0431.js';
 
-const RUNS = Math.max(24, Number.parseInt(process.env.MATCH_CALIBRATION_RUNS || '64', 10) || 64);
+const RUNS = Math.max(48, Number.parseInt(process.env.MATCH_CALIBRATION_RUNS || '96', 10) || 96);
 const GROUPS = ['GK','DEF','DEF','DEF','DEF','MID','MID','MID','ATT','ATT','ATT','MID','ATT','DEF','MID','ATT','DEF','MID'];
 const POSITIONS = ['GK','DR','DC','DC','DL','MC','MC','AMC','AMR','ST','AML','DMC','ST','DC','MC','ST','DR','ML'];
+const DIRECT_SHOT_TYPES = new Set(['goal','save','woodwork','miss']);
 
 const BALANCED = Object.freeze({
   formation:'4-3-3', mentality:'Balanced', pressing:'Standard', tempo:'Standard',
+  passing:'Mixed', width:'Balanced', defensiveLine:'Standard'
+});
+const MIRRORED = Object.freeze({
+  formation:'4-2-3-1', mentality:'Balanced', pressing:'Standard', tempo:'Standard',
   passing:'Mixed', width:'Balanced', defensiveLine:'Standard'
 });
 const ALL_OUT = Object.freeze({
@@ -25,6 +30,16 @@ const LOW_BLOCK = Object.freeze({
 function round(value, places = 3) {
   const factor = 10 ** places;
   return Math.round(value * factor) / factor;
+}
+
+function eventText(event) {
+  return `${event?.text || ''} ${(event?.lines || []).join(' ')}`.toLowerCase();
+}
+
+function representsShot(event) {
+  if (DIRECT_SHOT_TYPES.has(event?.type)) return true;
+  if (event?.type !== 'corner') return false;
+  return /shot is blocked|drives toward goal/.test(eventText(event));
 }
 
 function buildDb(userAbility = 116, opponentAbility = 116) {
@@ -68,7 +83,7 @@ function buildCareer({db, seed, tactics = BALANCED, userHome = true}) {
     table:db.clubs.map(club => ({clubId:club.id,played:0,won:0,drawn:0,lost:0,goalsFor:0,goalsAgainst:0,goalDifference:0,points:0})),
     lineupIds:userPlayers.slice(0,11).map(player => player.id),
     tactics:{...tactics},
-    playerStatus:Object.fromEntries(userPlayers.map(player => [player.id,{condition:100,sharpness:88,morale:'Good',appearances:0,goals:0}])),
+    playerStatus:Object.fromEntries(userPlayers.map(player => [player.id,{condition:100,sharpness:90,morale:'Good',appearances:0,goals:0}])),
     preseason:{tacticalFamiliarity:90}
   };
 }
@@ -78,25 +93,48 @@ function validateFinishedState(state) {
   assert.equal(new Set(state.homeLineupIds).size, state.homeLineupIds.length, 'home XI cannot contain duplicate players');
   assert.equal(new Set(state.awayLineupIds).size, state.awayLineupIds.length, 'away XI cannot contain duplicate players');
   assert.equal(new Set(state.sentOffIds || []).size, (state.sentOffIds || []).length, 'a player cannot be sent off twice');
+  assert.equal(new Set(state.injuredIds || []).size, (state.injuredIds || []).length, 'a player cannot be injured twice in one match');
+  assert.ok((state.substitutions || []).length <= 5, 'user substitutions cannot exceed the five-sub limit');
 
   for (const sentOffId of state.sentOffIds || []) {
     assert.ok(!state.homeLineupIds.includes(sentOffId) && !state.awayLineupIds.includes(sentOffId), 'sent-off players must leave the pitch');
   }
 
+  const totalReds = Number(state.stats.home.redCards || 0) + Number(state.stats.away.redCards || 0);
+  assert.equal(totalReds, (state.sentOffIds || []).length, 'red-card stats must reconcile with sent-off players');
+
+  for (const value of Object.values(state.conditions || {})) {
+    assert.ok(Number.isFinite(value) && value >= 0 && value <= 100, `player condition out of bounds: ${value}`);
+  }
+  for (const value of Object.values(state.ratings || {})) {
+    assert.ok(Number.isFinite(value) && value >= 4 && value <= 10, `player rating out of bounds: ${value}`);
+  }
+
   for (const side of ['home','away']) {
     const stats = state.stats[side];
+    const clubId = side === 'home' ? state.homeClubId : state.awayClubId;
+    const shotEvents = (state.events || []).filter(event => event.clubId === clubId && representsShot(event));
+    const goalEvents = (state.events || []).filter(event => event.clubId === clubId && event.type === 'goal');
+    const goals = side === 'home' ? state.homeGoals : state.awayGoals;
+
     assert.ok(Number.isFinite(stats.shots) && stats.shots >= 0, `${side} shots must be valid`);
     assert.ok(Number.isFinite(stats.onTarget) && stats.onTarget >= 0, `${side} shots on target must be valid`);
     assert.ok(stats.onTarget <= stats.shots, `${side} shots on target cannot exceed shots`);
     assert.ok(Number.isFinite(stats.xG) && stats.xG >= 0, `${side} xG must be valid`);
     assert.ok(Number.isFinite(stats.xgShots) && stats.xgShots >= 0, `${side} xG shot count must be valid`);
-    assert.ok(stats.xgShots <= stats.shots, `${side} xG shot count cannot exceed shots`);
+    assert.equal(stats.xgShots, stats.shots, `${side} every shot must enter xG accounting exactly once`);
+    assert.equal(shotEvents.length, stats.shots, `${side} shot stats must reconcile with explicit shot events`);
+    assert.ok(shotEvents.every(event => Number.isFinite(event.xg) && event.xg > 0), `${side} every shot event must carry positive xG`);
     assert.ok(Number.isFinite(stats.redCards) && stats.redCards >= 0, `${side} red cards must be valid`);
+    assert.equal(goalEvents.length, goals, `${side} scoreline must reconcile with goal events`);
+    assert.ok(goals <= stats.onTarget, `${side} goals cannot exceed shots on target`);
   }
 
-  assert.ok(state.homeGoals <= state.stats.home.onTarget, 'home goals cannot exceed shots on target');
-  assert.ok(state.awayGoals <= state.stats.away.onTarget, 'away goals cannot exceed shots on target');
-  assert.ok((state.events || []).every(event => Number.isFinite(event.minute) && event.minute >= 1 && event.minute <= 90), 'match events must stay inside regulation time');
+  const events = state.events || [];
+  assert.ok(events.every(event => Number.isFinite(event.minute) && event.minute >= 1 && event.minute <= 90), 'match events must stay inside regulation time');
+  for (let index = 1; index < events.length; index += 1) {
+    assert.ok(events[index].minute >= events[index - 1].minute, 'match event history must remain chronological');
+  }
 }
 
 function simulate({seed, userAbility = 116, opponentAbility = 116, tactics = BALANCED, userHome = true}) {
@@ -171,9 +209,10 @@ test('same seed and setup produce the same 90-minute match', () => {
   assert.deepEqual(second, first);
 });
 
-test('calibration matrix stays sane and team strength remains causal', () => {
+test('calibration matrix stays fair, sane and causally responsive', () => {
   const report = [
     scenario('equal-balanced', {tactics:BALANCED}),
+    scenario('equal-mirrored', {tactics:MIRRORED}),
     scenario('equal-all-out', {tactics:ALL_OUT}),
     scenario('equal-low-block', {tactics:LOW_BLOCK}),
     scenario('strong-user', {userAbility:132, opponentAbility:104, tactics:BALANCED}),
@@ -181,6 +220,7 @@ test('calibration matrix stays sane and team strength remains causal', () => {
   ];
   const byName = Object.fromEntries(report.map(row => [row.name,row]));
   const equal = byName['equal-balanced'];
+  const mirror = byName['equal-mirrored'];
   const strong = byName['strong-user'];
   const weak = byName['weak-user'];
   const attack = byName['equal-all-out'];
@@ -188,21 +228,28 @@ test('calibration matrix stays sane and team strength remains causal', () => {
 
   console.log(`MATCH_ENGINE_CALIBRATION ${JSON.stringify(report)}`);
 
-  // Broad guardrails catch catastrophic simulation drift without pretending these are
-  // final real-world tuning targets. Tightening them belongs to the V1 balance pass.
-  assert.ok(equal.totalGoals >= 0.8 && equal.totalGoals <= 6.5, `equal-team goals/match out of guardrail: ${equal.totalGoals}`);
-  assert.ok(equal.shotsFor + equal.shotsAgainst >= 5 && equal.shotsFor + equal.shotsAgainst <= 40, 'equal-team shot volume is implausible');
-  assert.ok(equal.drawRate >= 0.03 && equal.drawRate <= 0.60, `equal-team draw rate out of guardrail: ${equal.drawRate}`);
+  // Plausibility guardrails are deliberately narrower than the first-pass smoke test.
+  assert.ok(equal.totalGoals >= 1.5 && equal.totalGoals <= 4.2, `equal-team goals/match out of guardrail: ${equal.totalGoals}`);
+  assert.ok(equal.shotsFor + equal.shotsAgainst >= 14 && equal.shotsFor + equal.shotsAgainst <= 28, 'equal-team shot volume is implausible');
+  assert.ok(equal.drawRate >= 0.15 && equal.drawRate <= 0.48, `equal-team draw rate out of guardrail: ${equal.drawRate}`);
+  assert.ok(equal.redsPerMatch <= 0.30, `red-card rate is implausibly high: ${equal.redsPerMatch}`);
 
-  // Ability must matter strongly enough that a 28-point XI advantage cannot disappear
-  // into presentation randomness or tactical noise.
-  assert.ok(strong.pointsPerMatch > weak.pointsPerMatch, `strong XI PPM ${strong.pointsPerMatch} must exceed weak XI PPM ${weak.pointsPerMatch}`);
-  assert.ok(strong.goalDifference > weak.goalDifference, `strong XI GD ${strong.goalDifference} must exceed weak XI GD ${weak.goalDifference}`);
+  // With identical ability and the same baseline formation, alternating home/away must
+  // not expose a persistent user-side privilege from hidden role/instruction layers.
+  const mirrorShotShare = mirror.shotsFor / Math.max(1, mirror.shotsFor + mirror.shotsAgainst);
+  assert.ok(mirrorShotShare >= 0.46 && mirrorShotShare <= 0.54, `mirrored user shot share is biased: ${round(mirrorShotShare,4)}`);
+  assert.ok(Math.abs(mirror.xgFor - mirror.xgAgainst) <= 0.30, `mirrored xG gap is too large: ${mirror.xgFor} vs ${mirror.xgAgainst}`);
+  assert.ok(Math.abs(mirror.goalsFor - mirror.goalsAgainst) <= 0.45, `mirrored goal gap is too large: ${mirror.goalsFor} vs ${mirror.goalsAgainst}`);
 
-  // Extreme tactical presets must not collapse into the same statistical fingerprint.
-  const tacticalDelta = Math.abs(attack.goalsFor - defend.goalsFor)
-    + Math.abs(attack.goalsAgainst - defend.goalsAgainst)
-    + Math.abs(attack.shotsFor - defend.shotsFor)
-    + Math.abs(attack.xgFor - defend.xgFor);
-  assert.ok(tacticalDelta >= 0.10, 'all-out attack and low block are statistically indistinguishable');
+  // Ability must be materially causal, not just technically non-zero.
+  assert.ok(strong.pointsPerMatch - weak.pointsPerMatch >= 0.35, `28-point XI advantage produces too little PPM separation: ${strong.pointsPerMatch} vs ${weak.pointsPerMatch}`);
+  assert.ok(strong.goalDifference - weak.goalDifference >= 0.50, `28-point XI advantage produces too little GD separation: ${strong.goalDifference} vs ${weak.goalDifference}`);
+  assert.ok(strong.winRate > weak.winRate, `strong XI win rate ${strong.winRate} must exceed weak XI ${weak.winRate}`);
+
+  // Extreme tactics must move output in the intended direction, not merely produce a
+  // different random fingerprint.
+  assert.ok(attack.shotsFor > defend.shotsFor, `all-out attack should create more shots: ${attack.shotsFor} vs ${defend.shotsFor}`);
+  assert.ok(attack.goalsFor > defend.goalsFor, `all-out attack should score more: ${attack.goalsFor} vs ${defend.goalsFor}`);
+  assert.ok(attack.goalsAgainst > defend.goalsAgainst, `low block should concede less than all-out attack: ${defend.goalsAgainst} vs ${attack.goalsAgainst}`);
+  assert.ok(attack.totalGoals > defend.totalGoals, `all-out attack should create a more open match: ${attack.totalGoals} vs ${defend.totalGoals}`);
 });
