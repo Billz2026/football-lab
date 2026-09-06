@@ -39,6 +39,8 @@ jobs:
             transfers-v050.js \
             career-manager-start-v064.js \
             career-personality-v2.js \
+            appointment-media-core-v1.js \
+            career-appointment-media-v066.js \
             player-profile-v2.js \
             match-fulltime-single-continue-v064.js \
             scripts/validate-database.mjs \
@@ -46,6 +48,8 @@ jobs:
             tests/manager-core.test.js \
             tests/career-manager-v064.spec.js \
             tests/personality-v2.test.js \
+            tests/appointment-media-v1.test.js \
+            tests/appointment-media-v066.spec.js \
             tests/player-profile-v2.spec.js \
             tests/world-clock.test.js \
             tests/world-clock.spec.js; do
@@ -60,7 +64,7 @@ jobs:
         run: npm run validate:database
 
       - name: Test career simulation
-        run: node --test tests/manager-core.test.js tests/world-clock.test.js tests/personality-v2.test.js
+        run: node --test tests/manager-core.test.js tests/world-clock.test.js tests/personality-v2.test.js tests/appointment-media-v1.test.js
 
       - name: Install Chromium
         timeout-minutes: 10
