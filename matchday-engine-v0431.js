@@ -110,7 +110,6 @@ function ensureXgState(state) {
     note: 'Shot coordinates are not yet simulated; xG is derived from generated chance context.'
   };
   state.xgModel.version = XG_MODEL.version;
-  exposeXg(state);
   return state;
 }
 
