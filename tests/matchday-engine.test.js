@@ -13,6 +13,7 @@ import {
   setPlayerRole,
   swapShapePlayers
 } from '../matchday-engine-v0431.js';
+import { reconcileDisciplineState } from '../discipline-integrity-v063.js';
 
 const groups = ['GK','DEF','DEF','DEF','DEF','MID','MID','MID','ATT','ATT','ATT','MID','ATT','DEF','MID','ATT','DEF','MID'];
 const positions = ['GK','DR','DC','DC','DL','MC','MC','AMC','AMR','ST','AML','DMC','ST','DC','MC','ST','DR','ML'];
@@ -93,6 +94,43 @@ test('positional swaps and substitutions preserve the exact vacated slot',()=>{
   assert.equal(MAX_SUBSTITUTIONS,5);
   const incomingAssignment=getUserShape(state,c,db).assignments.find(a=>a.playerId===inId);
   assert.equal(incomingAssignment.slotId,vacatedSlot);
+});
+
+test('discipline guard removes a directly sent-off player and blocks substitution',()=>{
+  const c=career();
+  let state=createInteractiveMatch(c,db);
+  const side=state.userClubId===state.homeClubId?'home':'away';
+  const lineup=side==='home'?state.homeLineupIds:state.awayLineupIds;
+  const sentOffId=lineup.find(id=>players.find(player=>player.id===id)?.positionGroup!=='GK');
+  const benchId=state.userBenchIds[0];
+
+  state.events.push({minute:37,type:'red',clubId:state.userClubId,playerId:sentOffId,text:'RED CARD',lines:['RED CARD']});
+  reconcileDisciplineState(state);
+
+  const current=side==='home'?state.homeLineupIds:state.awayLineupIds;
+  assert.equal(current.length,10);
+  assert.ok(state.sentOffIds.includes(sentOffId));
+  assert.ok(!current.includes(sentOffId));
+  assert.equal(state.stats[side].redCards,1);
+  assert.throws(()=>makeSubstitution(state,sentOffId,benchId,db,c),/currently on the pitch/);
+});
+
+test('discipline guard converts a second yellow into a dismissal',()=>{
+  const c=career();
+  let state=createInteractiveMatch(c,db);
+  const side=state.userClubId===state.homeClubId?'home':'away';
+  const lineup=side==='home'?state.homeLineupIds:state.awayLineupIds;
+  const sentOffId=lineup.find(id=>players.find(player=>player.id===id)?.positionGroup==='DEF');
+
+  state.events.push({minute:18,type:'yellow',clubId:state.userClubId,playerId:sentOffId,text:'Yellow card',lines:['Yellow card']});
+  state.events.push({minute:44,type:'yellow',clubId:state.userClubId,playerId:sentOffId,text:'Second booking',lines:['Second booking']});
+  reconcileDisciplineState(state);
+
+  const current=side==='home'?state.homeLineupIds:state.awayLineupIds;
+  assert.equal(current.length,10);
+  assert.ok(state.sentOffIds.includes(sentOffId));
+  assert.ok(state.events.some(event=>event.type==='red'&&event.playerId===sentOffId));
+  assert.equal(state.stats[side].redCards,1);
 });
 
 test('full-time career persists tactical setup for the next match',()=>{
