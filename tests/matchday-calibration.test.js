@@ -88,10 +88,15 @@ function buildCareer({db, seed, tactics = BALANCED, userHome = true}) {
   };
 }
 
-function validateFinishedState(state) {
+function validateFinishedState(state, db) {
+  const events = state.events || [];
+  const playersById = new Map(db.players.map(player => [player.id, player]));
+  const matchClubIds = new Set([state.homeClubId, state.awayClubId]);
+
   assert.equal(state.minute, 90, 'every calibration match must reach 90 minutes');
   assert.equal(new Set(state.homeLineupIds).size, state.homeLineupIds.length, 'home XI cannot contain duplicate players');
   assert.equal(new Set(state.awayLineupIds).size, state.awayLineupIds.length, 'away XI cannot contain duplicate players');
+  assert.equal(state.homeLineupIds.filter(id => state.awayLineupIds.includes(id)).length, 0, 'a player cannot appear for both teams');
   assert.equal(new Set(state.sentOffIds || []).size, (state.sentOffIds || []).length, 'a player cannot be sent off twice');
   assert.equal(new Set(state.injuredIds || []).size, (state.injuredIds || []).length, 'a player cannot be injured twice in one match');
   assert.ok((state.substitutions || []).length <= 5, 'user substitutions cannot exceed the five-sub limit');
@@ -113,9 +118,14 @@ function validateFinishedState(state) {
   for (const side of ['home','away']) {
     const stats = state.stats[side];
     const clubId = side === 'home' ? state.homeClubId : state.awayClubId;
-    const shotEvents = (state.events || []).filter(event => event.clubId === clubId && representsShot(event));
-    const goalEvents = (state.events || []).filter(event => event.clubId === clubId && event.type === 'goal');
+    const shotEvents = events.filter(event => event.clubId === clubId && representsShot(event));
+    const goalEvents = events.filter(event => event.clubId === clubId && event.type === 'goal');
+    const yellowEvents = events.filter(event => event.clubId === clubId && event.type === 'yellow');
+    const redEvents = events.filter(event => event.clubId === clubId && event.type === 'red');
     const goals = side === 'home' ? state.homeGoals : state.awayGoals;
+    const lineup = side === 'home' ? state.homeLineupIds : state.awayLineupIds;
+    const eventXg = round(shotEvents.reduce((sum, event) => sum + Number(event.xg || 0), 0), 2);
+    const eventBigChances = shotEvents.filter(event => Number(event.xg) >= 0.30).length;
 
     assert.ok(Number.isFinite(stats.shots) && stats.shots >= 0, `${side} shots must be valid`);
     assert.ok(Number.isFinite(stats.onTarget) && stats.onTarget >= 0, `${side} shots on target must be valid`);
@@ -125,15 +135,33 @@ function validateFinishedState(state) {
     assert.equal(stats.xgShots, stats.shots, `${side} every shot must enter xG accounting exactly once`);
     assert.equal(shotEvents.length, stats.shots, `${side} shot stats must reconcile with explicit shot events`);
     assert.ok(shotEvents.every(event => Number.isFinite(event.xg) && event.xg > 0), `${side} every shot event must carry positive xG`);
+    assert.equal(eventXg, round(stats.xG, 2), `${side} event xG must reconcile with aggregate xG`);
+    assert.equal(eventBigChances, stats.bigChances, `${side} big-chance count must reconcile with shot events`);
     assert.ok(Number.isFinite(stats.redCards) && stats.redCards >= 0, `${side} red cards must be valid`);
+    assert.equal(redEvents.length, stats.redCards, `${side} red-card events must reconcile with red-card stats`);
+    assert.equal(yellowEvents.length, stats.yellowCards, `${side} yellow-card events must reconcile with yellow-card stats`);
+    assert.equal(lineup.length, 11 - stats.redCards, `${side} on-pitch player count must reflect dismissals`);
     assert.equal(goalEvents.length, goals, `${side} scoreline must reconcile with goal events`);
     assert.ok(goals <= stats.onTarget, `${side} goals cannot exceed shots on target`);
   }
 
-  const events = state.events || [];
   assert.ok(events.every(event => Number.isFinite(event.minute) && event.minute >= 1 && event.minute <= 90), 'match events must stay inside regulation time');
   for (let index = 1; index < events.length; index += 1) {
     assert.ok(events[index].minute >= events[index - 1].minute, 'match event history must remain chronological');
+  }
+
+  for (const event of events) {
+    assert.ok(event.clubId == null || matchClubIds.has(event.clubId), `event references a club outside the match: ${event.clubId}`);
+    if (event.playerId) {
+      const player = playersById.get(event.playerId);
+      assert.ok(player, `event references unknown player ${event.playerId}`);
+      if (event.clubId) assert.equal(player.clubId, event.clubId, `event player ${event.playerId} is attributed to the wrong club`);
+    }
+    if (event.assistPlayerId) {
+      const assister = playersById.get(event.assistPlayerId);
+      assert.ok(assister, `event references unknown assister ${event.assistPlayerId}`);
+      if (event.clubId) assert.equal(assister.clubId, event.clubId, `assist ${event.assistPlayerId} is attributed to the wrong club`);
+    }
   }
 }
 
@@ -142,7 +170,7 @@ function simulate({seed, userAbility = 116, opponentAbility = 116, tactics = BAL
   const career = buildCareer({db, seed, tactics, userHome});
   let state = createInteractiveMatch(career, db);
   while (state.minute < 90) state = advanceInteractiveMatch(state, career, db).state;
-  validateFinishedState(state);
+  validateFinishedState(state, db);
   return state;
 }
 
