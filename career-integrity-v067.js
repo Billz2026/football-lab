@@ -26,8 +26,8 @@ function minuteForRow(row){return Number(clean(row.querySelector('b')?.textConte
 
 async function repairCommentaryOwnership(live){
   const snapshot=window.__flmLiveStateV332;if(!snapshot?.events?.length)return;const db=await database();if(!db||!live.isConnected)return;
-  const playerClubs=playerClubMap(db);
-  for(const row of live.querySelectorAll('[data-commentary-feed] .flm-commentary-line')){
+  const playerClubs=playerClubMap(db);const rows=[...live.querySelectorAll('[data-commentary-feed] .flm-commentary-line')];
+  for(const row of rows){
     if(row.dataset.integritySide==='1')continue;
     const minute=minuteForRow(row);if(!Number.isFinite(minute))continue;
     const type=eventTypeForRow(row);
@@ -35,8 +35,11 @@ async function repairCommentaryOwnership(live){
     const typed=candidates.filter(event=>event.type===type);if(typed.length)candidates=typed;
     let event=candidates.at(-1);if(!event)continue;
     if(event.playerId){const playerClub=playerClubs.get(event.playerId);if(playerClub===snapshot.homeClubId||playerClub===snapshot.awayClubId)event={...event,clubId:playerClub};}
-    if(event.clubId===snapshot.homeClubId)row.dataset.cmSide='home';else if(event.clubId===snapshot.awayClubId)row.dataset.cmSide='away';else row.dataset.cmSide='neutral';
-    row.dataset.integritySide='1';
+    const side=event.clubId===snapshot.homeClubId?'home':event.clubId===snapshot.awayClubId?'away':'neutral';row.dataset.cmSide=side;row.dataset.integritySide='1';
+    if(row===rows.at(-1)&&side!=='neutral'){
+      const club=db.clubs?.find(item=>item.id===event.clubId);const label=live.querySelector('[data-cm4-event-team]');if(label)label.textContent=club?.name||club?.shortName||(side==='home'?'HOME':'AWAY');
+      const card=live.querySelector('[data-cm4-event]');if(card){card.classList.remove('is-home','is-away','is-neutral');card.classList.add(`is-${side}`);}
+    }
   }
 }
 
