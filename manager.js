@@ -36,5 +36,6 @@ import './database-readonly-v1.js?v=1.0.0';
 import './discipline-integrity-v063.js?v=0.6.3';
 import './career-manager-start-v064.js?v=0.6.4';
 import './career-personality-v2.js?v=2.0.0';
+import './career-appointment-media-v066.js?v=0.6.6';
 import './player-profile-v2.js?v=2.1.0';
 import './match-fulltime-single-continue-v064.js?v=0.6.4';
