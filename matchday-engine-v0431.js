@@ -7,6 +7,11 @@ import {
   getUserShape,
   makeSubstitution as baseMakeSubstitution
 } from './matchday-engine-v043.js';
+import {
+  COMPETITIVE_SUBSTITUTION_LIMIT,
+  substitutionLimitForFixture,
+  scaledConditionAfterMinute
+} from './match-integrity-core-v067.js?v=0.6.7';
 
 export {
   FORMATION_LAYOUTS,
@@ -22,7 +27,7 @@ export {
   swapShapePlayers
 } from './matchday-engine-v043.js';
 
-export const LIVE_ENGINE_VERSION = 9;
+export const LIVE_ENGINE_VERSION = 10;
 export const XG_MODEL = Object.freeze({
   version: 1,
   method: 'shot-derived-contextual',
@@ -37,6 +42,19 @@ const SHOT_TYPES = new Set(['goal', 'save', 'woodwork', 'miss', 'corner']);
 
 function playerById(db, id) {
   return db.players.find(player => player.id === id);
+}
+
+function clubById(db,id){
+  return db.clubs?.find(club => club.id === id) || null;
+}
+
+function fixtureForState(career,state){
+  return (career?.fixtures || []).flat().find(fixture => fixture?.id === state?.fixtureId) || null;
+}
+
+function fixtureMeta(career,state){
+  const fixture=fixtureForState(career,state);
+  return fixture || {type:state?.fixtureType || '',competitionName:state?.competitionName || ''};
 }
 
 function positionCodes(player) {
@@ -132,8 +150,6 @@ function chanceText(event) {
 
 function contextualXg(event) {
   const text = chanceText(event);
-  // Chance quality is based on the situation that generated the attempt. The
-  // outcome itself (goal/save/miss) does not make the xG higher or lower.
   if (/penalt/.test(text)) return 0.76;
   if (/six[- ]yard|open goal|tap[- ]?in/.test(text)) return 0.58;
   if (/in behind|is through|one[- ]on[- ]one|clear through/.test(text)) return 0.34;
@@ -173,8 +189,6 @@ function annotateNewShots(state, events, beforeShots) {
       remaining -= 1;
     }
 
-    // Some legacy branches increment the shot count without returning a dedicated
-    // shot event. Keep xG tied to that real attempt with a conservative neutral value.
     while (remaining > 0) {
       state.stats[side].xG = round2(state.stats[side].xG + 0.08);
       state.stats[side].xgShots += 1;
@@ -183,10 +197,41 @@ function annotateNewShots(state, events, beforeShots) {
   }
 }
 
+function improveInjuryAndOwnership(state,events,db){
+  for(const event of events || []){
+    const person=event.playerId ? playerById(db,event.playerId) : null;
+    if(person?.clubId===state.homeClubId || person?.clubId===state.awayClubId) event.clubId=person.clubId;
+    if(event.type!=='injury' || !person)return;
+    const team=clubById(db,event.clubId)?.shortName || clubById(db,event.clubId)?.name || 'the team';
+    event.lines=(event.lines || [event.text]).filter(Boolean).map((line,index)=>{
+      if(index>0 && !String(line).includes(person.name)) return `${person.name} looks in real trouble. ${team} may need to make a change.`;
+      return line;
+    });
+    event.text=event.lines.join(' ');
+    const stored=[...(state.events || [])].reverse().find(item=>item.minute===event.minute&&item.type==='injury'&&item.playerId===event.playerId);
+    if(stored){stored.clubId=event.clubId;stored.lines=[...event.lines];stored.text=event.text;}
+  }
+}
+
+function applyConditionIntegrity(prepared,state,career){
+  const fixture=fixtureMeta(career,prepared);
+  state.fixtureType=fixture.type || prepared.fixtureType || '';
+  state.competitionName=fixture.competitionName || prepared.competitionName || '';
+  state.substitutionLimit=substitutionLimitForFixture(fixture);
+  for(const [id,before] of Object.entries(prepared.conditions || {})){
+    if(!Number.isFinite(Number(state.conditions?.[id])))continue;
+    state.conditions[id]=round2(scaledConditionAfterMinute(before,state.conditions[id],fixture));
+  }
+}
+
 export function createInteractiveMatch(career, db) {
   const state = ensureXgState(baseCreateInteractiveMatch(career, db));
+  const fixture=fixtureForState(career,state) || {};
   state.liveEngineVersion = LIVE_ENGINE_VERSION;
   state.userReadiness = readinessFor(career);
+  state.fixtureType=fixture.type || '';
+  state.competitionName=fixture.competitionName || '';
+  state.substitutionLimit=substitutionLimitForFixture(fixture);
   exposeXg(state);
   return state;
 }
@@ -202,6 +247,8 @@ export function advanceInteractiveMatch(inputState, career, db) {
   const state = ensureXgState(result.state);
   state.liveEngineVersion = LIVE_ENGINE_VERSION;
   state.userReadiness = prepared.userReadiness || readinessFor(career);
+  applyConditionIntegrity(prepared,state,career);
+  improveInjuryAndOwnership(state,result.events,db);
   annotateNewShots(state, result.events, beforeShots);
   exposeXg(state);
   return { state, events: result.events };
@@ -213,14 +260,42 @@ export function completeInteractiveRound(career, inputState, db) {
   return baseCompleteInteractiveRound(career, state, db);
 }
 
+function extendedSubstitution(inputState,outId,inId,db){
+  const state=clone(inputState);const limit=Number(state.substitutionLimit)||COMPETITIVE_SUBSTITUTION_LIMIT;
+  if(state.minute>=90)throw new Error('The match is already over.');
+  if((state.substitutions||[]).length>=limit)throw new Error(`You have used all ${limit} substitutions.`);
+  const side=state.userClubId===state.homeClubId?'home':'away';
+  const lineup=[...(side==='home'?state.homeLineupIds:state.awayLineupIds)];
+  if((state.sentOffIds||[]).includes(outId))throw new Error('A sent-off player cannot be substituted.');
+  if(!lineup.includes(outId))throw new Error('Choose a player currently on the pitch.');
+  if(lineup.includes(inId))throw new Error('That player is already on the pitch.');
+  if(!(state.userBenchIds||[]).includes(inId))throw new Error('Choose a player from your matchday bench.');
+  if((state.subbedOffIds||[]).includes(inId))throw new Error('A substituted player cannot return to the match.');
+  const next=lineup.map(id=>id===outId?inId:id);
+  if(!next.some(id=>playerById(db,id)?.positionGroup==='GK'))throw new Error('Your team must keep a goalkeeper on the pitch.');
+  if(side==='home')state.homeLineupIds=next;else state.awayLineupIds=next;
+  state.subbedOffIds ||= [];state.substitutions ||= [];state.events ||= [];
+  state.subbedOffIds.push(outId);state.substitutions.push({minute:state.minute,outId,inId});
+  if(state.conditions[inId]==null)state.conditions[inId]=100;if(state.ratings[inId]==null)state.ratings[inId]=6.5;if(state.minutesPlayed[inId]==null)state.minutesPlayed[inId]=0;
+  const incoming=playerById(db,inId),outgoing=playerById(db,outId),team=clubById(db,state.userClubId)?.shortName||clubById(db,state.userClubId)?.name||'The team';
+  const event={minute:state.minute,type:'substitution',clubId:state.userClubId,playerId:inId,assistPlayerId:null,lines:[`${state.minute}' — ${team} make a change.`,`${incoming?.name||'The substitute'} replaces ${outgoing?.name||'the outgoing player'}.`]};
+  event.text=event.lines.join(' ');state.events.push(clone(event));return{state,event};
+}
+
 export function makeSubstitution(inputState, outId, inId, db, career = {}) {
   const beforeShape = clone(getUserShape(inputState, career, db));
   const vacated = beforeShape.assignments.find(item => item.playerId === outId);
-  const result = baseMakeSubstitution(inputState, outId, inId, db, career);
+  const limit=Number(inputState.substitutionLimit)||COMPETITIVE_SUBSTITUTION_LIMIT;
+  const result = (inputState.substitutions || []).length < COMPETITIVE_SUBSTITUTION_LIMIT
+    ? baseMakeSubstitution(inputState, outId, inId, db, career)
+    : limit > COMPETITIVE_SUBSTITUTION_LIMIT
+      ? extendedSubstitution(inputState,outId,inId,db)
+      : baseMakeSubstitution(inputState, outId, inId, db, career);
 
   if (!vacated) return result;
 
   const state = ensureXgState(result.state);
+  state.substitutionLimit=limit;
   const slot = beforeShape.slots.find(item => item.id === vacated.slotId);
   const nextShape = clone(beforeShape);
   const assignment = nextShape.assignments.find(item => item.slotId === vacated.slotId);
@@ -236,6 +311,8 @@ export function makeSubstitution(inputState, outId, inId, db, career = {}) {
     `${playerById(db, inId)?.name || 'The substitute'} takes over at ${slot.label} as ${assignment.role}.`
   ];
   result.event.text = result.event.lines.join(' ');
+  const stored=[...(state.events || [])].reverse().find(item=>item.minute===result.event.minute&&item.type==='substitution'&&item.playerId===inId);
+  if(stored){stored.lines=[...result.event.lines];stored.text=result.event.text;}
   exposeXg(state);
 
   return { state, event: result.event };
