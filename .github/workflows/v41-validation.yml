@@ -59,6 +59,7 @@ jobs:
             tests/manager-core.test.js \
             tests/match-integrity-engine-v067.test.js \
             tests/kit-colours-v1.test.js \
+            tests/matchday-v070.spec.js \
             tests/career-manager-v064.spec.js \
             tests/personality-v2.test.js \
             tests/appointment-media-v1.test.js \
