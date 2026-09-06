@@ -62,7 +62,7 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   await completePreseason(page);
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
   await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
-  await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm-match-v1', '1');
+  await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm4', '1');
   await page.locator('[data-cm-speed="4"]').click();
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
