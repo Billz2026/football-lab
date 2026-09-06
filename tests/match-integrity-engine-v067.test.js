@@ -36,13 +36,29 @@ test('rule contract exposes real-life Football Lab matchday limits',()=>{
   });
 });
 
-test('pre-season friendly exposes the full available bench and allows the entire XI to be replaced',()=>{
+test('pre-season friendly exposes the full available bench and can replace all eleven starters',()=>{
   const c=career('friendly');let state=createInteractiveMatch(c,db);
+  const originalXI=[...state.homeLineupIds];
   assert.equal(state.substitutionLimit,11);
   assert.equal(state.substitutionWindowLimit,null);
   assert.equal(state.userBenchIds.length,positions.length-11);
-  for(let i=1;i<=11;i+=1) state=makeNextSub(state,c,i,10+i).state;
+
+  for(let i=0;i<originalXI.length;i+=1){
+    const outId=originalXI[i];
+    const out=players.find(player=>player.id===outId);
+    const lineup=state.homeLineupIds;
+    const inId=state.userBenchIds.find(id=>{
+      if(lineup.includes(id)||state.subbedOffIds.includes(id))return false;
+      const incoming=players.find(player=>player.id===id);
+      return out?.positionGroup==='GK' ? incoming?.positionGroup==='GK' : incoming?.positionGroup!=='GK';
+    });
+    assert.ok(inId,`replacement for starter ${i+1}`);
+    state={...state,minute:10+i};
+    state=makeSubstitution(state,outId,inId,db,c).state;
+  }
+
   assert.equal(state.substitutions.length,11);
+  assert.equal(originalXI.some(id=>state.homeLineupIds.includes(id)),false);
   assert.throws(()=>makeNextSub(state,c,12,30),/used all 11 substitutions/i);
 });
 
