@@ -1,38 +1,87 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createInteractiveMatch, makeSubstitution } from '../matchday-engine-v0431.js';
+import {
+  createInteractiveMatch,
+  makeSubstitution,
+  substitutionRulesForFixture
+} from '../matchday-engine-v069.js';
 
-const positions=['GK','DR','DC','DC','DL','MC','MC','AMC','AMR','ST','AML','DMC','ST','DC','MC','ST','DR','ML','MR','DC'];
-const groups=['GK','DEF','DEF','DEF','DEF','MID','MID','MID','ATT','ATT','ATT','MID','ATT','DEF','MID','ATT','DEF','MID','MID','DEF'];
+const positions=['GK','DR','DC','DC','DL','MC','MC','AMC','AMR','ST','AML','DMC','ST','DC','MC','ST','DR','ML','MR','DC','GK','ST','MC','DL'];
+const groups=['GK','DEF','DEF','DEF','DEF','MID','MID','MID','ATT','ATT','ATT','MID','ATT','DEF','MID','ATT','DEF','MID','MID','DEF','GK','ATT','MID','DEF'];
 const clubs=[{id:'home',name:'Home FC',reputation:7000},{id:'away',name:'Away FC',reputation:7000}];
-const players=clubs.flatMap((club,ci)=>positions.map((primaryPosition,index)=>({id:`${club.id}-${index}`,clubId:club.id,name:`${club.name} ${index}`,primaryPosition,positionGroup:groups[index],currentAbility:130-index+ci,isPlaceholder:false})));
+const players=clubs.flatMap((club,ci)=>positions.map((primaryPosition,index)=>({id:`${club.id}-${index}`,clubId:club.id,name:`${club.name} ${index}`,primaryPosition,positionGroup:groups[index],currentAbility:140-index+ci,isPlaceholder:false})));
 const db={clubs,players};
 
 function career(type='friendly'){
   const user=players.filter(player=>player.clubId==='home');
-  return {id:`career-${type}`,version:1,clubId:'home',seed:`seed-${type}`,status:'active',roundIndex:0,competitionName:type==='friendly'?'Pre-Season Friendly':'Premier League',fixtures:[[{id:`fixture-${type}`,round:1,type,homeClubId:'home',awayClubId:'away',played:false,events:[]}]],table:clubs.map(club=>({clubId:club.id,played:0,won:0,drawn:0,lost:0,goalsFor:0,goalsAgainst:0,goalDifference:0,points:0})),lineupIds:user.slice(0,11).map(player=>player.id),tactics:{formation:'4-3-3',mentality:'Balanced',pressing:'Standard'},playerStatus:Object.fromEntries(user.map(player=>[player.id,{condition:90,sharpness:80,morale:'Good'}]))};
+  return {id:`career-${type}`,version:1,clubId:'home',seed:`seed-${type}`,status:'active',roundIndex:0,competitionName:type==='friendly'?'Pre-Season Friendly':'Premier League',fixtures:[[{id:`fixture-${type}`,round:1,type,competitionName:type==='friendly'?'Pre-Season Friendly':'Premier League',homeClubId:'home',awayClubId:'away',played:false,events:[]}]],table:clubs.map(club=>({clubId:club.id,played:0,won:0,drawn:0,lost:0,goalsFor:0,goalsAgainst:0,goalDifference:0,points:0})),lineupIds:user.slice(0,11).map(player=>player.id),tactics:{formation:'4-3-3',mentality:'Balanced',pressing:'Standard'},playerStatus:Object.fromEntries(user.map(player=>[player.id,{condition:90,sharpness:80,morale:'Good'}]))};
 }
 
-function makeNextSub(state,c,number){
+function makeNextSub(state,c,number,minute=state.minute){
+  state={...state,minute};
   const side=state.userClubId===state.homeClubId?'home':'away';
   const lineup=side==='home'?state.homeLineupIds:state.awayLineupIds;
   const outId=lineup.find(id=>db.players.find(player=>player.id===id)?.positionGroup!=='GK'&&!state.subbedOffIds.includes(id));
   const inId=state.userBenchIds.find(id=>!lineup.includes(id)&&!state.subbedOffIds.includes(id));
   assert.ok(outId,`out player ${number}`);assert.ok(inId,`bench player ${number}`);
-  return makeSubstitution(state,outId,inId,db,c).state;
+  return {state:makeSubstitution(state,outId,inId,db,c).state,outId,inId};
 }
 
-test('pre-season friendlies allow a sixth substitution and expose a nine-sub limit',()=>{
-  const c=career('friendly');let state=createInteractiveMatch(c,db);
-  assert.equal(state.substitutionLimit,9);
-  for(let i=1;i<=6;i+=1)state=makeNextSub(state,c,i);
-  assert.equal(state.substitutions.length,6);
+test('rule contract exposes real-life Football Lab matchday limits',()=>{
+  assert.deepEqual(substitutionRulesForFixture({type:'friendly'}),{
+    kind:'friendly',benchLimit:null,maxSubstitutions:11,maxInPlayWindows:null,halfTimeUsesWindow:false,reentryAllowed:false
+  });
+  assert.deepEqual(substitutionRulesForFixture({type:'league',competitionName:'Premier League'}),{
+    kind:'competitive',benchLimit:9,maxSubstitutions:5,maxInPlayWindows:3,halfTimeUsesWindow:false,reentryAllowed:false
+  });
 });
 
-test('competitive matches still stop after five substitutions',()=>{
+test('pre-season friendly exposes the full available bench and allows the entire XI to be replaced',()=>{
+  const c=career('friendly');let state=createInteractiveMatch(c,db);
+  assert.equal(state.substitutionLimit,11);
+  assert.equal(state.substitutionWindowLimit,null);
+  assert.equal(state.userBenchIds.length,positions.length-11);
+  for(let i=1;i<=11;i+=1) state=makeNextSub(state,c,i,10+i).state;
+  assert.equal(state.substitutions.length,11);
+  assert.throws(()=>makeNextSub(state,c,12,30),/used all 11 substitutions/i);
+});
+
+test('a substituted-off player cannot re-enter a friendly',()=>{
+  const c=career('friendly');let state=createInteractiveMatch(c,db);
+  const first=makeNextSub(state,c,1,20);state=first.state;
+  const currentLineup=state.homeLineupIds;
+  const currentPlayer=currentLineup.find(id=>id!==first.inId&&db.players.find(player=>player.id===id)?.positionGroup!=='GK');
+  assert.throws(()=>makeSubstitution(state,currentPlayer,first.outId,db,c),/cannot return/i);
+});
+
+test('Premier League matchday bench is nine and no more than five players may enter',()=>{
   const c=career('league');let state=createInteractiveMatch(c,db);
+  assert.equal(state.userBenchIds.length,9);
   assert.equal(state.substitutionLimit,5);
-  for(let i=1;i<=5;i+=1)state=makeNextSub(state,c,i);
+  state=makeNextSub(state,c,1,20).state;
+  state=makeNextSub(state,c,2,20).state;
+  state=makeNextSub(state,c,3,45).state;
+  state=makeNextSub(state,c,4,60).state;
+  state=makeNextSub(state,c,5,60).state;
   assert.equal(state.substitutions.length,5);
-  assert.throws(()=>makeNextSub(state,c,6),/used all five substitutions|used all 5 substitutions/i);
+  assert.deepEqual(state.substitutionWindowMinutes,[20,60]);
+  assert.throws(()=>makeNextSub(state,c,6,75),/used all five substitutions|used all 5 substitutions/i);
+});
+
+test('Premier League allows only three in-play substitution windows while same-minute changes share a window',()=>{
+  const c=career('league');let state=createInteractiveMatch(c,db);
+  state=makeNextSub(state,c,1,20).state;
+  state=makeNextSub(state,c,2,20).state;
+  state=makeNextSub(state,c,3,55).state;
+  state=makeNextSub(state,c,4,70).state;
+  assert.deepEqual(state.substitutionWindowMinutes,[20,55,70]);
+  assert.throws(()=>makeNextSub(state,c,5,80),/all three in-play substitution windows/i);
+});
+
+test('half-time substitutions do not consume a Premier League substitution window',()=>{
+  const c=career('league');let state=createInteractiveMatch(c,db);
+  state=makeNextSub(state,c,1,30).state;
+  state=makeNextSub(state,c,2,45).state;
+  state=makeNextSub(state,c,3,60).state;
+  assert.deepEqual(state.substitutionWindowMinutes,[30,60]);
 });
