@@ -1,4 +1,6 @@
-export const COMMENTARY_AUTHORITATIVE_ROW_HOST_VERSION='1.0.1';
+import './commentary-authoritative-flow-v3.js?v=3.0.0';
+
+export const COMMENTARY_AUTHORITATIVE_ROW_HOST_VERSION='1.0.2';
 
 const AUTHORITATIVE_VERSION='2.0.0';
 const STRUCTURED_TYPES=new Set(['goal','save','woodwork','miss']);

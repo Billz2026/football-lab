@@ -1,13 +1,15 @@
-import * as base from './matchday-structured-attacks-v1.js?v=1.0.0';
+import * as base from './matchday-structured-flow-v1.js?v=1.0.0';
 import { applyMatchDrama, MATCH_DRAMA_VERSION } from './match-drama-v3.js?v=3.0.0';
 
 export {
   FORMATION_LAYOUTS,
   MAX_SUBSTITUTIONS,
   ROLE_DEFINITIONS,
-  TACTIC_OPTIONS,
   STRUCTURED_ATTACK_VERSION,
+  STRUCTURED_FLOW_TYPES,
+  STRUCTURED_FLOW_VERSION,
   STRUCTURED_XG_MODEL,
+  TACTIC_OPTIONS,
   assignPlayersToFormation,
   changeTactics,
   getOpponentSnapshot,
@@ -15,11 +17,12 @@ export {
   setPlayerDuty,
   setPlayerRole,
   swapShapePlayers
-} from './matchday-structured-attacks-v1.js?v=1.0.0';
+} from './matchday-structured-flow-v1.js?v=1.0.0';
 
-export const MATCH_RULES_VERSION = '0.7.2';
+export const MATCH_RULES_VERSION = '0.7.3';
 export const MATCH_DRAMA_ENGINE_VERSION = MATCH_DRAMA_VERSION;
 export const MATCH_STRUCTURED_ATTACK_VERSION = base.STRUCTURED_ATTACK_VERSION;
+export const MATCH_STRUCTURED_FLOW_VERSION = base.STRUCTURED_FLOW_VERSION;
 export const PREMIER_LEAGUE_BENCH_LIMIT = 9;
 export const PREMIER_LEAGUE_SUBSTITUTION_LIMIT = 5;
 export const PREMIER_LEAGUE_WINDOW_LIMIT = 3;
@@ -27,6 +30,8 @@ export const FRIENDLY_SUBSTITUTION_LIMIT = 11;
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const round2 = value => Math.round(Number(value || 0) * 100) / 100;
+const liveStructuredHistory = new Map();
+const liveInitialLineups = new Map();
 
 function fixtureForState(career = {}, state = {}) {
   const fixture = (career.fixtures || []).flat().find(item => item?.id === state.fixtureId);
@@ -130,8 +135,18 @@ function cloneStructuredAttack(attack) {
   };
 }
 
+function cloneStructuredFlow(flow) {
+  if (!flow || typeof flow !== 'object') return null;
+  return {
+    ...flow,
+    contextTags: [...(flow.contextTags || [])],
+    beats: (flow.beats || []).map(beat => ({ ...beat }))
+  };
+}
+
 function cloneStructuredEvent(event) {
   return {
+    liveEventId: event.liveEventId,
     minute: event.minute,
     type: event.type,
     clubId: event.clubId,
@@ -146,30 +161,57 @@ function cloneStructuredEvent(event) {
     xg: event.xg,
     text: event.text,
     lines: Array.isArray(event.lines) ? [...event.lines] : undefined,
-    attack: cloneStructuredAttack(event.attack)
+    attack: cloneStructuredAttack(event.attack),
+    flow: cloneStructuredFlow(event.flow)
   };
+}
+
+function eventStorageKey(event) {
+  if (event?.liveEventId) return `event:${event.liveEventId}`;
+  if (event?.attack?.sequenceId) return `attack:${event.attack.sequenceId}`;
+  if (event?.flow?.sequenceId) return `flow:${event.flow.sequenceId}`;
+  return null;
+}
+
+function resetLiveFixtureHistory(state) {
+  liveStructuredHistory.set(state.fixtureId, []);
+  liveInitialLineups.set(state.fixtureId, {
+    home: [...(state.homeLineupIds || [])],
+    away: [...(state.awayLineupIds || [])]
+  });
+  if (liveStructuredHistory.size > 8) {
+    const oldest = liveStructuredHistory.keys().next().value;
+    liveStructuredHistory.delete(oldest);
+    liveInitialLineups.delete(oldest);
+  }
+}
+
+function clearLiveFixtureHistory(fixtureId) {
+  if (!fixtureId) return;
+  liveStructuredHistory.delete(fixtureId);
+  liveInitialLineups.delete(fixtureId);
 }
 
 function publishLiveState(state, emittedEvents = []) {
   if (typeof window === 'undefined' || !state?.fixtureId) return;
-  const existing = window.__flmLiveStateV332;
-  const sameFixture = existing?.fixtureId === state.fixtureId;
-  const events = sameFixture && Array.isArray(existing?.events) ? [...existing.events] : [];
-  const seen = new Set(events.map(event => event?.attack?.sequenceId).filter(Boolean));
+  if (!liveStructuredHistory.has(state.fixtureId)) resetLiveFixtureHistory(state);
+
+  const history = liveStructuredHistory.get(state.fixtureId);
+  const seen = new Set(history.map(eventStorageKey).filter(Boolean));
   for (const event of emittedEvents || []) {
-    const sequenceId = event?.attack?.sequenceId;
-    if (!sequenceId || seen.has(sequenceId)) continue;
-    events.push(cloneStructuredEvent(event));
-    seen.add(sequenceId);
+    const structuredKey = eventStorageKey(event);
+    if (structuredKey && seen.has(structuredKey)) continue;
+    const stored = cloneStructuredEvent(event);
+    if (!structuredKey) stored.liveEventId = `${state.fixtureId}:${history.length + 1}`;
+    history.push(stored);
+    const storedKey = eventStorageKey(stored);
+    if (storedKey) seen.add(storedKey);
   }
 
-  const initialHomeLineupIds = sameFixture && Array.isArray(existing?.initialHomeLineupIds)
-    ? [...existing.initialHomeLineupIds]
-    : [...(state.homeLineupIds || [])];
-  const initialAwayLineupIds = sameFixture && Array.isArray(existing?.initialAwayLineupIds)
-    ? [...existing.initialAwayLineupIds]
-    : [...(state.awayLineupIds || [])];
-
+  const initial = liveInitialLineups.get(state.fixtureId) || {
+    home: [...(state.homeLineupIds || [])],
+    away: [...(state.awayLineupIds || [])]
+  };
   const snapshot = {
     fixtureId: state.fixtureId,
     minute: Number(state.minute || 0),
@@ -180,18 +222,19 @@ function publishLiveState(state, emittedEvents = []) {
     awayGoals: Number(state.awayGoals || 0),
     homeLineupIds: [...(state.homeLineupIds || [])],
     awayLineupIds: [...(state.awayLineupIds || [])],
-    initialHomeLineupIds,
-    initialAwayLineupIds,
+    initialHomeLineupIds: [...initial.home],
+    initialAwayLineupIds: [...initial.away],
     ratings: { ...(state.ratings || {}) },
     conditions: { ...(state.conditions || {}) },
     minutesPlayed: { ...(state.minutesPlayed || {}) },
     subbedOffIds: [...(state.subbedOffIds || [])],
-    events,
-    structuredCommentarySnapshotVersion: '2.2.0',
+    events: history.map(cloneStructuredEvent),
+    structuredCommentarySnapshotVersion: '3.0.0',
     source: 'matchday-engine-v069'
   };
   window.__flmLiveStateV332 = snapshot;
   window.__flmStructuredCommentaryV2 = snapshot;
+  window.__flmStructuredCommentaryV3 = snapshot;
   try { window.dispatchEvent(new CustomEvent('flm:live-state-v332', { detail: snapshot })); } catch (_) {}
 }
 
@@ -234,13 +277,20 @@ export function advanceInteractiveMatch(inputState, career, db) {
   let state = applyRules(result.state, career, db);
   const drama = applyMatchDrama(state, db, result.events);
   state = applyRules(drama.state, career, db);
+  const events = [...(result.events || []), ...(drama.events || [])];
   publishLiveXg(state);
-  publishLiveState(state, result.events);
-  return { ...result, state, events: [...(result.events || []), ...(drama.events || [])] };
+  publishLiveState(state, events);
+  return { ...result, state, events };
 }
 
 export function completeInteractiveRound(career, inputState, db) {
-  return base.completeInteractiveRound(career, inputState, db);
+  const result = base.completeInteractiveRound(career, inputState, db);
+  const fixtureId = inputState?.fixtureId;
+  clearLiveFixtureHistory(fixtureId);
+  if (typeof window !== 'undefined' && fixtureId) {
+    try { window.dispatchEvent(new CustomEvent('flm:live-state-complete', { detail: { fixtureId } })); } catch (_) {}
+  }
+  return result;
 }
 
 export function makeSubstitution(inputState, outId, inId, db, career = {}) {
