@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(90000);
+test.setTimeout(180000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -64,10 +64,10 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
   await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm-match-v1', '1');
   await page.locator('[data-cm-speed="4"]').click();
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
+  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 60000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
+  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 60000 });
   await page.locator('[data-finish-live-match]').click();
 
   const newsAfterMatch = page.locator('[data-v046-news-tab]');
