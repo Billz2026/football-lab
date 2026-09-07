@@ -7,17 +7,28 @@
   "generatedAt": "2026-09-05T07:09:22.324Z",
   "provider": "API-Football Free + Football Lab Manager baseline engine",
   "scope": {
-    "country": "England",
-    "countryCode": "ENG",
+    "country": "England + Spain",
+    "countryCode": "MULTI",
+    "countries": [
+      {
+        "name": "England",
+        "countryCode": "ENG"
+      },
+      {
+        "name": "Spain",
+        "countryCode": "ESP"
+      }
+    ],
     "season": "2026/27",
-    "leagueCount": 5,
-    "targetClubCount": 116,
+    "leagueCount": 6,
+    "targetClubCount": 136,
     "leagues": [
       "eng-premier-league",
       "eng-championship",
       "eng-league-one",
       "eng-league-two",
-      "eng-national-league"
+      "eng-national-league",
+      "esp-la-liga"
     ]
   },
   "licensing": {
@@ -81,6 +92,11 @@
     "eng-national-league": {
       "realClubs": 0,
       "expectedClubs": 24,
+      "status": "pending"
+    },
+    "esp-la-liga": {
+      "realClubs": 0,
+      "expectedClubs": 20,
       "status": "pending"
     }
   },
