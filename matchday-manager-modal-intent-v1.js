@@ -1,4 +1,4 @@
-export const MATCHDAY_MANAGER_MODAL_INTENT_VERSION='1.0.0';
+export const MATCHDAY_MANAGER_MODAL_INTENT_VERSION='1.1.0';
 
 const LIVE_SELECTOR='.flm-live-match,[data-live-match]';
 const MODAL_SELECTOR='[data-manager-modal]';
@@ -31,7 +31,7 @@ function closeUnintendedModal(modal){
   modal.setAttribute('aria-hidden','true');
 }
 
-function guardLive(live){
+function guardManagerModal(live){
   const modal=live.querySelector(MODAL_SELECTOR);
   if(!modal)return;
 
@@ -53,9 +53,42 @@ function guardLive(live){
   closeUnintendedModal(modal);
 }
 
+function guardFullTimeContinue(live){
+  if(live.dataset.cm44State!=='fulltime')return;
+  const shell=live.querySelector(':scope > .cm4-shell')||live.querySelector('.cm4-shell');
+  if(!shell)return;
+
+  let button=shell.querySelector('[data-cm44-continue]');
+  if(!button){
+    button=document.createElement('button');
+    button.type='button';
+    button.dataset.cm44Continue='1';
+    button.className='cm44-continue-main';
+    button.textContent='CONTINUE';
+  }
+
+  // Full time is an application-level state, so its exit action must not live
+  // inside a presentation panel that later V4 layers can hide or replace.
+  if(button.parentElement!==shell)shell.appendChild(button);
+  button.hidden=false;
+  button.removeAttribute('aria-hidden');
+  button.setAttribute('aria-label','Review full-time summary');
+  button.style.setProperty('display','block','important');
+  button.style.setProperty('visibility','visible','important');
+  button.style.setProperty('opacity','1','important');
+  button.style.setProperty('position','fixed','important');
+  button.style.setProperty('left','50%','important');
+  button.style.setProperty('bottom','24px','important');
+  button.style.setProperty('transform','translateX(-50%)','important');
+  button.style.setProperty('z-index','1900','important');
+}
+
 function sync(){
   queued=false;
-  document.querySelectorAll(LIVE_SELECTOR).forEach(guardLive);
+  document.querySelectorAll(LIVE_SELECTOR).forEach(live=>{
+    guardManagerModal(live);
+    guardFullTimeContinue(live);
+  });
 }
 
 function queue(){
@@ -78,8 +111,9 @@ if(typeof window!=='undefined'&&typeof document!=='undefined'){
     childList:true,
     subtree:true,
     attributes:true,
-    attributeFilter:['class','aria-hidden']
+    attributeFilter:['class','aria-hidden','data-cm44-state']
   });
+  setInterval(queue,250);
   queue();
 
   window.FLMMatchdayManagerModalIntent=Object.freeze({
