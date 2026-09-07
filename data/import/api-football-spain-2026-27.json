@@ -1,0 +1,48 @@
+{
+  "snapshotSeason": "2026/27",
+  "country": "Spain",
+  "countryCode": "ESP",
+  "currency": "EUR",
+  "membershipAuthority": {
+    "name": "LALIGA",
+    "url": "https://www.laliga.com/en-US/laliga-easports/clubs",
+    "verifiedDate": "2026-09-07",
+    "note": "2026/27 LALIGA EA SPORTS membership is authoritative here. API-Football is used only to resolve provider identities and current squad payloads."
+  },
+  "providerPolicy": {
+    "provider": "API-Football",
+    "badgesIncluded": false,
+    "playerPhotosIncluded": false,
+    "squadEndpoint": "/players/squads",
+    "teamCountryLookup": "Spain"
+  },
+  "leagues": [
+    {
+      "id": "esp-la-liga",
+      "name": "La Liga",
+      "level": 1,
+      "clubs": [
+        {"name":"Athletic Club","officialName":"Athletic Club","aliases":["Athletic Bilbao","Athletic Club Bilbao"]},
+        {"name":"Atlético de Madrid","officialName":"Atlético de Madrid","aliases":["Atletico Madrid","Atlético Madrid"]},
+        {"name":"CA Osasuna","officialName":"CA Osasuna","aliases":["Osasuna"]},
+        {"name":"RC Celta","officialName":"Celta","aliases":["Celta Vigo","Celta","RC Celta de Vigo"]},
+        {"name":"Deportivo Alavés","officialName":"Deportivo Alavés","aliases":["Alaves","Alavés"]},
+        {"name":"Elche CF","officialName":"Elche CF","aliases":["Elche"]},
+        {"name":"FC Barcelona","officialName":"FC Barcelona","aliases":["Barcelona","Barca","Barça"]},
+        {"name":"Getafe CF","officialName":"Getafe CF","aliases":["Getafe"]},
+        {"name":"Levante UD","officialName":"Levante UD","aliases":["Levante"]},
+        {"name":"Málaga CF","officialName":"Málaga CF","aliases":["Malaga","Málaga"]},
+        {"name":"Real Racing Club","officialName":"R. Racing Club","aliases":["Racing Santander","Racing Club","R. Racing Club"]},
+        {"name":"Rayo Vallecano","officialName":"Rayo Vallecano","aliases":["Rayo"]},
+        {"name":"RC Deportivo","officialName":"RC Deportivo","aliases":["Deportivo La Coruna","Deportivo La Coruña","Deportivo de La Coruña","Deportivo"]},
+        {"name":"RCD Espanyol de Barcelona","officialName":"RCD Espanyol de Barcelona","aliases":["Espanyol","RCD Espanyol"]},
+        {"name":"Real Betis","officialName":"Real Betis","aliases":["Real Betis Balompie","Real Betis Balompié","Betis"]},
+        {"name":"Real Madrid","officialName":"Real Madrid","aliases":["Real Madrid CF"]},
+        {"name":"Real Sociedad","officialName":"Real Sociedad","aliases":["Real Sociedad de Futbol","Real Sociedad de Fútbol"]},
+        {"name":"Sevilla FC","officialName":"Sevilla FC","aliases":["Sevilla"]},
+        {"name":"Valencia CF","officialName":"Valencia CF","aliases":["Valencia"]},
+        {"name":"Villarreal CF","officialName":"Villarreal CF","aliases":["Villarreal"]}
+      ]
+    }
+  ]
+}
