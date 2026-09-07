@@ -11,7 +11,7 @@ test.beforeEach(async ({ page }) => {
 async function continueUntil(page, targetDate, maxSteps = 30) {
   for (let step = 0; step < maxSteps; step += 1) {
     const current = await page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '');
-    if (current >= targetDate) return;
+    if (current >= targetDate) return current;
     await page.locator('.career-header [data-v060-continue]').click();
     await page.waitForTimeout(80);
   }
@@ -35,7 +35,8 @@ test('V0.4.7 pre-season blocks Round 1, builds readiness and hands off to the se
 
   await continueUntil(page, '2026-07-11');
   await page.locator('[data-v047-preseason-tab]').click();
-  await page.locator('[data-v047-play]').click();
+  await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY');
+  await page.locator('[data-shell-continue]').click();
   await expect(page.locator('[data-live-match]')).toBeVisible();
   await page.getByRole('button', { name: '4×' }).click();
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
