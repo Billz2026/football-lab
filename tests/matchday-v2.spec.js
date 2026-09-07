@@ -151,10 +151,15 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await shell.locator('[data-cm4-subs]').click();
   await expect(page.locator('.v2-sub-shell')).toBeVisible();
   const confirm = page.locator('[data-apply-sub]');
+  const substitutionStatus = page.locator('.flm-sub-status');
   await expect(confirm).toHaveText('CONFIRM SUBSTITUTION');
   await expect(confirm).toBeDisabled();
   await expect(page.locator('.v2-sub-column').nth(0).locator('.v2-sub-player')).toHaveCount(11);
   await expect.poll(async () => page.locator('.cm332-bench-preview').count(), { timeout: 5000 }).toBeGreaterThan(0);
+  await expect(substitutionStatus).toContainText(/\d+ of \d+ substitutions remaining/);
+  const statusBefore = (await substitutionStatus.textContent()) || '';
+  const remainingBefore = statusBefore.match(/(\d+) of (\d+) substitutions remaining/);
+  expect(remainingBefore).not.toBeNull();
 
   const subGeometry = await page.evaluate(() => {
     const columns=[...document.querySelectorAll('.v2-sub-column')];
@@ -183,7 +188,7 @@ test('Match Centre V4 delivers CM-style event focus with stable match controls',
   await replacement.click();
   await expect(confirm).toBeEnabled();
   await confirm.click();
-  await expect(page.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
+  await expect(substitutionStatus).toContainText(`${Number(remainingBefore[1]) - 1} of ${remainingBefore[2]} substitutions remaining`);
 
   // Close the management screen, resume through the V4 halftime bridge and prove play continues.
   await page.locator('.flm-match-dialog [data-close-manager]').first().click();
