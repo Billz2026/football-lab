@@ -1,8 +1,9 @@
-export const COMMENTARY_AUTHORITATIVE_ROW_HOST_VERSION='1.0.0';
+export const COMMENTARY_AUTHORITATIVE_ROW_HOST_VERSION='1.0.1';
 
 const AUTHORITATIVE_VERSION='2.0.0';
 const STRUCTURED_TYPES=new Set(['goal','save','woodwork','miss']);
-let queued=false;
+const NATIVE_RENDER_GRACE_MS=900;
+let timer=0;
 
 function minuteOfRow(row){
   return parseInt(String(row?.querySelector?.('b')?.textContent||''),10)||0;
@@ -60,7 +61,7 @@ function ensureRows(live,snapshot){
 }
 
 function sync(){
-  queued=false;
+  timer=0;
   const snapshot=window.__flmStructuredCommentaryV2||window.__flmLiveStateV332;
   if(!snapshot)return;
   let changed=false;
@@ -72,17 +73,15 @@ function sync(){
 }
 
 function queue(){
-  if(queued)return;
-  queued=true;
-  requestAnimationFrame(sync);
+  if(timer)return;
+  // The engine publishes its structured state before the native live view has
+  // finished appending event lines. Give that renderer first refusal, then fill
+  // only any remaining four-beat deficit. This prevents duplicate commentary.
+  timer=setTimeout(sync,NATIVE_RENDER_GRACE_MS);
 }
 
 if(typeof window!=='undefined'&&typeof document!=='undefined'){
   window.addEventListener('flm:live-state-v332',queue);
-  new MutationObserver(queue).observe(document.documentElement,{
-    childList:true,
-    subtree:true
-  });
   queue();
   window.FLMCommentaryAuthoritativeRowHost=Object.freeze({
     version:COMMENTARY_AUTHORITATIVE_ROW_HOST_VERSION,
