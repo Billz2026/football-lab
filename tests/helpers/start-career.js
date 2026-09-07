@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 
-export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firstName='Test',lastName='Manager',experience='professional'}={}){
+export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firstName='Test',lastName='Manager',experience='professional',dismissAppointment=true}={}){
   await page.getByRole('button',{name:'START NEW GAME',exact:true}).click();
 
   await expect(page.locator('[data-manager-setup-v064="identity"]')).toBeVisible();
@@ -17,4 +17,16 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   await expect(clubs.first()).toBeVisible();
   await clubs.nth(clubIndex).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+
+  // The appointment experience is a legitimate post-onboarding modal. Matchday
+  // tests are not appointment-media tests, so dismiss it deliberately before
+  // interacting with the career shell. This prevents the modal backdrop from
+  // intercepting Squad/Matchday clicks while still exercising the real start flow.
+  if(dismissAppointment){
+    const appointment=page.locator('#appModal.flm-appointment-open');
+    if(await appointment.isVisible({timeout:2500}).catch(()=>false)){
+      await appointment.locator('[data-close-modal]').first().click();
+      await expect(appointment).toBeHidden({timeout:3000});
+    }
+  }
 }
