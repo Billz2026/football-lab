@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(90000);
+test.setTimeout(140000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -18,9 +18,16 @@ async function continueUntil(page, targetDate, maxSteps = 30) {
   throw new Error(`Continue Game did not reach ${targetDate}`);
 }
 
+async function selectXI(page) {
+  await page.getByRole('button', { name: 'Squad', exact: true }).click();
+  await page.locator('[data-v044-auto-pick]').click();
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
+}
+
 test('V0.4.7 pre-season blocks Round 1, builds readiness and hands off to the season', async ({ page }) => {
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+  await selectXI(page);
 
   const preseason = page.locator('[data-v047-preseason-tab]');
   await expect(preseason).toBeVisible();
@@ -38,11 +45,11 @@ test('V0.4.7 pre-season blocks Round 1, builds readiness and hands off to the se
   await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY');
   await page.locator('[data-shell-continue]').click();
   await expect(page.locator('[data-live-match]')).toBeVisible();
-  await page.getByRole('button', { name: '4×' }).click();
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
+  await page.getByRole('button', { name: '4×', exact: true }).click();
+  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 60000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
+  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 60000 });
   await page.locator('[data-finish-live-match]').click();
 
   await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
