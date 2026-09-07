@@ -44,6 +44,7 @@ test('La Liga registry target agrees with the locked import manifest', () => {
   assert.equal(registry.countryCode, 'ESP');
   assert.equal(registry.season, manifest.snapshotSeason);
   assert.equal(registry.expectedClubCount, manifestLeague.clubs.length);
+  assert.equal(registry.externalIds.apiFootball, 140);
   assert.equal(registry.importStatus, 'pending');
 });
 
