@@ -30,6 +30,8 @@ export const FRIENDLY_SUBSTITUTION_LIMIT = 11;
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const round2 = value => Math.round(Number(value || 0) * 100) / 100;
+const liveStructuredHistory = new Map();
+const liveInitialLineups = new Map();
 
 function fixtureForState(career = {}, state = {}) {
   const fixture = (career.fixtures || []).flat().find(item => item?.id === state.fixtureId);
@@ -163,30 +165,42 @@ function cloneStructuredEvent(event) {
   };
 }
 
-function eventSequenceId(event) {
-  return event?.attack?.sequenceId || event?.flow?.sequenceId || null;
+function eventStorageKey(event) {
+  if (event?.attack?.sequenceId) return `attack:${event.attack.sequenceId}`;
+  if (event?.flow?.sequenceId) return `flow:${event.flow.sequenceId}`;
+  return null;
 }
 
-function publishLiveState(state, emittedEvents = []) {
+function resetLiveFixtureHistory(state) {
+  liveStructuredHistory.set(state.fixtureId, []);
+  liveInitialLineups.set(state.fixtureId, {
+    home: [...(state.homeLineupIds || [])],
+    away: [...(state.awayLineupIds || [])]
+  });
+  if (liveStructuredHistory.size > 8) {
+    const oldest = liveStructuredHistory.keys().next().value;
+    liveStructuredHistory.delete(oldest);
+    liveInitialLineups.delete(oldest);
+  }
+}
+
+function publishLiveState(state, emittedEvents = [], reset = false) {
   if (typeof window === 'undefined' || !state?.fixtureId) return;
-  const existing = window.__flmLiveStateV332;
-  const sameFixture = existing?.fixtureId === state.fixtureId;
-  const events = sameFixture && Array.isArray(existing?.events) ? [...existing.events] : [];
-  const seen = new Set(events.map(eventSequenceId).filter(Boolean));
+  if (reset || !liveStructuredHistory.has(state.fixtureId)) resetLiveFixtureHistory(state);
+
+  const history = liveStructuredHistory.get(state.fixtureId);
+  const seen = new Set(history.map(eventStorageKey).filter(Boolean));
   for (const event of emittedEvents || []) {
-    const sequenceId = eventSequenceId(event);
-    if (!sequenceId || seen.has(sequenceId)) continue;
-    events.push(cloneStructuredEvent(event));
-    seen.add(sequenceId);
+    const storageKey = eventStorageKey(event);
+    if (!storageKey || seen.has(storageKey)) continue;
+    history.push(cloneStructuredEvent(event));
+    seen.add(storageKey);
   }
 
-  const initialHomeLineupIds = sameFixture && Array.isArray(existing?.initialHomeLineupIds)
-    ? [...existing.initialHomeLineupIds]
-    : [...(state.homeLineupIds || [])];
-  const initialAwayLineupIds = sameFixture && Array.isArray(existing?.initialAwayLineupIds)
-    ? [...existing.initialAwayLineupIds]
-    : [...(state.awayLineupIds || [])];
-
+  const initial = liveInitialLineups.get(state.fixtureId) || {
+    home: [...(state.homeLineupIds || [])],
+    away: [...(state.awayLineupIds || [])]
+  };
   const snapshot = {
     fixtureId: state.fixtureId,
     minute: Number(state.minute || 0),
@@ -197,13 +211,13 @@ function publishLiveState(state, emittedEvents = []) {
     awayGoals: Number(state.awayGoals || 0),
     homeLineupIds: [...(state.homeLineupIds || [])],
     awayLineupIds: [...(state.awayLineupIds || [])],
-    initialHomeLineupIds,
-    initialAwayLineupIds,
+    initialHomeLineupIds: [...initial.home],
+    initialAwayLineupIds: [...initial.away],
     ratings: { ...(state.ratings || {}) },
     conditions: { ...(state.conditions || {}) },
     minutesPlayed: { ...(state.minutesPlayed || {}) },
     subbedOffIds: [...(state.subbedOffIds || [])],
-    events,
+    events: history.map(cloneStructuredEvent),
     structuredCommentarySnapshotVersion: '3.0.0',
     source: 'matchday-engine-v069'
   };
@@ -243,7 +257,7 @@ export function createInteractiveMatch(career, db) {
   state.matchDrama ||= { version: MATCH_DRAMA_ENGINE_VERSION, serial: 0, counts: {}, atmosphere: [] };
   state.matchDrama.version = MATCH_DRAMA_ENGINE_VERSION;
   publishLiveXg(state);
-  publishLiveState(state, []);
+  publishLiveState(state, [], true);
   return state;
 }
 
