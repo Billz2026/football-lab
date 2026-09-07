@@ -11,12 +11,15 @@ on:
         description: 'Number of La Liga clubs to stage this run'
         required: true
         default: '20'
+  push:
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
   stage:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '(#126)') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
