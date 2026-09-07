@@ -82,12 +82,14 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
 
   const live = page.locator('[data-live-match]');
+  const shell = live.locator('.cm4-shell');
   await expect(live).toHaveAttribute('data-cm-match-v2', '1');
+  await expect(live).toHaveAttribute('data-cm4', '1');
   await expect(page.locator('.flm-cm-v2-tabs [data-cm-v2-view]')).toHaveCount(4);
   await expect(page.locator('.flm-cm-v2-focus')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'PAUSE MATCH', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'MAKE SUB', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'TACTICS', exact: true }).last()).toBeVisible();
+  await expect(shell.locator('[data-cm4-pause]')).toBeVisible();
+  await expect(shell.locator('[data-cm4-subs]')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Tactics', exact: true }).last()).toBeVisible();
 
   const typography = await page.locator('.flm-cm-v2-focus').evaluate(node => {
     const text = node.querySelector('.flm-cm-v2-text');
@@ -97,7 +99,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   expect(typography.fontFamily.toLowerCase()).toContain('tahoma');
   expect(typography.fontSize).toBeGreaterThanOrEqual(24);
 
-  await page.getByRole('button', { name: '4×', exact: true }).click();
+  await shell.locator('[data-cm4-speed="4"]').click();
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(5);
   const colouredPassages = await page.locator('[data-commentary-feed] .flm-commentary-line[data-cm-side="home"], [data-commentary-feed] .flm-commentary-line[data-cm-side="away"]').count();
   expect(colouredPassages).toBeGreaterThan(0);
@@ -110,11 +112,11 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   expect(teamColours.home).not.toBe(teamColours.away);
 
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 60000 });
-  await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
   await page.waitForTimeout(300);
-  await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
 
-  await page.getByRole('button', { name: 'MAKE SUB', exact: true }).click();
+  await shell.locator('[data-cm4-subs]').click();
   await expect(page.locator('.v2-sub-shell')).toBeVisible();
   const confirm = page.locator('[data-apply-sub]');
   await expect(confirm).toHaveText('CONFIRM SUBSTITUTION');
@@ -143,9 +145,9 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await page.locator('[data-close-manager]').last().click();
 
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 60000 });
-  await expect(page.locator('[data-match-status]')).toHaveText('FULL TIME');
-  await expect(page.locator('[data-finish-live-match]')).toBeVisible();
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 60000 });
+  await expect(live).toHaveClass(/is-full-time/);
+  await expect(live.locator('[data-v068-ft-continue]')).toBeVisible();
 });
 
 test('quick start launches Arsenal and mobile navigation remains usable', async ({ page }) => {
