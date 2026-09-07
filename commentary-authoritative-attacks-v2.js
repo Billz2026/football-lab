@@ -3,6 +3,7 @@ export const AUTHORITATIVE_ATTACK_COMMENTARY_VERSION='2.0.0';
 const clean=value=>String(value||'').replace(/\s+/g,' ').trim();
 const upper=value=>clean(value||'').toUpperCase();
 const memories=new WeakMap();
+const liveObservers=new WeakMap();
 let queued=false;
 let dbPromise=null;
 
@@ -406,21 +407,54 @@ function sync(){
 
 function queue(){if(queued)return;queued=true;requestAnimationFrame(sync);}
 
-function relevantMutation(mutation){
-  const target=mutation.target?.nodeType===1?mutation.target:mutation.target?.parentElement;
-  if(target?.closest?.('[data-commentary-feed],.flm-goal-flash'))return true;
-  for(const node of mutation.addedNodes||[]){
-    if(node?.nodeType!==1)continue;
-    if(node.matches?.('.flm-live-match,[data-live-match],[data-commentary-feed],.flm-commentary-line,.flm-goal-flash'))return true;
-    if(node.querySelector?.('[data-live-match],[data-commentary-feed],.flm-commentary-line,.flm-goal-flash'))return true;
+function bindFeedObserver(live,state){
+  if(!live?.isConnected)return;
+  const feed=live.querySelector('[data-commentary-feed]');
+  if(feed===state.feed)return;
+  state.feedObserver?.disconnect();
+  state.feed=feed||null;
+  state.feedObserver=null;
+  if(!feed)return;
+  const observer=new MutationObserver(()=>queue());
+  observer.observe(feed,{childList:true,subtree:true,characterData:true});
+  state.feedObserver=observer;
+  queue();
+}
+
+function observeLive(live){
+  if(!live?.isConnected)return;
+  let state=liveObservers.get(live);
+  if(state){bindFeedObserver(live,state);return;}
+  state={feed:null,feedObserver:null,shellObserver:null};
+  const shellObserver=new MutationObserver(mutations=>{
+    if(mutations.some(mutation=>mutation.addedNodes.length||mutation.removedNodes.length))bindFeedObserver(live,state);
+  });
+  shellObserver.observe(live,{childList:true,subtree:true});
+  state.shellObserver=shellObserver;
+  liveObservers.set(live,state);
+  bindFeedObserver(live,state);
+  queue();
+}
+
+function discoverLives(nodes=null){
+  if(!nodes){
+    for(const live of document.querySelectorAll('.flm-live-match,[data-live-match]'))observeLive(live);
+    return;
   }
-  return false;
+  for(const node of nodes){
+    if(node?.nodeType!==1)continue;
+    if(node.matches?.('.flm-live-match,[data-live-match]'))observeLive(node);
+    for(const live of node.querySelectorAll?.('.flm-live-match,[data-live-match]')||[])observeLive(live);
+  }
 }
 
 if(typeof window!=='undefined'&&typeof document!=='undefined'){
+  discoverLives();
+  // The document observer only discovers live-match mounts. Expensive character-data
+  // tracking is scoped to the commentary feed, keeping the engine clock independent.
+  new MutationObserver(mutations=>{
+    for(const mutation of mutations)if(mutation.addedNodes.length)discoverLives(mutation.addedNodes);
+  }).observe(document.documentElement,{childList:true,subtree:true});
   queue();
-  // Only commentary/goal-flash mutations can request a pass. Structured sequences are
-  // processed once, so the cost does not grow with every unrelated Match Centre update.
-  new MutationObserver(mutations=>{if(mutations.some(relevantMutation))queue();}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
   window.FLMCommentaryAuthoritativeAttacksV2=Object.freeze({version:AUTHORITATIVE_ATTACK_COMMENTARY_VERSION,refresh:queue});
 }
