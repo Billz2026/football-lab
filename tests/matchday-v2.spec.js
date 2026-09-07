@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { startCareerThroughCurrentOnboarding } from './helpers/start-career.js';
 
 test.setTimeout(150000);
 
@@ -40,9 +41,7 @@ async function completePreseason(page) {
 }
 
 test('Match Centre V4 delivers CM-style event focus with stable match controls', async ({ page }) => {
-  await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
-  await page.locator('[data-start-club]').first().click();
+  await startCareerThroughCurrentOnboarding(page);
   await selectXI(page);
   await completePreseason(page);
 
