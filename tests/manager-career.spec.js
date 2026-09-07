@@ -73,9 +73,8 @@ test('squad and tactics remain manager-controlled and position-aware', async ({ 
 });
 
 test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvious', async ({ page }) => {
-  await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
-  await page.locator('[data-start-club]').first().click();
+  await page.getByRole('button', { name: /QUICK START/ }).click();
+  await expect(page.locator('.career-app')).toHaveClass(/is-open/);
   await autoPickOptionalXI(page);
   await completePreseason(page);
 
