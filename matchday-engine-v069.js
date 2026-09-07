@@ -285,7 +285,11 @@ export function advanceInteractiveMatch(inputState, career, db) {
 
 export function completeInteractiveRound(career, inputState, db) {
   const result = base.completeInteractiveRound(career, inputState, db);
-  clearLiveFixtureHistory(inputState?.fixtureId);
+  const fixtureId = inputState?.fixtureId;
+  clearLiveFixtureHistory(fixtureId);
+  if (typeof window !== 'undefined' && fixtureId) {
+    try { window.dispatchEvent(new CustomEvent('flm:live-state-complete', { detail: { fixtureId } })); } catch (_) {}
+  }
   return result;
 }
 
