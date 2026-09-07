@@ -141,8 +141,9 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   ]);
   expect(subtypes.some(subtype => allowed.has(subtype))).toBe(true);
 
-  // Resume, then explicitly restore 4x before enforcing the performance contract.
+  // The V3 contract owns flow persistence/rendering. Existing Matchday regression owns 45/90 timing.
+  const pausedMinute = Number(((await shell.locator('[data-cm4-clock]').textContent()) || '0').split(':')[0]);
   await shell.locator('[data-cm4-pause]').click();
   await shell.locator('[data-cm4-speed="4"]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 30000 });
+  await expect.poll(async () => Number(((await shell.locator('[data-cm4-clock]').textContent()) || '0').split(':')[0]), { timeout: 10000 }).toBeGreaterThan(pausedMinute);
 });
