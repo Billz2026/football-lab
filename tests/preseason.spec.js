@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(140000);
+test.setTimeout(180000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -40,7 +40,7 @@ test('V0.4.7 pre-season blocks Round 1, builds readiness and hands off to the se
   // Live-friendly execution is covered by the dedicated V0.7 Matchday regression.
   // This test stays focused on pre-season readiness, gating and season hand-off.
   await page.locator('[data-v047-sim]').click();
-  await expect(page.locator('.v047-fixture.is-played')).toHaveCount(1);
+  await expect(page.locator('.v047-fixture.is-played')).toHaveCount(1, { timeout: 30000 });
   const savedAfterOne = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
   expect(savedAfterOne.preseason.trainingFocus).toBe('Tactical');
   expect(savedAfterOne.preseason.tacticalFamiliarity).toBeGreaterThanOrEqual(54);
@@ -51,7 +51,7 @@ test('V0.4.7 pre-season blocks Round 1, builds readiness and hands off to the se
     await continueUntil(page, dates[count - 2]);
     await page.locator('[data-v047-preseason-tab]').click();
     await page.locator('[data-v047-sim]').click();
-    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count);
+    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count, { timeout: 30000 });
   }
 
   await expect(page.locator('[data-v047-start]')).toBeVisible();

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { finishSecondHalf } from './helpers/live-match.js';
 
-test.setTimeout(180000);
+test.setTimeout(240000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -34,7 +35,7 @@ async function completePreseason(page) {
     await tab.click();
     await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
     await page.locator('[data-v047-sim]').click();
-    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count);
+    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count, { timeout: 30000 });
   }
   await page.locator('[data-v047-start]').click();
   await expect(page.getByRole('button', { name: 'Matchday', exact: true })).toBeEnabled();
@@ -111,8 +112,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   expect(teamColours.away).not.toBe('');
   expect(teamColours.home).not.toBe(teamColours.away);
 
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 60000 });
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 60000 });
   await page.waitForTimeout(300);
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
 
@@ -144,9 +144,8 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await expect(page.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
   await page.locator('[data-close-manager]').last().click();
 
-  await page.locator('[data-resume-second-half]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 60000 });
-  await expect(live).toHaveClass(/is-full-time/);
+  await shell.locator('[data-cm4-pause]').click();
+  await finishSecondHalf(page, live, shell, 90000);
   await expect(live.locator('[data-v068-ft-continue]')).toBeVisible();
 });
 

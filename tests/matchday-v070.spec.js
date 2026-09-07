@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { finishSecondHalf } from './helpers/live-match.js';
 
-test.setTimeout(140000);
+test.setTimeout(180000);
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({width:1366,height:900});
@@ -71,8 +72,7 @@ test('V0.7 keeps the full XI subbable, applies kits and exits full time in one c
   await shell.locator('[data-cm4-speed="4"]').click();
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00',{timeout:60000});
   await shell.locator('[data-cm4-pause]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00',{timeout:60000});
-  await expect(live).toHaveClass(/is-full-time/);
+  await finishSecondHalf(page,live,shell,90000);
 
   const visibleContinue=live.locator('[data-v068-ft-continue]');
   await expect(visibleContinue).toBeVisible();

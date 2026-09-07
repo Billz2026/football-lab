@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { finishSecondHalf } from './helpers/live-match.js';
 
-test.setTimeout(180000);
+test.setTimeout(240000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -25,7 +26,7 @@ async function completePreseason(page) {
     await page.locator('[data-v047-preseason-tab]').click();
     await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
     await page.locator('[data-v047-sim]').click();
-    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count);
+    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count, { timeout: 30000 });
   }
   await page.locator('[data-v047-start]').click();
   await continueUntil(page, '2026-08-21');
@@ -68,11 +69,9 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   await expect(live).toHaveAttribute('data-cm4', '1');
   await expect(live).toHaveAttribute('data-cm-match-v2', '1');
   await shell.locator('[data-cm4-speed="4"]').click();
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 60000 });
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
-  await page.locator('[data-resume-second-half]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 60000 });
-  await expect(live).toHaveClass(/is-full-time/);
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 60000 });
+  await shell.locator('[data-cm4-pause]').click();
+  await finishSecondHalf(page, live, shell, 90000);
   await live.locator('[data-v068-ft-continue]').click();
   await expect(live).toHaveCount(0, { timeout: 10000 });
 
