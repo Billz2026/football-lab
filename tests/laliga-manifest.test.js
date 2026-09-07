@@ -22,7 +22,7 @@ test('La Liga manifest locks the authoritative 20-club 2026/27 membership', () =
   assert.equal(league.clubs.length, 20);
   assert.deepEqual(
     league.clubs.map(club => club.officialName).sort((a,b) => a.localeCompare(b)),
-    official2026.sort((a,b) => a.localeCompare(b))
+    [...official2026].sort((a,b) => a.localeCompare(b))
   );
 });
 
@@ -30,8 +30,10 @@ test('La Liga canonical names and provider aliases are collision-free inside eac
   const clubs = manifest.leagues.find(item => item.id === 'esp-la-liga').clubs;
   assert.equal(new Set(clubs.map(club => norm(club.name))).size, 20);
   for (const club of clubs) {
-    const tokens = [club.name, club.officialName, ...club.aliases].map(norm).filter(Boolean);
-    assert.equal(new Set(tokens).size, tokens.length, `${club.name} has duplicate normalized aliases`);
+    const protectedNames = new Set([norm(club.name), norm(club.officialName)].filter(Boolean));
+    const aliases = club.aliases.map(norm).filter(Boolean);
+    assert.equal(new Set(aliases).size, aliases.length, `${club.name} has duplicate aliases`);
+    assert.equal(aliases.every(alias => !protectedNames.has(alias)), true, `${club.name} alias duplicates canonical/official name`);
   }
 });
 
