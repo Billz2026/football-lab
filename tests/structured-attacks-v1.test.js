@@ -9,6 +9,12 @@ import {
   structuredXgFor
 } from '../matchday-structured-attacks-v1.js';
 import {
+  AUTHORITATIVE_ATTACK_COMMENTARY_VERSION,
+  attackNarrativeContext,
+  createAuthoritativeAttackMemory,
+  renderAuthoritativeAttackLines
+} from '../commentary-authoritative-attacks-v2.js';
+import {
   advanceInteractiveMatch as legacyAdvance,
   createInteractiveMatch as legacyCreate
 } from '../matchday-engine-v0431.js';
@@ -128,4 +134,84 @@ test('every generated shot outcome carries a deterministic four-beat attack sequ
   const secondDigest=second.events.filter(event=>shotTypes.has(event.type)).map(event=>({type:event.type,minute:event.minute,sequenceId:event.sequenceId,attack:event.attack,lines:event.lines}));
   assert.deepEqual(firstDigest,secondDigest);
   assert.equal(first.state.xgModel.method,'structured-shot-context');
+});
+
+test('authoritative renderer uses structured creator, shot and goalkeeper facts instead of generic shot prose',()=>{
+  const event={
+    minute:67,
+    type:'save',
+    clubId:'club-1',
+    playerId:'club-1-player-10',
+    assistPlayerId:'club-1-player-8',
+    finishType:'normal',
+    attack:{
+      version:STRUCTURED_ATTACK_VERSION,
+      sequenceId:'authoritative-save-1',
+      delivery:'low_cross',
+      side:'right',
+      zoneFrom:'central_box',
+      firstTime:true,
+      pressure:'high',
+      subtype:'first_time',
+      bodyPart:'left_foot',
+      distance:9,
+      angle:'central',
+      outcome:'saved_parried',
+      opponentClubId:'club-2',
+      opponentPlayerId:'club-2-player-1',
+      scoreBefore:{home:0,away:0},
+      scoreAfter:{home:0,away:0},
+      contextTags:[],
+      beats:[{phase:'buildup'},{phase:'penetration'},{phase:'attempt'},{phase:'outcome'}]
+    }
+  };
+  const snapshot={homeClubId:'club-1',awayClubId:'club-2',events:[event]};
+  const lines=renderAuthoritativeAttackLines({event,db,snapshot,memory:createAuthoritativeAttackMemory()});
+  const text=lines.join(' ');
+  assert.equal(AUTHORITATIVE_ATTACK_COMMENTARY_VERSION,'2.0.0');
+  assert.equal(lines.length,4);
+  assert.match(text,/Club 1 Player 8/);
+  assert.match(text,/Club 1 Player 10/);
+  assert.match(text,/Club 2 Player 1/);
+  assert.match(text,/low cross|drives the ball hard across/i);
+  assert.match(text,/first time|first-time/i);
+  assert.match(text,/parr/i);
+  assert.doesNotMatch(text,/gets the shot away|sees the opening and lets fly|takes aim from here/i);
+});
+
+test('authoritative goal context recognises a 90th-minute winner before choosing the final call',()=>{
+  const event={
+    minute:90,
+    type:'goal',
+    clubId:'club-1',
+    playerId:'club-1-player-10',
+    assistPlayerId:'club-1-player-8',
+    finishType:'volley',
+    attack:{
+      version:STRUCTURED_ATTACK_VERSION,
+      sequenceId:'late-winner-1',
+      delivery:'cutback',
+      side:'left',
+      zoneFrom:'central_box',
+      firstTime:true,
+      pressure:'medium',
+      subtype:'volley',
+      bodyPart:'right_foot',
+      distance:11,
+      angle:'central',
+      outcome:'goal',
+      opponentClubId:'club-2',
+      opponentPlayerId:'club-2-player-1',
+      scoreBefore:{home:1,away:1},
+      scoreAfter:{home:2,away:1},
+      contextTags:[],
+      beats:[{phase:'buildup'},{phase:'penetration'},{phase:'attempt'},{phase:'outcome'}]
+    }
+  };
+  const snapshot={homeClubId:'club-1',awayClubId:'club-2',events:[event]};
+  const context=attackNarrativeContext(event,event.attack,snapshot);
+  assert.ok(context.tags.includes('late-winner'));
+  const lines=renderAuthoritativeAttackLines({event,db,snapshot,memory:createAuthoritativeAttackMemory()});
+  assert.match(lines.at(-1),/WON IT AT THE DEATH/i);
+  assert.match(lines.join(' '),/volley/i);
 });
