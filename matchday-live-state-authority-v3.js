@@ -13,12 +13,42 @@ function isAuthoritative(value) {
     && value.structuredCommentarySnapshotVersion === MATCHDAY_LIVE_STATE_AUTHORITY_VERSION;
 }
 
-function publishAuthorityStatus(fixtureId, rejectedLegacyWrites) {
+function sequenceIdFor(event) {
+  return event?.attack?.sequenceId || event?.flow?.sequenceId || null;
+}
+
+function mergeAuthoritativeSnapshots(previous, next) {
+  if (!isAuthoritative(previous) || previous.fixtureId !== next.fixtureId) return next;
+
+  const orderedIds = [];
+  const byId = new Map();
+  const unkeyed = [];
+
+  for (const event of [...(previous.events || []), ...(next.events || [])]) {
+    const sequenceId = sequenceIdFor(event);
+    if (!sequenceId) {
+      unkeyed.push(event);
+      continue;
+    }
+    if (!byId.has(sequenceId)) orderedIds.push(sequenceId);
+    byId.set(sequenceId, event);
+  }
+
+  return {
+    ...next,
+    initialHomeLineupIds: next.initialHomeLineupIds || previous.initialHomeLineupIds,
+    initialAwayLineupIds: next.initialAwayLineupIds || previous.initialAwayLineupIds,
+    events: [...orderedIds.map(id => byId.get(id)), ...unkeyed]
+  };
+}
+
+function publishAuthorityStatus(fixtureId, rejectedLegacyWrites, structuredEventCount) {
   window.__flmLiveStateAuthorityV3 = {
     version: MATCHDAY_LIVE_STATE_AUTHORITY_VERSION,
     source: AUTH_SOURCE,
     fixtureId: fixtureId || null,
-    rejectedLegacyWrites
+    rejectedLegacyWrites,
+    structuredEventCount: Number(structuredEventCount || 0)
   };
 }
 
@@ -42,16 +72,16 @@ function installLiveStateAuthority() {
     },
     set(next) {
       if (isAuthoritative(next)) {
-        current = next;
+        current = mergeAuthoritativeSnapshots(current, next);
         authorityClaimed = true;
-        lockedFixtureId = next.fixtureId || lockedFixtureId;
-        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites);
+        lockedFixtureId = current.fixtureId || lockedFixtureId;
+        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current.events?.length);
         return;
       }
 
       if (authorityClaimed) {
         rejectedLegacyWrites += 1;
-        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites);
+        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length);
         return;
       }
 
@@ -62,7 +92,7 @@ function installLiveStateAuthority() {
     }
   });
 
-  if (authorityClaimed) publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites);
+  if (authorityClaimed) publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length);
 }
 
 installLiveStateAuthority();
