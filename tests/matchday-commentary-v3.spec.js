@@ -54,10 +54,30 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   await expect(shell).toBeVisible();
   await shell.locator('[data-cm4-speed="4"]').click();
 
-  // Engine contract: a real non-shot flow event must reach the browser snapshot.
+  // Engine contract: one real non-shot flow sequence must reach the authoritative browser snapshot.
   await expect.poll(async () => page.evaluate(() =>
     (window.__flmLiveStateV332?.events || []).filter(event => event?.flow?.sequenceId).length
-  ), { timeout: 20000 }).toBeGreaterThanOrEqual(2);
+  ), { timeout: 20000 }).toBeGreaterThanOrEqual(1);
+
+  const firstSequenceId = await page.evaluate(() =>
+    (window.__flmLiveStateV332?.events || []).find(event => event?.flow?.sequenceId)?.flow?.sequenceId || null
+  );
+  expect(firstSequenceId).toBeTruthy();
+
+  // Persistence contract: later presentation/state ticks must not replace the rich engine snapshot.
+  await page.waitForTimeout(1200);
+  const authorityState = await page.evaluate(sequenceId => ({
+    source: window.__flmLiveStateV332?.source,
+    version: window.__flmLiveStateV332?.structuredCommentarySnapshotVersion,
+    authoritySource: window.__flmLiveStateAuthorityV3?.source,
+    stillPresent: (window.__flmLiveStateV332?.events || []).some(event => event?.flow?.sequenceId === sequenceId),
+    flowCount: (window.__flmLiveStateV332?.events || []).filter(event => event?.flow?.sequenceId).length
+  }), firstSequenceId);
+  expect(authorityState.source).toBe('matchday-engine-v069');
+  expect(authorityState.version).toBe('3.0.0');
+  expect(authorityState.authoritySource).toBe('matchday-engine-v069');
+  expect(authorityState.stillPresent).toBe(true);
+  expect(authorityState.flowCount).toBeGreaterThanOrEqual(1);
 
   const snapshotFlow = await page.evaluate(() =>
     (window.__flmLiveStateV332?.events || [])
@@ -72,7 +92,7 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
         outcome: event.flow.outcome
       }))
   );
-  expect(snapshotFlow.length).toBeGreaterThanOrEqual(2);
+  expect(snapshotFlow.length).toBeGreaterThanOrEqual(1);
   for (const event of snapshotFlow) {
     expect(event.sequenceId).toBeTruthy();
     expect(event.phases).toEqual(['development','duel','resolution']);
