@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 
-async function currentUserInjuryPause(page) {
+async function currentActivePause(page) {
   return page.evaluate(() => {
     const live = document.querySelector('[data-live-match]');
     const snapshot = window.__flmLiveStateV332;
@@ -14,10 +14,23 @@ async function currentUserInjuryPause(page) {
       : snapshot.awayLineupIds;
     const injury = [...(snapshot.events || [])]
       .reverse()
-      .find(event => event?.type === 'injury' && event?.playerId && userLineup?.includes(event.playerId));
+      .find(event => event?.type === 'injury' && event?.playerId);
 
-    return injury ? { playerId: injury.playerId, minute: Number(snapshot.minute || 0) } : null;
+    return {
+      minute: Number(snapshot.minute || 0),
+      userInjury: injury && userLineup?.includes(injury.playerId)
+        ? { playerId: injury.playerId }
+        : null
+    };
   });
+}
+
+async function resumeShortHandedIfNeeded(page, shell) {
+  const notice = page.getByText('No substitutes available. You must continue short-handed.', { exact: false }).last();
+  if (!(await notice.count())) return false;
+  if (!(await notice.isVisible().catch(() => false))) return false;
+  await shell.locator('[data-cm4-speed="4"]').click();
+  return true;
 }
 
 async function replaceInjuredPlayer(page, shell, injury) {
@@ -36,6 +49,14 @@ async function replaceInjuredPlayer(page, shell, injury) {
   await outgoing.click();
 
   const incoming = dialog.locator('[data-v2-in-list] .v2-sub-player:not(:disabled)').first();
+  if (!(await incoming.count())) {
+    if (await dialog.isVisible()) {
+      await dialog.locator('[data-close-manager]').first().click();
+    }
+    await shell.locator('[data-cm4-speed="4"]').click();
+    return;
+  }
+
   await expect(incoming).toBeEnabled();
   await incoming.click();
 
@@ -49,27 +70,44 @@ async function replaceInjuredPlayer(page, shell, injury) {
   await shell.locator('[data-cm4-speed="4"]').click();
 }
 
-export async function finishSecondHalf(page, live, shell, timeout = 90000) {
+async function runMatchToClock(page, live, shell, targetClock, timeout) {
   await shell.locator('[data-cm4-speed="4"]').click();
   const deadline = Date.now() + timeout;
 
   while (Date.now() < deadline) {
-    const fullTime = await live.evaluate(node => node.classList.contains('is-full-time'));
     const clock = String(await shell.locator('[data-cm4-clock]').textContent() || '').trim();
-    if (fullTime || clock === '90:00') {
-      await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00');
-      await expect(live).toHaveClass(/is-full-time/);
-      return;
+    if (clock === targetClock) return;
+
+    if (await resumeShortHandedIfNeeded(page, shell)) {
+      await page.waitForTimeout(250);
+      continue;
     }
 
-    const injury = await currentUserInjuryPause(page);
-    if (injury) {
-      await replaceInjuredPlayer(page, shell, injury);
+    const pause = await currentActivePause(page);
+    if (pause?.userInjury) {
+      await replaceInjuredPlayer(page, shell, pause.userInjury);
+      continue;
+    }
+    if (pause) {
+      await shell.locator('[data-cm4-speed="4"]').click();
+      await page.waitForTimeout(250);
       continue;
     }
 
     await page.waitForTimeout(250);
   }
 
-  throw new Error(`Match did not reach full time within ${timeout}ms`);
+  const current = String(await shell.locator('[data-cm4-clock]').textContent() || '').trim();
+  throw new Error(`Match did not reach ${targetClock} within ${timeout}ms (stopped at ${current})`);
+}
+
+export async function reachHalfTime(page, live, shell, timeout = 90000) {
+  await runMatchToClock(page, live, shell, '45:00', timeout);
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
+}
+
+export async function finishSecondHalf(page, live, shell, timeout = 90000) {
+  await runMatchToClock(page, live, shell, '90:00', timeout);
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00');
+  await expect(live).toHaveClass(/is-full-time/);
 }

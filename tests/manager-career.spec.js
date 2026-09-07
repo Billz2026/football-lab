@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { finishSecondHalf } from './helpers/live-match.js';
+import { finishSecondHalf, reachHalfTime } from './helpers/live-match.js';
 
 test.setTimeout(240000);
 
@@ -112,7 +112,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   expect(teamColours.away).not.toBe('');
   expect(teamColours.home).not.toBe(teamColours.away);
 
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 60000 });
+  await reachHalfTime(page, live, shell, 90000);
   await page.waitForTimeout(300);
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
 

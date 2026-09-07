@@ -18,9 +18,16 @@ async function continueUntil(page, targetDate, maxSteps = 30) {
   throw new Error(`Continue Game did not reach ${targetDate}`);
 }
 
+async function selectXI(page) {
+  await page.getByRole('button', { name: 'Squad', exact: true }).click();
+  await page.locator('[data-v044-auto-pick]').click();
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
+}
+
 test('V0.4.7 pre-season blocks Round 1, builds readiness and hands off to the season', async ({ page }) => {
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+  await selectXI(page);
 
   const preseason = page.locator('[data-v047-preseason-tab]');
   await expect(preseason).toBeVisible();
