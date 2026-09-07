@@ -54,7 +54,6 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   await expect(live).toHaveAttribute('data-cm4', '1');
   await expect(shell).toBeVisible();
 
-  // Wait until the live match has replaced any snapshot left by pre-season simulation.
   await expect.poll(async () => page.evaluate(previous => {
     const fixtureId = window.__flmLiveStateV332?.fixtureId || null;
     return Boolean(fixtureId && fixtureId !== previous);
@@ -64,7 +63,6 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
 
   await shell.locator('[data-cm4-speed="4"]').click();
 
-  // Engine contract: one real non-shot flow sequence from this live fixture must reach the authoritative snapshot.
   await expect.poll(async () => page.evaluate(fixtureId => {
     const snapshot = window.__flmLiveStateV332;
     if (snapshot?.fixtureId !== fixtureId) return 0;
@@ -78,7 +76,6 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   }, liveFixtureId);
   expect(firstSequenceId).toBeTruthy();
 
-  // Persistence contract: later presentation/state ticks must not replace the rich engine snapshot.
   await page.waitForTimeout(1200);
   const authorityState = await page.evaluate(({ fixtureId, sequenceId }) => ({
     fixtureId: window.__flmLiveStateV332?.fixtureId,
@@ -94,6 +91,9 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   expect(authorityState.authoritySource).toBe('matchday-engine-v069');
   expect(authorityState.stillPresent).toBe(true);
   expect(authorityState.flowCount).toBeGreaterThanOrEqual(1);
+
+  // Persistence has already survived later 4x ticks; pause before inspecting metadata to avoid a racing read.
+  await shell.locator('[data-cm4-pause]').click();
 
   const snapshotFlow = await page.evaluate(fixtureId => {
     const snapshot = window.__flmLiveStateV332;
@@ -117,7 +117,6 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
     expect(event.outcome).toBeTruthy();
   }
 
-  // Presentation contract: the three beats must be visible and protected from legacy commentary rewrites.
   const authoritative = page.locator('[data-commentary-feed] .flm-commentary-line[data-fl-authoritative-flow="3.0.0"]');
   await expect.poll(async () => authoritative.count(), { timeout: 15000 }).toBeGreaterThanOrEqual(3);
 
@@ -131,35 +130,19 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   expect(visibleText).toMatch(/tackle|intercept|block|header|claim|press|turnover|offside|second ball|recycle|first touch|delivery|cross/i);
   expect(visibleText).not.toMatch(/move it from side to side|danger passes|gets down the flank and crosses early|closes down aggressively and forces the hurried pass/i);
 
-  const flowDiagnostics = await page.evaluate(fixtureId => {
+  const subtypes = await page.evaluate(fixtureId => {
     const snapshot = window.__flmLiveStateV332;
-    return {
-      fixtureId: snapshot?.fixtureId || null,
-      source: snapshot?.source || null,
-      minute: snapshot?.minute ?? null,
-      flows: snapshot?.fixtureId === fixtureId
-        ? (snapshot.events || []).filter(event => event?.flow?.sequenceId).map(event => ({
-            type: event.type,
-            sequenceId: event.flow.sequenceId,
-            subtype: event.flow.subtype,
-            action: event.flow.action,
-            category: event.flow.category,
-            outcome: event.flow.outcome
-          }))
-        : []
-    };
+    if (snapshot?.fixtureId !== fixtureId) return [];
+    return [...new Set((snapshot.events || []).filter(event => event?.flow?.sequenceId).map(event => event.flow.subtype))];
   }, liveFixtureId);
-  const subtypes = [...new Set(flowDiagnostics.flows.map(event => event.subtype))];
   const allowed = new Set([
     'interception','standing_tackle','sliding_tackle','poor_touch','overhit_pass','forced_back',
     'second_ball_win','blocked_cross','defensive_header','keeper_claim','overhit_cross','press_regain',
     'offside_trap','defensive_header_corner','blocked_cross_corner','last_ditch_block_corner'
   ]);
-  expect(
-    subtypes.some(subtype => allowed.has(subtype)),
-    `Unexpected V3 flow state: ${JSON.stringify(flowDiagnostics)}`
-  ).toBe(true);
+  expect(subtypes.some(subtype => allowed.has(subtype))).toBe(true);
 
-  // Performance contract: V3 commentary must not starve the calibrated match clock.
+  // Resume 4x playback before the performance contract.
+  await shell.locator('[data-cm4-pause]').click();
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 30000 });
 });
