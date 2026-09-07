@@ -1,4 +1,4 @@
-import * as base from './matchday-engine-v0431.js?v=0.4.3.1';
+import * as base from './matchday-structured-attacks-v1.js?v=1.0.0';
 import { applyMatchDrama, MATCH_DRAMA_VERSION } from './match-drama-v3.js?v=3.0.0';
 
 export {
@@ -6,6 +6,8 @@ export {
   MAX_SUBSTITUTIONS,
   ROLE_DEFINITIONS,
   TACTIC_OPTIONS,
+  STRUCTURED_ATTACK_VERSION,
+  STRUCTURED_XG_MODEL,
   assignPlayersToFormation,
   changeTactics,
   getOpponentSnapshot,
@@ -13,10 +15,11 @@ export {
   setPlayerDuty,
   setPlayerRole,
   swapShapePlayers
-} from './matchday-engine-v0431.js?v=0.4.3.1';
+} from './matchday-structured-attacks-v1.js?v=1.0.0';
 
 export const MATCH_RULES_VERSION = '0.7.2';
 export const MATCH_DRAMA_ENGINE_VERSION = MATCH_DRAMA_VERSION;
+export const MATCH_STRUCTURED_ATTACK_VERSION = base.STRUCTURED_ATTACK_VERSION;
 export const PREMIER_LEAGUE_BENCH_LIMIT = 9;
 export const PREMIER_LEAGUE_SUBSTITUTION_LIMIT = 5;
 export const PREMIER_LEAGUE_WINDOW_LIMIT = 3;
@@ -116,6 +119,82 @@ function publishLiveXg(state) {
   try { window.dispatchEvent(new CustomEvent('flm:live-xg', { detail: window.__flmLiveXg })); } catch (_) {}
 }
 
+function cloneStructuredAttack(attack) {
+  if (!attack || typeof attack !== 'object') return null;
+  return {
+    ...attack,
+    scoreBefore: attack.scoreBefore ? { ...attack.scoreBefore } : null,
+    scoreAfter: attack.scoreAfter ? { ...attack.scoreAfter } : null,
+    contextTags: [...(attack.contextTags || [])],
+    beats: (attack.beats || []).map(beat => ({ ...beat }))
+  };
+}
+
+function cloneStructuredEvent(event) {
+  return {
+    minute: event.minute,
+    type: event.type,
+    clubId: event.clubId,
+    playerId: event.playerId,
+    assistPlayerId: event.assistPlayerId,
+    sequenceId: event.sequenceId,
+    phase: event.phase,
+    action: event.action,
+    subtype: event.subtype,
+    outcome: event.outcome,
+    finishType: event.finishType,
+    xg: event.xg,
+    text: event.text,
+    lines: Array.isArray(event.lines) ? [...event.lines] : undefined,
+    attack: cloneStructuredAttack(event.attack)
+  };
+}
+
+function publishLiveState(state, emittedEvents = []) {
+  if (typeof window === 'undefined' || !state?.fixtureId) return;
+  const existing = window.__flmLiveStateV332;
+  const sameFixture = existing?.fixtureId === state.fixtureId;
+  const events = sameFixture && Array.isArray(existing?.events) ? [...existing.events] : [];
+  const seen = new Set(events.map(event => event?.attack?.sequenceId).filter(Boolean));
+  for (const event of emittedEvents || []) {
+    const sequenceId = event?.attack?.sequenceId;
+    if (!sequenceId || seen.has(sequenceId)) continue;
+    events.push(cloneStructuredEvent(event));
+    seen.add(sequenceId);
+  }
+
+  const initialHomeLineupIds = sameFixture && Array.isArray(existing?.initialHomeLineupIds)
+    ? [...existing.initialHomeLineupIds]
+    : [...(state.homeLineupIds || [])];
+  const initialAwayLineupIds = sameFixture && Array.isArray(existing?.initialAwayLineupIds)
+    ? [...existing.initialAwayLineupIds]
+    : [...(state.awayLineupIds || [])];
+
+  const snapshot = {
+    fixtureId: state.fixtureId,
+    minute: Number(state.minute || 0),
+    homeClubId: state.homeClubId,
+    awayClubId: state.awayClubId,
+    userClubId: state.userClubId,
+    homeGoals: Number(state.homeGoals || 0),
+    awayGoals: Number(state.awayGoals || 0),
+    homeLineupIds: [...(state.homeLineupIds || [])],
+    awayLineupIds: [...(state.awayLineupIds || [])],
+    initialHomeLineupIds,
+    initialAwayLineupIds,
+    ratings: { ...(state.ratings || {}) },
+    conditions: { ...(state.conditions || {}) },
+    minutesPlayed: { ...(state.minutesPlayed || {}) },
+    subbedOffIds: [...(state.subbedOffIds || [])],
+    events,
+    structuredCommentarySnapshotVersion: '2.2.0',
+    source: 'matchday-engine-v069'
+  };
+  window.__flmLiveStateV332 = snapshot;
+  window.__flmStructuredCommentaryV2 = snapshot;
+  try { window.dispatchEvent(new CustomEvent('flm:live-state-v332', { detail: snapshot })); } catch (_) {}
+}
+
 function isHalfTimeSubstitution(state) {
   return Number(state.minute) === 45;
 }
@@ -146,6 +225,7 @@ export function createInteractiveMatch(career, db) {
   state.matchDrama ||= { version: MATCH_DRAMA_ENGINE_VERSION, serial: 0, counts: {}, atmosphere: [] };
   state.matchDrama.version = MATCH_DRAMA_ENGINE_VERSION;
   publishLiveXg(state);
+  publishLiveState(state, []);
   return state;
 }
 
@@ -155,6 +235,7 @@ export function advanceInteractiveMatch(inputState, career, db) {
   const drama = applyMatchDrama(state, db, result.events);
   state = applyRules(drama.state, career, db);
   publishLiveXg(state);
+  publishLiveState(state, result.events);
   return { ...result, state, events: [...(result.events || []), ...(drama.events || [])] };
 }
 
@@ -172,5 +253,6 @@ export function makeSubstitution(inputState, outId, inId, db, career = {}) {
   const next = applyRules(result.state, career, db);
   recordWindow(next, rules);
   publishLiveXg(next);
+  publishLiveState(next, []);
   return { ...result, state: next };
 }

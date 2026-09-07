@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { startCareerThroughCurrentOnboarding } from './helpers/start-career.js';
 
 test.setTimeout(150000);
 
@@ -38,8 +39,7 @@ async function liveGoalInfo(page) {
 }
 
 test('V4.5 starts the next friendly directly, fills the viewport and keeps scorer history', async ({ page }) => {
-  await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
-  await page.locator('[data-start-club]').first().click();
+  await startCareerThroughCurrentOnboarding(page);
   await selectXI(page);
   await continueUntil(page, '2026-07-11');
 
