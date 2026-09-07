@@ -2,6 +2,8 @@ export const MATCHDAY_LIVE_STATE_AUTHORITY_VERSION = '3.0.0';
 
 const KEY = '__flmLiveStateV332';
 const AUTH_SOURCE = 'matchday-engine-v069';
+const fixtureHistory = new Map();
+const fixtureLineups = new Map();
 
 function isObject(value) {
   return Boolean(value && typeof value === 'object');
@@ -13,33 +15,61 @@ function isAuthoritative(value) {
     && value.structuredCommentarySnapshotVersion === MATCHDAY_LIVE_STATE_AUTHORITY_VERSION;
 }
 
-function sequenceIdFor(event) {
-  return event?.attack?.sequenceId || event?.flow?.sequenceId || null;
+function eventStorageKey(event) {
+  if (event?.attack?.sequenceId) return `attack:${event.attack.sequenceId}`;
+  if (event?.flow?.sequenceId) return `flow:${event.flow.sequenceId}`;
+  return null;
 }
 
-function mergeAuthoritativeSnapshots(previous, next) {
-  if (!isAuthoritative(previous) || previous.fixtureId !== next.fixtureId) return next;
-
-  const orderedIds = [];
-  const byId = new Map();
-  const unkeyed = [];
-
-  for (const event of [...(previous.events || []), ...(next.events || [])]) {
-    const sequenceId = sequenceIdFor(event);
-    if (!sequenceId) {
-      unkeyed.push(event);
-      continue;
+function fixtureStore(fixtureId) {
+  if (!fixtureHistory.has(fixtureId)) {
+    fixtureHistory.set(fixtureId, { order: [], byKey: new Map() });
+    if (fixtureHistory.size > 12) {
+      const oldest = fixtureHistory.keys().next().value;
+      fixtureHistory.delete(oldest);
+      fixtureLineups.delete(oldest);
     }
-    if (!byId.has(sequenceId)) orderedIds.push(sequenceId);
-    byId.set(sequenceId, event);
+  }
+  return fixtureHistory.get(fixtureId);
+}
+
+function rememberAuthoritativeSnapshot(next) {
+  const fixtureId = next.fixtureId;
+  const store = fixtureStore(fixtureId);
+  for (const event of next.events || []) {
+    const key = eventStorageKey(event);
+    if (!key) continue;
+    if (!store.byKey.has(key)) store.order.push(key);
+    store.byKey.set(key, event);
+  }
+
+  if (!fixtureLineups.has(fixtureId)) {
+    fixtureLineups.set(fixtureId, {
+      home: [...(next.initialHomeLineupIds || next.homeLineupIds || [])],
+      away: [...(next.initialAwayLineupIds || next.awayLineupIds || [])]
+    });
   }
 
   return {
-    ...next,
-    initialHomeLineupIds: next.initialHomeLineupIds || previous.initialHomeLineupIds,
-    initialAwayLineupIds: next.initialAwayLineupIds || previous.initialAwayLineupIds,
-    events: [...orderedIds.map(id => byId.get(id)), ...unkeyed]
+    events: store.order.map(key => store.byKey.get(key)),
+    lineups: fixtureLineups.get(fixtureId)
   };
+}
+
+function mergeAuthoritativeSnapshots(previous, next) {
+  const remembered = rememberAuthoritativeSnapshot(next);
+  return {
+    ...next,
+    initialHomeLineupIds: remembered.lineups?.home || next.initialHomeLineupIds || previous?.initialHomeLineupIds,
+    initialAwayLineupIds: remembered.lineups?.away || next.initialAwayLineupIds || previous?.initialAwayLineupIds,
+    events: remembered.events
+  };
+}
+
+function forgetFixture(fixtureId) {
+  if (!fixtureId) return;
+  fixtureHistory.delete(fixtureId);
+  fixtureLineups.delete(fixtureId);
 }
 
 function publishAuthorityStatus(fixtureId, rejectedLegacyWrites, structuredEventCount) {
@@ -64,6 +94,8 @@ function installLiveStateAuthority() {
   let lockedFixtureId = authorityClaimed ? current.fixtureId : null;
   let rejectedLegacyWrites = 0;
 
+  if (authorityClaimed) current = mergeAuthoritativeSnapshots(null, current);
+
   Object.defineProperty(window, KEY, {
     configurable: true,
     enumerable: true,
@@ -85,11 +117,12 @@ function installLiveStateAuthority() {
         return;
       }
 
-      // Legacy snapshots may initialise read-only presentation consumers before
-      // Matchday starts. The first direct engine publication permanently claims
-      // ownership for the session; no later legacy write can downgrade it.
       current = next;
     }
+  });
+
+  window.addEventListener('flm:live-state-complete', event => {
+    forgetFixture(event?.detail?.fixtureId);
   });
 
   if (authorityClaimed) publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length);
