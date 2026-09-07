@@ -52,8 +52,8 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   await page.locator('[data-v046-all]').click();
   await expect(page.locator('[data-v046-news-tab] .v046-news-badge')).toBeHidden();
 
-  // A fresh career now starts with no user-selected XI. Choose the optional auto XI
-  // deliberately for this news-flow regression before attempting a competitive match.
+  // A fresh career starts with no user-selected XI. Choose one deliberately before
+  // the competitive match so this regression tests news generation, not lineup gating.
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(0);
   await page.locator('[data-v044-auto-pick]').click();
@@ -62,13 +62,19 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   await completePreseason(page);
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
   await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
-  await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm-match-v1', '1');
-  await page.locator('[data-cm-speed="4"]').click();
+
+  const live = page.locator('[data-live-match]');
+  const shell = live.locator('.cm4-shell');
+  await expect(live).toHaveAttribute('data-cm4', '1');
+  await expect(live).toHaveAttribute('data-cm-match-v2', '1');
+  await shell.locator('[data-cm4-speed="4"]').click();
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 60000 });
-  await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 60000 });
-  await page.locator('[data-finish-live-match]').click();
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 60000 });
+  await expect(live).toHaveClass(/is-full-time/);
+  await live.locator('[data-v068-ft-continue]').click();
+  await expect(live).toHaveCount(0, { timeout: 10000 });
 
   const newsAfterMatch = page.locator('[data-v046-news-tab]');
   await expect(newsAfterMatch).toBeVisible();
