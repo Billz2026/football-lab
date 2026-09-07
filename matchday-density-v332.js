@@ -20,47 +20,6 @@ function database(){
   return databasePromise;
 }
 
-/* Read-only capture of the immutable state the engine already serialises.
-   It does not alter match calculations or the serialized value returned. */
-function installStateObserver(){
-  if (window.__flmV332StateObserverInstalled) return;
-  window.__flmV332StateObserverInstalled = true;
-  const native = JSON.stringify;
-  JSON.stringify = function(value, ...rest){
-    try {
-      const isLiveState = value && typeof value === 'object'
-        && typeof value.minute === 'number'
-        && typeof value.fixtureId === 'string'
-        && Array.isArray(value.homeLineupIds)
-        && Array.isArray(value.awayLineupIds)
-        && value.ratings && value.conditions && value.stats;
-      if (isLiveState) {
-        window.__flmLiveStateV332 = {
-          minute: value.minute,
-          fixtureId: value.fixtureId,
-          homeClubId: value.homeClubId,
-          awayClubId: value.awayClubId,
-          userClubId: value.userClubId,
-          homeLineupIds: [...value.homeLineupIds],
-          awayLineupIds: [...value.awayLineupIds],
-          ratings: {...value.ratings},
-          conditions: {...value.conditions},
-          minutesPlayed: {...(value.minutesPlayed || {})},
-          subbedOffIds: [...(value.subbedOffIds || [])],
-          events: (value.events || []).map(event => ({
-            minute: event.minute,
-            type: event.type,
-            clubId: event.clubId,
-            playerId: event.playerId,
-            assistPlayerId: event.assistPlayerId
-          }))
-        };
-      }
-    } catch (_) {}
-    return Reflect.apply(native, this, [value, ...rest]);
-  };
-}
-
 function compactCommentary(input){
   let text = clean(input);
   if (!text) return text;
@@ -366,6 +325,6 @@ function queue(){
 }
 
 ensureStyles();
-installStateObserver();
+window.__flmV332StateObserverRetired = 'direct-engine-publisher';
 queue();
 new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','data-cm-view']});
