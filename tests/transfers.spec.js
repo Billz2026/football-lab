@@ -35,17 +35,32 @@ test('V0.6.1 transfer market completes a signing through club and player negotia
   await expect(page.locator('.v050-player-row')).not.toHaveCount(0);
   await expect(page.locator('.v050-budget')).toContainText('TRANSFER BUDGET');
 
-  // The market is sorted high-to-low by value, so the final row gives this regression
-  // a deterministic affordable target while still exercising the real negotiation UI.
-  const targetRow = page.locator('.v050-player-row').last();
-  const targetName = (await targetRow.locator('strong').textContent()).trim();
-  await targetRow.click();
-  await expect(page.locator('.v050-detail')).toContainText(targetName);
+  const firstRow = page.locator('.v050-player-row').first();
+  const firstName = (await firstRow.locator('strong').textContent()).trim();
+  await firstRow.click();
+  await expect(page.locator('.v050-detail')).toContainText(firstName);
   await expect(page.locator('.v050-detail')).not.toContainText(/\bCA\b|overall ability/i);
 
-  await targetRow.locator('strong').click();
+  // Rivalry premiums can make a low-value market row unaffordable. Resolve a real target
+  // from the live asking-price model instead of assuming list position equals affordability.
+  const target = await page.evaluate(async () => {
+    const db = await window.FLMManager.loadDatabase();
+    const transfers = await import('./transfers-v050.js?v=0.5.2');
+    const c = window.FLMManager.activeCareer;
+    transfers.ensureTransferState(c, db);
+    const budget = transfers.getTransferBudget(c).transferBudget;
+    const candidates = transfers.searchTransferMarket(c, db)
+      .map(player => ({ player, stance: transfers.getTransferStance(player, db, c, c.clubId) }))
+      .filter(item => item.stance.askingPrice > 0 && item.stance.askingPrice < budget * 0.72)
+      .sort((a, b) => b.stance.value - a.stance.value);
+    const picked = candidates[0];
+    if (!picked) throw new Error('No affordable profile-negotiation target found.');
+    await window.FLMPlayerProfile.open(picked.player.id);
+    return { id: picked.player.id, name: picked.player.name, asking: picked.stance.askingPrice };
+  });
+
   await expect(page.locator('#appModal')).toHaveClass(/is-open/);
-  await expect(page.locator('#modalTitle')).toContainText(targetName);
+  await expect(page.locator('#modalTitle')).toContainText(target.name);
   const bidAction = page.locator('[data-v061-profile-bid]');
   await expect(bidAction).toBeVisible();
   await expect(bidAction).toBeEnabled();
@@ -54,6 +69,7 @@ test('V0.6.1 transfer market completes a signing through club and player negotia
   const negotiation = page.locator('[data-v061-negotiation]');
   await expect(negotiation).toBeVisible();
   const playerId = await negotiation.getAttribute('data-v061-negotiation');
+  expect(playerId).toBe(target.id);
   const terms = await page.evaluate(id => {
     const c = window.FLMManager.activeCareer;
     const n = c.transfers.negotiations[id];
@@ -63,6 +79,7 @@ test('V0.6.1 transfer market completes a signing through club and player negotia
       wageRoom: c.transfers.wageRoom
     };
   }, playerId);
+  expect(terms.askingPrice).toBe(target.asking);
   expect(terms.askingPrice).toBeGreaterThan(0);
   expect(terms.askingPrice).toBeLessThanOrEqual(terms.transferBudget);
 
@@ -90,7 +107,7 @@ test('V0.6.1 transfer market completes a signing through club and player negotia
   await page.locator('[data-v061-close]').click();
   await page.locator('.modal-close').click();
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
-  await expect(page.locator('.career-content')).toContainText(targetName);
+  await expect(page.locator('.career-content')).toContainText(target.name);
 });
 
 test('transfer market remains usable on a Fold-sized viewport', async ({ page }) => {
