@@ -79,12 +79,17 @@ function forgetFixture(fixtureId) {
   fixtureLineups.delete(fixtureId);
 }
 
-function publishAuthorityStatus(fixtureId, rejectedLegacyWrites, structuredEventCount) {
+function hasMountedLiveMatch() {
+  return Boolean(document.querySelector('[data-live-match], .flm-live-match'));
+}
+
+function publishAuthorityStatus(fixtureId, rejectedLegacyWrites, structuredEventCount, rejectedCrossFixtureWrites = 0) {
   window.__flmLiveStateAuthorityV3 = {
     version: MATCHDAY_LIVE_STATE_AUTHORITY_VERSION,
     source: AUTH_SOURCE,
     fixtureId: fixtureId || null,
     rejectedLegacyWrites,
+    rejectedCrossFixtureWrites,
     structuredEventCount: Number(structuredEventCount || 0)
   };
 }
@@ -100,6 +105,7 @@ function installLiveStateAuthority() {
   let authorityClaimed = isAuthoritative(current);
   let lockedFixtureId = authorityClaimed ? current.fixtureId : null;
   let rejectedLegacyWrites = 0;
+  let rejectedCrossFixtureWrites = 0;
 
   if (authorityClaimed) current = mergeAuthoritativeSnapshots(null, current);
 
@@ -111,16 +117,24 @@ function installLiveStateAuthority() {
     },
     set(next) {
       if (isAuthoritative(next)) {
+        const nextFixtureId = next.fixtureId || null;
+        const fixtureWouldChange = Boolean(lockedFixtureId && nextFixtureId && nextFixtureId !== lockedFixtureId);
+        if (fixtureWouldChange && hasMountedLiveMatch()) {
+          rejectedCrossFixtureWrites += 1;
+          publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length, rejectedCrossFixtureWrites);
+          return;
+        }
+
         current = mergeAuthoritativeSnapshots(current, next);
         authorityClaimed = true;
         lockedFixtureId = current.fixtureId || lockedFixtureId;
-        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current.events?.length);
+        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current.events?.length, rejectedCrossFixtureWrites);
         return;
       }
 
       if (authorityClaimed) {
         rejectedLegacyWrites += 1;
-        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length);
+        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length, rejectedCrossFixtureWrites);
         return;
       }
 
@@ -129,10 +143,13 @@ function installLiveStateAuthority() {
   });
 
   window.addEventListener('flm:live-state-complete', event => {
-    forgetFixture(event?.detail?.fixtureId);
+    const fixtureId = event?.detail?.fixtureId;
+    forgetFixture(fixtureId);
+    if (fixtureId && fixtureId === lockedFixtureId) lockedFixtureId = null;
+    publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length, rejectedCrossFixtureWrites);
   });
 
-  if (authorityClaimed) publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length);
+  if (authorityClaimed) publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites, current?.events?.length, rejectedCrossFixtureWrites);
 }
 
 installLiveStateAuthority();
