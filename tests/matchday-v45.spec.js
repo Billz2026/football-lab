@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { startCareerThroughCurrentOnboarding } from './helpers/start-career.js';
+import { finishSecondHalf, reachHalfTime } from './helpers/live-match.js';
 
-test.setTimeout(170000);
+test.setTimeout(200000);
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -70,12 +71,11 @@ test('V4.5 starts the next friendly directly, fills the viewport and keeps score
     expect(initialGoals.some(goal => goal.name && initialText.includes(goal.name))).toBeTruthy();
   }
 
-  // The timing budget measures a complete simulation, not animation-frame speed.
-  await shell.locator('[data-cm4-speed="4"]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 55000 });
+  // Advance through real Matchday stoppages rather than assuming uninterrupted playback.
+  // The helper replaces an injured user player when possible or resumes short-handed when not.
+  await reachHalfTime(page, live, shell, 100000);
   await shell.locator('[data-cm4-pause]').click();
-  // Full time is still mandatory; the wider timeout absorbs hosted-runner variance only.
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 65000 });
+  await finishSecondHalf(page, live, shell, 100000);
 
   const goalInfo = await liveGoalInfo(page);
   await expect(shell).toHaveAttribute('data-cm45-goal-count', String(goalInfo.length));
