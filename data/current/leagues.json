@@ -60,7 +60,9 @@
     "level": 1,
     "expectedClubCount": 20,
     "season": "2026/27",
-    "externalIds": {},
+    "externalIds": {
+      "apiFootball": 140
+    },
     "importStatus": "pending"
   }
 ]
