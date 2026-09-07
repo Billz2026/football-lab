@@ -109,9 +109,9 @@ test('a Premier League fixture cannot be played before its calendar date', async
     localStorage.setItem('flm-career-save', JSON.stringify(c));
   });
   await page.locator('.career-nav [data-career-tab="matchday"]').click();
-  await expect(page.locator('[data-play-match]')).toBeVisible();
-  await page.locator('[data-play-match]').click();
-  await expect(page.locator('.career-toast')).toContainText('21 AUG 2026');
+  const play = page.locator('[data-play-match]');
+  await expect(play).toBeVisible();
+  await expect(play).toBeDisabled();
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
   expect(saved.roundIndex).toBe(0);
   expect(saved.currentDate).toBe('2026-08-20');
