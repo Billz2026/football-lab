@@ -146,6 +146,7 @@ function cloneStructuredFlow(flow) {
 
 function cloneStructuredEvent(event) {
   return {
+    liveEventId: event.liveEventId,
     minute: event.minute,
     type: event.type,
     clubId: event.clubId,
@@ -166,6 +167,7 @@ function cloneStructuredEvent(event) {
 }
 
 function eventStorageKey(event) {
+  if (event?.liveEventId) return `event:${event.liveEventId}`;
   if (event?.attack?.sequenceId) return `attack:${event.attack.sequenceId}`;
   if (event?.flow?.sequenceId) return `flow:${event.flow.sequenceId}`;
   return null;
@@ -197,10 +199,13 @@ function publishLiveState(state, emittedEvents = []) {
   const history = liveStructuredHistory.get(state.fixtureId);
   const seen = new Set(history.map(eventStorageKey).filter(Boolean));
   for (const event of emittedEvents || []) {
-    const storageKey = eventStorageKey(event);
-    if (!storageKey || seen.has(storageKey)) continue;
-    history.push(cloneStructuredEvent(event));
-    seen.add(storageKey);
+    const structuredKey = eventStorageKey(event);
+    if (structuredKey && seen.has(structuredKey)) continue;
+    const stored = cloneStructuredEvent(event);
+    if (!structuredKey) stored.liveEventId = `${state.fixtureId}:${history.length + 1}`;
+    history.push(stored);
+    const storedKey = eventStorageKey(stored);
+    if (storedKey) seen.add(storedKey);
   }
 
   const initial = liveInitialLineups.get(state.fixtureId) || {
@@ -272,9 +277,10 @@ export function advanceInteractiveMatch(inputState, career, db) {
   let state = applyRules(result.state, career, db);
   const drama = applyMatchDrama(state, db, result.events);
   state = applyRules(drama.state, career, db);
+  const events = [...(result.events || []), ...(drama.events || [])];
   publishLiveXg(state);
-  publishLiveState(state, result.events);
-  return { ...result, state, events: [...(result.events || []), ...(drama.events || [])] };
+  publishLiveState(state, events);
+  return { ...result, state, events };
 }
 
 export function completeInteractiveRound(career, inputState, db) {
