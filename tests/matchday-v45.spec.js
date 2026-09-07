@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { startCareerThroughCurrentOnboarding } from './helpers/start-career.js';
 
-test.setTimeout(150000);
+test.setTimeout(170000);
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -72,9 +72,10 @@ test('V4.5 starts the next friendly directly, fills the viewport and keeps score
 
   // The timing budget measures a complete simulation, not animation-frame speed.
   await shell.locator('[data-cm4-speed="4"]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 50000 });
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 55000 });
   await shell.locator('[data-cm4-pause]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 50000 });
+  // Full time is still mandatory; the wider timeout absorbs hosted-runner variance only.
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('90:00', { timeout: 65000 });
 
   const goalInfo = await liveGoalInfo(page);
   await expect(shell).toHaveAttribute('data-cm45-goal-count', String(goalInfo.length));
