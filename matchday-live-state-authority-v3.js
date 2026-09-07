@@ -9,6 +9,12 @@ function isObject(value) {
   return Boolean(value && typeof value === 'object');
 }
 
+function cloneValue(value) {
+  if (Array.isArray(value)) return value.map(cloneValue);
+  if (!isObject(value)) return value;
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, cloneValue(item)]));
+}
+
 function isAuthoritative(value) {
   return isObject(value)
     && value.source === AUTH_SOURCE
@@ -16,9 +22,11 @@ function isAuthoritative(value) {
 }
 
 function eventStorageKey(event) {
-  if (event?.liveEventId) return `event:${event.liveEventId}`;
+  // Structured sequence IDs are the canonical identity. A presentation/live ID can be
+  // rewritten or reused by legacy layers, so it must never outrank engine-owned facts.
   if (event?.attack?.sequenceId) return `attack:${event.attack.sequenceId}`;
   if (event?.flow?.sequenceId) return `flow:${event.flow.sequenceId}`;
+  if (event?.liveEventId) return `event:${event.liveEventId}`;
   if (event?.type) {
     return `legacy:${[
       event.type,event.minute,event.clubId,event.playerId,event.assistPlayerId,
@@ -47,7 +55,8 @@ function rememberAuthoritativeSnapshot(next) {
     const key = eventStorageKey(event);
     if (!key) continue;
     if (!store.byKey.has(key)) store.order.push(key);
-    store.byKey.set(key, event);
+    // Never retain a reference that presentation code can mutate in place.
+    store.byKey.set(key, cloneValue(event));
   }
 
   if (!fixtureLineups.has(fixtureId)) {
@@ -57,18 +66,23 @@ function rememberAuthoritativeSnapshot(next) {
     });
   }
 
+  const lineups = fixtureLineups.get(fixtureId);
   return {
-    events: store.order.map(key => store.byKey.get(key)),
-    lineups: fixtureLineups.get(fixtureId)
+    events: store.order.map(key => cloneValue(store.byKey.get(key))),
+    lineups: {
+      home: [...(lineups?.home || [])],
+      away: [...(lineups?.away || [])]
+    }
   };
 }
 
 function mergeAuthoritativeSnapshots(previous, next) {
-  const remembered = rememberAuthoritativeSnapshot(next);
+  const safeNext = cloneValue(next);
+  const remembered = rememberAuthoritativeSnapshot(safeNext);
   return {
-    ...next,
-    initialHomeLineupIds: remembered.lineups?.home || next.initialHomeLineupIds || previous?.initialHomeLineupIds,
-    initialAwayLineupIds: remembered.lineups?.away || next.initialAwayLineupIds || previous?.initialAwayLineupIds,
+    ...safeNext,
+    initialHomeLineupIds: remembered.lineups?.home || safeNext.initialHomeLineupIds || previous?.initialHomeLineupIds,
+    initialAwayLineupIds: remembered.lineups?.away || safeNext.initialAwayLineupIds || previous?.initialAwayLineupIds,
     events: remembered.events
   };
 }
@@ -113,7 +127,9 @@ function installLiveStateAuthority() {
     configurable: true,
     enumerable: true,
     get() {
-      return current;
+      // Readers get a defensive copy. This closes the hole where a legacy renderer could
+      // mutate current.events/current.events[n].flow without invoking the setter at all.
+      return cloneValue(current);
     },
     set(next) {
       if (isAuthoritative(next)) {
@@ -138,7 +154,7 @@ function installLiveStateAuthority() {
         return;
       }
 
-      current = next;
+      current = cloneValue(next);
     }
   });
 
