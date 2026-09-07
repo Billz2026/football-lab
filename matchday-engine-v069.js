@@ -1,4 +1,4 @@
-import * as base from './matchday-engine-v0431.js?v=0.4.3.1';
+import * as base from './matchday-structured-attacks-v1.js?v=1.0.0';
 import { applyMatchDrama, MATCH_DRAMA_VERSION } from './match-drama-v3.js?v=3.0.0';
 
 export {
@@ -6,6 +6,8 @@ export {
   MAX_SUBSTITUTIONS,
   ROLE_DEFINITIONS,
   TACTIC_OPTIONS,
+  STRUCTURED_ATTACK_VERSION,
+  STRUCTURED_XG_MODEL,
   assignPlayersToFormation,
   changeTactics,
   getOpponentSnapshot,
@@ -13,10 +15,11 @@ export {
   setPlayerDuty,
   setPlayerRole,
   swapShapePlayers
-} from './matchday-engine-v0431.js?v=0.4.3.1';
+} from './matchday-structured-attacks-v1.js?v=1.0.0';
 
 export const MATCH_RULES_VERSION = '0.7.2';
 export const MATCH_DRAMA_ENGINE_VERSION = MATCH_DRAMA_VERSION;
+export const MATCH_STRUCTURED_ATTACK_VERSION = base.STRUCTURED_ATTACK_VERSION;
 export const PREMIER_LEAGUE_BENCH_LIMIT = 9;
 export const PREMIER_LEAGUE_SUBSTITUTION_LIMIT = 5;
 export const PREMIER_LEAGUE_WINDOW_LIMIT = 3;
