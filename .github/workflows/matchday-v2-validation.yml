@@ -1,4 +1,4 @@
-name: Matchday V2 validation
+name: Matchday Commentary V3 validation
 
 on:
   push:
@@ -27,12 +27,16 @@ on:
       - 'matchday-engine-v069.js'
       - 'matchday-engine-v0431.js'
       - 'matchday-structured-attacks-v1.js'
+      - 'matchday-structured-flow-v1.js'
       - 'commentary-authoritative-attacks-v2.js'
+      - 'commentary-authoritative-flow-v3.js'
+      - 'commentary-authoritative-row-host-v1.js'
       - 'match-drama-v3.js'
       - 'manager.js'
       - 'package.json'
       - 'tests/helpers/start-career.js'
       - 'tests/structured-attacks-v1.test.js'
+      - 'tests/structured-flow-v1.test.js'
       - 'tests/matchday-v2.spec.js'
       - 'tests/matchday-v44.spec.js'
       - 'tests/matchday-v45.spec.js'
@@ -64,12 +68,16 @@ on:
       - 'matchday-engine-v069.js'
       - 'matchday-engine-v0431.js'
       - 'matchday-structured-attacks-v1.js'
+      - 'matchday-structured-flow-v1.js'
       - 'commentary-authoritative-attacks-v2.js'
+      - 'commentary-authoritative-flow-v3.js'
+      - 'commentary-authoritative-row-host-v1.js'
       - 'match-drama-v3.js'
       - 'manager.js'
       - 'package.json'
       - 'tests/helpers/start-career.js'
       - 'tests/structured-attacks-v1.test.js'
+      - 'tests/structured-flow-v1.test.js'
       - 'tests/matchday-v2.spec.js'
       - 'tests/matchday-v44.spec.js'
       - 'tests/matchday-v45.spec.js'
@@ -109,10 +117,14 @@ jobs:
           node --check matchday-engine-v069.js
           node --check matchday-engine-v0431.js
           node --check matchday-structured-attacks-v1.js
+          node --check matchday-structured-flow-v1.js
           node --check commentary-authoritative-attacks-v2.js
+          node --check commentary-authoritative-flow-v3.js
+          node --check commentary-authoritative-row-host-v1.js
           node --check match-drama-v3.js
           node --check tests/helpers/start-career.js
           node --check tests/structured-attacks-v1.test.js
+          node --check tests/structured-flow-v1.test.js
           node --check tests/matchday-v2.spec.js
           node --check tests/matchday-v44.spec.js
           node --check tests/matchday-v45.spec.js
@@ -121,8 +133,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run structured engine contract
-        run: node --test tests/structured-attacks-v1.test.js
+      - name: Run structured engine contracts
+        run: node --test tests/structured-attacks-v1.test.js tests/structured-flow-v1.test.js
 
       - name: Install Chromium
         run: npx playwright install chromium
