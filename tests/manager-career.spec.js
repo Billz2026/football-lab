@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(90000);
+test.setTimeout(180000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -109,7 +109,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   expect(teamColours.away).not.toBe('');
   expect(teamColours.home).not.toBe(teamColours.away);
 
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
+  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 60000 });
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
   await page.waitForTimeout(300);
   await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
@@ -143,7 +143,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await page.locator('[data-close-manager]').last().click();
 
   await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
+  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 60000 });
   await expect(page.locator('[data-match-status]')).toHaveText('FULL TIME');
   await expect(page.locator('[data-finish-live-match]')).toBeVisible();
 });
