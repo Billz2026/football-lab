@@ -47,7 +47,7 @@ test('News & Inbox persists read state and generates pre-season plus real round 
 
   await page.locator('[data-v046-filter="Board"]').click();
   await expect(page.locator('.v046-row')).toHaveCount(1);
-  await expect(page.locator('.v046-detail')).toContainText('Board sets season expectations');
+  await expect(page.locator('.v046-detail')).toContainText('Board expectations and transfer budget');
   await page.locator('[data-v046-filter="All"]').click();
   await page.locator('[data-v046-all]').click();
   await expect(page.locator('[data-v046-news-tab] .v046-news-badge')).toBeHidden();
