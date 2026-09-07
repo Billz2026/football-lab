@@ -66,6 +66,12 @@ test('Fold substitution manager always exposes and substitutes the striker', asy
   expect(geometry.rowTop).toBeGreaterThanOrEqual(geometry.listTop - 1);
   expect(geometry.rowBottom).toBeLessThanOrEqual(geometry.listBottom + 1);
 
+  const status = dialog.locator('.flm-sub-status');
+  await expect(status).toContainText(/\d+ of \d+ substitutions remaining/);
+  const statusBefore = (await status.textContent()) || '';
+  const remainingBefore = statusBefore.match(/(\d+) of (\d+) substitutions remaining/);
+  expect(remainingBefore).not.toBeNull();
+
   await striker.click();
   const bench = dialog.locator('.v2-sub-column').nth(1).locator('.v2-sub-player:not(:disabled)');
   await expect(bench.first()).toBeVisible();
@@ -75,7 +81,7 @@ test('Fold substitution manager always exposes and substitutes the striker', asy
   await expect(confirm).toBeEnabled();
   await confirm.click();
 
-  await expect(dialog.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
+  await expect(status).toContainText(`${Number(remainingBefore[1]) - 1} of ${remainingBefore[2]} substitutions remaining`);
   await expect(dialog.locator('.v2-sub-column').nth(0).getByText(strikerName, { exact: true })).toHaveCount(0);
 });
 
