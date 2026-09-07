@@ -1,13 +1,15 @@
-import * as base from './matchday-structured-attacks-v1.js?v=1.0.0';
+import * as base from './matchday-structured-flow-v1.js?v=1.0.0';
 import { applyMatchDrama, MATCH_DRAMA_VERSION } from './match-drama-v3.js?v=3.0.0';
 
 export {
   FORMATION_LAYOUTS,
   MAX_SUBSTITUTIONS,
   ROLE_DEFINITIONS,
-  TACTIC_OPTIONS,
   STRUCTURED_ATTACK_VERSION,
+  STRUCTURED_FLOW_TYPES,
+  STRUCTURED_FLOW_VERSION,
   STRUCTURED_XG_MODEL,
+  TACTIC_OPTIONS,
   assignPlayersToFormation,
   changeTactics,
   getOpponentSnapshot,
@@ -15,11 +17,12 @@ export {
   setPlayerDuty,
   setPlayerRole,
   swapShapePlayers
-} from './matchday-structured-attacks-v1.js?v=1.0.0';
+} from './matchday-structured-flow-v1.js?v=1.0.0';
 
-export const MATCH_RULES_VERSION = '0.7.2';
+export const MATCH_RULES_VERSION = '0.7.3';
 export const MATCH_DRAMA_ENGINE_VERSION = MATCH_DRAMA_VERSION;
 export const MATCH_STRUCTURED_ATTACK_VERSION = base.STRUCTURED_ATTACK_VERSION;
+export const MATCH_STRUCTURED_FLOW_VERSION = base.STRUCTURED_FLOW_VERSION;
 export const PREMIER_LEAGUE_BENCH_LIMIT = 9;
 export const PREMIER_LEAGUE_SUBSTITUTION_LIMIT = 5;
 export const PREMIER_LEAGUE_WINDOW_LIMIT = 3;
@@ -130,6 +133,15 @@ function cloneStructuredAttack(attack) {
   };
 }
 
+function cloneStructuredFlow(flow) {
+  if (!flow || typeof flow !== 'object') return null;
+  return {
+    ...flow,
+    contextTags: [...(flow.contextTags || [])],
+    beats: (flow.beats || []).map(beat => ({ ...beat }))
+  };
+}
+
 function cloneStructuredEvent(event) {
   return {
     minute: event.minute,
@@ -146,8 +158,13 @@ function cloneStructuredEvent(event) {
     xg: event.xg,
     text: event.text,
     lines: Array.isArray(event.lines) ? [...event.lines] : undefined,
-    attack: cloneStructuredAttack(event.attack)
+    attack: cloneStructuredAttack(event.attack),
+    flow: cloneStructuredFlow(event.flow)
   };
+}
+
+function eventSequenceId(event) {
+  return event?.attack?.sequenceId || event?.flow?.sequenceId || null;
 }
 
 function publishLiveState(state, emittedEvents = []) {
@@ -155,9 +172,9 @@ function publishLiveState(state, emittedEvents = []) {
   const existing = window.__flmLiveStateV332;
   const sameFixture = existing?.fixtureId === state.fixtureId;
   const events = sameFixture && Array.isArray(existing?.events) ? [...existing.events] : [];
-  const seen = new Set(events.map(event => event?.attack?.sequenceId).filter(Boolean));
+  const seen = new Set(events.map(eventSequenceId).filter(Boolean));
   for (const event of emittedEvents || []) {
-    const sequenceId = event?.attack?.sequenceId;
+    const sequenceId = eventSequenceId(event);
     if (!sequenceId || seen.has(sequenceId)) continue;
     events.push(cloneStructuredEvent(event));
     seen.add(sequenceId);
@@ -187,11 +204,12 @@ function publishLiveState(state, emittedEvents = []) {
     minutesPlayed: { ...(state.minutesPlayed || {}) },
     subbedOffIds: [...(state.subbedOffIds || [])],
     events,
-    structuredCommentarySnapshotVersion: '2.2.0',
+    structuredCommentarySnapshotVersion: '3.0.0',
     source: 'matchday-engine-v069'
   };
   window.__flmLiveStateV332 = snapshot;
   window.__flmStructuredCommentaryV2 = snapshot;
+  window.__flmStructuredCommentaryV3 = snapshot;
   try { window.dispatchEvent(new CustomEvent('flm:live-state-v332', { detail: snapshot })); } catch (_) {}
 }
 
