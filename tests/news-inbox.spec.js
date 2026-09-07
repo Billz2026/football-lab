@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { finishSecondHalf } from './helpers/live-match.js';
+import { finishSecondHalf, reachHalfTime } from './helpers/live-match.js';
 
 test.setTimeout(240000);
 
@@ -68,8 +68,7 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   const shell = live.locator('.cm4-shell');
   await expect(live).toHaveAttribute('data-cm4', '1');
   await expect(live).toHaveAttribute('data-cm-match-v2', '1');
-  await shell.locator('[data-cm4-speed="4"]').click();
-  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 60000 });
+  await reachHalfTime(page, live, shell, 90000);
   await shell.locator('[data-cm4-pause]').click();
   await finishSecondHalf(page, live, shell, 90000);
   await live.locator('[data-v068-ft-continue]').click();
