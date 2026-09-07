@@ -33,8 +33,10 @@ for (const club of clubs) {
   assert(Boolean(club.name), 'every club needs a canonical name');
   assert(Boolean(club.officialName), `${club.name || 'unknown club'} needs officialName`);
   assert(Array.isArray(club.aliases), `${club.name || 'unknown club'} aliases must be an array`);
-  const tokens = [club.name, club.officialName, ...(club.aliases || [])].map(norm).filter(Boolean);
-  assert(new Set(tokens).size === tokens.length, `${club.name || 'unknown club'} contains duplicate normalized aliases`);
+  const protectedNames = new Set([norm(club.name), norm(club.officialName)].filter(Boolean));
+  const aliasTokens = (club.aliases || []).map(norm).filter(Boolean);
+  assert(new Set(aliasTokens).size === aliasTokens.length, `${club.name || 'unknown club'} contains duplicate aliases`);
+  assert(aliasTokens.every(alias => !protectedNames.has(alias)), `${club.name || 'unknown club'} contains an alias that duplicates its canonical/official name`);
 }
 
 const expectedOfficialNames = [
