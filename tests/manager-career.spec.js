@@ -79,7 +79,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await completePreseason(page);
 
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
-  await page.getByRole('button', { name: 'PLAY MATCH' }).click();
+  await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
 
   const live = page.locator('[data-live-match]');
   await expect(live).toHaveAttribute('data-cm-match-v2', '1');
