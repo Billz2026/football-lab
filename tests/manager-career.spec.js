@@ -121,6 +121,12 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   const confirm = page.locator('[data-apply-sub]');
   await expect(confirm).toHaveText('CONFIRM SUBSTITUTION');
   await expect(confirm).toBeDisabled();
+  const subStatus = page.locator('.flm-sub-status');
+  const remainingBeforeText = String(await subStatus.textContent() || '');
+  const remainingBeforeMatch = remainingBeforeText.match(/(\d+)\s+of\s+5 substitutions remaining/i);
+  if (!remainingBeforeMatch) throw new Error(`Could not parse substitution status: ${remainingBeforeText}`);
+  const remainingBefore = Number(remainingBeforeMatch[1]);
+  expect(remainingBefore).toBeGreaterThan(0);
 
   const offColumn = page.locator('.v2-sub-column').nth(0);
   const inColumn = page.locator('.v2-sub-column').nth(1);
@@ -141,7 +147,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await expect(page.locator('[data-v2-plan]')).toContainText('READY TO CONFIRM');
   await expect(confirm).toBeEnabled();
   await confirm.click();
-  await expect(page.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
+  await expect(subStatus).toContainText(`${remainingBefore - 1} of 5 substitutions remaining`);
   await page.locator('[data-close-manager]').last().click();
 
   await shell.locator('[data-cm4-pause]').click();
