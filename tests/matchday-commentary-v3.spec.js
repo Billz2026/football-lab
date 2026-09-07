@@ -46,41 +46,59 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   await completePreseason(page);
 
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
+  const previousFixtureId = await page.evaluate(() => window.__flmLiveStateV332?.fixtureId || null);
   await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
 
   const live = page.locator('[data-live-match]');
   const shell = page.locator('.cm4-shell');
   await expect(live).toHaveAttribute('data-cm4', '1');
   await expect(shell).toBeVisible();
+
+  // Wait until the live match has replaced any snapshot left by pre-season simulation.
+  await expect.poll(async () => page.evaluate(previous => {
+    const fixtureId = window.__flmLiveStateV332?.fixtureId || null;
+    return Boolean(fixtureId && fixtureId !== previous);
+  }, previousFixtureId), { timeout: 10000 }).toBe(true);
+  const liveFixtureId = await page.evaluate(() => window.__flmLiveStateV332?.fixtureId || null);
+  expect(liveFixtureId).toBeTruthy();
+
   await shell.locator('[data-cm4-speed="4"]').click();
 
-  // Engine contract: one real non-shot flow sequence must reach the authoritative browser snapshot.
-  await expect.poll(async () => page.evaluate(() =>
-    (window.__flmLiveStateV332?.events || []).filter(event => event?.flow?.sequenceId).length
-  ), { timeout: 20000 }).toBeGreaterThanOrEqual(1);
+  // Engine contract: one real non-shot flow sequence from this live fixture must reach the authoritative snapshot.
+  await expect.poll(async () => page.evaluate(fixtureId => {
+    const snapshot = window.__flmLiveStateV332;
+    if (snapshot?.fixtureId !== fixtureId) return 0;
+    return (snapshot.events || []).filter(event => event?.flow?.sequenceId).length;
+  }, liveFixtureId), { timeout: 20000 }).toBeGreaterThanOrEqual(1);
 
-  const firstSequenceId = await page.evaluate(() =>
-    (window.__flmLiveStateV332?.events || []).find(event => event?.flow?.sequenceId)?.flow?.sequenceId || null
-  );
+  const firstSequenceId = await page.evaluate(fixtureId => {
+    const snapshot = window.__flmLiveStateV332;
+    if (snapshot?.fixtureId !== fixtureId) return null;
+    return (snapshot.events || []).find(event => event?.flow?.sequenceId)?.flow?.sequenceId || null;
+  }, liveFixtureId);
   expect(firstSequenceId).toBeTruthy();
 
   // Persistence contract: later presentation/state ticks must not replace the rich engine snapshot.
   await page.waitForTimeout(1200);
-  const authorityState = await page.evaluate(sequenceId => ({
+  const authorityState = await page.evaluate(({ fixtureId, sequenceId }) => ({
+    fixtureId: window.__flmLiveStateV332?.fixtureId,
     source: window.__flmLiveStateV332?.source,
     version: window.__flmLiveStateV332?.structuredCommentarySnapshotVersion,
     authoritySource: window.__flmLiveStateAuthorityV3?.source,
-    stillPresent: (window.__flmLiveStateV332?.events || []).some(event => event?.flow?.sequenceId === sequenceId),
-    flowCount: (window.__flmLiveStateV332?.events || []).filter(event => event?.flow?.sequenceId).length
-  }), firstSequenceId);
+    stillPresent: window.__flmLiveStateV332?.fixtureId === fixtureId && (window.__flmLiveStateV332?.events || []).some(event => event?.flow?.sequenceId === sequenceId),
+    flowCount: window.__flmLiveStateV332?.fixtureId === fixtureId ? (window.__flmLiveStateV332?.events || []).filter(event => event?.flow?.sequenceId).length : 0
+  }), { fixtureId: liveFixtureId, sequenceId: firstSequenceId });
+  expect(authorityState.fixtureId).toBe(liveFixtureId);
   expect(authorityState.source).toBe('matchday-engine-v069');
   expect(authorityState.version).toBe('3.0.0');
   expect(authorityState.authoritySource).toBe('matchday-engine-v069');
   expect(authorityState.stillPresent).toBe(true);
   expect(authorityState.flowCount).toBeGreaterThanOrEqual(1);
 
-  const snapshotFlow = await page.evaluate(() =>
-    (window.__flmLiveStateV332?.events || [])
+  const snapshotFlow = await page.evaluate(fixtureId => {
+    const snapshot = window.__flmLiveStateV332;
+    if (snapshot?.fixtureId !== fixtureId) return [];
+    return (snapshot.events || [])
       .filter(event => event?.flow?.sequenceId)
       .map(event => ({
         type: event.type,
@@ -90,8 +108,8 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
         attackerId: event.flow.attackerId,
         defenderId: event.flow.defenderId,
         outcome: event.flow.outcome
-      }))
-  );
+      }));
+  }, liveFixtureId);
   expect(snapshotFlow.length).toBeGreaterThanOrEqual(1);
   for (const event of snapshotFlow) {
     expect(event.sequenceId).toBeTruthy();
@@ -113,9 +131,11 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   expect(visibleText).toMatch(/tackle|intercept|block|header|claim|press|turnover|offside|second ball|recycle|first touch|delivery|cross/i);
   expect(visibleText).not.toMatch(/move it from side to side|danger passes|gets down the flank and crosses early|closes down aggressively and forces the hurried pass/i);
 
-  const subtypes = await page.evaluate(() =>
-    [...new Set((window.__flmLiveStateV332?.events || []).filter(event => event?.flow?.sequenceId).map(event => event.flow.subtype))]
-  );
+  const subtypes = await page.evaluate(fixtureId => {
+    const snapshot = window.__flmLiveStateV332;
+    if (snapshot?.fixtureId !== fixtureId) return [];
+    return [...new Set((snapshot.events || []).filter(event => event?.flow?.sequenceId).map(event => event.flow.subtype))];
+  }, liveFixtureId);
   const allowed = new Set([
     'interception','standing_tackle','sliding_tackle','poor_touch','overhit_pass','forced_back',
     'second_ball_win','blocked_cross','defensive_header','keeper_claim','overhit_cross','press_regain',
