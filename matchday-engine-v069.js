@@ -119,6 +119,62 @@ function publishLiveXg(state) {
   try { window.dispatchEvent(new CustomEvent('flm:live-xg', { detail: window.__flmLiveXg })); } catch (_) {}
 }
 
+function cloneStructuredAttack(attack) {
+  if (!attack || typeof attack !== 'object') return null;
+  return {
+    ...attack,
+    scoreBefore: attack.scoreBefore ? { ...attack.scoreBefore } : null,
+    scoreAfter: attack.scoreAfter ? { ...attack.scoreAfter } : null,
+    contextTags: [...(attack.contextTags || [])],
+    beats: (attack.beats || []).map(beat => ({ ...beat }))
+  };
+}
+
+function cloneStructuredEvent(event) {
+  return {
+    minute: event.minute,
+    type: event.type,
+    clubId: event.clubId,
+    playerId: event.playerId,
+    assistPlayerId: event.assistPlayerId,
+    sequenceId: event.sequenceId,
+    phase: event.phase,
+    action: event.action,
+    subtype: event.subtype,
+    outcome: event.outcome,
+    finishType: event.finishType,
+    xg: event.xg,
+    text: event.text,
+    lines: Array.isArray(event.lines) ? [...event.lines] : undefined,
+    attack: cloneStructuredAttack(event.attack)
+  };
+}
+
+function publishStructuredCommentary(state, emittedEvents = []) {
+  if (typeof window === 'undefined' || !state?.fixtureId) return;
+  const existing = window.__flmLiveStateV332;
+  const sameFixture = existing?.fixtureId === state.fixtureId;
+  const events = sameFixture && Array.isArray(existing?.events) ? [...existing.events] : [];
+  const seen = new Set(events.map(event => event?.attack?.sequenceId).filter(Boolean));
+  for (const event of emittedEvents || []) {
+    const sequenceId = event?.attack?.sequenceId;
+    if (!sequenceId || seen.has(sequenceId)) continue;
+    events.push(cloneStructuredEvent(event));
+    seen.add(sequenceId);
+  }
+  window.__flmLiveStateV332 = {
+    fixtureId: state.fixtureId,
+    minute: state.minute,
+    homeClubId: state.homeClubId,
+    awayClubId: state.awayClubId,
+    homeGoals: Number(state.homeGoals || 0),
+    awayGoals: Number(state.awayGoals || 0),
+    events,
+    structuredCommentarySnapshotVersion: '2.1.0'
+  };
+  window.__flmStructuredCommentaryV2 = window.__flmLiveStateV332;
+}
+
 function isHalfTimeSubstitution(state) {
   return Number(state.minute) === 45;
 }
@@ -149,6 +205,7 @@ export function createInteractiveMatch(career, db) {
   state.matchDrama ||= { version: MATCH_DRAMA_ENGINE_VERSION, serial: 0, counts: {}, atmosphere: [] };
   state.matchDrama.version = MATCH_DRAMA_ENGINE_VERSION;
   publishLiveXg(state);
+  publishStructuredCommentary(state, []);
   return state;
 }
 
@@ -158,6 +215,7 @@ export function advanceInteractiveMatch(inputState, career, db) {
   const drama = applyMatchDrama(state, db, result.events);
   state = applyRules(drama.state, career, db);
   publishLiveXg(state);
+  publishStructuredCommentary(state, result.events);
   return { ...result, state, events: [...(result.events || []), ...(drama.events || [])] };
 }
 
@@ -175,5 +233,6 @@ export function makeSubstitution(inputState, outId, inId, db, career = {}) {
   const next = applyRules(result.state, career, db);
   recordWindow(next, rules);
   publishLiveXg(next);
+  publishStructuredCommentary(next, []);
   return { ...result, state: next };
 }
