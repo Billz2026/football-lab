@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { startCareerThroughCurrentOnboarding } from './helpers/start-career.js';
 
 test.setTimeout(120000);
 
@@ -25,8 +26,7 @@ async function selectXI(page) {
 }
 
 async function openFriendlyMatch(page) {
-  await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
-  await page.locator('[data-start-club]').first().click();
+  await startCareerThroughCurrentOnboarding(page);
   await selectXI(page);
   await continueUntil(page, '2026-07-11');
   await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY');
@@ -80,8 +80,7 @@ test('Fold substitution manager always exposes and substitutes the striker', asy
 });
 
 test('V4.4 latches match states and keeps Fold matchday playable', async ({ page }) => {
-  await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
-  await page.locator('[data-start-club]').first().click();
+  await startCareerThroughCurrentOnboarding(page);
   await selectXI(page);
   await continueUntil(page, '2026-07-11');
 
