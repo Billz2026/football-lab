@@ -184,9 +184,15 @@ function resetLiveFixtureHistory(state) {
   }
 }
 
-function publishLiveState(state, emittedEvents = [], reset = false) {
+function clearLiveFixtureHistory(fixtureId) {
+  if (!fixtureId) return;
+  liveStructuredHistory.delete(fixtureId);
+  liveInitialLineups.delete(fixtureId);
+}
+
+function publishLiveState(state, emittedEvents = []) {
   if (typeof window === 'undefined' || !state?.fixtureId) return;
-  if (reset || !liveStructuredHistory.has(state.fixtureId)) resetLiveFixtureHistory(state);
+  if (!liveStructuredHistory.has(state.fixtureId)) resetLiveFixtureHistory(state);
 
   const history = liveStructuredHistory.get(state.fixtureId);
   const seen = new Set(history.map(eventStorageKey).filter(Boolean));
@@ -257,7 +263,7 @@ export function createInteractiveMatch(career, db) {
   state.matchDrama ||= { version: MATCH_DRAMA_ENGINE_VERSION, serial: 0, counts: {}, atmosphere: [] };
   state.matchDrama.version = MATCH_DRAMA_ENGINE_VERSION;
   publishLiveXg(state);
-  publishLiveState(state, [], true);
+  publishLiveState(state, []);
   return state;
 }
 
@@ -272,7 +278,9 @@ export function advanceInteractiveMatch(inputState, career, db) {
 }
 
 export function completeInteractiveRound(career, inputState, db) {
-  return base.completeInteractiveRound(career, inputState, db);
+  const result = base.completeInteractiveRound(career, inputState, db);
+  clearLiveFixtureHistory(inputState?.fixtureId);
+  return result;
 }
 
 export function makeSubstitution(inputState, outId, inId, db, career = {}) {
