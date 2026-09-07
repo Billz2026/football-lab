@@ -114,6 +114,16 @@ test('V4.4 latches match states and keeps Fold matchday playable', async ({ page
   // Live commentary should expose football actions, not tactical/database jargon.
   await shell.locator('[data-cm4-speed="4"]').click();
   await expect.poll(async()=>page.locator('[data-commentary-feed] .flm-commentary-line').count(),{timeout:15000}).toBeGreaterThanOrEqual(5);
+  await expect(live).toHaveAttribute('data-authoritative-attack-commentary','2.0.0');
+  const authoritative=page.locator('[data-commentary-feed] .flm-commentary-line[data-fl-authoritative-attack="2.0.0"]');
+  await expect.poll(async()=>authoritative.count(),{timeout:30000}).toBeGreaterThanOrEqual(4);
+  const authoritativeText=(await authoritative.allTextContents()).join(' ');
+  expect(authoritativeText).not.toMatch(/gets the shot away|sees the opening and lets fly|takes aim from here/i);
+  const phases=new Set(await authoritative.evaluateAll(rows=>rows.map(row=>row.getAttribute('data-fl-attack-phase'))));
+  expect(phases.has('buildup')).toBeTruthy();
+  expect(phases.has('attempt')).toBeTruthy();
+  expect(phases.has('outcome')).toBeTruthy();
+
   await expect.poll(async()=>((await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text'))||'').length,{timeout:10000}).toBeGreaterThan(5);
   const displayed=(await shell.locator('[data-cm4-event-text]').getAttribute('data-cm44-text'))||'';
   expect(displayed).not.toMatch(/\b(?:LCB|RCB|LCM|RCM|DMC|AMC|AML|AMR|Central Defender|Inside Forward|Poacher|tactical plan|attacking instruction)\b/i);
