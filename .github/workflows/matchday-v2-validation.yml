@@ -28,6 +28,7 @@ on:
       - 'matchday-engine-v0431.js'
       - 'matchday-structured-attacks-v1.js'
       - 'matchday-structured-flow-v1.js'
+      - 'matchday-live-state-authority-v3.js'
       - 'commentary-authoritative-attacks-v2.js'
       - 'commentary-authoritative-flow-v3.js'
       - 'commentary-authoritative-row-host-v1.js'
@@ -70,6 +71,7 @@ on:
       - 'matchday-engine-v0431.js'
       - 'matchday-structured-attacks-v1.js'
       - 'matchday-structured-flow-v1.js'
+      - 'matchday-live-state-authority-v3.js'
       - 'commentary-authoritative-attacks-v2.js'
       - 'commentary-authoritative-flow-v3.js'
       - 'commentary-authoritative-row-host-v1.js'
@@ -120,6 +122,7 @@ jobs:
           node --check matchday-engine-v0431.js
           node --check matchday-structured-attacks-v1.js
           node --check matchday-structured-flow-v1.js
+          node --check matchday-live-state-authority-v3.js
           node --check commentary-authoritative-attacks-v2.js
           node --check commentary-authoritative-flow-v3.js
           node --check commentary-authoritative-row-host-v1.js
@@ -142,5 +145,8 @@ jobs:
       - name: Install Chromium
         run: npx playwright install chromium
 
-      - name: Run Matchday acceptance tests
-        run: npx playwright test tests/matchday-commentary-v3.spec.js tests/matchday-v2.spec.js tests/matchday-v44.spec.js tests/matchday-v45.spec.js tests/matchday-v46.spec.js --config=playwright.ci.config.js --reporter=line --workers=1
+      - name: Run Commentary V3 browser contract
+        run: npx playwright test tests/matchday-commentary-v3.spec.js --config=playwright.ci.config.js --reporter=line --workers=1
+
+      - name: Run Matchday regression suite
+        run: npx playwright test tests/matchday-v2.spec.js tests/matchday-v44.spec.js tests/matchday-v45.spec.js tests/matchday-v46.spec.js --config=playwright.ci.config.js --reporter=line --workers=1
