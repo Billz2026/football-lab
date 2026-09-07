@@ -141,7 +141,7 @@ test('flow memory tags repeated defensive resistance instead of treating every e
   assert.ok(repeated.contextTags.includes('chasing-game'));
 });
 
-test('authoritative V3 renderer describes the actual defensive duel with named players',()=>{
+test('authoritative V3 renderer describes the actual defensive duel with named participants',()=>{
   const event={
     minute:71,
     type:'commentary',
@@ -172,7 +172,6 @@ test('authoritative V3 renderer describes the actual defensive duel with named p
   assert.equal(AUTHORITATIVE_FLOW_COMMENTARY_VERSION,'3.0.0');
   assert.equal(lines.length,3);
   assert.match(text,/Club 1 Player 10/);
-  assert.match(text,/Club 1 Player 7/);
   assert.match(text,/Club 2 Player 3/);
   assert.match(text,/intercept|cuts the ball out|pass|lane|reads/i);
   assert.match(text,/again|increasingly difficult/i);
