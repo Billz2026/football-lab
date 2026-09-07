@@ -47,7 +47,8 @@ test('new manager appointment flows through fans and a three-question press conf
   expect(news).toContain('first-press-conference');
 
   await page.locator('[data-appt-enter]').click();
-  await expect(page.locator('[data-appointment-v066="summary"]')).toHaveCount(0);
+  await expect(page.locator('#appModal')).not.toHaveClass(/is-open/);
+  await expect.poll(async () => page.evaluate(() => window.FLMManager.activeCareer.appointmentExperience.dismissed)).toBe(true);
   const relationshipDeltas = await page.evaluate(() => Object.values(window.FLMManager.activeCareer.playerRelationships || {}).map(r => r.lastMediaReaction?.delta).filter(Number.isFinite));
   expect(relationshipDeltas.length).toBeGreaterThan(5);
 });

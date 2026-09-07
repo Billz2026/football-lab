@@ -13,7 +13,7 @@ test('Football Database player profiles are read-only even after a career has ex
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
   const exit = page.locator('[data-exit-career]').first();
-  if (await exit.count()) await exit.click();
+  if (await exit.isVisible()) await exit.click();
   else await page.evaluate(() => document.querySelector('.career-app')?.classList.remove('is-open'));
 
   await page.locator('[data-action="database"]').first().click();

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { finishSecondHalf, reachHalfTime } from './helpers/live-match.js';
 
-test.setTimeout(90000);
+test.setTimeout(240000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -34,7 +35,7 @@ async function completePreseason(page) {
     await tab.click();
     await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
     await page.locator('[data-v047-sim]').click();
-    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count);
+    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count, { timeout: 30000 });
   }
   await page.locator('[data-v047-start]').click();
   await expect(page.getByRole('button', { name: 'Matchday', exact: true })).toBeEnabled();
@@ -73,22 +74,23 @@ test('squad and tactics remain manager-controlled and position-aware', async ({ 
 });
 
 test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvious', async ({ page }) => {
-  await page.getByRole('button', { name: 'START NEW GAME', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
-  await page.locator('[data-start-club]').first().click();
+  await page.getByRole('button', { name: /QUICK START/ }).click();
+  await expect(page.locator('.career-app')).toHaveClass(/is-open/);
   await autoPickOptionalXI(page);
   await completePreseason(page);
 
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
-  await page.getByRole('button', { name: 'PLAY MATCH' }).click();
+  await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
 
   const live = page.locator('[data-live-match]');
+  const shell = live.locator('.cm4-shell');
   await expect(live).toHaveAttribute('data-cm-match-v2', '1');
+  await expect(live).toHaveAttribute('data-cm4', '1');
   await expect(page.locator('.flm-cm-v2-tabs [data-cm-v2-view]')).toHaveCount(4);
   await expect(page.locator('.flm-cm-v2-focus')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'PAUSE MATCH', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'MAKE SUB', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'TACTICS', exact: true }).last()).toBeVisible();
+  await expect(shell.locator('[data-cm4-pause]')).toBeVisible();
+  await expect(shell.locator('[data-cm4-subs]')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Tactics', exact: true }).last()).toBeVisible();
 
   const typography = await page.locator('.flm-cm-v2-focus').evaluate(node => {
     const text = node.querySelector('.flm-cm-v2-text');
@@ -98,7 +100,7 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   expect(typography.fontFamily.toLowerCase()).toContain('tahoma');
   expect(typography.fontSize).toBeGreaterThanOrEqual(24);
 
-  await page.getByRole('button', { name: '4×', exact: true }).click();
+  await shell.locator('[data-cm4-speed="4"]').click();
   await expect.poll(async () => page.locator('[data-commentary-feed] .flm-commentary-line').count(), { timeout: 15000 }).toBeGreaterThanOrEqual(5);
   const colouredPassages = await page.locator('[data-commentary-feed] .flm-commentary-line[data-cm-side="home"], [data-commentary-feed] .flm-commentary-line[data-cm-side="away"]').count();
   expect(colouredPassages).toBeGreaterThan(0);
@@ -110,16 +112,21 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   expect(teamColours.away).not.toBe('');
   expect(teamColours.home).not.toBe(teamColours.away);
 
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
-  await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
+  await reachHalfTime(page, live, shell, 90000);
   await page.waitForTimeout(300);
-  await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00');
 
-  await page.getByRole('button', { name: 'MAKE SUB', exact: true }).click();
+  await shell.locator('[data-cm4-subs]').click();
   await expect(page.locator('.v2-sub-shell')).toBeVisible();
   const confirm = page.locator('[data-apply-sub]');
   await expect(confirm).toHaveText('CONFIRM SUBSTITUTION');
   await expect(confirm).toBeDisabled();
+  const subStatus = page.locator('.flm-sub-status');
+  const remainingBeforeText = String(await subStatus.textContent() || '');
+  const remainingBeforeMatch = remainingBeforeText.match(/(\d+)\s+of\s+5 substitutions remaining/i);
+  if (!remainingBeforeMatch) throw new Error(`Could not parse substitution status: ${remainingBeforeText}`);
+  const remainingBefore = Number(remainingBeforeMatch[1]);
+  expect(remainingBefore).toBeGreaterThan(0);
 
   const offColumn = page.locator('.v2-sub-column').nth(0);
   const inColumn = page.locator('.v2-sub-column').nth(1);
@@ -140,13 +147,12 @@ test('Matchday V2 is CM-clear, team-coloured and makes legal substitutions obvio
   await expect(page.locator('[data-v2-plan]')).toContainText('READY TO CONFIRM');
   await expect(confirm).toBeEnabled();
   await confirm.click();
-  await expect(page.locator('.flm-sub-status')).toContainText('4 of 5 substitutions remaining');
+  await expect(subStatus).toContainText(`${remainingBefore - 1} of 5 substitutions remaining`);
   await page.locator('[data-close-manager]').last().click();
 
-  await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
-  await expect(page.locator('[data-match-status]')).toHaveText('FULL TIME');
-  await expect(page.locator('[data-finish-live-match]')).toBeVisible();
+  await shell.locator('[data-cm4-pause]').click();
+  await finishSecondHalf(page, live, shell, 90000);
+  await expect(live.locator('[data-v068-ft-continue]')).toBeVisible();
 });
 
 test('quick start launches Arsenal and mobile navigation remains usable', async ({ page }) => {

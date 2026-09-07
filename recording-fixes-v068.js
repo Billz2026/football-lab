@@ -121,7 +121,7 @@ function normalizeMoneyBeforeAction(target){
 
 async function sync(){queued=false;ensureStyles();repairTransferMoney();await repairOverview();document.querySelectorAll('.flm-live-match').forEach(repairFullTime);}
 function queue(){if(queued)return;queued=true;requestAnimationFrame(()=>sync().catch(()=>{}));}
-document.addEventListener('click',event=>normalizeMoneyBeforeAction(event.target),true);
+window.addEventListener('click',event=>normalizeMoneyBeforeAction(event.target),true);
 new MutationObserver(queue).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-career-tab','data-cm44-state','data-cm44-full-time']});
 setInterval(queue,700);ensureStyles();queue();
 window.FLMRecordingFixesV068=Object.freeze({version:VERSION,refresh:queue});

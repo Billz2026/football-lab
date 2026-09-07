@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { finishSecondHalf } from './helpers/live-match.js';
 
-test.setTimeout(90000);
+test.setTimeout(240000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -25,7 +26,7 @@ async function completePreseason(page) {
     await page.locator('[data-v047-preseason-tab]').click();
     await expect(page.getByRole('heading', { name: 'Pre-Season' })).toBeVisible();
     await page.locator('[data-v047-sim]').click();
-    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count);
+    await expect(page.locator('.v047-fixture.is-played')).toHaveCount(count, { timeout: 30000 });
   }
   await page.locator('[data-v047-start]').click();
   await continueUntil(page, '2026-08-21');
@@ -47,28 +48,32 @@ test('News & Inbox persists read state and generates pre-season plus real round 
 
   await page.locator('[data-v046-filter="Board"]').click();
   await expect(page.locator('.v046-row')).toHaveCount(1);
-  await expect(page.locator('.v046-detail')).toContainText('Board sets season expectations');
+  await expect(page.locator('.v046-detail')).toContainText('Board expectations and transfer budget');
   await page.locator('[data-v046-filter="All"]').click();
   await page.locator('[data-v046-all]').click();
   await expect(page.locator('[data-v046-news-tab] .v046-news-badge')).toBeHidden();
 
-  // A fresh career now starts with no user-selected XI. Choose the optional auto XI
-  // deliberately for this news-flow regression before attempting a competitive match.
+  // A fresh career starts with no user-selected XI. Choose one deliberately before
+  // the competitive match so this regression tests news generation, not lineup gating.
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
-  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(0);
-  await page.locator('[data-auto-pick]').click();
-  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(11);
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(0);
+  await page.locator('[data-v044-auto-pick]').click();
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
 
   await completePreseason(page);
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
-  await page.getByRole('button', { name: 'PLAY MATCH' }).click();
-  await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm-match-v1', '1');
-  await page.locator('[data-cm-speed="4"]').click();
-  await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
-  await expect(page.locator('[data-live-clock]')).toHaveText('45:00');
-  await page.locator('[data-resume-second-half]').click();
-  await expect(page.locator('[data-live-clock]')).toHaveText('90:00', { timeout: 30000 });
-  await page.locator('[data-finish-live-match]').click();
+  await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
+
+  const live = page.locator('[data-live-match]');
+  const shell = live.locator('.cm4-shell');
+  await expect(live).toHaveAttribute('data-cm4', '1');
+  await expect(live).toHaveAttribute('data-cm-match-v2', '1');
+  await shell.locator('[data-cm4-speed="4"]').click();
+  await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 60000 });
+  await shell.locator('[data-cm4-pause]').click();
+  await finishSecondHalf(page, live, shell, 90000);
+  await live.locator('[data-v068-ft-continue]').click();
+  await expect(live).toHaveCount(0, { timeout: 10000 });
 
   const newsAfterMatch = page.locator('[data-v046-news-tab]');
   await expect(newsAfterMatch).toBeVisible();

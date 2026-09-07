@@ -28,11 +28,13 @@ test('V0.5.3 opens player profiles from career lists and exposes live value plus
   await expect(page.locator('#modalTitle')).toContainText(squadPlayerName.split(' ')[0]);
   await expect(page.locator('.flm-profile')).toBeVisible();
   await expect(page.locator('.v053-profile-summary')).toBeVisible();
-  await expect(page.locator('.v053-profile-summary')).toContainText('LIVE VALUE');
+  await expect(page.locator('.v053-profile-summary')).toContainText('WAGE');
+  await expect(page.locator('.v053-profile-summary')).toContainText('CONTRACT');
 
   await page.locator('[data-profile-compare]').click();
   await expect(page.locator('.v053-compare-summary')).toBeVisible();
   await expect(page.locator('.v053-compare-card')).toHaveCount(2);
+  await expect(page.locator('.v053-compare-summary')).toContainText('Value');
   await expect(page.locator('.v053-compare-summary')).toContainText('Apps / Goals / Assists');
   await page.locator('.modal-close').click();
 
@@ -44,7 +46,7 @@ test('V0.5.3 opens player profiles from career lists and exposes live value plus
   await marketName.click();
   await expect(page.locator('#appModal')).toHaveClass(/is-open/);
   await expect(page.locator('#modalTitle')).toHaveText(marketPlayerName);
-  await expect(page.locator('.v053-profile-summary')).toContainText('LIVE VALUE');
+  await expect(page.locator('.v053-profile-summary')).toContainText('WAGE');
 });
 
 async function seedListedOffer(page, serial) {

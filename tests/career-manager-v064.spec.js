@@ -31,7 +31,8 @@ test('new career creates a named manager with experience-based reputation and re
   expect(career.managerName).toBe('Alex Morgan');
   expect(career.managerProfile.experienceId).toBe('professional');
   expect(career.managerReputation).toBe(70);
-  expect(career.squadRespect).toBe(68);
+  expect(career.managerProfile.startingSquadRespect).toBe(68);
+  expect(career.squadRespect).toBe(68 + (career.appointmentExperience?.initialSquadReaction || 0));
   expect(Object.values(career.playerRelationships || {}).length).toBeGreaterThan(10);
   expect(Object.values(career.playerRelationships).every(item => Number.isFinite(item.managerRespect))).toBeTruthy();
   expect(career.boardExpectations.transferBudget).toBeGreaterThan(0);
