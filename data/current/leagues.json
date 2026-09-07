@@ -52,5 +52,15 @@
     "season": "2026/27",
     "externalIds": {},
     "importStatus": "pending"
+  },
+  {
+    "id": "esp-la-liga",
+    "name": "La Liga",
+    "countryCode": "ESP",
+    "level": 1,
+    "expectedClubCount": 20,
+    "season": "2026/27",
+    "externalIds": {},
+    "importStatus": "pending"
   }
 ]
