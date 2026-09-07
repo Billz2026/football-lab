@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.setTimeout(45000);
+test.setTimeout(60000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -15,7 +15,7 @@ async function openTransferWindow(page) {
   await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
 }
 
-test('V0.6.1 transfer market completes a signing and exposes the living football world without forcing an AI deal', async ({ page }) => {
+test('V0.6.1 transfer market completes a signing through club and player negotiations and exposes the living football world', async ({ page }) => {
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
   await openTransferWindow(page);
@@ -35,29 +35,60 @@ test('V0.6.1 transfer market completes a signing and exposes the living football
   await expect(page.locator('.v050-player-row')).not.toHaveCount(0);
   await expect(page.locator('.v050-budget')).toContainText('TRANSFER BUDGET');
 
+  // The market is sorted high-to-low by value, so the final row gives this regression
+  // a deterministic affordable target while still exercising the real negotiation UI.
   const targetRow = page.locator('.v050-player-row').last();
   const targetName = (await targetRow.locator('strong').textContent()).trim();
   await targetRow.click();
   await expect(page.locator('.v050-detail')).toContainText(targetName);
   await expect(page.locator('.v050-detail')).not.toContainText(/\bCA\b|overall ability/i);
 
-  await page.locator('[data-v050-asking]').click();
-  await page.locator('[data-v050-offer]').click();
-  await expect(page.locator('[data-v050-contract]')).toBeVisible();
-  await page.locator('[data-v050-contract]').click();
+  await targetRow.locator('strong').click();
+  await expect(page.locator('#appModal')).toHaveClass(/is-open/);
+  await expect(page.locator('#modalTitle')).toContainText(targetName);
+  const bidAction = page.locator('[data-v061-profile-bid]');
+  await expect(bidAction).toBeVisible();
+  await expect(bidAction).toBeEnabled();
+  await bidAction.click();
 
-  await expect(page.locator('.v050-own-list')).toContainText(targetName);
-  await expect(page.locator('.v050-message.good')).toContainText(/has signed/i);
+  const negotiation = page.locator('[data-v061-negotiation]');
+  await expect(negotiation).toBeVisible();
+  const playerId = await negotiation.getAttribute('data-v061-negotiation');
+  const terms = await page.evaluate(id => {
+    const c = window.FLMManager.activeCareer;
+    const n = c.transfers.negotiations[id];
+    return {
+      askingPrice: n?.askingPrice || 0,
+      transferBudget: c.transfers.transferBudget,
+      wageRoom: c.transfers.wageRoom
+    };
+  }, playerId);
+  expect(terms.askingPrice).toBeGreaterThan(0);
+  expect(terms.askingPrice).toBeLessThanOrEqual(terms.transferBudget);
+
+  await negotiation.locator('[data-v061-fee]').fill(String(terms.askingPrice));
+  await negotiation.locator('[data-v061-submit-bid]').click();
+  await expect(page.locator('[data-v061-submit-contract]')).toBeVisible();
+
+  const wageDemand = await page.evaluate(id => window.FLMManager.activeCareer.transfers.negotiations[id]?.wageDemand || 0, playerId);
+  const wageRoom = await page.evaluate(() => window.FLMManager.activeCareer.transfers.wageRoom);
+  expect(wageDemand).toBeGreaterThan(0);
+  expect(wageDemand).toBeLessThanOrEqual(wageRoom);
+  await page.locator('[data-v061-wage]').fill(String(wageDemand));
+  await page.locator('[data-v061-submit-contract]').click();
+  await expect(page.locator('.v061-complete')).toContainText('DEAL COMPLETED');
 
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
-  const transfer = saved.transfers.completed.find(item => item.playerId && item.toClubId === saved.clubId);
+  const transfer = saved.transfers.completed.find(item => item.playerId === playerId && item.toClubId === saved.clubId);
   expect(transfer).toBeTruthy();
-  expect(saved.transfers.ownership[transfer.playerId]).toBe(saved.clubId);
-  expect(saved.news.items.some(item => item.category === 'Transfers' && item.relatedPlayerId === transfer.playerId)).toBeTruthy();
+  expect(saved.transfers.ownership[playerId]).toBe(saved.clubId);
+  expect(saved.news.items.some(item => item.category === 'Transfers' && item.relatedPlayerId === playerId)).toBeTruthy();
   expect(saved.transfers.aiClubs && Object.keys(saved.transfers.aiClubs).length).toBeGreaterThan(0);
   expect(Array.isArray(saved.transfers.processedWorldPhases)).toBeTruthy();
   expect(Array.isArray(saved.transfers.rumours)).toBeTruthy();
 
+  await page.locator('[data-v061-close]').click();
+  await page.locator('.modal-close').click();
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   await expect(page.locator('.career-content')).toContainText(targetName);
 });
