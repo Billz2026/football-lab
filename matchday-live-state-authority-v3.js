@@ -16,8 +16,15 @@ function isAuthoritative(value) {
 }
 
 function eventStorageKey(event) {
+  if (event?.liveEventId) return `event:${event.liveEventId}`;
   if (event?.attack?.sequenceId) return `attack:${event.attack.sequenceId}`;
   if (event?.flow?.sequenceId) return `flow:${event.flow.sequenceId}`;
+  if (event?.type) {
+    return `legacy:${[
+      event.type,event.minute,event.clubId,event.playerId,event.assistPlayerId,
+      event.subtype,event.outcome,event.text,(event.lines || []).join('|')
+    ].map(value => String(value ?? '')).join(':')}`;
+  }
   return null;
 }
 
