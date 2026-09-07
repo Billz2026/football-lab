@@ -131,17 +131,34 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   expect(visibleText).toMatch(/tackle|intercept|block|header|claim|press|turnover|offside|second ball|recycle|first touch|delivery|cross/i);
   expect(visibleText).not.toMatch(/move it from side to side|danger passes|gets down the flank and crosses early|closes down aggressively and forces the hurried pass/i);
 
-  const subtypes = await page.evaluate(fixtureId => {
+  const flowDiagnostics = await page.evaluate(fixtureId => {
     const snapshot = window.__flmLiveStateV332;
-    if (snapshot?.fixtureId !== fixtureId) return [];
-    return [...new Set((snapshot.events || []).filter(event => event?.flow?.sequenceId).map(event => event.flow.subtype))];
+    return {
+      fixtureId: snapshot?.fixtureId || null,
+      source: snapshot?.source || null,
+      minute: snapshot?.minute ?? null,
+      flows: snapshot?.fixtureId === fixtureId
+        ? (snapshot.events || []).filter(event => event?.flow?.sequenceId).map(event => ({
+            type: event.type,
+            sequenceId: event.flow.sequenceId,
+            subtype: event.flow.subtype,
+            action: event.flow.action,
+            category: event.flow.category,
+            outcome: event.flow.outcome
+          }))
+        : []
+    };
   }, liveFixtureId);
+  const subtypes = [...new Set(flowDiagnostics.flows.map(event => event.subtype))];
   const allowed = new Set([
     'interception','standing_tackle','sliding_tackle','poor_touch','overhit_pass','forced_back',
     'second_ball_win','blocked_cross','defensive_header','keeper_claim','overhit_cross','press_regain',
     'offside_trap','defensive_header_corner','blocked_cross_corner','last_ditch_block_corner'
   ]);
-  expect(subtypes.some(subtype => allowed.has(subtype))).toBe(true);
+  expect(
+    subtypes.some(subtype => allowed.has(subtype)),
+    `Unexpected V3 flow state: ${JSON.stringify(flowDiagnostics)}`
+  ).toBe(true);
 
   // Performance contract: V3 commentary must not starve the calibrated match clock.
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 30000 });
