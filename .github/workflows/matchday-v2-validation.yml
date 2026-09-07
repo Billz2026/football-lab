@@ -37,6 +37,7 @@ on:
       - 'tests/helpers/start-career.js'
       - 'tests/structured-attacks-v1.test.js'
       - 'tests/structured-flow-v1.test.js'
+      - 'tests/matchday-commentary-v3.spec.js'
       - 'tests/matchday-v2.spec.js'
       - 'tests/matchday-v44.spec.js'
       - 'tests/matchday-v45.spec.js'
@@ -78,6 +79,7 @@ on:
       - 'tests/helpers/start-career.js'
       - 'tests/structured-attacks-v1.test.js'
       - 'tests/structured-flow-v1.test.js'
+      - 'tests/matchday-commentary-v3.spec.js'
       - 'tests/matchday-v2.spec.js'
       - 'tests/matchday-v44.spec.js'
       - 'tests/matchday-v45.spec.js'
@@ -125,6 +127,7 @@ jobs:
           node --check tests/helpers/start-career.js
           node --check tests/structured-attacks-v1.test.js
           node --check tests/structured-flow-v1.test.js
+          node --check tests/matchday-commentary-v3.spec.js
           node --check tests/matchday-v2.spec.js
           node --check tests/matchday-v44.spec.js
           node --check tests/matchday-v45.spec.js
@@ -140,4 +143,4 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run Matchday acceptance tests
-        run: npx playwright test tests/matchday-v2.spec.js tests/matchday-v44.spec.js tests/matchday-v45.spec.js tests/matchday-v46.spec.js --config=playwright.ci.config.js --reporter=line --workers=1
+        run: npx playwright test tests/matchday-commentary-v3.spec.js tests/matchday-v2.spec.js tests/matchday-v44.spec.js tests/matchday-v45.spec.js tests/matchday-v46.spec.js --config=playwright.ci.config.js --reporter=line --workers=1
