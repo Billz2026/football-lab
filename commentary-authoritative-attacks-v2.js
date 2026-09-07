@@ -16,7 +16,7 @@ function hashString(value){
 }
 
 export function createAuthoritativeAttackMemory(){
-  return {linesBySequence:new Map(),lastVariant:{},recentFamilies:[]};
+  return {linesBySequence:new Map(),lastVariant:{},recentFamilies:[],processedSequences:new Set(),latestProtectedRow:null};
 }
 
 function choose(list,key,memory,family){
@@ -266,7 +266,16 @@ export function goalFlashCopy(event,snapshot={},db=null){
 function minuteOfRow(row){return parseInt(clean(row?.querySelector?.('b')?.textContent),10)||0;}
 function sourceRows(live){return[...live.querySelectorAll('[data-commentary-feed] .flm-commentary-line')];}
 function memoryFor(live){if(!memories.has(live))memories.set(live,createAuthoritativeAttackMemory());return memories.get(live);}
-function structuredEvents(snapshot){return(snapshot?.events||[]).filter(event=>event?.attack?.sequenceId&&['goal','save','woodwork','miss'].includes(event.type));}
+function isStructuredEvent(event){return Boolean(event?.attack?.sequenceId&&['goal','save','woodwork','miss'].includes(event.type));}
+function structuredEvents(snapshot){return(snapshot?.events||[]).filter(isStructuredEvent);}
+function pendingStructuredEvents(snapshot,memory){
+  const pending=[];
+  for(const event of snapshot?.events||[]){
+    const sequenceId=event?.attack?.sequenceId;
+    if(isStructuredEvent(event)&&!memory.processedSequences?.has(sequenceId))pending.push(event);
+  }
+  return pending;
+}
 
 function protectRow(row,line,event,lineIndex){
   const span=row.querySelector('span');
@@ -288,19 +297,23 @@ function protectRow(row,line,event,lineIndex){
 }
 
 function applyStructuredRows(live,snapshot,db,memory){
+  const pending=pendingStructuredEvents(snapshot,memory);
+  if(!pending.length)return false;
   const rows=sourceRows(live);
   const groups=new Map();
-  for(const event of structuredEvents(snapshot)){
+  for(const event of pending){
     const key=`${Number(event.minute)}|${event.type}`;
     if(!groups.has(key))groups.set(key,[]);
     groups.get(key).push(event);
   }
+  let changed=false;
   for(const [key,events] of groups){
     const [minuteText,type]=key.split('|');
     const minute=Number(minuteText);
-    const candidates=rows.filter(row=>minuteOfRow(row)===minute&&row.classList.contains(type));
+    const candidates=rows.filter(row=>!row.dataset.flSequenceId&&minuteOfRow(row)===minute&&row.classList.contains(type));
     const rendered=events.map(event=>({event,lines:renderAuthoritativeAttackLines({event,db,snapshot,memory})}));
     const expectedCount=rendered.reduce((sum,item)=>sum+item.lines.length,0);
+    if(candidates.length<expectedCount)continue;
     const usable=candidates.length>expectedCount?candidates.slice(-expectedCount):candidates;
     let cursor=0;
     for(const item of rendered){
@@ -309,19 +322,23 @@ function applyStructuredRows(live,snapshot,db,memory){
       item.event.attack.contextTags=[...new Set(item.event.attack.contextTags||[])];
       item.lines.forEach((line,index)=>{
         const row=usable[cursor++];
-        if(row)protectRow(row,line,item.event,index);
+        if(!row)return;
+        protectRow(row,line,item.event,index);
+        memory.latestProtectedRow=row;
       });
+      memory.processedSequences?.add(item.event.attack.sequenceId);
+      changed=true;
     }
   }
+  return changed;
 }
 
-function latestProtectedRow(live){return sourceRows(live).filter(row=>row.dataset.flAuthoritativeAttack===AUTHORITATIVE_ATTACK_COMMENTARY_VERSION).at(-1)||null;}
-
-function syncCentre(live,snapshot,db){
+function syncCentre(live,snapshot,db,memory,rows=null){
   if(live.dataset.cm44State==='fulltime'||live.dataset.cm44FullTime==='1')return;
-  const latest=latestProtectedRow(live);
-  const absoluteLatest=sourceRows(live).at(-1);
-  if(!latest||latest!==absoluteLatest)return;
+  const latest=memory.latestProtectedRow;
+  if(!latest?.isConnected)return;
+  const absoluteLatest=(rows||sourceRows(live)).at(-1);
+  if(latest!==absoluteLatest)return;
   const text=clean(latest.querySelector('span')?.textContent);
   const minute=clean(latest.querySelector('b')?.textContent)||'—';
   const textNode=live.querySelector('[data-cm4-event-text]');
@@ -339,10 +356,19 @@ function syncCentre(live,snapshot,db){
   }
 }
 
+function latestStructuredGoal(snapshot){
+  const events=snapshot?.events||[];
+  for(let index=events.length-1;index>=0;index-=1){
+    const event=events[index];
+    if(event?.type==='goal'&&event?.attack?.sequenceId)return event;
+  }
+  return null;
+}
+
 function syncFlash(live,snapshot,db){
   const flash=live.querySelector('.flm-goal-flash.is-visible');
   if(!flash)return;
-  const event=structuredEvents(snapshot).filter(item=>item.type==='goal').at(-1);
+  const event=latestStructuredGoal(snapshot);
   if(!event)return;
   const copy=goalFlashCopy(event,snapshot,db);
   if(!copy)return;
@@ -363,8 +389,12 @@ async function syncLive(live){
   const db=await database();
   if(!db)return;
   const memory=memoryFor(live);
-  applyStructuredRows(live,snapshot,db,memory);
-  syncCentre(live,snapshot,db);
+  if(memory.latestProtectedRow&&!memory.latestProtectedRow.isConnected){
+    memory.processedSequences?.clear();
+    memory.latestProtectedRow=null;
+  }
+  const changed=applyStructuredRows(live,snapshot,db,memory);
+  if(changed)syncCentre(live,snapshot,db,memory);
   syncFlash(live,snapshot,db);
   if(live.dataset.authoritativeAttackCommentary!==AUTHORITATIVE_ATTACK_COMMENTARY_VERSION)live.dataset.authoritativeAttackCommentary=AUTHORITATIVE_ATTACK_COMMENTARY_VERSION;
 }
@@ -376,11 +406,21 @@ function sync(){
 
 function queue(){if(queued)return;queued=true;requestAnimationFrame(sync);}
 
+function relevantMutation(mutation){
+  const target=mutation.target?.nodeType===1?mutation.target:mutation.target?.parentElement;
+  if(target?.closest?.('[data-commentary-feed],.flm-goal-flash'))return true;
+  for(const node of mutation.addedNodes||[]){
+    if(node?.nodeType!==1)continue;
+    if(node.matches?.('.flm-live-match,[data-live-match],[data-commentary-feed],.flm-commentary-line,.flm-goal-flash'))return true;
+    if(node.querySelector?.('[data-live-match],[data-commentary-feed],.flm-commentary-line,.flm-goal-flash'))return true;
+  }
+  return false;
+}
+
 if(typeof window!=='undefined'&&typeof document!=='undefined'){
   queue();
-  // Observe only row insertion/text changes. Watching the guard attributes themselves
-  // would create a permanent observer loop because this module deliberately stamps
-  // structured rows so the legacy commentary layers leave them alone.
-  new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+  // Only commentary/goal-flash mutations can request a pass. Structured sequences are
+  // processed once, so the cost does not grow with every unrelated Match Centre update.
+  new MutationObserver(mutations=>{if(mutations.some(relevantMutation))queue();}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
   window.FLMCommentaryAuthoritativeAttacksV2=Object.freeze({version:AUTHORITATIVE_ATTACK_COMMENTARY_VERSION,refresh:queue});
 }
