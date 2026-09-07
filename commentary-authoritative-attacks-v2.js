@@ -115,7 +115,7 @@ function footLabel(bodyPart){
   return'';
 }
 
-function buildupLines({event,attack,db,team,shooter,creator,memory}){
+function buildupLines({attack,team,shooter,creator,memory}){
   const key=`${attack.sequenceId}:buildup`;
   const side=attack.side||'wide area';
   switch(attack.delivery){
@@ -195,7 +195,7 @@ function attemptLine({attack,shooter,memory}){
   }
 }
 
-function goalLine({event,attack,db,team,shooter,snapshot,context}){
+function goalLine({event,team,shooter,context}){
   const tags=new Set(context.tags||[]);
   const teamUpper=upper(team);
   const scorerUpper=upper(shooter);
@@ -213,9 +213,9 @@ function goalLine({event,attack,db,team,shooter,snapshot,context}){
   return`GOAL! ${shooter} finishes the move for ${team}.`;
 }
 
-function outcomeLine({event,attack,db,team,opponent,shooter,keeper,snapshot,context,memory}){
+function outcomeLine({event,attack,team,opponent,shooter,keeper,context,memory}){
   const key=`${attack.sequenceId}:outcome`;
-  if(attack.outcome==='goal')return goalLine({event,attack,db,team,shooter,snapshot,context});
+  if(attack.outcome==='goal')return goalLine({event,team,shooter,context});
   if(attack.outcome==='saved_held')return choose([`${keeper} reads it and holds cleanly.`,`${keeper} gets his body behind it and makes the catch.`],key,memory,'save_hold');
   if(attack.outcome==='saved_parried')return choose([`${keeper} gets down and parries it back into the area!`,`${keeper} cannot hold it — the ball is pushed back into danger.`],key,memory,'save_parry');
   if(attack.outcome==='saved_tipped')return choose([`${keeper} gets fingertips to it and turns it away!`,`${keeper} stretches and tips it beyond the frame of the goal.`],key,memory,'save_tip');
@@ -239,10 +239,10 @@ export function renderAuthoritativeAttackLines({event,db,snapshot={},memory=crea
   const keeper=playerName(db,attack.opponentPlayerId,'The goalkeeper');
   const context=attackNarrativeContext(event,attack,snapshot);
   const lines=[
-    buildupLines({event,attack,db,team,shooter,creator,memory}),
+    buildupLines({attack,team,shooter,creator,memory}),
     penetrationLine({attack,shooter,memory}),
     attemptLine({attack,shooter,memory}),
-    outcomeLine({event,attack,db,team,opponent,shooter,keeper,snapshot,context,memory})
+    outcomeLine({event,attack,team,opponent,shooter,keeper,context,memory})
   ].filter(Boolean);
   attack.contextTags=[...new Set([...(attack.contextTags||[]),...context.tags])];
   if(memory.linesBySequence)memory.linesBySequence.set(attack.sequenceId,lines);
@@ -266,25 +266,25 @@ export function goalFlashCopy(event,snapshot={},db=null){
 function minuteOfRow(row){return parseInt(clean(row?.querySelector?.('b')?.textContent),10)||0;}
 function sourceRows(live){return[...live.querySelectorAll('[data-commentary-feed] .flm-commentary-line')];}
 function memoryFor(live){if(!memories.has(live))memories.set(live,createAuthoritativeAttackMemory());return memories.get(live);}
-
 function structuredEvents(snapshot){return(snapshot?.events||[]).filter(event=>event?.attack?.sequenceId&&['goal','save','woodwork','miss'].includes(event.type));}
 
 function protectRow(row,line,event,lineIndex){
   const span=row.querySelector('span');
   if(!span)return;
   if(clean(span.textContent)!==clean(line))span.textContent=line;
-  span.dataset.cv2Raw=line;
-  span.dataset.cm332Raw=line;
-  row.dataset.flAuthoritativeAttack=AUTHORITATIVE_ATTACK_COMMENTARY_VERSION;
-  row.dataset.flSequenceId=event.attack.sequenceId;
-  row.dataset.flAttackPhase=event.attack.beats?.[lineIndex]?.phase||['buildup','penetration','attempt','outcome'][lineIndex]||'outcome';
-  row.dataset.flcV1='1';
-  row.dataset.cv2Processed='1';
-  delete row.dataset.cv2Duplicate;
-  delete row.dataset.cv3Duplicate;
-  row.removeAttribute('aria-hidden');
-  if(event.type==='goal'&&lineIndex===3)row.dataset.flcFinal='1';
-  else delete row.dataset.flcFinal;
+  if(span.dataset.cv2Raw!==line)span.dataset.cv2Raw=line;
+  if(span.dataset.cm332Raw!==line)span.dataset.cm332Raw=line;
+  if(row.dataset.flAuthoritativeAttack!==AUTHORITATIVE_ATTACK_COMMENTARY_VERSION)row.dataset.flAuthoritativeAttack=AUTHORITATIVE_ATTACK_COMMENTARY_VERSION;
+  if(row.dataset.flSequenceId!==event.attack.sequenceId)row.dataset.flSequenceId=event.attack.sequenceId;
+  const phase=event.attack.beats?.[lineIndex]?.phase||['buildup','penetration','attempt','outcome'][lineIndex]||'outcome';
+  if(row.dataset.flAttackPhase!==phase)row.dataset.flAttackPhase=phase;
+  if(row.dataset.flcV1!=='1')row.dataset.flcV1='1';
+  if(row.dataset.cv2Processed!=='1')row.dataset.cv2Processed='1';
+  if(row.dataset.cv2Duplicate)delete row.dataset.cv2Duplicate;
+  if(row.dataset.cv3Duplicate)delete row.dataset.cv3Duplicate;
+  if(row.hasAttribute('aria-hidden'))row.removeAttribute('aria-hidden');
+  if(event.type==='goal'&&lineIndex===3){if(row.dataset.flcFinal!=='1')row.dataset.flcFinal='1';}
+  else if(row.dataset.flcFinal)delete row.dataset.flcFinal;
 }
 
 function applyStructuredRows(live,snapshot,db,memory){
@@ -325,33 +325,36 @@ function syncCentre(live,snapshot,db){
   const text=clean(latest.querySelector('span')?.textContent);
   const minute=clean(latest.querySelector('b')?.textContent)||'—';
   const textNode=live.querySelector('[data-cm4-event-text]');
-  if(textNode){textNode.textContent=text;textNode.dataset.cm44Text=text;textNode.setAttribute('aria-label',text);}
-  const minuteNode=live.querySelector('[data-cm4-event-minute]');if(minuteNode)minuteNode.textContent=minute;
+  if(textNode&&clean(textNode.textContent)!==text){textNode.textContent=text;textNode.dataset.cm44Text=text;textNode.setAttribute('aria-label',text);}
+  const minuteNode=live.querySelector('[data-cm4-event-minute]');if(minuteNode&&clean(minuteNode.textContent)!==minute)minuteNode.textContent=minute;
+  const event=[...structuredEvents(snapshot)].reverse().find(item=>item.attack?.sequenceId===latest.dataset.flSequenceId);
   const teamNode=live.querySelector('[data-cm4-event-team]');
-  const event=structuredEvents(snapshot).findLast?.(item=>item.attack?.sequenceId===latest.dataset.flSequenceId)
-    ||[...structuredEvents(snapshot)].reverse().find(item=>item.attack?.sequenceId===latest.dataset.flSequenceId);
-  if(teamNode&&event)teamNode.textContent=clubName(db,event.clubId,'MATCH UPDATE');
+  if(teamNode&&event){const label=clubName(db,event.clubId,'MATCH UPDATE');if(clean(teamNode.textContent)!==label)teamNode.textContent=label;}
   const eventNode=live.querySelector('[data-cm4-event]');
-  if(eventNode){eventNode.dataset.cm44Type=event?.type==='goal'?'goal':'chance';eventNode.dataset.cm46Major=event?.type==='goal'?'1':'0';}
+  if(eventNode&&event){
+    const type=event.type==='goal'?'goal':'chance';
+    const major=event.type==='goal'?'1':'0';
+    if(eventNode.dataset.cm44Type!==type)eventNode.dataset.cm44Type=type;
+    if(eventNode.dataset.cm46Major!==major)eventNode.dataset.cm46Major=major;
+  }
 }
 
 function syncFlash(live,snapshot,db){
   const flash=live.querySelector('.flm-goal-flash.is-visible');
   if(!flash)return;
-  const goals=structuredEvents(snapshot).filter(event=>event.type==='goal');
-  const event=goals.at(-1);
+  const event=structuredEvents(snapshot).filter(item=>item.type==='goal').at(-1);
   if(!event)return;
   const copy=goalFlashCopy(event,snapshot,db);
   if(!copy)return;
-  const word=flash.querySelector('.goal-word');if(word)word.textContent=copy.word;
+  const word=flash.querySelector('.goal-word');if(word&&word.textContent!==copy.word)word.textContent=copy.word;
   const inner=flash.querySelector('.flm-goal-flash-inner');
   if(inner){
     let detail=inner.querySelector('.flc-goal-detail');
     if(!detail){detail=document.createElement('span');detail.className='flc-goal-detail';inner.appendChild(detail);}
-    detail.textContent=copy.detail||'';
+    if(detail.textContent!==(copy.detail||''))detail.textContent=copy.detail||'';
     detail.hidden=!copy.detail;
   }
-  flash.dataset.flAuthoritativeAttack=AUTHORITATIVE_ATTACK_COMMENTARY_VERSION;
+  if(flash.dataset.flAuthoritativeAttack!==AUTHORITATIVE_ATTACK_COMMENTARY_VERSION)flash.dataset.flAuthoritativeAttack=AUTHORITATIVE_ATTACK_COMMENTARY_VERSION;
 }
 
 async function syncLive(live){
@@ -363,20 +366,21 @@ async function syncLive(live){
   applyStructuredRows(live,snapshot,db,memory);
   syncCentre(live,snapshot,db);
   syncFlash(live,snapshot,db);
-  live.dataset.authoritativeAttackCommentary=AUTHORITATIVE_ATTACK_COMMENTARY_VERSION;
+  if(live.dataset.authoritativeAttackCommentary!==AUTHORITATIVE_ATTACK_COMMENTARY_VERSION)live.dataset.authoritativeAttackCommentary=AUTHORITATIVE_ATTACK_COMMENTARY_VERSION;
 }
 
 function sync(){
   queued=false;
-  for(const live of document.querySelectorAll('.flm-live-match,[data-live-match]')){
-    syncLive(live).catch(()=>{});
-  }
+  for(const live of document.querySelectorAll('.flm-live-match,[data-live-match]'))syncLive(live).catch(()=>{});
 }
 
 function queue(){if(queued)return;queued=true;requestAnimationFrame(sync);}
 
 if(typeof window!=='undefined'&&typeof document!=='undefined'){
   queue();
-  new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','data-cv2-processed','data-flc-v1','data-flc-final']});
+  // Observe only row insertion/text changes. Watching the guard attributes themselves
+  // would create a permanent observer loop because this module deliberately stamps
+  // structured rows so the legacy commentary layers leave them alone.
+  new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
   window.FLMCommentaryAuthoritativeAttacksV2=Object.freeze({version:AUTHORITATIVE_ATTACK_COMMENTARY_VERSION,refresh:queue});
 }
