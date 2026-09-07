@@ -55,13 +55,13 @@ test('News & Inbox persists read state and generates pre-season plus real round 
   // A fresh career now starts with no user-selected XI. Choose the optional auto XI
   // deliberately for this news-flow regression before attempting a competitive match.
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
-  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(0);
-  await page.locator('[data-auto-pick]').click();
-  await expect(page.locator('[data-lineup-player]:checked')).toHaveCount(11);
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(0);
+  await page.locator('[data-v044-auto-pick]').click();
+  await expect(page.locator('[data-v044-lineup]:checked')).toHaveCount(11);
 
   await completePreseason(page);
   await page.getByRole('button', { name: 'Matchday', exact: true }).click();
-  await page.getByRole('button', { name: 'PLAY MATCH' }).click();
+  await page.getByRole('button', { name: 'PLAY MATCH', exact: true }).click();
   await expect(page.locator('[data-live-match]')).toHaveAttribute('data-cm-match-v1', '1');
   await page.locator('[data-cm-speed="4"]').click();
   await expect(page.locator('[data-resume-second-half]')).toBeVisible({ timeout: 30000 });
