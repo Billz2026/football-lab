@@ -40,21 +40,47 @@ function isLiveMatchState(value){
     &&value.stats&&Array.isArray(value.events));
 }
 
+function snapshotKey(value){
+  const events=value.events||[];
+  const last=events[events.length-1];
+  return [
+    value.fixtureId,
+    events.length,
+    value.structuredAttackSerial||0,
+    last?.sequenceId||'',
+    last?.minute||0,
+    last?.type||''
+  ].join('|');
+}
+
 export function installStructuredCommentarySnapshot(){
   if(typeof window==='undefined'||window.__flmStructuredCommentarySnapshotInstalled)return;
   window.__flmStructuredCommentarySnapshotInstalled=STRUCTURED_COMMENTARY_SNAPSHOT_VERSION;
   const prior=JSON.stringify;
+  let lastKey='';
   JSON.stringify=function(value,...rest){
     const live=isLiveMatchState(value);
+    const key=live?snapshotKey(value):'';
     let events=null;
-    if(live){
+    if(live&&key!==lastKey){
       try{events=structuredEvents(value);}catch(_){events=null;}
     }
     const result=Reflect.apply(prior,this,[value,...rest]);
     if(live&&events){
       try{
         const base=window.__flmLiveStateV332||{};
-        window.__flmLiveStateV332={...base,events,structuredCommentarySnapshotVersion:STRUCTURED_COMMENTARY_SNAPSHOT_VERSION};
+        window.__flmLiveStateV332={
+          ...base,
+          fixtureId:value.fixtureId,
+          minute:value.minute,
+          homeClubId:value.homeClubId,
+          awayClubId:value.awayClubId,
+          homeGoals:value.homeGoals,
+          awayGoals:value.awayGoals,
+          events,
+          structuredCommentarySnapshotVersion:STRUCTURED_COMMENTARY_SNAPSHOT_VERSION
+        };
+        lastKey=key;
       }catch(_){}
     }
     return result;
