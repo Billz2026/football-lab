@@ -1,6 +1,32 @@
 import { expect } from '@playwright/test';
 
-export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firstName='Test',lastName='Manager',experience='professional',dismissAppointment=true}={}){
+async function completeAppointmentExperience(page){
+  const appointment=page.locator('#appModal.flm-appointment-open');
+  if(!(await appointment.isVisible({timeout:3000}).catch(()=>false)))return;
+
+  const fanButton=appointment.locator('[data-appt-fans]');
+  if(await fanButton.isVisible({timeout:1200}).catch(()=>false))await fanButton.click();
+
+  const mediaButton=appointment.locator('[data-appt-media]');
+  if(await mediaButton.isVisible({timeout:1200}).catch(()=>false))await mediaButton.click();
+
+  // Complete the real first press conference rather than closing an incomplete
+  // modal. The appointment feature intentionally reopens until it is finished.
+  for(let answer=0;answer<12;answer+=1){
+    const enter=appointment.locator('[data-appt-enter]');
+    if(await enter.isVisible({timeout:250}).catch(()=>false))break;
+    const option=appointment.locator('[data-media-answer]:not(:disabled)').first();
+    if(!(await option.isVisible({timeout:700}).catch(()=>false)))break;
+    await option.click();
+  }
+
+  const enter=appointment.locator('[data-appt-enter]');
+  await expect(enter).toBeVisible({timeout:3000});
+  await enter.click();
+  await expect(appointment).toBeHidden({timeout:3000});
+}
+
+export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firstName='Test',lastName='Manager',experience='professional',completeAppointment=true}={}){
   await page.getByRole('button',{name:'START NEW GAME',exact:true}).click();
 
   await expect(page.locator('[data-manager-setup-v064="identity"]')).toBeVisible();
@@ -18,15 +44,5 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   await clubs.nth(clubIndex).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
-  // The appointment experience is a legitimate post-onboarding modal. Matchday
-  // tests are not appointment-media tests, so dismiss it deliberately before
-  // interacting with the career shell. This prevents the modal backdrop from
-  // intercepting Squad/Matchday clicks while still exercising the real start flow.
-  if(dismissAppointment){
-    const appointment=page.locator('#appModal.flm-appointment-open');
-    if(await appointment.isVisible({timeout:2500}).catch(()=>false)){
-      await appointment.locator('[data-close-modal]').first().click();
-      await expect(appointment).toBeHidden({timeout:3000});
-    }
-  }
+  if(completeAppointment)await completeAppointmentExperience(page);
 }
