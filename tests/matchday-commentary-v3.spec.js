@@ -63,17 +63,16 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
 
   await shell.locator('[data-cm4-speed="4"]').click();
 
-  await expect.poll(async () => page.evaluate(fixtureId => {
-    const snapshot = window.__flmLiveStateV332;
-    if (snapshot?.fixtureId !== fixtureId) return 0;
-    return (snapshot.events || []).filter(event => event?.flow?.sequenceId).length;
-  }, liveFixtureId), { timeout: 20000 }).toBeGreaterThanOrEqual(1);
-
-  const firstSequenceId = await page.evaluate(fixtureId => {
-    const snapshot = window.__flmLiveStateV332;
-    if (snapshot?.fixtureId !== fixtureId) return null;
-    return (snapshot.events || []).find(event => event?.flow?.sequenceId)?.flow?.sequenceId || null;
-  }, liveFixtureId);
+  let firstSequenceId = null;
+  await expect.poll(async () => {
+    const observedSequenceId = await page.evaluate(fixtureId => {
+      const snapshot = window.__flmLiveStateV332;
+      if (snapshot?.fixtureId !== fixtureId) return null;
+      return (snapshot.events || []).find(event => event?.flow?.sequenceId)?.flow?.sequenceId || null;
+    }, liveFixtureId);
+    if (observedSequenceId) firstSequenceId = observedSequenceId;
+    return firstSequenceId;
+  }, { timeout: 20000 }).toBeTruthy();
   expect(firstSequenceId).toBeTruthy();
 
   await page.waitForTimeout(1200);
