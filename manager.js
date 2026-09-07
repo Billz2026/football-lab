@@ -1,3 +1,4 @@
+import './matchday-state-native-guard-v1.js?v=1.0.0';
 import './manager-base-v045.js?v=0.4.5';
 import './player-audit-v1.js?v=1.0.0';
 import './player-audit-v2.js?v=2.0.0';
@@ -24,6 +25,7 @@ import './matchday-polish-v321.js?v=3.2.1';
 import './matchday-console-v33.js?v=3.3.0';
 import './matchday-console-v331-compat.js?v=3.3.1';
 import './matchday-density-v332.js?v=3.3.2';
+import './matchday-state-native-restore-v1.js?v=1.0.0';
 import './matchday-stability-v333.js?v=3.3.3';
 import './match-centre-v4.js?v=4.0.0';
 import './match-centre-v4-mode.js?v=4.0.0';
