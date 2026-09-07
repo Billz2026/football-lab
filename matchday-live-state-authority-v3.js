@@ -13,6 +13,15 @@ function isAuthoritative(value) {
     && value.structuredCommentarySnapshotVersion === MATCHDAY_LIVE_STATE_AUTHORITY_VERSION;
 }
 
+function publishAuthorityStatus(fixtureId, rejectedLegacyWrites) {
+  window.__flmLiveStateAuthorityV3 = {
+    version: MATCHDAY_LIVE_STATE_AUTHORITY_VERSION,
+    source: AUTH_SOURCE,
+    fixtureId: fixtureId || null,
+    rejectedLegacyWrites
+  };
+}
+
 function installLiveStateAuthority() {
   if (typeof window === 'undefined' || window.__flmLiveStateAuthorityV3Installed) return;
   window.__flmLiveStateAuthorityV3Installed = true;
@@ -21,7 +30,8 @@ function installLiveStateAuthority() {
   if (descriptor && descriptor.configurable === false) return;
 
   let current = window[KEY];
-  let lockedFixtureId = isAuthoritative(current) ? current.fixtureId : null;
+  let authorityClaimed = isAuthoritative(current);
+  let lockedFixtureId = authorityClaimed ? current.fixtureId : null;
   let rejectedLegacyWrites = 0;
 
   Object.defineProperty(window, KEY, {
@@ -31,51 +41,28 @@ function installLiveStateAuthority() {
       return current;
     },
     set(next) {
-      if (!isObject(next)) {
-        if (!lockedFixtureId) current = next;
-        return;
-      }
-
       if (isAuthoritative(next)) {
         current = next;
+        authorityClaimed = true;
         lockedFixtureId = next.fixtureId || lockedFixtureId;
-        window.__flmLiveStateAuthorityV3 = {
-          version: MATCHDAY_LIVE_STATE_AUTHORITY_VERSION,
-          source: AUTH_SOURCE,
-          fixtureId: lockedFixtureId,
-          rejectedLegacyWrites
-        };
+        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites);
         return;
       }
 
-      const sameLockedFixture = Boolean(lockedFixtureId && next.fixtureId === lockedFixtureId);
-      if (sameLockedFixture) {
+      if (authorityClaimed) {
         rejectedLegacyWrites += 1;
-        window.__flmLiveStateAuthorityV3 = {
-          version: MATCHDAY_LIVE_STATE_AUTHORITY_VERSION,
-          source: AUTH_SOURCE,
-          fixtureId: lockedFixtureId,
-          rejectedLegacyWrites
-        };
+        publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites);
         return;
       }
 
-      // Before the match engine publishes its first authoritative snapshot, keep
-      // legacy readers working. A different fixture can also initialise normally
-      // until that fixture's direct engine publisher claims ownership.
+      // Legacy snapshots may initialise read-only presentation consumers before
+      // Matchday starts. The first direct engine publication permanently claims
+      // ownership for the session; no later legacy write can downgrade it.
       current = next;
-      if (!lockedFixtureId || next.fixtureId !== lockedFixtureId) lockedFixtureId = null;
     }
   });
 
-  if (isAuthoritative(current)) {
-    window.__flmLiveStateAuthorityV3 = {
-      version: MATCHDAY_LIVE_STATE_AUTHORITY_VERSION,
-      source: AUTH_SOURCE,
-      fixtureId: current.fixtureId || null,
-      rejectedLegacyWrites
-    };
-  }
+  if (authorityClaimed) publishAuthorityStatus(lockedFixtureId, rejectedLegacyWrites);
 }
 
 installLiveStateAuthority();
