@@ -141,7 +141,8 @@ test('Commentary V3 renders structured defensive flow in the live Match Centre w
   ]);
   expect(subtypes.some(subtype => allowed.has(subtype))).toBe(true);
 
-  // Resume 4x playback before the performance contract.
+  // Resume, then explicitly restore 4x before enforcing the performance contract.
   await shell.locator('[data-cm4-pause]').click();
+  await shell.locator('[data-cm4-speed="4"]').click();
   await expect(shell.locator('[data-cm4-clock]')).toHaveText('45:00', { timeout: 30000 });
 });
