@@ -150,7 +150,7 @@ function cloneStructuredEvent(event) {
   };
 }
 
-function publishStructuredCommentary(state, emittedEvents = []) {
+function publishLiveState(state, emittedEvents = []) {
   if (typeof window === 'undefined' || !state?.fixtureId) return;
   const existing = window.__flmLiveStateV332;
   const sameFixture = existing?.fixtureId === state.fixtureId;
@@ -162,17 +162,37 @@ function publishStructuredCommentary(state, emittedEvents = []) {
     events.push(cloneStructuredEvent(event));
     seen.add(sequenceId);
   }
-  window.__flmLiveStateV332 = {
+
+  const initialHomeLineupIds = sameFixture && Array.isArray(existing?.initialHomeLineupIds)
+    ? [...existing.initialHomeLineupIds]
+    : [...(state.homeLineupIds || [])];
+  const initialAwayLineupIds = sameFixture && Array.isArray(existing?.initialAwayLineupIds)
+    ? [...existing.initialAwayLineupIds]
+    : [...(state.awayLineupIds || [])];
+
+  const snapshot = {
     fixtureId: state.fixtureId,
-    minute: state.minute,
+    minute: Number(state.minute || 0),
     homeClubId: state.homeClubId,
     awayClubId: state.awayClubId,
+    userClubId: state.userClubId,
     homeGoals: Number(state.homeGoals || 0),
     awayGoals: Number(state.awayGoals || 0),
+    homeLineupIds: [...(state.homeLineupIds || [])],
+    awayLineupIds: [...(state.awayLineupIds || [])],
+    initialHomeLineupIds,
+    initialAwayLineupIds,
+    ratings: { ...(state.ratings || {}) },
+    conditions: { ...(state.conditions || {}) },
+    minutesPlayed: { ...(state.minutesPlayed || {}) },
+    subbedOffIds: [...(state.subbedOffIds || [])],
     events,
-    structuredCommentarySnapshotVersion: '2.1.0'
+    structuredCommentarySnapshotVersion: '2.2.0',
+    source: 'matchday-engine-v069'
   };
-  window.__flmStructuredCommentaryV2 = window.__flmLiveStateV332;
+  window.__flmLiveStateV332 = snapshot;
+  window.__flmStructuredCommentaryV2 = snapshot;
+  try { window.dispatchEvent(new CustomEvent('flm:live-state-v332', { detail: snapshot })); } catch (_) {}
 }
 
 function isHalfTimeSubstitution(state) {
@@ -205,7 +225,7 @@ export function createInteractiveMatch(career, db) {
   state.matchDrama ||= { version: MATCH_DRAMA_ENGINE_VERSION, serial: 0, counts: {}, atmosphere: [] };
   state.matchDrama.version = MATCH_DRAMA_ENGINE_VERSION;
   publishLiveXg(state);
-  publishStructuredCommentary(state, []);
+  publishLiveState(state, []);
   return state;
 }
 
@@ -215,7 +235,7 @@ export function advanceInteractiveMatch(inputState, career, db) {
   const drama = applyMatchDrama(state, db, result.events);
   state = applyRules(drama.state, career, db);
   publishLiveXg(state);
-  publishStructuredCommentary(state, result.events);
+  publishLiveState(state, result.events);
   return { ...result, state, events: [...(result.events || []), ...(drama.events || [])] };
 }
 
@@ -233,6 +253,6 @@ export function makeSubstitution(inputState, outId, inId, db, career = {}) {
   const next = applyRules(result.state, career, db);
   recordWindow(next, rules);
   publishLiveXg(next);
-  publishStructuredCommentary(next, []);
+  publishLiveState(next, []);
   return { ...result, state: next };
 }
