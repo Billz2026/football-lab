@@ -26,8 +26,8 @@ async function selectXI(page){
 }
 
 test('V0.7 keeps the full XI subbable, applies kits and exits full time in one click',async({page})=>{
-  await page.getByRole('button',{name:'START NEW GAME',exact:true}).click();
-  await page.locator('[data-start-club]').first().click();
+  await page.getByRole('button',{name:/QUICK START/}).click();
+  await expect(page.locator('.career-app')).toHaveClass(/is-open/);
   await selectXI(page);
   await continueUntil(page,'2026-07-11');
   await expect(page.locator('[data-shell-continue-label]')).toHaveText('PLAY FRIENDLY');
