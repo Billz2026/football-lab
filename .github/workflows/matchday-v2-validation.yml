@@ -30,6 +30,7 @@ on:
       - 'match-drama-v3.js'
       - 'manager.js'
       - 'package.json'
+      - 'tests/helpers/start-career.js'
       - 'tests/structured-attacks-v1.test.js'
       - 'tests/matchday-v2.spec.js'
       - 'tests/matchday-v44.spec.js'
@@ -65,6 +66,7 @@ on:
       - 'match-drama-v3.js'
       - 'manager.js'
       - 'package.json'
+      - 'tests/helpers/start-career.js'
       - 'tests/structured-attacks-v1.test.js'
       - 'tests/matchday-v2.spec.js'
       - 'tests/matchday-v44.spec.js'
@@ -106,6 +108,7 @@ jobs:
           node --check matchday-engine-v0431.js
           node --check matchday-structured-attacks-v1.js
           node --check match-drama-v3.js
+          node --check tests/helpers/start-career.js
           node --check tests/structured-attacks-v1.test.js
           node --check tests/matchday-v2.spec.js
           node --check tests/matchday-v44.spec.js
