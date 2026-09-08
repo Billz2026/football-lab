@@ -1,9 +1,9 @@
 import './matchday-state-native-guard-v1.js?v=1.0.0';
-import './manager-base-v045.js?v=0.4.12';
+import './manager-base-v045.js?v=0.4.13';
 import './player-audit-v1.js?v=1.0.0';
 import './player-audit-v2.js?v=2.0.0';
 import './player-audit-v3.js?v=3.0.0';
-import './career-news-ui-v0461.js?v=0.4.6.1';
+import './career-news-ui-v0461.js?v=0.4.7';
 import './career-news-ui-v0462-fix.js?v=0.4.6.2';
 import './career-preseason-ui-v047.js?v=0.4.10';
 import './career-preseason-ui-v0471-fix.js?v=0.4.7.1';

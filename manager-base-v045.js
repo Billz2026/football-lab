@@ -11,6 +11,14 @@ import {
   updateTactics,
   validateLineup
 } from './manager-core.js?v=0.3.0';
+import {
+  NEWS_CATEGORIES,
+  getNewsItems,
+  getUnreadNewsCount,
+  markAllNewsRead,
+  markNewsRead,
+  syncCareerNews
+} from './career-news-v046.js?v=0.4.6';
 
 const DATA_VERSION = '60';
 const modal = document.getElementById('appModal');
@@ -25,6 +33,8 @@ const settingsTemplate = document.getElementById('settingsTemplate');
 let databasePromise;
 let activeCareer;
 let activeCareerTab = 'overview';
+let inboxFilter = 'All';
+let inboxSelectedId = null;
 
 const settings = {
   autosave: localStorage.getItem('flm-autosave') !== 'false',
@@ -133,6 +143,12 @@ function resultSummary(result, db) {
   return `${outcome} · ${clubName(db, result.homeClubId)} ${result.homeGoals}–${result.awayGoals} ${clubName(db, result.awayClubId)}`;
 }
 
+function inboxDetail(item, db) {
+  if (!item) return '<div class="career-inbox-empty"><strong>NO STORIES IN THIS FILTER</strong><span>New club events will appear here.</span></div>';
+  const player = item.relatedPlayerId ? db.players.find(entry => entry.id === item.relatedPlayerId) : null;
+  return `<div class="career-inbox-detail-meta"><b>${esc(item.category)}</b><span>${esc(item.dateLabel)} · ${esc(item.source)}</span></div><h3>${esc(item.title)}</h3><p>${esc(item.body)}</p><div class="career-inbox-detail-source">SOURCE · ${esc(item.source)}${item.priority === 'important' ? ' · IMPORTANT' : ''}</div>${player ? `<button class="career-inbox-detail-action" type="button" data-inbox-player="${esc(player.id)}">OPEN PLAYER PROFILE</button>` : ''}`;
+}
+
 function toast(message, error = false) {
   document.querySelector('.career-toast')?.remove();
   const element = document.createElement('div');
@@ -156,29 +172,26 @@ function shell() {
 }
 
 function navigation() {
-  return [['overview', 'Overview'], ['squad', 'Squad'], ['tactics', 'Tactics'], ['matchday', 'Matchday'], ['table', 'Table']]
-    .map(([id, label]) => `<button type="button" class="career-nav-button ${activeCareerTab === id ? 'is-active' : ''}" data-career-tab="${id}">${label}</button>`)
+  return [['overview', 'Inbox'], ['squad', 'Squad'], ['tactics', 'Tactics'], ['matchday', 'Matchday'], ['table', 'Table']]
+    .map(([id, label]) => `<button type="button" class="career-nav-button ${activeCareerTab === id ? 'is-active' : ''}" data-career-tab="${id}"${id === 'overview' ? ' data-v046-news-tab aria-label="Overview"' : ''}>${label}</button>`)
     .join('');
 }
 
 function overviewView(db) {
   const club = getClub(db, activeCareer.clubId);
   const next = getNextFixture(activeCareer);
-  const rows = sortedTable(activeCareer.table);
-  const row = rows.find(item => item.clubId === activeCareer.clubId);
-  const position = rows.indexOf(row) + 1;
+  if (syncCareerNews(activeCareer, db) && settings.autosave) saveCareer();
+  const items = getNewsItems(activeCareer, inboxFilter);
+  let selected = items.find(item => item.id === inboxSelectedId);
+  if (!selected) selected = items.find(item => !item.read) || items[0] || null;
+  inboxSelectedId = selected?.id || null;
+  const unread = getUnreadNewsCount(activeCareer);
+  const nextUnread = items.find(item => !item.read);
   return `
-    <div class="career-page-heading"><div><p class="eyebrow">MANAGER DASHBOARD</p><h2>${esc(club.name)}</h2></div><span class="career-round">${activeCareer.status === 'complete' ? 'SEASON COMPLETE' : `ROUND ${activeCareer.roundIndex + 1} OF ${activeCareer.fixtures.length}`}</span></div>
-    <div class="career-kpi-grid">
-      <article><small>POSITION</small><strong>${row.played ? position : '—'}</strong><span>${row.points} points</span></article>
-      <article><small>RECORD</small><strong>${row.won}-${row.drawn}-${row.lost}</strong><span>W-D-L</span></article>
-      <article><small>GOAL DIFFERENCE</small><strong>${row.goalDifference > 0 ? '+' : ''}${row.goalDifference}</strong><span>${row.goalsFor} scored</span></article>
-      <article><small>FORMATION</small><strong>${esc(activeCareer.tactics.formation)}</strong><span>${esc(activeCareer.tactics.mentality)}</span></article>
-    </div>
-    <div class="career-dashboard-grid">
-      <article class="career-panel career-next-match"><p class="eyebrow">NEXT FIXTURE</p>${next ? `<div class="fixture-teams"><strong>${esc(clubName(db, next.homeClubId))}</strong><span>VS</span><strong>${esc(clubName(db, next.awayClubId))}</strong></div><small>${next.homeClubId === activeCareer.clubId ? club.venue || 'Home' : 'Away'} · Round ${next.round}</small><button class="career-primary" type="button" data-career-tab="matchday">GO TO MATCHDAY</button>` : '<h3>INVITATIONAL COMPLETE</h3><p>Your seven-match demo season is finished.</p><button class="career-primary" type="button" data-career-tab="table">FINAL TABLE</button>'}</article>
-      <article class="career-panel"><p class="eyebrow">LAST RESULT</p>${activeCareer.lastMatch ? `<h3>${esc(resultSummary(activeCareer.lastMatch, db))}</h3><p>${activeCareer.lastMatch.events.length} key events recorded.</p>` : '<h3>NO MATCHES PLAYED</h3><p>Select your team and begin the Invitational.</p>'}</article>
-    </div>`;
+    <div class="career-page-heading career-inbox-heading"><div><p class="eyebrow">CLUB INBOX · ${esc(club.name)}</p><h2 aria-label="News & Inbox">Inbox</h2><span class="career-inbox-subtitle">${unread ? `${unread} unread message${unread === 1 ? '' : 's'}` : 'All messages read'} · ${esc(activeCareer.competitionName)}</span></div><div class="career-inbox-heading-actions">${nextUnread ? '<button class="career-secondary career-inbox-next" type="button" data-inbox-next data-v046-next>NEXT UNREAD</button>' : ''}</div></div>
+    <div class="career-inbox-tabs">${NEWS_CATEGORIES.map(category => `<button type="button" class="${category === inboxFilter ? 'is-active' : ''}" data-inbox-filter="${esc(category)}" data-v046-filter="${esc(category)}">${esc(category)}${category !== 'All' && getUnreadNewsCount(activeCareer, category) ? `<b>${getUnreadNewsCount(activeCareer, category)}</b>` : ''}</button>`).join('')}</div>
+    <div class="career-inbox-layout"><aside class="career-inbox-list v046-list"><div class="career-inbox-list-head"><strong>${inboxFilter === 'All' ? 'ALL MESSAGES' : inboxFilter.toUpperCase()}</strong><span>${items.length}</span></div>${items.length ? items.map(item => `<button type="button" class="career-inbox-row v046-row ${item.id === inboxSelectedId ? 'is-selected' : ''} ${!item.read ? 'is-unread' : ''}" data-inbox-item="${esc(item.id)}"><span class="career-inbox-row-date">${esc(item.dateLabel)}</span><span class="career-inbox-row-copy"><strong>${esc(item.title)}</strong><small>${esc(item.category)} · ${esc(item.source)}</small></span><i aria-hidden="true"></i></button>`).join('') : '<div class="career-inbox-empty"><strong>NO STORIES</strong><span>New career events will appear here.</span></div>'}</aside><article class="career-inbox-detail v046-detail">${inboxDetail(selected, db)}</article></div>
+    <div class="career-inbox-footer">${next ? `<div><small>NEXT FIXTURE</small><strong>${esc(clubName(db, next.homeClubId))} <em>vs</em> ${esc(clubName(db, next.awayClubId))}</strong><span>${next.homeClubId === activeCareer.clubId ? club.venue || 'Home' : 'Away'} · Round ${next.round}</span></div><button class="career-primary" type="button" data-career-tab="matchday">OPEN MATCHDAY</button>` : '<div><small>SEASON STATUS</small><strong>SEASON COMPLETE</strong><span>Your final table is ready.</span></div><button class="career-primary" type="button" data-career-tab="table">VIEW TABLE</button>'}<button class="career-secondary career-inbox-mark" type="button" data-inbox-all data-v046-all>MARK ALL READ</button></div>`;
 }
 
 function squadView(db) {
@@ -278,6 +291,36 @@ async function renderCareer() {
     activeCareerTab = control.dataset.careerTab;
     renderCareer();
   }));
+
+  element.querySelectorAll('[data-inbox-filter]').forEach(control => control.addEventListener('click', () => {
+    inboxFilter = control.dataset.inboxFilter;
+    inboxSelectedId = null;
+    renderCareer();
+  }));
+
+  element.querySelectorAll('[data-inbox-item]').forEach(control => control.addEventListener('click', () => {
+    inboxSelectedId = control.dataset.inboxItem;
+    if (markNewsRead(activeCareer, inboxSelectedId) && settings.autosave) saveCareer();
+    renderCareer();
+  }));
+
+  element.querySelector('[data-inbox-next]')?.addEventListener('click', () => {
+    const unreadItem = getNewsItems(activeCareer, inboxFilter).find(item => !item.read);
+    if (!unreadItem) return;
+    inboxSelectedId = unreadItem.id;
+    markNewsRead(activeCareer, unreadItem.id);
+    if (settings.autosave) saveCareer();
+    renderCareer();
+  });
+
+  element.querySelector('[data-inbox-all]')?.addEventListener('click', () => {
+    if (markAllNewsRead(activeCareer, inboxFilter) && settings.autosave) saveCareer();
+    renderCareer();
+  });
+
+  element.querySelector('[data-inbox-player]')?.addEventListener('click', event => {
+    window.FLMPlayerProfile?.open(event.currentTarget.dataset.inboxPlayer);
+  });
 
   element.querySelectorAll('[data-exit-career]').forEach(control => control.addEventListener('click', () => {
     if (settings.autosave) saveCareer();
