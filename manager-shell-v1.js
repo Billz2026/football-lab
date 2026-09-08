@@ -1,7 +1,7 @@
 // Football Lab Manager Shell V1
 // Presentation/navigation layer only: existing career systems remain authoritative.
 
-const SHELL_VERSION = '1.0.2';
+const SHELL_VERSION = '1.0.3';
 const STYLE_HREF = `./manager-shell-v1.css?v=${SHELL_VERSION}`;
 const MILESTONES = [
   { date: '2026-06-15', label: 'CONTINUE TO 15 JUNE', detail: 'Summer transfer window opens' },
@@ -177,6 +177,10 @@ function playMatchDirect() {
 }
 
 function runMilestoneAdvance() {
+  if (window.FLMCareerWorld?.continue) {
+    window.FLMCareerWorld.continue();
+    return;
+  }
   const direct = document.querySelector('[data-v054-advance]');
   if (direct) {
     direct.click();
@@ -194,6 +198,14 @@ function runMilestoneAdvance() {
     if (attempts < 12) setTimeout(tryClick, 45);
   };
   setTimeout(tryClick, 25);
+}
+
+function runCalendarContinue() {
+  if (window.FLMCareerWorld?.continue) {
+    window.FLMCareerWorld.continue();
+    return;
+  }
+  clickOriginal('.career-content [data-v060-continue], .career-content [data-v054-advance]');
 }
 
 async function openDatabaseSearch() {
@@ -231,7 +243,7 @@ function handleContinue(control) {
   const action = control?.dataset.shellAction;
   if (!action || control.disabled) return;
   if (action === 'milestone') runMilestoneAdvance();
-  else if (action === 'calendar') clickOriginal('.career-header [data-v060-continue]');
+  else if (action === 'calendar') runCalendarContinue();
   else if (action === 'friendly') playFriendlyDirect();
   else if (action === 'play-match') playMatchDirect();
   else if (action === 'preseason') activatePreseason();

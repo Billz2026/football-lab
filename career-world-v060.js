@@ -229,6 +229,11 @@ async function performContinue() {
   }
 }
 
+// The compact shell uses one Continue control in the sidebar. Expose the
+// authoritative calendar action so the shell does not have to click a hidden
+// page-level button to advance the career.
+window.FLMCareerWorld = Object.freeze({ continue: performContinue });
+
 function sync() {
   styles();
   const c = career();
