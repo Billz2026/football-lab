@@ -1,4 +1,5 @@
 import { competitionRulesFor, rankCompetitionTable } from './competition-rules-v1.js';
+import { finaliseChampionshipBackground } from './championship-world-v1.js';
 
 export const SEASON_HISTORY_SCHEMA_VERSION = 1;
 
@@ -43,7 +44,8 @@ export function finaliseSeason(career, { completedAt = new Date().toISOString() 
       relegatedClubIds: [...(existing.relegatedClubIds || [])],
       europeanQualificationStatus: existing.europeanQualification?.status || 'pending'
     };
-    return { status: 'already-finalised', outcome: existing };
+    const championship = finaliseChampionshipBackground(career, { completedAt: existing.completedAt || completedAt });
+    return { status: 'already-finalised', outcome: existing, championship };
   }
 
   const ranking = rankCompetitionTable(career);
@@ -57,7 +59,8 @@ export function finaliseSeason(career, { completedAt = new Date().toISOString() 
     };
     career.seasonOutcome = null;
     career.nextSeasonContext = null;
-    return { status: 'playoff-required', outcome: null, resolution: career.seasonResolution };
+    const championship = finaliseChampionshipBackground(career, { completedAt });
+    return { status: 'playoff-required', outcome: null, resolution: career.seasonResolution, championship };
   }
 
   const relegationCount = rules.relegationPlaces || 0;
@@ -97,5 +100,6 @@ export function finaliseSeason(career, { completedAt = new Date().toISOString() 
     relegatedClubIds: [...relegatedClubIds],
     europeanQualificationStatus: outcome.europeanQualification.status
   };
-  return { status: 'finalised', outcome };
+  const championship = finaliseChampionshipBackground(career, { completedAt });
+  return { status: 'finalised', outcome, championship };
 }
