@@ -5,6 +5,7 @@ import {
   rolloverPremierLeagueSeason,
   validatePremierLeagueRollover
 } from './premier-league-rollover-v1.js';
+import { migrateRolloverCalendar } from './season-rollover-calendar-migration-v1.js';
 
 const SAVE_KEY = 'flm-career-save';
 const STYLE_ID = 'flm-season-rollover-v1-style';
@@ -114,7 +115,7 @@ async function performRollover() {
     }
     augmentDatabaseForCareer(c, db);
     persist(c);
-    toast(result.status === 'rolled-over' ? `${ROLLOVER_TARGET_SEASON} Premier League created.` : `${ROLLOVER_TARGET_SEASON} is already active.`);
+    toast(result.status === 'rolled-over' ? `${ROLLOVER_TARGET_SEASON} offseason created.` : `${ROLLOVER_TARGET_SEASON} is already active.`);
     document.querySelector('.career-nav [data-career-tab="overview"]')?.click();
     queueSync();
   } catch (error) {
@@ -136,6 +137,12 @@ async function sync() {
   const db = await loadDb();
   if (!db) return;
   augmentDatabaseForCareer(c, db);
+
+  const migration = migrateRolloverCalendar(c, db);
+  if (migration.status === 'migrated') {
+    persist(c);
+    toast(`${ROLLOVER_TARGET_SEASON} offseason calendar restored.`);
+  }
 
   if (c.season !== ROLLOVER_SOURCE_SEASON || c.status !== 'complete') {
     existing?.remove();
