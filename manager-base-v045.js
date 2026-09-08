@@ -32,6 +32,8 @@ const settings = {
   compact: localStorage.getItem('flm-compact') === 'true'
 };
 
+window.FLMManager = { loadDatabase, showDatabase, get activeCareer() { return activeCareer; } };
+
 function esc(value) {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -554,11 +556,10 @@ document.addEventListener('click', event => {
   if (event.target.closest('[data-close-modal]')) closeModal();
 });
 
-document.getElementById('headerSettings').addEventListener('click', showSettings);
+document.getElementById('headerSettings')?.addEventListener('click', showSettings);
 document.getElementById('brandHome')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: settings.reducedMotion ? 'auto' : 'smooth' }));
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
 });
 
 applySettings();
-window.FLMManager = { loadDatabase, showDatabase, get activeCareer() { return activeCareer; } };
