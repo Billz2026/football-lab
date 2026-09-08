@@ -128,24 +128,40 @@ async function performRollover() {
 async function sync() {
   ensureStyles();
   const c = career();
-  if (!c) return;
+  const existing = document.querySelector('.flm-rollover-panel');
+  if (!c) {
+    existing?.remove();
+    return;
+  }
   const db = await loadDb();
   if (!db) return;
   augmentDatabaseForCareer(c, db);
 
-  document.querySelectorAll('.flm-rollover-panel').forEach(node => node.remove());
-  if (c.season !== ROLLOVER_SOURCE_SEASON || c.status !== 'complete') return;
+  if (c.season !== ROLLOVER_SOURCE_SEASON || c.status !== 'complete') {
+    existing?.remove();
+    return;
+  }
   const content = document.querySelector('.career-content');
   if (!content) return;
 
   const validation = validatePremierLeagueRollover(c, db);
   const copy = panelCopy(validation);
-  const panel = document.createElement('section');
+  const signature = [validation.status, copy.title, copy.body, copy.button, copy.blocked].join('|');
+  let panel = existing;
+  if (!panel || !panel.isConnected) {
+    panel = document.createElement('section');
+    panel.className = 'flm-rollover-panel';
+    panel.dataset.flmRollover = '1';
+    content.appendChild(panel);
+  } else if (panel.parentElement !== content) {
+    content.appendChild(panel);
+  }
+  if (panel.dataset.signature === signature) return;
+
+  panel.dataset.signature = signature;
   panel.className = `flm-rollover-panel${copy.blocked ? ' is-blocked' : ''}`;
-  panel.dataset.flmRollover = '1';
   panel.innerHTML = `<div><small>${esc(copy.eyebrow)}</small><strong>${esc(copy.title)}</strong><p>${esc(copy.body)}</p></div><button type="button" ${copy.blocked ? 'disabled' : ''}>${esc(copy.button)}</button>`;
   if (!copy.blocked) panel.querySelector('button')?.addEventListener('click', performRollover);
-  content.appendChild(panel);
 }
 
 function queueSync() {
