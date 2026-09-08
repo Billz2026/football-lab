@@ -67,15 +67,15 @@ test('an exact tie crossing third place requires a deciding league match instead
   const table = Array.from({ length: 24 }, (_, index) => row(`club-${index + 1}`, index));
   const tied = {
     played: 46,
-    won: 20,
-    drawn: 10,
+    won: 22,
+    drawn: 8,
     lost: 16,
-    goalsFor: 70,
-    goalsAgainst: 45,
-    goalDifference: 25,
-    points: 80,
-    awayGoals: 28,
-    disciplinePenaltyPoints: 280,
+    goalsFor: 86,
+    goalsAgainst: 43,
+    goalDifference: 43,
+    points: 94,
+    awayGoals: 30,
+    disciplinePenaltyPoints: 270,
     severeSendingOffs: 1
   };
   Object.assign(table[2], tied);
