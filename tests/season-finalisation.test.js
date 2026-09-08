@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { rankCompetitionTable } from '../competition-rules-v1.js';
 import { finaliseSeason } from '../season-finalisation-v1.js';
+import { createCareer, simulateNextRound } from '../manager-core.js';
 
 function clubIds() {
   return Array.from({ length: 20 }, (_, index) => `club-${String(index + 1).padStart(2, '0')}`);
@@ -156,4 +157,49 @@ test('unknown leagues do not inherit Premier League rules', () => {
   const result = finaliseSeason(career);
   assert.equal(result.status, 'unsupported-competition');
   assert.equal(career.seasonHistory.length, 0);
+});
+
+function simulatedDb() {
+  const ids = clubIds();
+  const clubs = ids.map((id, index) => ({
+    id,
+    name: `Club ${index + 1}`,
+    leagueId: 'eng-premier-league',
+    reputation: 7000 + (20 - index) * 10,
+    isPlaceholder: false
+  }));
+  const shape = [
+    ['GK', 'GK'],
+    ['DEF', 'RB'], ['DEF', 'CB'], ['DEF', 'CB'], ['DEF', 'LB'],
+    ['MID', 'CM'], ['MID', 'CM'], ['MID', 'AM'],
+    ['ATT', 'RW'], ['ATT', 'ST'], ['ATT', 'LW']
+  ];
+  const players = clubs.flatMap((club, clubIndex) => shape.map(([positionGroup, primaryPosition], playerIndex) => ({
+    id: `${club.id}-p${playerIndex + 1}`,
+    name: `${club.name} Player ${playerIndex + 1}`,
+    clubId: club.id,
+    positionGroup,
+    primaryPosition,
+    currentAbility: 120 + (20 - clubIndex),
+    potentialAbility: 145,
+    isPlaceholder: false
+  })));
+  return { clubs, players };
+}
+
+test('manager core automatically finalises a full 38-round Premier League season', () => {
+  const db = simulatedDb();
+  let career = createCareer({ clubId: 'club-01', clubs: db.clubs, players: db.players, seed: 'season-finalisation-integration' });
+  assert.equal(career.leagueId, 'eng-premier-league');
+  assert.equal(career.fixtures.length, 38);
+
+  while (career.status !== 'complete') career = simulateNextRound(career, db);
+
+  assert.equal(career.roundIndex, 38);
+  assert.equal(career.fixtures.flat().length, 380);
+  assert.ok(career.fixtures.flat().every(fixture => fixture.played));
+  assert.equal(career.seasonHistory.length, 1);
+  assert.ok(career.seasonOutcome?.championClubId);
+  assert.equal(career.seasonOutcome.relegatedClubIds.length, 3);
+  assert.equal(career.nextSeasonContext.defendingChampionClubId, career.seasonOutcome.championClubId);
 });
