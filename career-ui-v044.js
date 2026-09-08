@@ -53,6 +53,11 @@ s.textContent+=`
 .career-app:has(.v044-squad-browser) .v044-squad-browser .v044-status{font-size:8px;letter-spacing:.02em}
 .career-app:has(.v044-squad-browser) .v044-squad-browser .v044-cell b{font-size:10px}
 .career-app:has(.v044-squad-browser) .v044-squad-browser .v044-profile{font-size:8px}
+.career-app:has(.v044-squad-browser){height:100dvh;min-height:0;overflow:hidden}
+.career-app:has(.v044-squad-browser) .career-header{box-sizing:border-box}
+.career-app:has(.v044-squad-browser) .career-layout{height:calc(100dvh - 64px);min-height:0;overflow:hidden}
+.career-app:has(.v044-squad-browser) .career-content{box-sizing:border-box;min-height:0;overflow:hidden}
+html:has(.career-app.is-open),body:has(.career-app.is-open){overflow:hidden}
 `;
 document.head.appendChild(s);}
 function updateVersion(){const chip=document.querySelector('.version-chip');if(chip&&chip.textContent!==VERSION)chip.textContent=VERSION;const footer=document.querySelector('.footer-build');if(footer&&footer.textContent!=='V0.4.4 · SQUAD & TACTICS')footer.textContent='V0.4.4 · SQUAD & TACTICS';}

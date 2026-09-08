@@ -269,6 +269,9 @@ async function renderCareer() {
     <div class="career-layout"><nav class="career-nav" aria-label="Career sections">${navigation()}</nav><main class="career-content">${views[activeCareerTab]()}</main></div>`;
   element.classList.add('is-open');
   element.removeAttribute('aria-hidden');
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
   document.body.style.overflow = 'hidden';
 
   element.querySelectorAll('[data-career-tab]').forEach(control => control.addEventListener('click', () => {
