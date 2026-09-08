@@ -133,8 +133,7 @@ function enhanceLiveMatch() {
   rail.appendChild(pause);
 
   const actionDefs = [
-    ['MY TACTICS', '[data-open-tactics]'],
-    ['SUBSTITUTIONS', '[data-open-subs]'],
+    ['TACTICS', '[data-open-tactics]'],
     ['ROLES & SHAPE', '[data-open-shape]'],
     ['PLAYER RATINGS', '[data-open-ratings]'],
     ['OPPOSITION', '[data-open-opposition]']

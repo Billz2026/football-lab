@@ -70,7 +70,6 @@ function shellMarkup(){
         <div class="cm4-minute" data-cm4-minute>0'</div>
         <button type="button" data-cm4-pause>Pause Match</button>
         <button type="button" data-cm4-tactics>Tactics</button>
-        <button type="button" data-cm4-subs>Substitutions</button>
         <div class="cm4-speed-label">Commentary<br>Speed</div>
         <div class="cm4-speed">
           <button type="button" data-cm4-speed="1">1x</button>
@@ -134,7 +133,6 @@ function ensureShell(live){
     queue();
   });
   shell.querySelector('[data-cm4-tactics]')?.addEventListener('click',() => live.querySelector('[data-open-tactics]')?.click());
-  shell.querySelector('[data-cm4-subs]')?.addEventListener('click',() => live.querySelector('[data-open-subs]')?.click());
   shell.querySelectorAll('[data-cm4-speed]').forEach(button => button.addEventListener('click',() => {
     live.querySelector(`[data-match-speed="${button.dataset.cm4Speed}"]`)?.click();
     queue();

@@ -74,7 +74,6 @@ function ensureConsole(live){
       </div>
       <div class="cm33-rail-section cm33-management">
         <small>MANAGE</small>
-        <button type="button" data-cm33-subs>Make Sub</button>
         <button type="button" data-cm33-tactics>Tactics</button>
       </div>
       <div class="cm33-rail-section cm33-speed">
@@ -98,7 +97,6 @@ function ensureConsole(live){
   grid.before(console);
 
   console.querySelectorAll('[data-cm33-view]').forEach(button => button.addEventListener('click', () => selectView(live,button.dataset.cm33View)));
-  console.querySelector('[data-cm33-subs]')?.addEventListener('click', () => live.querySelector('[data-open-subs]')?.click());
   console.querySelector('[data-cm33-tactics]')?.addEventListener('click', () => live.querySelector('[data-open-tactics]')?.click());
   console.querySelectorAll('[data-cm33-speed]').forEach(button => button.addEventListener('click', () => {
     live.querySelector(`[data-match-speed="${button.dataset.cm33Speed}"]`)?.click();
