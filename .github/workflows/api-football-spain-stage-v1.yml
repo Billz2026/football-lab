@@ -1,0 +1,71 @@
+name: FLM API-Football Spain Stage v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      offset:
+        description: 'Club offset in locked La Liga manifest (0-19)'
+        required: true
+        default: '0'
+      count:
+        description: 'Number of La Liga clubs to stage this run'
+        required: true
+        default: '20'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  stage:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '(#126)') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      FLM_BATCH_OFFSET: ${{ github.event.inputs.offset || '0' }}
+      FLM_BATCH_COUNT: ${{ github.event.inputs.count || '20' }}
+      FLM_REQUEST_DELAY_MS: '7000'
+      FLM_DAILY_RESERVE: '3'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify API-Football secret
+        run: |
+          if [ -z "$API_FOOTBALL_KEY" ]; then
+            echo "API_FOOTBALL_KEY repository secret is missing."
+            exit 1
+          fi
+          echo "API-Football secret is configured."
+      - name: Validate locked La Liga membership
+        run: node scripts/validate-laliga-manifest.mjs
+      - name: Stage current Spanish club identities and squads
+        run: node scripts/import-api-football-spain-free.mjs artifacts/api-football-spain-stage-v1
+      - name: Validate staged provider payload
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          const dir = 'artifacts/api-football-spain-stage-v1';
+          const [clubs, squads, report] = await Promise.all(
+            ['clubs-stage.json','squads-stage.json','report.json'].map(async file => JSON.parse(await readFile(`${dir}/${file}`, 'utf8')))
+          );
+          if (!clubs.length) throw new Error('No La Liga clubs were staged.');
+          if (squads.length !== clubs.length) throw new Error(`Squad coverage mismatch: ${squads.length}/${clubs.length}.`);
+          if (squads.some(squad => squad.players.length < 15)) throw new Error('One or more staged squads has fewer than 15 players.');
+          if (new Set(clubs.map(club => club.apiFootballId)).size !== clubs.length) throw new Error('Duplicate API-Football team identity detected.');
+          if (report.result.missing.length || report.result.failures.length || report.result.duplicateTeamIds.length) throw new Error('Spain staging report contains unresolved failures.');
+          if (report.safety.writesCurrentDatabase !== false || report.safety.badgesIncluded !== false || report.safety.playerPhotosIncluded !== false) throw new Error('Spain staging safety contract was violated.');
+          console.log(`Validated ${clubs.length} staged La Liga clubs and ${report.result.playersStaged} squad players.`);
+          console.log(`Remaining daily requests: ${report.usage.lastKnownRemainingDailyRequests ?? 'unknown'}`);
+          NODE
+      - name: Upload La Liga staging artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-football-spain-stage-v1-${{ github.run_id }}
+          path: artifacts/api-football-spain-stage-v1
+          retention-days: 3
+          if-no-files-found: warn

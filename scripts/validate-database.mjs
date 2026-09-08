@@ -52,8 +52,15 @@ async function main() {
   const externalPlayerIds = new Set();
 
   assert(metadata.schemaVersion === '1.0.0', 'metadata.schemaVersion must be 1.0.0', errors);
-  assert(metadata.scope?.targetClubCount === 116, 'metadata targetClubCount must be 116 for the England v1 scope', errors);
-  assert(leagues.length === 5, 'England v1 must define exactly five target leagues', errors);
+
+  const scopedLeagueIds = Array.isArray(metadata.scope?.leagues) ? metadata.scope.leagues : [];
+  const expectedClubCount = leagues.reduce((sum, league) => sum + (Number(league.expectedClubCount) || 0), 0);
+  assert(scopedLeagueIds.length === leagues.length, 'metadata scope league count must match leagues.json', errors);
+  assert(new Set(scopedLeagueIds).size === scopedLeagueIds.length, 'metadata scope contains duplicate league ids', errors);
+  scopedLeagueIds.forEach(leagueId => assert(leagueIds.has(leagueId), `metadata scope references unknown league ${leagueId}`, errors));
+  leagues.forEach(league => assert(scopedLeagueIds.includes(league.id), `${league.id} is missing from metadata scope`, errors));
+  assert(metadata.scope?.leagueCount === leagues.length, 'metadata scope leagueCount must match leagues.json', errors);
+  assert(metadata.scope?.targetClubCount === expectedClubCount, `metadata targetClubCount must equal summed league targets (${expectedClubCount})`, errors);
 
   clubs.forEach(club => {
     assert(leagueIds.has(club.leagueId), `${club.id} references unknown league ${club.leagueId}`, errors);
