@@ -140,6 +140,35 @@ function rolloverRecord(career) {
   ) || null;
 }
 
+function ensureUnsupportedChampionshipGuard(career, rolledAt) {
+  career.worldHistory ||= [];
+  const key = `eng-championship:${ROLLOVER_TARGET_SEASON}`;
+  const existing = career.worldHistory.find(record => record?.key === key);
+  if (existing) return existing;
+  const guard = {
+    schemaVersion: 1,
+    key,
+    competitionId: 'eng-championship',
+    competitionName: 'Championship',
+    season: ROLLOVER_TARGET_SEASON,
+    completedAt: null,
+    status: 'unsupported-membership',
+    membershipSource: 'not simulated: 2027/28 Championship membership is not annualised in world v1',
+    championClubId: null,
+    runnerUpClubId: null,
+    automaticPromotionClubIds: [],
+    playoffClubIds: [],
+    playoffWinnerClubId: null,
+    promotedClubIds: [],
+    relegatedClubIds: [],
+    playoffs: null,
+    simulationBlockedAt: rolledAt,
+    reason: 'Football Lab will not reuse the 2026/27 Championship membership to fabricate a 2027/28 world result.'
+  };
+  career.worldHistory.push(guard);
+  return guard;
+}
+
 export function augmentDatabaseForCareer(career, db) {
   if (!career || !db || !Array.isArray(db.clubs) || !Array.isArray(db.players)) return db;
   const clubIds = new Set(db.clubs.map(club => club.id));
@@ -266,6 +295,7 @@ export function rolloverPremierLeagueSeason(career, { db, rolledAt = new Date().
     career.worldClock.lastProcessedDate = career.seasonStartDate;
   }
   if (career.preseason && typeof career.preseason === 'object') career.preseason.phase = 'complete';
+  ensureUnsupportedChampionshipGuard(career, rolledAt);
   career.updatedAt = rolledAt;
 
   augmentDatabaseForCareer(career, db);
