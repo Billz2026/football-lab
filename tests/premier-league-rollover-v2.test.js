@@ -134,26 +134,40 @@ test('season labels advance generically beyond the first rollover', () => {
   assert.equal(nextSeasonLabel('bad-label'), null);
 });
 
-test('2026/27 finalisation creates League One history and a complete 2027/28 Championship membership', () => {
+test('2026/27 finalisation creates League One history and complete 2027/28 Championship and League One memberships', () => {
   const career = completedCareer();
   const championship = career.worldHistory.find(record => record.key === 'eng-championship:2026/27');
   const leagueOne = career.lowerLeagueHistory.find(record => record.key === 'eng-league-one:2026/27');
+  const leagueTwo = career.lowerLeagueHistory.find(record => record.key === 'eng-league-two:2026/27');
   const membership = career.worldMemberships.find(record => record.key === 'eng-championship:2027/28');
-  const leagueOneBoundary = career.worldMemberships.find(record => record.key === 'eng-league-one:2027/28');
+  const leagueOneMembership = career.worldMemberships.find(record => record.key === 'eng-league-one:2027/28');
+  const leagueTwoBoundary = career.worldMemberships.find(record => record.key === 'eng-league-two:2027/28');
 
   assert.equal(championship.status, 'complete');
   assert.equal(leagueOne.status, 'complete');
+  assert.equal(leagueTwo.status, 'complete');
   assert.equal(leagueOne.promotedClubIds.length, 3);
   assert.equal(leagueOne.relegatedClubIds.length, 4);
+  assert.equal(leagueTwo.promotedClubIds.length, 4);
+  assert.equal(leagueTwo.relegatedClubIds.length, 2);
+
   assert.equal(membership.status, 'complete');
   assert.equal(membership.clubCount, 24);
   assert.equal(new Set(membership.clubs.map(club => club.id)).size, 24);
   assert.equal(membership.relegatedFromPremierLeagueClubIds.length, 3);
   assert.equal(membership.promotedFromLeagueOneClubIds.length, 3);
   assert.equal(membership.relegatedToLeagueOneClubIds.length, 3);
-  assert.equal(leagueOneBoundary.status, 'incomplete-lower-pyramid');
-  assert.equal(leagueOneBoundary.clubCount, 20);
-  assert.equal(leagueOneBoundary.missingPromotionSlots, 4);
+
+  assert.equal(leagueOneMembership.status, 'complete');
+  assert.equal(leagueOneMembership.clubCount, 24);
+  assert.equal(leagueOneMembership.promotedFromLeagueTwoClubIds.length, 4);
+  assert.equal(leagueOneMembership.relegatedFromChampionshipClubIds.length, 3);
+  assert.equal(new Set(leagueOneMembership.clubs.map(club => club.id)).size, 24);
+
+  assert.equal(leagueTwoBoundary.status, 'incomplete-lower-pyramid');
+  assert.equal(leagueTwoBoundary.clubCount, 22);
+  assert.equal(leagueTwoBoundary.missingPromotionSlots, 2);
+  assert.match(leagueTwoBoundary.reason, /National League/i);
 
   const sourceIds = new Set(CHAMPIONSHIP_2026_27_CLUBS.map(club => club.id));
   const leaving = new Set([...championship.promotedClubIds, ...championship.relegatedClubIds]);
@@ -182,13 +196,14 @@ test('first rollover enters the 2027/28 offseason with 20 clubs and preserved py
   assert.ok(career.worldMemberships.some(record => record.key === 'eng-championship:2027/28' && record.status === 'complete'));
 });
 
-test('2027/28 Championship simulates from its derived membership instead of recycling 2026/27 clubs', () => {
+test('2027/28 Championship simulates from its derived membership and creates a complete 2028/29 Championship handoff', () => {
   const db = dbFixture();
   const career = completedCareer();
   rolloverPremierLeagueSeason(career, { db, rolledAt: '2027-05-31T09:00:00.000Z' });
   const { result } = completeActiveSeason(career, { completedAt: '2028-05-28T18:00:00.000Z' });
 
   assert.equal(result.championship.status, 'finalised');
+  assert.equal(result.leagueOne.status, 'finalised');
   assert.equal(career.championshipOutcome.season, '2027/28');
   assert.equal(career.championshipOutcome.status, 'complete');
   assert.match(career.championshipOutcome.membershipSource, /derived English pyramid membership/);
@@ -196,9 +211,9 @@ test('2027/28 Championship simulates from its derived membership instead of recy
   assert.equal(career.nextSeasonContext.promotedFromChampionshipClubIds.length, 3);
   assert.equal(career.worldHistory.filter(record => record.competitionId === 'eng-championship').length, 2);
   const nextMembership = career.worldMemberships.find(record => record.key === 'eng-championship:2028/29');
-  assert.equal(nextMembership.status, 'incomplete-lower-pyramid');
-  assert.equal(nextMembership.clubCount, 21);
-  assert.equal(nextMembership.missingPromotionSlots, 3);
+  assert.equal(nextMembership.status, 'complete');
+  assert.equal(nextMembership.clubCount, 24);
+  assert.equal(nextMembership.promotedFromLeagueOneClubIds.length, 3);
 });
 
 test('second rollover creates 2028/29 and carries an existing background squad across the save boundary', () => {
@@ -230,7 +245,7 @@ test('second rollover creates 2028/29 and carries an existing background squad a
   assert.ok(originalBackgroundIds.every(id => carriedIds.has(id)));
 });
 
-test('2028/29 lower-pyramid boundary is explicit rather than fabricated', () => {
+test('2028/29 Championship still finalises and unlocks 2029/30 while the next lower-pyramid boundary remains explicit', () => {
   const db = dbFixture();
   const career = completedCareer();
   rolloverPremierLeagueSeason(career, { db });
@@ -239,13 +254,21 @@ test('2028/29 lower-pyramid boundary is explicit rather than fabricated', () => 
   const { result } = completeActiveSeason(career, { completedAt: '2029-05-27T18:00:00.000Z' });
 
   assert.equal(career.season, '2028/29');
-  assert.equal(result.championship.status, 'unsupported-membership');
-  assert.equal(career.nextSeasonContext.championshipStatus, 'unsupported-membership');
-  assert.deepEqual(career.nextSeasonContext.promotedFromChampionshipClubIds, []);
+  assert.equal(result.championship.status, 'finalised');
+  assert.equal(career.championshipOutcome.status, 'complete');
+  assert.equal(career.nextSeasonContext.championshipStatus, 'complete');
+  assert.equal(career.nextSeasonContext.promotedFromChampionshipClubIds.length, 3);
+
+  const nextChampionship = career.worldMemberships.find(record => record.key === 'eng-championship:2029/30');
+  assert.ok(nextChampionship);
+  assert.equal(nextChampionship.status, 'incomplete-lower-pyramid');
+  assert.equal(nextChampionship.clubCount, 21);
+  assert.equal(nextChampionship.missingPromotionSlots, 3);
+
   const validation = validatePremierLeagueRollover(career, db);
-  assert.equal(validation.ok, false);
-  assert.equal(validation.status, 'lower-pyramid-not-ready');
-  assert.match(validation.reason, /has not produced exactly three promoted clubs/i);
+  assert.equal(validation.ok, true);
+  assert.equal(validation.sourceSeason, '2028/29');
+  assert.equal(validation.targetSeason, '2029/30');
 });
 
 test('a relegated managed club is still blocked from a fake Premier League survival', () => {
