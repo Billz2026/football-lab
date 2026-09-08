@@ -27,10 +27,10 @@ function injectStyles() {
   style.id = STYLE_ID;
   style.textContent = `
     .v048-tactics.is-xi-locked .v048-workspace,.v048-tactics.is-xi-locked .v048-topbar{filter:saturate(.7);opacity:.62}
-    .flm-xi-tactics-lock{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;margin:0 0 10px;padding:12px 14px;border:1px solid rgba(232,184,63,.35);border-radius:8px;background:#171306;color:#eee}
-    .flm-xi-tactics-lock strong{display:block;font-size:11px;letter-spacing:.04em;color:#f1d16d}
-    .flm-xi-tactics-lock span{display:block;margin-top:3px;font-size:9px;color:#aaa}
-    .flm-xi-tactics-lock button{min-height:36px;padding:0 13px;border:1px solid #e8b83f;border-radius:5px;background:#e8b83f;color:#110d04;font-size:9px;font-weight:950;cursor:pointer}
+    .flm-xi-tactics-lock{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;margin:0 0 8px;padding:10px 12px;border:1px solid #23558e;border-radius:0;background:#071c38;color:#eef3f6}
+    .flm-xi-tactics-lock strong{display:block;font-size:10px;letter-spacing:.04em;color:#f4c342}
+    .flm-xi-tactics-lock span{display:block;margin-top:3px;font-size:8px;color:#9caebe}
+    .flm-xi-tactics-lock button{min-height:32px;padding:0 12px;border:1px solid #55dc7c;border-radius:0;background:#174d36;color:#eef3f6;font-size:8px;font-weight:950;cursor:pointer}
     @media(max-width:620px){.flm-xi-tactics-lock{grid-template-columns:1fr}.flm-xi-tactics-lock button{width:100%}}
   `;
   document.head.appendChild(style);
@@ -46,34 +46,12 @@ async function enhance() {
   const tactics = document.querySelector('.v048-tactics');
   const c = career();
   if (!tactics || !c) return;
-
-  const state = await lineupState();
-  tactics.classList.toggle('is-xi-locked', !state.complete);
-  tactics.dataset.manualXiComplete = state.complete ? '1' : '0';
-
-  let notice = tactics.parentElement?.querySelector(':scope > .flm-xi-tactics-lock');
-  if (state.complete) {
-    notice?.remove();
-    return;
-  }
-
-  if (!notice) {
-    notice = document.createElement('div');
-    notice.className = 'flm-xi-tactics-lock';
-    notice.innerHTML = '<div><strong>COMPLETE YOUR STARTING XI FIRST</strong><span data-xi-lock-copy></span></div><button type="button" data-xi-lock-squad>SELECT STARTING XI</button>';
-    tactics.before(notice);
-    notice.querySelector('[data-xi-lock-squad]')?.addEventListener('click', goToSquad);
-  }
-  const missing = Math.max(0, 11 - state.count);
-  const copy = notice.querySelector('[data-xi-lock-copy]');
-  if (copy) copy.textContent = `${state.count} / 11 selected${state.goalkeeper ? '' : ' · goalkeeper required'}. Pick ${missing} more player${missing === 1 ? '' : 's'} in Team Selection. Tactics will not auto-fill your team.`;
+  tactics.classList.remove('is-xi-locked');
+  tactics.dataset.manualXiComplete = '1';
+  tactics.parentElement?.querySelector(':scope > .flm-xi-tactics-lock')?.remove();
 }
 
-function isLockedTacticsTarget(target) {
-  const tactics = target?.closest?.('.v048-tactics.is-xi-locked');
-  if (!tactics) return false;
-  return Boolean(target.closest('[data-v048-formation],[data-v048-option],[data-v048-save],[data-v048-auto],[data-v048-role],[data-v048-squad-player],[data-v048-slot],[data-v048-pitch]'));
-}
+function isLockedTacticsTarget() { return false; }
 
 // Capture-phase guards run before the existing tactics handlers. This prevents a
 // partial/empty XI from being converted into undefined tactical assignments and saved.
