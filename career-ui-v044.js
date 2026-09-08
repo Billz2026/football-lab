@@ -36,7 +36,19 @@ function injectStyles(){if(document.getElementById(STYLE_ID))return;const s=docu
 @media(max-width:900px){.career-app:has(.v044-squad-browser) .career-header{height:72px}.career-app:has(.v044-squad-browser) .career-layout{height:calc(100vh - 72px)}.career-app:has(.v044-squad-browser) .career-content{overflow:auto;padding:24px 16px 50px}.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-list{grid-template-columns:1fr}}
 @media(max-width:720px){.career-app:has(.v044-squad-browser) .career-header{height:72px}.career-app:has(.v044-squad-browser) .career-content{padding:18px 12px 40px}.career-app:has(.v044-squad-browser) .career-page-heading{align-items:flex-start;flex-direction:column;gap:6px}.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-row{grid-template-columns:26px 45px minmax(120px,1fr) 58px}.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-status,.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-cell,.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-profile{display:none}}
 .career-app{background:#061326;color:#eef3f6}.career-app:has(.career-nav-button[data-career-tab="squad"].is-active){background-image:url('./assets/homepage/squad-goal.webp');background-position:center;background-size:cover;background-repeat:no-repeat}
-`;document.head.appendChild(s);}
+`;
+s.textContent+=`
+/* Desktop squad pass: use the available manager workspace instead of a narrow centred card. */
+.career-app:has(.v044-squad-browser) .career-content>*,.career-app:has(.v044-squad-browser) .career-content>.career-page-heading{max-width:none;margin-left:0;margin-right:0}
+.career-app:has(.v044-squad-browser) .v044-squad-browser>.v044-head{grid-template-columns:22px 42px minmax(170px,1fr) 94px 52px 52px 62px}
+.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-row{grid-template-columns:22px 42px minmax(170px,1fr) 94px 52px 52px 62px;min-height:36px;padding:3px 8px;gap:6px;border:0;border-top:1px solid rgba(90,160,225,.28);background:rgba(7,28,56,.68)}
+.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-row:nth-child(4n),.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-row:nth-child(4n+1){background:rgba(12,42,79,.72)}
+.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-row.is-selected{border:0;border-top:1px solid #55dc7c;box-shadow:inset 3px 0 #55dc7c;background:rgba(23,77,55,.84)}
+.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-name strong{font-size:12px;line-height:1.05}
+.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-name small{font-size:7px}
+.career-app:has(.v044-squad-browser) .v044-squad-browser .v044-list{padding:0 6px 6px}
+`;
+document.head.appendChild(s);}
 function updateVersion(){const chip=document.querySelector('.version-chip');if(chip&&chip.textContent!==VERSION)chip.textContent=VERSION;const footer=document.querySelector('.footer-build');if(footer&&footer.textContent!=='V0.4.4 · SQUAD & TACTICS')footer.textContent='V0.4.4 · SQUAD & TACTICS';}
 
 function renderSquad(root,c,database){
@@ -46,7 +58,8 @@ function renderSquad(root,c,database){
   root.dataset.v044Squad='1';
   const selected=new Set(c.lineupIds||[]),stars=keyPlayers(database,c.clubId),order={GK:0,DEF:1,MID:2,ATT:3};
   const squad=database.players.filter(p=>p.clubId===c.clubId&&!p.isPlaceholder).sort((a,b)=>order[a.positionGroup]-order[b.positionGroup]||displayName(a).localeCompare(displayName(b)));
-  const positions=[...new Set(squad.map(p=>p.primaryPosition).filter(Boolean))];
+  // GK is already represented by the group filter, so do not repeat it in the exact-position strip.
+  const positions=[...new Set(squad.map(p=>p.primaryPosition).filter(Boolean))].filter(p=>p!=='GK');
   root.querySelector('.career-page-heading h2').textContent='Squad';
   root.querySelector('.career-page-heading .eyebrow').textContent='SQUAD · POSITION(S)';
   const round=root.querySelector('.career-round, .lineup-counter');
