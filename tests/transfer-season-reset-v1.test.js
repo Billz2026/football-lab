@@ -6,6 +6,7 @@ import { ensurePreseason } from '../preseason-v047.js';
 import {
   ensureTransferState,
   getTransferWindowStatus,
+  processTransferWorld,
   startTransferSeason
 } from '../transfers-v050.js';
 
@@ -33,6 +34,15 @@ function fixture() {
   return { career, db };
 }
 
+function moveTo2027(career, date = '2027-06-15') {
+  career.season = '2027/28';
+  career.previousSeasonEndDate = '2027-05-30';
+  career.seasonStartDate = '2027-08-20';
+  career.currentDate = date;
+  career.calendar = { currentDate: date, fixturesReleased: date >= '2027-06-19' };
+  career.worldClock = { schemaVersion: 2, season: '2027/28', acknowledgedMilestones: [], history: [], totalDaysAdvanced: 0 };
+}
+
 test('a new season archives last summer business and opens a clean operational transfer window', () => {
   const { career, db } = fixture();
   career.transfers.activeWindowSeason = '2026/27';
@@ -55,12 +65,7 @@ test('a new season archives last summer business and opens a clean operational t
   const initialBudget = career.transfers.initialTransferBudget;
   const initialWageRoom = career.transfers.initialWageRoom;
 
-  career.season = '2027/28';
-  career.previousSeasonEndDate = '2027-05-30';
-  career.seasonStartDate = '2027-08-20';
-  career.currentDate = '2027-06-15';
-  career.calendar = { currentDate: '2027-06-15', fixturesReleased: false };
-  career.worldClock = { schemaVersion: 2, season: '2027/28', acknowledgedMilestones: [], history: [], totalDaysAdvanced: 0 };
+  moveTo2027(career);
 
   assert.equal(startTransferSeason(career, db), true);
   assert.equal(career.transfers.activeWindowSeason, '2027/28');
@@ -84,14 +89,28 @@ test('starting the same transfer season twice is idempotent and does not duplica
   const { career, db } = fixture();
   career.transfers.activeWindowSeason = '2026/27';
   career.transfers.completed.push({ id: 'one-old-deal', playerId: 'p1', fee: 1000000, season: '2026/27' });
-  career.season = '2027/28';
-  career.currentDate = '2027-06-15';
-  career.calendar = { currentDate: '2027-06-15' };
-  career.worldClock = { schemaVersion: 2, season: '2027/28' };
+  moveTo2027(career);
 
   assert.equal(startTransferSeason(career, db), true);
   const snapshot = structuredClone(career.transfers);
   assert.equal(startTransferSeason(career, db), false);
   assert.deepEqual(career.transfers, snapshot);
   assert.equal(career.transfers.history.filter(item => item.id === 'one-old-deal').length, 1);
+});
+
+test('closing the 2027 window emits only season-correct closure news and never leaks a 2026 item', () => {
+  const { career, db } = fixture();
+  career.transfers.activeWindowSeason = '2026/27';
+  moveTo2027(career, '2027-09-02');
+  startTransferSeason(career, db);
+  career.preseason.phase = 'complete';
+  career.news.items = [];
+
+  const result = processTransferWorld(career, db);
+  assert.equal(result.window.open, false);
+  assert.equal(result.window.closes, '2027-09-01');
+  assert.equal(result.phaseKey, 'D:2027-09-02');
+  assert.ok(career.news.items.some(item => item.key === '2027/28:summer-window-closed'));
+  assert.equal(career.news.items.some(item => item.key === 'summer-window-closed-2026'), false);
+  assert.equal(career.news.items.some(item => /2026/.test(String(item.id || '')) && /window-closed/.test(String(item.id || ''))), false);
 });
