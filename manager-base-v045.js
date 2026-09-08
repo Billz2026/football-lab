@@ -352,22 +352,48 @@ async function beginCareer(clubId) {
 }
 
 async function showNewGame() {
+  let selectedClubId = null;
   openModal({
     eyebrow: '01 · NEW CAREER',
     title: 'CHOOSE YOUR CLUB',
-    copy: 'Begin a seven-match playable career. Choosing a club replaces the current local save.',
+    copy: 'Begin a full 38-match league season. Choosing a club replaces the current local save.',
     body: notice('LOADING PLAYABLE CLUBS', 'Preparing the Football Lab Invitational.'),
     wide: true,
     variant: 'club-picker',
-    actions: [{ label: 'CANCEL', onClick: closeModal }]
+    actions: [{ label: 'CANCEL', onClick: closeModal }, { label: 'TAKE CONTROL', primary: true, onClick: () => { if (selectedClubId) beginCareer(selectedClubId); } }]
   });
   try {
     const db = await loadDatabase();
+    const clubs = playableClubs(db);
+    const toolbar = document.createElement('div');
+    toolbar.className = 'career-club-toolbar';
+    toolbar.innerHTML = '<label>FIND CLUB<input type="search" data-club-search placeholder="Search clubs" autocomplete="off"></label><label>VIEW<select data-club-sort><option value="name">A–Z</option><option value="venue">STADIUM</option></select></label>';
+    const selection = document.createElement('div');
+    selection.className = 'career-club-selection';
+    selection.innerHTML = '<strong data-club-selection>SELECT A CLUB</strong><span>Choose your club to continue</span>';
     const grid = document.createElement('div');
     grid.className = 'career-club-grid';
-    grid.innerHTML = playableClubs(db).map(club => `<button type="button" data-start-club="${esc(club.id)}"><span>${esc((club.shortName || club.name).slice(0, 3).toUpperCase())}</span><strong>${esc(club.name)}</strong><small>${esc(club.venue || 'Stadium pending')}</small><em>TAKE CONTROL →</em></button>`).join('');
-    modalBody.replaceChildren(grid);
-    grid.querySelectorAll('[data-start-club]').forEach(control => control.addEventListener('click', () => beginCareer(control.dataset.startClub)));
+    const confirm = [...modalActions.querySelectorAll('button')].find(control => control.textContent === 'TAKE CONTROL');
+    if (confirm) confirm.disabled = true;
+    const renderClubs = () => {
+      const query = toolbar.querySelector('[data-club-search]').value.trim().toLowerCase();
+      const sort = toolbar.querySelector('[data-club-sort]').value;
+      const visible = clubs.filter(club => !query || `${club.name} ${club.venue || ''}`.toLowerCase().includes(query)).sort((a, b) => String(a[sort] || a.name).localeCompare(String(b[sort] || b.name)));
+      grid.innerHTML = visible.length ? visible.map(club => `<button type="button" class="${selectedClubId === club.id ? 'is-selected' : ''}" data-start-club="${esc(club.id)}"><span>${esc((club.shortName || club.name).slice(0, 3).toUpperCase())}</span><strong>${esc(club.name)}</strong><small>${esc(club.venue || 'Stadium pending')}</small><em>SELECT CLUB</em></button>`).join('') : '<div class="db-empty"><strong>NO CLUBS FOUND</strong><br>Try another search.</div>';
+      grid.querySelectorAll('[data-start-club]').forEach(control => control.addEventListener('click', () => {
+        selectedClubId = control.dataset.startClub;
+        const club = clubs.find(item => item.id === selectedClubId);
+        grid.querySelectorAll('[data-start-club]').forEach(item => item.classList.toggle('is-selected', item === control));
+        const label = selection.querySelector('[data-club-selection]');
+        if (label) label.textContent = club?.name || 'SELECT A CLUB';
+        selection.querySelector('span').textContent = club?.venue || 'Club selected';
+        if (confirm) confirm.disabled = false;
+      }));
+    };
+    toolbar.querySelector('[data-club-search]').addEventListener('input', renderClubs);
+    toolbar.querySelector('[data-club-sort]').addEventListener('change', renderClubs);
+    modalBody.replaceChildren(toolbar, selection, grid);
+    renderClubs();
   } catch (error) {
     modalBody.innerHTML = `<div class="db-empty"><strong>CAREER COULD NOT START</strong><br>${esc(error.message)}</div>`;
   }
@@ -556,13 +582,13 @@ const actions = {
 document.addEventListener('click', event => {
   const trigger = event.target.closest('[data-action]');
   if (trigger && actions[trigger.dataset.action]) actions[trigger.dataset.action]();
-  if (event.target.closest('[data-close-modal]')) closeModal();
+  if (event.target.closest('[data-close-modal]') && !modal.classList.contains('flm-appointment-open')) closeModal();
 });
 
 document.getElementById('headerSettings')?.addEventListener('click', showSettings);
 document.getElementById('brandHome')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: settings.reducedMotion ? 'auto' : 'smooth' }));
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+  if (event.key === 'Escape' && modal.classList.contains('is-open') && !modal.classList.contains('flm-appointment-open')) closeModal();
 });
 
 applySettings();

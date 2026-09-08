@@ -1,15 +1,15 @@
 :root {
-  --bg: #050504;
-  --bg-soft: #0a0906;
-  --panel: rgba(13, 12, 9, 0.91);
-  --panel-2: rgba(20, 18, 12, 0.86);
-  --gold: #efb93f;
-  --gold-bright: #ffd66a;
-  --gold-soft: #9b7024;
-  --text: #f4f1e9;
-  --muted: #9c978c;
-  --line: rgba(239, 185, 63, 0.24);
-  --line-strong: rgba(239, 185, 63, 0.62);
+  --bg: #061326;
+  --bg-soft: #071c38;
+  --panel: rgba(5, 22, 45, 0.91);
+  --panel-2: rgba(10, 34, 66, 0.86);
+  --gold: #f4c342;
+  --gold-bright: #ffd75e;
+  --gold-soft: #b48d2a;
+  --text: #eef3f6;
+  --muted: #9caebe;
+  --line: rgba(47, 104, 169, 0.48);
+  --line-strong: rgba(244, 195, 66, 0.72);
   --shadow: 0 22px 70px rgba(0, 0, 0, 0.48);
   --radius: 20px;
   --ease: cubic-bezier(.2,.8,.2,1);
@@ -25,9 +25,9 @@ body {
   min-height: 100vh;
   color: var(--text);
   background:
-    radial-gradient(circle at 15% -10%, rgba(239,185,63,.12), transparent 31rem),
-    radial-gradient(circle at 88% 6%, rgba(122,86,20,.13), transparent 27rem),
-    linear-gradient(180deg, #080705 0%, #050504 42%, #070603 100%);
+    radial-gradient(circle at 15% -10%, rgba(47,104,169,.18), transparent 31rem),
+    radial-gradient(circle at 88% 6%, rgba(21,77,55,.16), transparent 27rem),
+    linear-gradient(180deg, #071a32 0%, #061326 42%, #030d1d 100%);
 }
 body::before {
   content: "";
@@ -193,16 +193,18 @@ button { color: inherit; }
 
 .modal { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:20px; opacity:0; visibility:hidden; transition:.2s ease; }
 .modal.is-open { opacity:1; visibility:visible; }
-.modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,.72); backdrop-filter:blur(10px); }
-.modal-card { position:relative; width:min(650px,100%); max-height:min(780px,90vh); overflow:auto; border:1px solid rgba(239,185,63,.35); border-radius:22px; background:linear-gradient(155deg,#14120d,#080805 67%); box-shadow:0 32px 100px rgba(0,0,0,.7); padding:clamp(24px,4vw,42px); transform:translateY(14px) scale(.985); transition:.24s var(--ease); }
+.modal-backdrop { position:absolute; inset:0; background:rgba(2,10,21,.78); backdrop-filter:blur(10px); }
+.modal-card { position:relative; width:min(650px,100%); max-height:min(780px,90vh); overflow:auto; border:1px solid rgba(47,104,169,.65); border-radius:3px; background:linear-gradient(155deg,#081d39,#030e1d 67%); box-shadow:0 32px 100px rgba(0,0,0,.7),inset 0 1px rgba(142,231,168,.08); padding:clamp(24px,4vw,42px); transform:translateY(14px) scale(.985); transition:.24s var(--ease); }
 .modal.is-open .modal-card { transform:translateY(0) scale(1); }
-.modal-close { position:absolute; top:15px; right:15px; width:38px; height:38px; border-radius:10px; border:1px solid rgba(239,185,63,.2); background:#0b0a07; cursor:pointer; color:#c8c2b7; font-size:22px; }
+.modal-close { position:absolute; top:15px; right:15px; width:38px; height:38px; border-radius:2px; border:1px solid #2b63a4; background:#0a2242; cursor:pointer; color:#dce7ee; font-size:22px; }
 .modal-card h2 { margin:0; font-size:clamp(29px,4vw,44px); letter-spacing:-.04em; }
-.modal-copy { color:#aaa397; line-height:1.7; }
+.modal-copy { color:#aebdca; line-height:1.7; }
 .modal-body { margin-top:22px; }
 .modal-actions { margin-top:24px; display:flex; gap:10px; flex-wrap:wrap; }
-.modal-actions button { min-height:44px; padding:0 16px; border-radius:10px; border:1px solid rgba(239,185,63,.3); background:rgba(20,17,10,.9); cursor:pointer; font-size:10px; font-weight:900; letter-spacing:.12em; }
-.modal-actions .action-gold { background:linear-gradient(180deg,#ffd363,#e8aa2d); color:#161004; border-color:#f5ca61; }
+.modal-actions button { min-height:44px; padding:0 16px; border-radius:2px; border:1px solid #2b63a4; background:#0a2242; color:#e9f1f6; cursor:pointer; font-size:10px; font-weight:900; letter-spacing:.12em; }
+.modal-actions button:hover,.modal-actions button:focus-visible { border-color:#55dc7c; color:#55dc7c; outline:none; }
+.modal-actions .action-gold { background:#f4c342; color:#071326; border-color:#f4c342; }
+.modal-actions .action-gold:hover,.modal-actions .action-gold:focus-visible { color:#071326; background:#ffd75e; }
 .notice-panel { border:1px solid rgba(239,185,63,.14); border-radius:14px; padding:18px; background:rgba(255,255,255,.018); }
 .notice-panel strong{display:block;color:#e1d7c0;font-size:13px}.notice-panel p{margin:7px 0 0;color:#807a70;font-size:12px;line-height:1.6}
 .stat-row { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px }.stat-chip{padding:14px;border:1px solid rgba(239,185,63,.12);border-radius:12px;background:rgba(0,0,0,.15)}.stat-chip small{display:block;color:#716c62;font-size:9px;letter-spacing:.12em}.stat-chip strong{display:block;margin-top:5px;color:var(--gold-bright);font-size:16px}
