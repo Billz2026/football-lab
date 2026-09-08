@@ -92,21 +92,21 @@ function addInitialNews(career, db) {
   changed = pushUnique(career, makeItem(career, {
     key: 'welcome', category: 'Messages', source: 'Club Secretary', period: 'AM', order: 10,
     title: `Welcome to ${club?.name || 'the club'}`,
-    body: `${manager}, you are now in control of ${club?.name || 'the club'}. The board expects decisive squad management, a clear tactical identity and steady progress through the ${career.season || 'current'} season.`,
+    body: `${manager}, welcome to ${club?.name || 'the club'}. The board has placed its trust in you and the club is ready for your first decisions.`,
     priority: 'important', relatedClubId: career.clubId
   })) || changed;
 
   changed = pushUnique(career, makeItem(career, {
     key: 'board-expectation', category: 'Board', source: 'Board of Directors', period: 'AM', order: 20,
-    title: 'Board sets season expectations',
-    body: `The board wants the team to ${expectation}. Results, league position and the manner of performances will shape board confidence as the season develops.`,
+    title: 'The board sets its expectations',
+    body: `The board has set a clear target for the season: ${expectation}. Results, performances and the way the squad is managed will shape their view of your progress.`,
     priority: 'important', relatedClubId: career.clubId
   })) || changed;
 
   changed = pushUnique(career, makeItem(career, {
-    key: 'competition-briefing', category: 'Competitions', source: 'Competition Office', period: 'PM', order: 30,
-    title: `${career.competitionName || 'Competition'} fixtures confirmed`,
-    body: `${career.fixtures?.length || 0} rounds are scheduled. Every result affects the live table, with goal difference used as the first tie-break after points.`,
+    key: 'competition-briefing', category: 'Competitions', source: 'Club Secretary', period: 'PM', order: 30,
+    title: 'Your opening fixtures are ready',
+    body: `Your opening fixtures are now available. The first match will give you an early look at the squad and the standards expected at ${club?.name || 'the club'}.`,
     relatedClubId: career.clubId
   })) || changed;
 

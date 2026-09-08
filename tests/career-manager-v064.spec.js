@@ -37,7 +37,11 @@ test('new career creates a named manager with experience-based reputation and re
   expect(Object.values(career.playerRelationships).every(item => Number.isFinite(item.managerRespect))).toBeTruthy();
   expect(career.boardExpectations.transferBudget).toBeGreaterThan(0);
   expect(career.transfers.transferBudget).toBe(career.boardExpectations.transferBudget);
-  expect(career.news.items.find(item => item.key === 'board-expectation')?.body).toContain('Transfer budget: £');
+  expect(career.news.items.find(item => item.key === 'board-expectation')?.body).toContain('available for transfers');
+  expect(career.managerContract.weeklyWage).toBeGreaterThan(0);
+  expect(career.news.items.find(item => item.key === 'welcome')?.body).toContain('contract has been signed until');
+  expect(career.news.items.find(item => item.key === 'welcome')?.body).toContain('salary of');
+  expect(career.news.items.filter(item => item.round === 0)).toHaveLength(4);
   await expect(page.locator('[data-manager-strip-v064]')).toContainText('Alex Morgan');
 });
 

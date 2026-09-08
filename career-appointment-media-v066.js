@@ -4,7 +4,6 @@ import {
   FIRST_PRESS_QUESTIONS,
   initialFanSentiment,
   fanSentimentLabel,
-  fanReactionCopy,
   fanSquadAdjustment,
   mediaFanImpact,
   mediaPlayerImpact,
@@ -12,8 +11,8 @@ import {
   dominantCommunicationStyle
 } from './appointment-media-core-v1.js?v=1.0.0';
 
-const VERSION='0.6.7';
-const STYLE_ID='flm-appointment-media-v067-style';
+const VERSION='0.6.9';
+const STYLE_ID='flm-appointment-media-v069-style';
 const SAVE_KEY='flm-career-save';
 let dbPromise=null;
 let queued=false;
@@ -83,6 +82,11 @@ function addNews(c,item){
   const existing=c.news.items.find(x=>x.key===item.key);if(existing){Object.assign(existing,item);return;}
   c.news.items.push({id:`news-${c.id}-${item.key}`,round:0,period:'AM',dateLabel:'TODAY',priority:'important',relatedClubId:c.clubId,relatedPlayerId:null,read:false,...item});
 }
+function ensurePressInboxItem(c,db){
+  const state=c?.appointmentExperience;if(!state||state.completed||state.legacySkipped)return;
+  if(c.news?.items?.some(item=>item.key==='first-press-conference'))return;
+  const club=clubFor(c,db);addNews(c,{key:'first-press-conference',category:'Messages',source:'Press Office',title:'Your first press conference is scheduled',body:`The cameras are waiting. Your first press conference is scheduled for today, with the board, supporters and players listening closely to how you set the tone at ${club?.name||'the club'}.`,order:51980});
+}
 function relationSummary(c,db){
   const squad=db.players.filter(p=>p.clubId===c.clubId&&!p.isPlaceholder);const values=squad.map(p=>Number(c.playerRelationships?.[p.id]?.managerRespect)).filter(Number.isFinite);if(!values.length)return{average:Number(c.squadRespect)||50,sceptical:0,supportive:0};
   return{average:Math.round(values.reduce((a,b)=>a+b,0)/values.length),sceptical:values.filter(x=>x<40).length,supportive:values.filter(x=>x>=65).length};
@@ -95,8 +99,7 @@ function initializeAppointment(c,db){
   const club=clubFor(c,db);const initial=initialFanSentiment(c.managerReputation,club?.reputation);
   c.appointmentExperience={schemaVersion:APPOINTMENT_SCHEMA_VERSION,stage:'press',completed:false,fanSentiment:initial,initialFanSentiment:initial,fanApplied:false,questionIndex:0,answers:[],communicationProfile:{authority:50,diplomacy:50,motivation:50,mediaHandling:50,playerProtection:50},createdAt:new Date().toISOString()};
   applyInitialFanReaction(c,db);
-  addNews(c,{key:'manager-appointed',category:'Club',source:club?.name||'Club',title:`${c.managerProfile.name} appointed as manager`,body:`The board has confirmed ${c.managerProfile.name} as the new manager of ${club?.name||'the club'}. The appointment has been warmly received inside the club, with the board expecting clear leadership from day one.`,order:52000});
-  addNews(c,{key:'fan-reaction-appointment',category:'Supporters',source:'Supporter reaction',title:`Supporters react to ${c.managerProfile.name}'s appointment`,body:`${fanReactionCopy(initial,c.managerProfile.name,club?.name||'the club')} Supporters will judge the appointment by your decisions, your leadership and the results on the pitch.`,order:51990});
+  addNews(c,{key:'first-press-conference',category:'Messages',source:'Press Office',title:'Your first press conference is scheduled',body:`The cameras are waiting. Your first press conference is scheduled for today, with the board, supporters and players listening closely to how you set the tone at ${club?.name||'the club'}.`,order:51980});
   return true;
 }
 function applyInitialFanReaction(c,db){
@@ -136,7 +139,7 @@ function renderPress(c,db){
 }
 function completePress(c,db){
   const s=c.appointmentExperience;if(!s||s.completed)return;const club=clubFor(c,db);s.completed=true;s.stage='complete';s.completedAt=new Date().toISOString();s.communicationStyle=dominantCommunicationStyle(s.communicationProfile);const relations=relationSummary(c,db);s.finalSquadRespect=relations.average;
-  addNews(c,{key:'first-press-conference',category:'Media',source:'Press conference',title:`${c.managerProfile.name} faces the media for the first time`,body:`First press conference complete. Communication profile: ${s.communicationStyle}. Supporter sentiment: ${fanSentimentLabel(s.fanSentiment)} (${Math.round(s.fanSentiment)}/100). Squad respect: ${Math.round(c.squadRespect)}/100.`,order:51980});persist(c);window.dispatchEvent(new CustomEvent('flm:appointment-complete',{detail:{careerId:c.id}}));
+  addNews(c,{key:'first-press-conference',category:'Messages',source:'Press Office',title:`${c.managerProfile.name} completes the first press conference`,body:`${c.managerProfile.name} has addressed the media for the first time. The initial response around the club is ${fanSentimentLabel(s.fanSentiment).toLowerCase()}; the dressing room will now judge the manager by decisions and results.`,order:51980});persist(c);window.dispatchEvent(new CustomEvent('flm:appointment-complete',{detail:{careerId:c.id}}));
 }
 function renderSummary(c,db){
   const p=openFrame();if(!p)return;opening=true;const s=c.appointmentExperience;const relations=relationSummary(c,db);p.eyebrow.textContent='NEW CAREER · PRESS CONFERENCE COMPLETE';p.title.textContent='FIRST IMPRESSION SET';p.copy.textContent='Your answers have started to define how supporters, players and the media see you.';
@@ -148,7 +151,7 @@ function maybeOpen(c,db){
   if(s.completed){renderSummary(c,db);return;}renderPress(c,db);
 }
 async function sync(){
-  queued=false;ensureStyles();const c=career();if(!c?.managerProfile?.schemaVersion)return;const db=await database();if(!db)return;let changed=initializeAppointment(c,db);if(changed)persist(c);if(document.querySelector('.career-app.is-open'))setTimeout(()=>maybeOpen(c,db),180);
+  queued=false;ensureStyles();const c=career();if(!c?.managerProfile?.schemaVersion)return;const db=await database();if(!db)return;let changed=initializeAppointment(c,db);ensurePressInboxItem(c,db);if(changed)persist(c);if(document.querySelector('.career-app.is-open'))setTimeout(()=>maybeOpen(c,db),180);
 }
 function queue(){if(queued)return;queued=true;requestAnimationFrame(()=>sync().catch(error=>console.error('Appointment Media V0.6.6:',error)));}
 ensureStyles();new MutationObserver(queue).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});document.addEventListener('click',queue,true);window.addEventListener('flm:personality-v2',queue);setInterval(queue,1400);queue();

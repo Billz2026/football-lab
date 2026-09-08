@@ -42,9 +42,9 @@ test('new manager appointment flows through fans and a three-question press conf
   expect(state.communicationStyle).toBeTruthy();
 
   const news = await page.evaluate(() => window.FLMManager.activeCareer.news.items.map(item => item.key));
-  expect(news).toContain('manager-appointed');
-  expect(news).toContain('fan-reaction-appointment');
   expect(news).toContain('first-press-conference');
+  expect(news).not.toContain('manager-appointed');
+  expect(news).not.toContain('fan-reaction-appointment');
 
   await page.locator('[data-appt-enter]').click();
   await expect(page.locator('#appModal')).not.toHaveClass(/is-open/);
