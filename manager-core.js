@@ -1,3 +1,5 @@
+import { ensureSeasonHistoryState, finaliseSeason } from './season-finalisation-v1.js';
+
 export const CAREER_VERSION = 2;
 export const SAVE_KEY = 'flm-career-save';
 
@@ -187,6 +189,11 @@ function initialPlayerStatus(players, clubs) {
   );
 }
 
+function sharedLeagueId(clubs) {
+  const ids = [...new Set(clubs.map(club => club.leagueId).filter(Boolean))];
+  return ids.length === 1 ? ids[0] : null;
+}
+
 export function createCareer({ clubId, clubs, players, seed = Date.now(), managerName = 'The Gaffer' }) {
   const leagueClubs = clubs.filter(club => !club.isPlaceholder);
   if (!leagueClubs.some(club => club.id === clubId)) throw new Error('Choose a club from the playable league.');
@@ -194,11 +201,14 @@ export function createCareer({ clubId, clubs, players, seed = Date.now(), manage
 
   const timestamp = new Date().toISOString();
   const fixtures = createFixtures(leagueClubs.map(club => club.id));
-  return {
+  const leagueId = sharedLeagueId(leagueClubs);
+  const career = {
     version: CAREER_VERSION,
     id: `career-${hashString(`${clubId}:${seed}:${timestamp}`).toString(16)}`,
     managerName,
     clubId,
+    leagueId,
+    competitionId: leagueId,
     season: '2026/27',
     competitionName: leagueClubs.length === 20 ? 'Football Lab Premier League' : 'Football Lab League',
     competitionFormat: 'double-round-robin',
@@ -216,6 +226,8 @@ export function createCareer({ clubId, clubs, players, seed = Date.now(), manage
     playerStatus: initialPlayerStatus(players, leagueClubs),
     lastMatch: null
   };
+  ensureSeasonHistoryState(career);
+  return career;
 }
 
 function lineupPlayers(career, db, clubId) {
@@ -381,7 +393,10 @@ export function simulateNextRound(career, db) {
   updateRoundPlayerStatus(next, db, results, nextRoundDate);
   next.lastMatch = userResult;
   next.roundIndex += 1;
-  if (next.roundIndex >= next.fixtures.length) next.status = 'complete';
+  if (next.roundIndex >= next.fixtures.length) {
+    next.status = 'complete';
+    finaliseSeason(next);
+  }
   next.updatedAt = new Date().toISOString();
   return next;
 }
@@ -462,5 +477,15 @@ export function parseCareer(raw, db) {
   if (career.version !== CAREER_VERSION) throw new Error('This save belongs to an unsupported Football Lab version.');
   if (!db.clubs.some(club => club.id === career.clubId && !club.isPlaceholder)) throw new Error('The saved club is not available in this database.');
   if (!Array.isArray(career.fixtures) || !Array.isArray(career.table)) throw new Error('The career save is incomplete.');
+  if (!career.leagueId && !career.competitionId) {
+    const tableClubIds = new Set(career.table.map(row => row.clubId));
+    const leagueIds = [...new Set(db.clubs.filter(club => tableClubIds.has(club.id)).map(club => club.leagueId).filter(Boolean))];
+    if (leagueIds.length === 1) {
+      career.leagueId = leagueIds[0];
+      career.competitionId = leagueIds[0];
+    }
+  }
+  ensureSeasonHistoryState(career);
+  if (career.status === 'complete') finaliseSeason(career);
   return career;
 }
