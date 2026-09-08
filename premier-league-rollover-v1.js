@@ -1,5 +1,8 @@
 import { createFixtures } from './manager-core.js';
 import { CHAMPIONSHIP_2026_27_CLUBS } from './championship-world-v1.js';
+import { resetPreseasonForSeason } from './preseason-v047.js';
+import { deriveSeasonCalendar } from './season-calendar-v1.js';
+import { startTransferSeason } from './transfers-v050.js';
 
 export const PREMIER_LEAGUE_ROLLOVER_VERSION = 1;
 export const PREMIER_LEAGUE_ID = 'eng-premier-league';
@@ -249,11 +252,13 @@ export function rolloverPremierLeagueSeason(career, { db, rolledAt = new Date().
   const sourceSeason = career.season;
   const sourceOutcome = clone(career.seasonOutcome);
   const previousSeed = String(career.seed ?? 'football-lab');
+  const previousSeasonEndDate = career.seasonEndDate || career.lastMatch?.date || career.currentDate || null;
   const rollover = {
     schemaVersion: PREMIER_LEAGUE_ROLLOVER_VERSION,
     fromSeason: sourceSeason,
     toSeason: ROLLOVER_TARGET_SEASON,
     rolledAt,
+    previousSeasonEndDate,
     defendingChampionClubId: sourceOutcome.championClubId,
     relegatedClubIds: [...validation.relegatedClubIds],
     promotedClubIds: [...validation.promotedClubIds],
@@ -263,6 +268,7 @@ export function rolloverPremierLeagueSeason(career, { db, rolledAt = new Date().
   career.seasonRollovers ||= [];
   career.seasonRollovers.push(rollover);
   career.previousSeasonOutcomeKey = rollover.sourceOutcomeKey;
+  career.previousSeasonEndDate = previousSeasonEndDate;
   career.defendingChampionClubId = sourceOutcome.championClubId;
   career.season = ROLLOVER_TARGET_SEASON;
   career.status = 'active';
@@ -280,31 +286,46 @@ export function rolloverPremierLeagueSeason(career, { db, rolledAt = new Date().
   career.seasonOutcome = null;
   career.seasonResolution = null;
   career.nextSeasonContext = null;
-  career.currentDate = career.seasonStartDate;
-  if (career.calendar && typeof career.calendar === 'object') {
-    career.calendar.currentDate = career.seasonStartDate;
-    career.calendar.fixturesReleased = true;
-  }
-  if (career.worldClock && typeof career.worldClock === 'object') {
-    career.worldClock.acknowledgedMilestones = [];
-    career.worldClock.history = [];
-    career.worldClock.totalDaysAdvanced = 0;
-    career.worldClock.lastContinueFrom = career.seasonStartDate;
-    career.worldClock.lastContinueTo = career.seasonStartDate;
-    career.worldClock.lastStopReason = null;
-    career.worldClock.lastProcessedDate = career.seasonStartDate;
-  }
-  if (career.preseason && typeof career.preseason === 'object') career.preseason.phase = 'complete';
+
+  const calendar = deriveSeasonCalendar({
+    season: ROLLOVER_TARGET_SEASON,
+    previousSeasonEndDate,
+    seasonStartDate: career.seasonStartDate
+  });
+  career.currentDate = calendar.offseasonStartDate;
+  career.calendar = {
+    ...calendar,
+    schemaVersion: 3,
+    currentDate: calendar.offseasonStartDate,
+    fixturesReleased: false
+  };
+  career.worldClock = {
+    schemaVersion: 2,
+    season: ROLLOVER_TARGET_SEASON,
+    acknowledgedMilestones: [],
+    history: [],
+    totalDaysAdvanced: 0,
+    lastContinueFrom: calendar.offseasonStartDate,
+    lastContinueTo: calendar.offseasonStartDate,
+    lastStopReason: null,
+    lastProcessedDate: calendar.offseasonStartDate
+  };
+
+  augmentDatabaseForCareer(career, db);
+  resetPreseasonForSeason(career, db, { startedAt: rolledAt });
+  startTransferSeason(career, db);
   ensureUnsupportedChampionshipGuard(career, rolledAt);
   career.updatedAt = rolledAt;
 
-  augmentDatabaseForCareer(career, db);
   return {
     status: 'rolled-over',
     career,
     rollover: clone(rollover),
     seasonClubIds: [...seasonClubIds],
     promotedClubIds: [...validation.promotedClubIds],
-    relegatedClubIds: [...validation.relegatedClubIds]
+    relegatedClubIds: [...validation.relegatedClubIds],
+    offseasonStartDate: calendar.offseasonStartDate,
+    transferWindowOpenDate: calendar.transferWindowOpenDate,
+    fixtureReleaseDate: calendar.fixtureReleaseDate
   };
 }
