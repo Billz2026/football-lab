@@ -228,6 +228,8 @@ async function openBrowserPlayer(playerId){
   setTimeout(decorateBrowser,0);
 }
 async function decorateBrowser(){
+  document.querySelectorAll('.v054-browser').forEach(node=>node.remove());
+  return;
   const body=document.getElementById('modalBody');
   const profile=body?.querySelector('.flm-profile');
   const active=window.FLMPlayerProfile?.activePlayerId;

@@ -163,6 +163,8 @@ async function openPlayer(id) {
   queueMicrotask(decorateBrowser);
 }
 async function decorateBrowser() {
+  document.querySelectorAll('.v054-browser').forEach(node => node.remove());
+  return;
   const profile = document.querySelector('#appModal.is-open .flm-profile');
   const active = window.FLMPlayerProfile?.activePlayerId;
   if (!profile || !active) return;

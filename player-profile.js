@@ -287,7 +287,6 @@
     const short = shortlistSet();
     body.innerHTML = `<div class="flm-profile">
       <div class="flm-profile-head">
-        <div class="flm-player-avatar"><strong>${esc(initials(player.name))}</strong><span>NO PHOTO</span></div>
         <div class="flm-profile-name"><h3>${esc(player.firstName || player.name.split(' ')[0])} <span>${esc(player.lastName || player.name.split(' ').slice(1).join(' '))}</span></h3>
           <div class="flm-profile-sub">${esc(club?.name || 'Unattached')} · ${esc(player.nationalityCode || '—')}</div>
           <div class="flm-profile-position">${esc([player.primaryPosition, ...(player.secondaryPositions || [])].filter(Boolean).join(' / '))}</div>

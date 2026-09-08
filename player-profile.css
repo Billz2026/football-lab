@@ -96,3 +96,13 @@
 .flm-personality-v2-grid>div{background:#071c38}
 .flm-personality-v2-grid strong{color:#eef3f6}
 .flm-personality-v2-grid .respect strong{color:#8ee7a8}
+
+/* Final profile cleanup: one clean CM-style identity block, no legacy browser or portrait placeholder. */
+.flm-profile-v2-open .v054-browser{display:none!important}
+.flm-profile-head{grid-template-columns:minmax(0,1fr) minmax(250px,.4fr);gap:18px}
+.flm-profile-name h3{font-size:clamp(34px,5vw,58px)}
+.modal.flm-profile-v2-open .modal-card{background:linear-gradient(180deg,rgba(3,15,32,.72),rgba(3,17,37,.88)),url('./assets/homepage/stadium-home.webp') center/cover no-repeat}
+.modal.flm-profile-v2-open .modal-card:before{background:linear-gradient(90deg,rgba(3,15,32,.68),rgba(3,15,32,.32) 50%,rgba(3,15,32,.72)),linear-gradient(180deg,rgba(3,15,32,.42),transparent 35%,rgba(3,15,32,.76))}
+.flm-profile-actions{align-content:start}
+@media(max-width:1020px){.flm-profile-head{grid-template-columns:minmax(0,1fr)}.flm-profile-actions{grid-column:auto;grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:680px){.flm-profile-head{grid-template-columns:1fr;gap:12px}.flm-profile-actions{grid-template-columns:1fr 1fr}}
