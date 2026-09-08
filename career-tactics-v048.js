@@ -17,6 +17,7 @@ const displayName = player => {
   const last = String(player.lastName || '').trim();
   const full = String(player.name || '').replace(',', '').trim();
   if (first.length > 1 && last) return `${first} ${last}`;
+  if (first.length <= 1 && full) return full;
   if (full && !/^[A-Za-zÀ-ÖØ-öø-ÿ]\.?\s/.test(full)) return full;
   return [first, last].filter(Boolean).join(' ') || full || '—';
 };
