@@ -157,7 +157,7 @@ async function playFriendly(c, database, fixture) {
   if (navButton) navButton.disabled = true;
   const pseudo = buildPreseasonFriendlyCareer(c, fixture);
   const completed = {};
-  const { playLiveMatch } = await import('./matchday-live-v04.js?v=0.4.3');
+  const { playLiveMatch } = await import('./matchday-live-v04.js?v=0.4.4');
   await playLiveMatch({ root, career: pseudo, completedCareer: completed, db: database, reducedMotion: false });
   await finishFriendly(c, database, completed);
 }

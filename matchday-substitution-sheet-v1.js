@@ -43,6 +43,9 @@ function ensureStyles() {
     .flm-v049-row:hover,.flm-v049-row.is-selected{background:#174d36}
     .flm-v049-row.is-off{border-left:2px solid #ef786f;background:#3b1d25}
     .flm-v049-row.is-in{border-left:2px solid #55dc7c;background:#174d36}
+    .flm-v049-row[draggable="true"]{cursor:grab;touch-action:manipulation}
+    .flm-v049-row[draggable="true"].is-dragging{opacity:.48;cursor:grabbing}
+    .flm-v049-row.is-drop{background:#174d36;box-shadow:inset 0 0 0 1px #f4c342}
     .flm-v049-slot{display:grid;gap:1px;justify-items:start;line-height:1}
     .flm-v049-slot strong{color:#f4c342;font-size:9px}
     .flm-v049-slot small{color:#8ee7a8;font-size:6px;font-weight:950}
@@ -88,6 +91,8 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, o
   ensureStyles();
   let selectedOutId = null;
   let selectedInId = null;
+  let draggedBenchId = null;
+  let suppressClickUntil = 0;
   let busy = false;
 
   function currentLineup() {
@@ -152,31 +157,72 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, o
       return `<button type="button" class="flm-v049-player ${selectedOut ? 'is-off' : ''} ${selectedIn ? 'is-in' : ''}" style="left:${slot.x}%;top:${slot.y}%" data-v049-pitch-out="${esc(player.id)}"><span class="position">${esc(slot.label)}</span><strong>${esc(displayName(player))}</strong><small>${conditionFor(state, player.id)}% CON</small></button>`;
     }).join('');
     dialog.dataset.v049MatchSheet = '1';
-    dialog.innerHTML = `${head('Match Plan','IN-MATCH MANAGEMENT')}<div class="flm-v049-match-sheet"><div class="flm-v049-context"><strong>${esc(matchContext)}</strong><span>${state.minute}' · ${windowInfo}</span></div><div class="flm-v049-status"><strong>${remaining} SUBSTITUTIONS REMAINING</strong><span>XI ${lineup.length} · BENCH ${bench.length}</span></div><div class="flm-v049-workspace"><aside class="flm-v049-squad"><div class="flm-v049-list"><div class="flm-v049-sheet-head"><span>MATCHDAY SQUAD</span><span>${lineup.length} / 11 ON PITCH</span></div><div class="flm-v049-section">STARTING XI</div>${starters}<div class="flm-v049-section bench">BENCH · ${bench.length}</div>${benchRows || '<div class="flm-v049-row"><span class="flm-v049-name"><strong>NO AVAILABLE SUBSTITUTES</strong></span></div>'}</div></aside><section class="flm-v049-board"><div class="flm-v049-board-head"><strong>TACTICAL BOARD</strong><span>Click a player off, then a substitute on.<br>Drag a substitute onto a pitch player.</span></div><div class="flm-v049-pitch"><i class="flm-v049-circle"></i><i class="flm-v049-box top"></i><i class="flm-v049-box bottom"></i>${pitch}</div><div class="flm-v049-plan" data-v049-plan>${planText(outPlayer, inPlayer)}</div></section></div><div class="flm-v049-actions"><button type="button" data-v049-tactics>TACTICS OPTIONS</button><button type="button" data-close-manager>CLOSE</button><button type="button" class="primary" data-v049-confirm ${validPlan ? '' : 'disabled'}>CONFIRM SUB</button></div></div>`;
-    dialog.querySelectorAll('[data-v049-out],[data-v049-pitch-out]').forEach(button => button.addEventListener('click', () => {
-      selectedOutId = button.dataset.v049Out || button.dataset.v049PitchOut;
-      render();
-    }));
-    dialog.querySelectorAll('[data-v049-in]').forEach(button => {
-      button.addEventListener('click', () => { selectedInId = button.dataset.v049In; render(); });
-      button.addEventListener('dragstart', event => {
-        selectedInId = button.dataset.v049In;
-        event.dataTransfer.setData('application/x-flm-match-sub', selectedInId);
-        event.dataTransfer.effectAllowed = 'move';
-      });
-    });
-    dialog.querySelectorAll('[data-v049-pitch-out]').forEach(button => {
-      button.addEventListener('dragover', event => { event.preventDefault(); button.classList.add('is-drop'); });
-      button.addEventListener('dragleave', () => button.classList.remove('is-drop'));
-      button.addEventListener('drop', event => {
-        event.preventDefault();
-        button.classList.remove('is-drop');
-        const incoming = event.dataTransfer.getData('application/x-flm-match-sub');
-        if (incoming) selectedInId = incoming;
-        selectedOutId = button.dataset.v049PitchOut;
+    dialog.innerHTML = `${head('Match Plan','IN-MATCH MANAGEMENT')}<div class="flm-v049-match-sheet"><div class="flm-v049-context"><strong>${esc(matchContext)}</strong><span>${state.minute}' · ${windowInfo}</span></div><div class="flm-v049-status"><strong>${remaining} SUBSTITUTIONS REMAINING</strong><span>XI ${lineup.length} · BENCH ${bench.length}</span></div><div class="flm-v049-workspace"><aside class="flm-v049-squad"><div class="flm-v049-list"><div class="flm-v049-sheet-head"><span>MATCHDAY SQUAD</span><span>${lineup.length} / 11 ON PITCH</span></div><div class="flm-v049-section">STARTING XI</div>${starters}<div class="flm-v049-section bench">BENCH · ${bench.length}</div>${benchRows || '<div class="flm-v049-row"><span class="flm-v049-name"><strong>NO AVAILABLE SUBSTITUTES</strong></span></div>'}</div></aside><section class="flm-v049-board"><div class="flm-v049-board-head"><strong>TACTICAL BOARD</strong><span>Click players to plan a change, or drag a bench row onto a starter.</span></div><div class="flm-v049-pitch"><i class="flm-v049-circle"></i><i class="flm-v049-box top"></i><i class="flm-v049-box bottom"></i>${pitch}</div><div class="flm-v049-plan" data-v049-plan>${planText(outPlayer, inPlayer)}</div></section></div><div class="flm-v049-actions"><button type="button" data-v049-tactics>TACTICS OPTIONS</button><button type="button" data-close-manager>CLOSE</button><button type="button" class="primary" data-v049-confirm ${validPlan ? '' : 'disabled'}>CONFIRM SUB</button></div></div>`;
+    const clearDropHighlights = () => {
+      dialog.querySelectorAll('.flm-v049-player.is-drop,.flm-v049-row.is-drop').forEach(item => item.classList.remove('is-drop'));
+    };
+    dialog.querySelectorAll('[data-v049-out],[data-v049-pitch-out]').forEach(button => {
+      button.addEventListener('click', () => {
+        if (Date.now() < suppressClickUntil) return;
+        selectedOutId = button.dataset.v049Out || button.dataset.v049PitchOut;
         render();
       });
     });
+    dialog.querySelectorAll('[data-v049-in]').forEach(button => {
+      button.addEventListener('click', () => {
+        if (Date.now() < suppressClickUntil) return;
+        selectedInId = button.dataset.v049In;
+        render();
+      });
+      button.addEventListener('dragstart', event => {
+        draggedBenchId = button.dataset.v049In;
+        selectedInId = draggedBenchId;
+        suppressClickUntil = Date.now() + 350;
+        button.classList.add('is-dragging');
+        dialog.querySelector('.flm-v049-match-sheet')?.classList.add('is-dragging');
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = 'copy';
+          event.dataTransfer.setData('application/x-flm-match-sub', draggedBenchId);
+          event.dataTransfer.setData('text/plain', draggedBenchId);
+        }
+      });
+      button.addEventListener('dragend', () => {
+        suppressClickUntil = Date.now() + 250;
+        draggedBenchId = null;
+        button.classList.remove('is-dragging');
+        dialog.querySelector('.flm-v049-match-sheet')?.classList.remove('is-dragging');
+        clearDropHighlights();
+      });
+    });
+    const bindDropTarget = (button, outId) => {
+      button.addEventListener('dragenter', event => {
+        event.preventDefault();
+        button.classList.add('is-drop');
+      });
+      button.addEventListener('dragover', event => {
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+        button.classList.add('is-drop');
+      });
+      button.addEventListener('dragleave', event => {
+        if (!event.relatedTarget || !button.contains(event.relatedTarget)) button.classList.remove('is-drop');
+      });
+      button.addEventListener('drop', event => {
+        event.preventDefault();
+        const incoming = event.dataTransfer?.getData('application/x-flm-match-sub')
+          || event.dataTransfer?.getData('text/plain')
+          || draggedBenchId;
+        button.classList.remove('is-drop');
+        draggedBenchId = null;
+        if (!incoming || !bench.includes(incoming)) return;
+        suppressClickUntil = Date.now() + 250;
+        selectedInId = incoming;
+        selectedOutId = outId;
+        render();
+      });
+    };
+    dialog.querySelectorAll('[data-v049-out]').forEach(button => bindDropTarget(button, button.dataset.v049Out));
+    dialog.querySelectorAll('[data-v049-pitch-out]').forEach(button => bindDropTarget(button, button.dataset.v049PitchOut));
     dialog.querySelector('[data-v049-confirm]')?.addEventListener('click', async () => {
       if (!selectedOutId || !selectedInId || busy) return;
       busy = true;
