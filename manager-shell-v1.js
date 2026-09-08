@@ -1,7 +1,7 @@
 // Football Lab Manager Shell V1
 // Presentation/navigation layer only: existing career systems remain authoritative.
 
-const SHELL_VERSION = '1.0.1';
+const SHELL_VERSION = '1.0.2';
 const STYLE_HREF = `./manager-shell-v1.css?v=${SHELL_VERSION}`;
 const MILESTONES = [
   { date: '2026-06-15', label: 'CONTINUE TO 15 JUNE', detail: 'Summer transfer window opens' },
@@ -245,9 +245,8 @@ function buildSidebar(layout, nav) {
   sidebar.className = 'flm-cm-sidebar';
   sidebar.setAttribute('aria-label', 'Football Lab career navigation');
   sidebar.innerHTML = `
-    <div class="flm-shell-brand">
-      <span class="flm-shell-brand-mark">FL</span>
-      <div><strong>FOOTBALL LAB</strong><span>MANAGER</span></div>
+    <div class="flm-shell-brand" aria-label="Football Lab Manager">
+      <strong>FOOTBALL LAB</strong><span>MANAGER</span>
     </div>
     <div class="flm-shell-date" data-shell-date>
       <div><small>CAREER DATE</small><strong data-shell-date-value>—</strong><em data-shell-stage>CAREER</em></div>

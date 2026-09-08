@@ -464,9 +464,9 @@
 .career-inbox-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2px; margin-bottom: 8px; }
 .career-inbox-tabs button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 35px; padding: 0 8px; border: 1px solid #24558e; border-radius: 0; color: #b9c9d5; background: #071c38; cursor: pointer; font-size: 8px; font-weight: 950; letter-spacing: .04em; }
 .career-inbox-tabs button:hover, .career-inbox-tabs button:focus-visible { border-color: #55dc7c; color: #eef3f6; background: #0b315c; outline: none; }
-.career-inbox-tabs button.is-active { border-color: #f4c342; color: #071326; background: #f4c342; }
+.career-inbox-tabs button.is-active { border-color: #55dc7c; color: #fff; background: #123e70; box-shadow: inset 0 -2px #55dc7c; }
 .career-inbox-tabs button b { display: inline-grid; place-items: center; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 99px; color: #071326; background: #55dc7c; font-size: 7px; }
-.career-inbox-layout { display: grid; grid-template-columns: minmax(350px, .7fr) minmax(0, 1.8fr); height: clamp(540px, calc(100dvh - 240px), 850px); min-height: 540px; border: 1px solid rgba(47, 104, 169, .72); background: rgba(5, 22, 45, .88); }
+.career-inbox-layout { display: grid; grid-template-columns: minmax(350px, .7fr) minmax(0, 1.8fr); height: clamp(500px, calc(100dvh - 284px), 740px); min-height: 500px; border: 1px solid rgba(47, 104, 169, .72); background: rgba(5, 22, 45, .88); }
 .career-inbox-list { min-width: 0; overflow: auto; border-right: 1px solid #24558e; background: #061326; }
 .career-inbox-list-head { display: flex; align-items: center; justify-content: space-between; min-height: 36px; padding: 0 11px; border-bottom: 1px solid #24558e; color: #8fa9bd; font-size: 8px; letter-spacing: .12em; }
 .career-inbox-list-head span { color: #f4c342; }
@@ -481,7 +481,7 @@
 .career-inbox-row-copy small { display: block; overflow: hidden; margin-top: 3px; color: #8fa9bd; text-overflow: ellipsis; white-space: nowrap; font-size: 7px; }
 .career-inbox-row i { width: 7px; height: 7px; border-radius: 50%; background: #55dc7c; opacity: 0; }
 .career-inbox-row.is-unread i { opacity: 1; }
-.career-inbox-detail { min-width: 0; overflow: auto; padding: clamp(22px, 3vw, 38px); background: linear-gradient(145deg, rgba(7, 28, 56, .92), rgba(5, 19, 39, .72)); }
+.career-inbox-detail { min-width: 0; overflow: auto; padding: clamp(22px, 3vw, 38px); background: linear-gradient(145deg, rgba(7, 28, 56, .96), rgba(5, 19, 39, .91)), url('./assets/homepage/stadium-home.webp') center / cover no-repeat; }
 .career-inbox-detail-meta { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 11px; border-bottom: 1px solid rgba(142, 231, 168, .18); color: #8fa9bd; font-size: 8px; font-weight: 850; letter-spacing: .08em; }
 .career-inbox-detail-meta b { color: #55dc7c; }
 .career-inbox-detail h3 { max-width: 720px; margin: 26px 0 13px; color: #eef3f6; font-size: clamp(23px, 3vw, 38px); line-height: 1.05; letter-spacing: -.02em; }
@@ -492,7 +492,7 @@
 .career-inbox-empty { display: grid; place-items: center; min-height: 220px; padding: 20px; color: #8fa9bd; text-align: center; }
 .career-inbox-empty strong { display: block; margin-bottom: 6px; color: #f4c342; font-size: 10px; }
 .career-inbox-empty span { font-size: 10px; }
-.career-inbox-footer { display: flex; align-items: center; gap: 10px; min-height: 66px; margin-top: 8px; padding: 10px 12px; border: 1px solid rgba(47, 104, 169, .72); background: rgba(5, 22, 45, .88); }
+.career-inbox-footer { display: flex; align-items: center; gap: 10px; min-height: 52px; margin-top: 8px; padding: 7px 12px; border: 1px solid rgba(47, 104, 169, .72); background: rgba(5, 22, 45, .96); }
 .career-inbox-footer > div { display: grid; gap: 3px; min-width: 0; margin-right: auto; }
 .career-inbox-footer small { color: #8fa9bd; font-size: 7px; font-weight: 950; letter-spacing: .13em; }
 .career-inbox-footer strong { overflow: hidden; color: #eef3f6; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
@@ -514,9 +514,21 @@
 .flm-cm-shell .career-content:has(.career-inbox-heading) .v060-world-panel { display: none !important; }
 .flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-heading { min-height: 64px !important; margin-bottom: 9px !important; padding: 9px 13px !important; }
 .flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-tabs { margin-bottom: 9px; }
-.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-detail { padding: clamp(28px, 4vw, 58px); }
-.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-detail h3 { max-width: 980px; font-size: clamp(28px, 3.1vw, 48px); }
-.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-detail p { max-width: 980px; font-size: 14px; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-heading { border-color: #2f66a5 !important; background: linear-gradient(180deg, #144781, #0c2d57) !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-heading .eyebrow { color: #a9c8e7 !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-heading h2 { color: #fff !important; font-size: 24px !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-detail { padding: clamp(22px, 3vw, 42px); }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-detail h3,
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-detail.v046-detail h3 { max-width: 980px; margin: 18px 0 13px; color: #eef3f6 !important; font-size: clamp(22px, 2.4vw, 34px) !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-detail p { max-width: 980px; font-size: 13px; line-height: 1.6; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .v047-banner { margin: 0 0 9px !important; padding: 7px 11px !important; border: 1px solid #24558e !important; border-radius: 0 !important; background: #0a2242 !important; color: #c6d3dc !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .v047-banner b { color: #55dc7c !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-layout .career-inbox-row { min-height: 46px !important; padding: 5px 9px !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-list-head { min-height: 30px; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-row-copy strong { font-size: 9px !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-row-copy small { margin-top: 2px; font-size: 6px !important; }
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-footer .career-primary,
+.flm-cm-shell .career-content:has(.career-inbox-heading) .career-inbox-footer .career-secondary { min-height: 29px; }
 
 /* Keep the rail as the single visible calendar action. The header control is
    retained as a bridge for existing world-clock logic but is not shown twice. */
@@ -529,6 +541,7 @@
 @media (max-width: 650px) {
   .career-inbox-heading { align-items: flex-start; }
   .career-inbox-heading-actions { width: 100%; }
+  .flm-cm-shell .career-content:has(.career-inbox-heading) { overflow: auto !important; }
   .career-inbox-layout { display: block; height: auto; min-height: 0; }
   .career-inbox-list { max-height: 280px; border-right: 0; border-bottom: 1px solid #24558e; }
   .career-inbox-detail { min-height: 280px; }
