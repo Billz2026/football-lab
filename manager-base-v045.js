@@ -55,13 +55,14 @@ function applySettings() {
   document.body.classList.toggle('compact', settings.compact);
 }
 
-function openModal({ eyebrow = 'FOOTBALL LAB MANAGER', title, copy = '', body, actions = [], wide = false }) {
+function openModal({ eyebrow = 'FOOTBALL LAB MANAGER', title, copy = '', body, actions = [], wide = false, variant = '' }) {
   modalEyebrow.textContent = eyebrow;
   modalTitle.textContent = title;
   modalCopy.textContent = copy;
   modalBody.replaceChildren();
   modalActions.replaceChildren();
   modalCard.classList.toggle('modal-wide', wide);
+  modal.classList.toggle('club-picker-modal', variant === 'club-picker');
   if (typeof body === 'string') modalBody.innerHTML = body;
   else if (body) modalBody.appendChild(body);
   actions.forEach(action => modalActions.appendChild(button(action.label, action.primary ? 'action-gold' : '', action.onClick)));
@@ -72,6 +73,7 @@ function openModal({ eyebrow = 'FOOTBALL LAB MANAGER', title, copy = '', body, a
 
 function closeModal() {
   modal.classList.remove('is-open');
+  modal.classList.remove('club-picker-modal');
   modal.setAttribute('aria-hidden', 'true');
   modalCard.classList.remove('modal-wide');
   document.body.style.overflow = '';
@@ -351,6 +353,7 @@ async function showNewGame() {
     copy: 'Begin a seven-match playable career. Choosing a club replaces the current local save.',
     body: notice('LOADING PLAYABLE CLUBS', 'Preparing the Football Lab Invitational.'),
     wide: true,
+    variant: 'club-picker',
     actions: [{ label: 'CANCEL', onClick: closeModal }]
   });
   try {

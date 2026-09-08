@@ -275,3 +275,95 @@
   .career-match-actions { align-items: stretch; flex-direction: column; }
   .career-play-button { width: 100%; }
 }
+
+/* Unified new-career club picker: navy / blue / green manager theme */
+.modal.club-picker-modal .modal-backdrop {
+  background: rgba(2, 10, 21, .82);
+  backdrop-filter: blur(12px);
+}
+
+.modal.club-picker-modal .modal-card {
+  border: 1px solid rgba(59, 130, 199, .62);
+  border-radius: 3px;
+  background: linear-gradient(155deg, rgba(8, 29, 57, .99), rgba(3, 14, 29, .99));
+  box-shadow: 0 32px 100px rgba(0, 0, 0, .72), inset 0 1px rgba(142, 231, 168, .08);
+}
+
+.modal.club-picker-modal .modal-close {
+  border-color: #2b63a4;
+  border-radius: 2px;
+  color: #dce7ee;
+  background: #0a2242;
+}
+
+.modal.club-picker-modal .modal-close:hover,
+.modal.club-picker-modal .modal-close:focus-visible {
+  border-color: #55dc7c;
+  color: #55dc7c;
+}
+
+.modal.club-picker-modal .eyebrow {
+  color: #8ee7a8;
+}
+
+.modal.club-picker-modal .modal-card h2 {
+  color: #f1f5f7;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, .34);
+}
+
+.modal.club-picker-modal .modal-copy {
+  color: #aebdca;
+}
+
+.modal.club-picker-modal .career-club-grid {
+  gap: 8px;
+}
+
+.modal.club-picker-modal .career-club-grid button {
+  min-height: 110px;
+  border: 1px solid #24558e;
+  border-radius: 2px;
+  color: #eef3f6;
+  background: rgba(5, 22, 45, .88);
+  box-shadow: inset 0 1px rgba(142, 231, 168, .025);
+}
+
+.modal.club-picker-modal .career-club-grid button:hover,
+.modal.club-picker-modal .career-club-grid button:focus-visible {
+  border-color: #55dc7c;
+  background: #0b315c;
+  box-shadow: inset 4px 0 #55dc7c;
+  transform: translateX(2px);
+}
+
+.modal.club-picker-modal .career-club-grid button > span {
+  border-color: #2d6dbb;
+  border-radius: 50%;
+  color: #8ee7a8;
+  background: #0b315c;
+}
+
+.modal.club-picker-modal .career-club-grid strong {
+  color: #f1f5f7;
+}
+
+.modal.club-picker-modal .career-club-grid small {
+  color: #9caebe;
+}
+
+.modal.club-picker-modal .career-club-grid em {
+  color: #55dc7c;
+}
+
+.modal.club-picker-modal .modal-actions button {
+  border-color: #2b63a4;
+  border-radius: 2px;
+  color: #e9f1f6;
+  background: #0a2242;
+}
+
+.modal.club-picker-modal .modal-actions button:hover,
+.modal.club-picker-modal .modal-actions button:focus-visible {
+  border-color: #55dc7c;
+  color: #55dc7c;
+}
