@@ -1,4 +1,3 @@
-const SEASON_LABEL = '2026/27';
 const stylesheetId = 'flm-season-v051-css';
 if (!document.getElementById(stylesheetId)) {
   const link = document.createElement('link');
@@ -23,7 +22,16 @@ function readCareer() {
   }
 }
 
-function formatFixtureDate(value) {
+function careerSeason(career) {
+  return career?.season || '2026/27';
+}
+
+function careerSeasonStartYear(career) {
+  const match = /^(\d{4})\//.exec(careerSeason(career));
+  return match ? Number(match[1]) : null;
+}
+
+function formatFixtureDate(value, startYear = null) {
   if (!value) return '';
   const date = new Date(`${value}T12:00:00Z`);
   if (Number.isNaN(date.getTime())) return '';
@@ -31,19 +39,35 @@ function formatFixtureDate(value) {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
-    year: date.getUTCFullYear() === 2026 ? undefined : 'numeric',
+    year: Number.isFinite(startYear) && date.getUTCFullYear() === startYear ? undefined : 'numeric',
     timeZone: 'UTC'
   }).format(date);
 }
 
-function clubMap() {
+function finalDayLabel(career) {
+  const value = career?.seasonEndDate || career?.fixtures?.at(-1)?.[0]?.date;
+  if (!value) return 'TBC';
+  const date = new Date(`${value}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return 'TBC';
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC'
+  }).format(date).toUpperCase();
+}
+
+function clubMap(career = null) {
   if (!clubsPromise) {
     clubsPromise = fetch('./data/current/clubs.json?v=60', { cache: 'no-store' })
       .then(response => response.ok ? response.json() : Promise.reject(new Error('clubs unavailable')))
       .then(clubs => new Map(clubs.map(club => [club.id, club.name])))
       .catch(() => new Map());
   }
-  return clubsPromise;
+  return clubsPromise.then(map => {
+    const combined = new Map(map);
+    for (const club of career?.seasonClubs || []) {
+      if (club?.id && club?.name) combined.set(club.id, club.name);
+    }
+    return combined;
+  });
 }
 
 function userFixture(career, round) {
@@ -65,8 +89,9 @@ async function renderFixturesPage() {
   const career = readCareer();
   const content = document.querySelector('.career-content');
   if (!career || !content || !fixturesOpen) return;
-  const names = await clubMap();
+  const names = await clubMap(career);
   if (!fixturesOpen || !document.querySelector('.career-content')) return;
+  const startYear = careerSeasonStartYear(career);
 
   const rows = career.fixtures.map((round, index) => {
     const fixture = userFixture(career, round);
@@ -77,7 +102,7 @@ async function renderFixturesPage() {
     const isNext = career.status !== 'complete' && index === career.roundIndex;
     return `<article class="v051-fixture-row ${fixture.played ? 'is-played' : ''} ${isNext ? 'is-next' : ''}">
       <div class="v051-mw">MW ${fixture.matchweek || fixture.round}</div>
-      <div class="v051-date">${formatFixtureDate(fixture.date)}</div>
+      <div class="v051-date">${formatFixtureDate(fixture.date, startYear)}</div>
       <div class="v051-opponent"><span class="v051-ha">${home ? 'H' : 'A'}</span><b>${names.get(opponentId) || 'Opponent'}</b></div>
       <div class="v051-phase">${fixture.phase === 'return-leg' ? 'Return' : 'First leg'}</div>
       <div class="v051-result ${result.className}">${result.text}</div>
@@ -86,12 +111,12 @@ async function renderFixturesPage() {
 
   const played = career.table?.find(row => row.clubId === career.clubId)?.played || career.roundIndex || 0;
   content.innerHTML = `<section class="v051-fixtures-page">
-    <div class="v051-fixture-heading"><div><p class="eyebrow">${career.competitionName || 'FOOTBALL LAB PREMIER LEAGUE'}</p><h2>Fixtures & Results</h2></div><p>${SEASON_LABEL} · Home & away · 38 matches</p></div>
+    <div class="v051-fixture-heading"><div><p class="eyebrow">${career.competitionName || 'FOOTBALL LAB PREMIER LEAGUE'}</p><h2>Fixtures & Results</h2></div><p>${careerSeason(career)} · Home & away · ${career.fixtures.length} matches</p></div>
     <div class="v051-season-summary">
       <article><small>MATCHES</small><strong>${played} / ${career.fixtures.length}</strong></article>
-      <article><small>HOME</small><strong>19</strong></article>
-      <article><small>AWAY</small><strong>19</strong></article>
-      <article><small>FINAL DAY</small><strong>30 MAY 2027</strong></article>
+      <article><small>HOME</small><strong>${career.fixtures.length / 2}</strong></article>
+      <article><small>AWAY</small><strong>${career.fixtures.length / 2}</strong></article>
+      <article><small>FINAL DAY</small><strong>${finalDayLabel(career)}</strong></article>
     </div>
     <div class="v051-fixture-list">${rows}</div>
   </section>`;
@@ -116,8 +141,8 @@ function ensureFixturesTab() {
 
 function syncSeasonPresentation() {
   setText(document.querySelector('.hero-note'), 'FULL LEAGUE BETA · 20 CLUBS · 38 MATCHES');
-  setText(document.querySelector('.version-chip'), 'V0.5.1');
-  setText(document.querySelector('.footer-build'), 'V0.5.1 · FULL LEAGUE CAREER');
+  setText(document.querySelector('.version-chip'), 'V0.5.2');
+  setText(document.querySelector('.footer-build'), 'V0.5.2 · MULTI-SEASON LEAGUE CAREER');
 
   ensureFixturesTab();
 
@@ -125,6 +150,7 @@ function syncSeasonPresentation() {
   const total = career?.fixtures?.length || 38;
   const current = Math.min((career?.roundIndex || 0) + 1, total);
   const next = career?.status === 'complete' ? null : userFixture(career, career?.fixtures?.[career?.roundIndex || 0]);
+  const startYear = careerSeasonStartYear(career);
 
   document.querySelectorAll('.career-round').forEach(node => {
     const value = node.textContent
@@ -138,10 +164,10 @@ function syncSeasonPresentation() {
   });
 
   const nextMeta = document.querySelector('.career-next-match small');
-  if (nextMeta && next) {
+  if (nextMeta && next && career) {
     const currentVenue = nextMeta.textContent.split('·').find(part => /Home|Away|Stadium|Ground|Park|Bridge|Road|Lane|Stadium/i.test(part))?.trim();
     const venue = currentVenue || (next.homeClubId === career.clubId ? 'Home' : 'Away');
-    const date = formatFixtureDate(next.date);
+    const date = formatFixtureDate(next.date, startYear);
     setText(nextMeta, [date, venue, `Matchweek ${next.matchweek || next.round}`].filter(Boolean).join(' · '));
   }
 
@@ -153,8 +179,8 @@ function syncSeasonPresentation() {
     if (/Invitational complete/i.test(node.textContent)) setText(node, 'League season complete.');
   });
   document.querySelectorAll('.career-complete p').forEach(node => {
-    if (/first playable management loop/i.test(node.textContent)) {
-      setText(node, `You completed the full ${SEASON_LABEL} 38-match league season.`);
+    if (/first playable management loop/i.test(node.textContent) && career) {
+      setText(node, `You completed the full ${careerSeason(career)} ${total}-match league season.`);
     }
   });
 
@@ -168,14 +194,14 @@ function syncSeasonPresentation() {
   if (modalTitle?.textContent.trim() === 'LOAD GAME' && modalBody && career) {
     const paragraph = modalBody.querySelector('.notice-panel p');
     if (paragraph && /Round\s+\d+\s+of\s+\d+/i.test(paragraph.textContent)) {
-      setText(paragraph, career.status === 'complete' ? 'Season complete' : `Matchweek ${current} of ${total}`);
+      setText(paragraph, career.status === 'complete' ? `${careerSeason(career)} season complete` : `${careerSeason(career)} · Matchweek ${current} of ${total}`);
     }
   }
 
   if (modalTitle?.textContent.trim() === 'HALL OF FAME' && modalBody) {
     const paragraph = modalBody.querySelector('.notice-panel p');
     if (paragraph && /seven-match Invitational/i.test(paragraph.textContent)) {
-      setText(paragraph, 'Complete the 38-match league campaign and build a record worth keeping.');
+      setText(paragraph, 'Complete full league campaigns and build a multi-season record worth keeping.');
     }
   }
 }
