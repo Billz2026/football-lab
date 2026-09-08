@@ -7,22 +7,22 @@ import {
 } from '../premier-league-rollover-v3.js';
 
 function clubIds() {
-  return Array.from({ length: 20 }, (_, index) => `pl-${String(index + 1).padStart(2, '0')}`);
+  return Array.from({ length: 20 }, (_, index) => `v4-pl-${String(index + 1).padStart(2, '0')}`);
 }
 
-function completedFixtures(ids = clubIds()) {
+function completedFixtures(ids) {
   const fixtures = [];
   let serial = 0;
   for (let first = 0; first < ids.length; first += 1) {
     for (let second = first + 1; second < ids.length; second += 1) {
-      fixtures.push({ id: `m-${++serial}-a`, played: true, homeClubId: ids[first], awayClubId: ids[second], homeGoals: 1, awayGoals: 0 });
-      fixtures.push({ id: `m-${++serial}-b`, played: true, homeClubId: ids[second], awayClubId: ids[first], homeGoals: 0, awayGoals: 1 });
+      fixtures.push({ id: `v4-${++serial}-a`, played: true, homeClubId: ids[first], awayClubId: ids[second], homeGoals: 1, awayGoals: 0 });
+      fixtures.push({ id: `v4-${++serial}-b`, played: true, homeClubId: ids[second], awayClubId: ids[first], homeGoals: 0, awayGoals: 1 });
     }
   }
   return [fixtures];
 }
 
-function completedTable(ids = clubIds(), protectedClubId = 'pl-01') {
+function completedTable(ids, protectedClubId) {
   const ordered = ids.includes(protectedClubId)
     ? [protectedClubId, ...ids.filter(id => id !== protectedClubId)]
     : [...ids];
@@ -43,12 +43,12 @@ function dbFixture() {
   const ids = clubIds();
   const clubs = ids.map((id, index) => ({
     id,
-    name: `Premier Club ${index + 1}`,
-    shortName: `PL ${index + 1}`,
-    providerName: `Premier Club ${index + 1}`,
+    name: `V4 Premier Club ${index + 1}`,
+    shortName: `V4 PL ${index + 1}`,
+    providerName: `V4 Premier Club ${index + 1}`,
     countryCode: 'ENG',
     leagueId: 'eng-premier-league',
-    venue: `Ground ${index + 1}`,
+    venue: `V4 Ground ${index + 1}`,
     reputation: 7100 - index * 20,
     isPlaceholder: false
   }));
@@ -75,10 +75,10 @@ function completedCareer() {
   const ids = clubIds();
   return {
     version: 2,
-    id: 'pyramid-v3-career',
-    seed: 'pyramid-v3-seed',
-    managerName: 'Test Manager',
-    clubId: 'pl-01',
+    id: 'pyramid-v4-career',
+    seed: 'pyramid-v4-seed',
+    managerName: 'V4 Test Manager',
+    clubId: ids[0],
     leagueId: 'eng-premier-league',
     competitionId: 'eng-premier-league',
     competitionName: 'Premier League',
@@ -86,8 +86,8 @@ function completedCareer() {
     status: 'complete',
     roundIndex: 38,
     fixtures: completedFixtures(ids),
-    table: completedTable(ids),
-    seasonClubs: ids.map((id, index) => ({ id, name: `Premier Club ${index + 1}`, strength: 82 - index * 0.4 })),
+    table: completedTable(ids, ids[0]),
+    seasonClubs: ids.map((id, index) => ({ id, name: `V4 Premier Club ${index + 1}`, strength: 82 - index * 0.4 })),
     seasonClubIds: ids,
     seasonHistory: [],
     worldHistory: [],
@@ -101,12 +101,12 @@ function completedCareer() {
     preseason: { phase: 'complete' },
     worldClock: { schemaVersion: 2, season: '2026/27', acknowledgedMilestones: [], history: [], totalDaysAdvanced: 300 },
     tactics: { formation: '4-3-3', mentality: 'Balanced', pressing: 'Standard' },
-    lineupIds: Array.from({ length: 11 }, (_, index) => `pl-01-p${index + 1}`),
+    lineupIds: Array.from({ length: 11 }, (_, index) => `${ids[0]}-p${index + 1}`),
     playerStatus: {}
   };
 }
 
-function completeActiveSeason(career, completedAt) {
+function completeActiveSeason(career) {
   const ids = [...career.seasonClubIds];
   career.table = completedTable(ids, career.clubId);
   career.fixtures = career.fixtures.map(round => round.map(fixture => ({
@@ -120,28 +120,19 @@ function completeActiveSeason(career, completedAt) {
   career.currentDate = career.seasonEndDate;
   career.calendar.currentDate = career.seasonEndDate;
   career.lastMatch = { date: career.seasonEndDate };
-  const result = finaliseSeason(career, { completedAt });
+  const result = finaliseSeason(career, { completedAt: `${career.seasonEndDate}T18:00:00.000Z` });
   assert.equal(result.status, 'finalised');
   return result;
 }
 
-test('2026/27 finalisation uses League Two and National League to create complete 2027/28 League One and League Two memberships', () => {
+test('2026/27 National League feeder completes the 2027/28 League Two membership and exposes the Step 2 boundary', () => {
   const career = completedCareer();
   const result = finaliseSeason(career, { completedAt: '2027-05-30T18:00:00.000Z' });
-  assert.equal(result.status, 'finalised');
-  assert.equal(result.leagueOne.status, 'finalised');
-  assert.equal(result.leagueTwo.status, 'finalised');
-  assert.equal(result.nationalLeague.status, 'finalised');
 
-  const leagueOneMembership = career.worldMemberships.find(record => record.key === 'eng-league-one:2027/28');
-  assert.ok(leagueOneMembership);
-  assert.equal(leagueOneMembership.status, 'complete');
-  assert.equal(leagueOneMembership.clubCount, 24);
-  assert.equal(leagueOneMembership.clubs.length, 24);
-  assert.equal(new Set(leagueOneMembership.clubs.map(club => club.id)).size, 24);
-  assert.equal(leagueOneMembership.promotedFromLeagueTwoClubIds.length, 4);
-  assert.equal(leagueOneMembership.relegatedFromChampionshipClubIds.length, 3);
-  assert.equal(leagueOneMembership.relegatedToLeagueTwoClubIds.length, 4);
+  assert.equal(result.status, 'finalised');
+  assert.equal(result.nationalLeague.status, 'finalised');
+  assert.equal(result.nationalLeague.outcome.promotedClubIds.length, 2);
+  assert.equal(result.nationalLeague.outcome.relegatedClubIds.length, 4);
 
   const leagueTwoMembership = career.worldMemberships.find(record => record.key === 'eng-league-two:2027/28');
   assert.ok(leagueTwoMembership);
@@ -159,46 +150,54 @@ test('2026/27 finalisation uses League Two and National League to create complet
   assert.match(nationalLeagueBoundary.reason, /National League North\/South/i);
 
   const boundary = career.worldBoundaries.find(record => record.key === 'english-pyramid:2027/28');
-  assert.equal(boundary.leagueOneStatus, 'complete');
   assert.equal(boundary.leagueTwoStatus, 'complete');
   assert.equal(boundary.nationalLeagueStatus, 'incomplete-lower-pyramid');
   assert.equal(boundary.status, 'league-two-ready-step-two-boundary');
 });
 
-test('League Two feeder survives real Premier League rollovers and reaches the 2029/30 season', () => {
+test('National League feeder survives real rollovers and unlocks START 2030/31', () => {
   const db = dbFixture();
   const career = completedCareer();
-  const firstFinal = finaliseSeason(career, { completedAt: '2027-05-30T18:00:00.000Z' });
-  assert.equal(firstFinal.status, 'finalised');
 
-  const firstRollover = rolloverPremierLeagueSeason(career, { db, rolledAt: '2027-05-31T09:00:00.000Z' });
-  assert.equal(firstRollover.status, 'rolled-over');
+  const final2026 = finaliseSeason(career, { completedAt: '2027-05-30T18:00:00.000Z' });
+  assert.equal(final2026.nationalLeague.status, 'finalised');
+  assert.equal(career.worldMemberships.find(record => record.key === 'eng-league-two:2027/28')?.status, 'complete');
+
+  assert.equal(rolloverPremierLeagueSeason(career, { db, rolledAt: '2027-05-31T09:00:00.000Z' }).status, 'rolled-over');
   assert.equal(career.season, '2027/28');
 
-  const secondFinal = completeActiveSeason(career, '2028-05-28T18:00:00.000Z');
-  assert.equal(secondFinal.championship.status, 'finalised');
-  assert.equal(secondFinal.leagueOne.status, 'finalised');
-  const championship2028 = career.worldMemberships.find(record => record.key === 'eng-championship:2028/29');
-  assert.ok(championship2028);
-  assert.equal(championship2028.status, 'complete');
-  assert.equal(championship2028.clubCount, 24);
+  const final2027 = completeActiveSeason(career);
+  assert.equal(final2027.leagueTwo.status, 'finalised');
+  const leagueOne2028 = career.worldMemberships.find(record => record.key === 'eng-league-one:2028/29');
+  assert.ok(leagueOne2028);
+  assert.equal(leagueOne2028.status, 'complete');
+  assert.equal(leagueOne2028.clubCount, 24);
 
-  const secondRollover = rolloverPremierLeagueSeason(career, { db, rolledAt: '2028-05-29T09:00:00.000Z' });
-  assert.equal(secondRollover.status, 'rolled-over');
+  assert.equal(rolloverPremierLeagueSeason(career, { db, rolledAt: '2028-05-29T09:00:00.000Z' }).status, 'rolled-over');
   assert.equal(career.season, '2028/29');
 
-  const thirdFinal = completeActiveSeason(career, '2029-05-27T18:00:00.000Z');
-  assert.equal(thirdFinal.championship.status, 'finalised');
+  const final2028 = completeActiveSeason(career);
+  assert.equal(final2028.leagueOne.status, 'finalised');
+  const championship2029 = career.worldMemberships.find(record => record.key === 'eng-championship:2029/30');
+  assert.ok(championship2029);
+  assert.equal(championship2029.status, 'complete');
+  assert.equal(championship2029.clubCount, 24);
+
+  assert.equal(rolloverPremierLeagueSeason(career, { db, rolledAt: '2029-05-28T09:00:00.000Z' }).status, 'rolled-over');
+  assert.equal(career.season, '2029/30');
+
+  const final2029 = completeActiveSeason(career);
+  assert.equal(final2029.championship.status, 'finalised');
   assert.equal(career.nextSeasonContext.promotedFromChampionshipClubIds.length, 3);
 
   const validation = validatePremierLeagueRollover(career, db);
   assert.equal(validation.ok, true);
-  assert.equal(validation.sourceSeason, '2028/29');
-  assert.equal(validation.targetSeason, '2029/30');
+  assert.equal(validation.sourceSeason, '2029/30');
+  assert.equal(validation.targetSeason, '2030/31');
 
-  const thirdRollover = rolloverPremierLeagueSeason(career, { db, rolledAt: '2029-05-28T09:00:00.000Z' });
-  assert.equal(thirdRollover.status, 'rolled-over');
-  assert.equal(career.season, '2029/30');
+  const rollover2030 = rolloverPremierLeagueSeason(career, { db, rolledAt: '2030-05-27T09:00:00.000Z' });
+  assert.equal(rollover2030.status, 'rolled-over');
+  assert.equal(career.season, '2030/31');
   assert.equal(career.seasonClubIds.length, 20);
   assert.equal(new Set(career.seasonClubIds).size, 20);
 });
