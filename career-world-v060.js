@@ -113,6 +113,12 @@ function syncOverview(c) {
   const content = document.querySelector('.career-content');
   const overview = document.querySelector('.career-nav [data-career-tab="overview"]');
   if (!content || !overview?.classList.contains('is-active')) return;
+  // The Inbox is the overview now. Its primary action lives in the shell rail;
+  // never inject a second black/gold calendar card into the message workspace.
+  if (content.querySelector('.career-inbox-heading')) {
+    content.querySelector('.v060-world-panel')?.remove();
+    return;
+  }
   if (content.dataset.v046News === '1' || content.dataset.v047Preseason === '1' || content.dataset.v050Transfers === '1') return;
   const heading = content.querySelector('.career-page-heading');
   if (!heading) return;

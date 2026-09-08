@@ -222,6 +222,51 @@ export function getNewsItems(career, category = 'All') {
     .sort((a, b) => (b.order || 0) - (a.order || 0) || a.id.localeCompare(b.id));
 }
 
+function transferFeeFrom(item) {
+  if (Number.isFinite(Number(item?.transferFee))) return Number(item.transferFee);
+  const match = String(item?.body || '').match(/£([\d,]+)/);
+  return match ? Number(match[1].replaceAll(',', '')) : 0;
+}
+
+export function isRelevantNewsItem(career, db, item) {
+  if (!career || !item) return false;
+  // Competition roundups and unconfirmed rumours are background noise in the
+  // manager inbox. They remain in the save for audit/history but do not belong
+  // in the player's daily attention feed.
+  if (/^(roundup-r|rumour-)/i.test(String(item.key || ''))) return false;
+  if (item.relatedClubId === career.clubId) return true;
+
+  const player = db && item.relatedPlayerId ? playerById(db, item.relatedPlayerId) : null;
+  if (player?.clubId === career.clubId) return true;
+
+  // Only surface neutral transfer-desk stories when they are genuinely major
+  // business or a market milestone. A £50m threshold keeps the inbox focused.
+  if (item.category === 'Transfers') {
+    if (item.priority === 'important') return true;
+    if (/^transfer-/i.test(String(item.key || '')) && transferFeeFrom(item) >= 50000000) return true;
+  }
+  return false;
+}
+
+export function getRelevantNewsItems(career, db, category = 'All') {
+  return getNewsItems(career, category).filter(item => isRelevantNewsItem(career, db, item));
+}
+
+export function getRelevantUnreadNewsCount(career, db, category = 'All') {
+  return getRelevantNewsItems(career, db, category).filter(item => !item.read).length;
+}
+
+export function markRelevantNewsRead(career, db, category = 'All') {
+  let changed = false;
+  for (const item of getRelevantNewsItems(career, db, category)) {
+    if (!item.read) {
+      item.read = true;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 export function getUnreadNewsCount(career, category = 'All') {
   return getNewsItems(career, category).filter(item => !item.read).length;
 }

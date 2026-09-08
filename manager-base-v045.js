@@ -13,12 +13,12 @@ import {
 } from './manager-core.js?v=0.3.0';
 import {
   NEWS_CATEGORIES,
-  getNewsItems,
-  getUnreadNewsCount,
-  markAllNewsRead,
+  getRelevantNewsItems,
+  getRelevantUnreadNewsCount,
+  markRelevantNewsRead,
   markNewsRead,
   syncCareerNews
-} from './career-news-v046.js?v=0.4.6';
+} from './career-news-v046.js?v=0.4.7';
 
 const DATA_VERSION = '60';
 const modal = document.getElementById('appModal');
@@ -181,15 +181,15 @@ function overviewView(db) {
   const club = getClub(db, activeCareer.clubId);
   const next = getNextFixture(activeCareer);
   if (syncCareerNews(activeCareer, db) && settings.autosave) saveCareer();
-  const items = getNewsItems(activeCareer, inboxFilter);
+  const items = getRelevantNewsItems(activeCareer, db, inboxFilter);
   let selected = items.find(item => item.id === inboxSelectedId);
   if (!selected) selected = items.find(item => !item.read) || items[0] || null;
   inboxSelectedId = selected?.id || null;
-  const unread = getUnreadNewsCount(activeCareer);
+  const unread = getRelevantUnreadNewsCount(activeCareer, db);
   const nextUnread = items.find(item => !item.read);
   return `
     <div class="career-page-heading career-inbox-heading"><div><p class="eyebrow">CLUB INBOX · ${esc(club.name)}</p><h2 aria-label="News & Inbox">Inbox</h2><span class="career-inbox-subtitle">${unread ? `${unread} unread message${unread === 1 ? '' : 's'}` : 'All messages read'} · ${esc(activeCareer.competitionName)}</span></div><div class="career-inbox-heading-actions">${nextUnread ? '<button class="career-secondary career-inbox-next" type="button" data-inbox-next data-v046-next>NEXT UNREAD</button>' : ''}</div></div>
-    <div class="career-inbox-tabs">${NEWS_CATEGORIES.map(category => `<button type="button" class="${category === inboxFilter ? 'is-active' : ''}" data-inbox-filter="${esc(category)}" data-v046-filter="${esc(category)}">${esc(category)}${category !== 'All' && getUnreadNewsCount(activeCareer, category) ? `<b>${getUnreadNewsCount(activeCareer, category)}</b>` : ''}</button>`).join('')}</div>
+    <div class="career-inbox-tabs">${NEWS_CATEGORIES.map(category => `<button type="button" class="${category === inboxFilter ? 'is-active' : ''}" data-inbox-filter="${esc(category)}" data-v046-filter="${esc(category)}">${esc(category)}${category !== 'All' && getRelevantUnreadNewsCount(activeCareer, db, category) ? `<b>${getRelevantUnreadNewsCount(activeCareer, db, category)}</b>` : ''}</button>`).join('')}</div>
     <div class="career-inbox-layout"><aside class="career-inbox-list v046-list"><div class="career-inbox-list-head"><strong>${inboxFilter === 'All' ? 'ALL MESSAGES' : inboxFilter.toUpperCase()}</strong><span>${items.length}</span></div>${items.length ? items.map(item => `<button type="button" class="career-inbox-row v046-row ${item.id === inboxSelectedId ? 'is-selected' : ''} ${!item.read ? 'is-unread' : ''}" data-inbox-item="${esc(item.id)}"><span class="career-inbox-row-date">${esc(item.dateLabel)}</span><span class="career-inbox-row-copy"><strong>${esc(item.title)}</strong><small>${esc(item.category)} · ${esc(item.source)}</small></span><i aria-hidden="true"></i></button>`).join('') : '<div class="career-inbox-empty"><strong>NO STORIES</strong><span>New career events will appear here.</span></div>'}</aside><article class="career-inbox-detail v046-detail">${inboxDetail(selected, db)}</article></div>
     <div class="career-inbox-footer">${next ? `<div><small>NEXT FIXTURE</small><strong>${esc(clubName(db, next.homeClubId))} <em>vs</em> ${esc(clubName(db, next.awayClubId))}</strong><span>${next.homeClubId === activeCareer.clubId ? club.venue || 'Home' : 'Away'} · Round ${next.round}</span></div><button class="career-primary" type="button" data-career-tab="matchday">OPEN MATCHDAY</button>` : '<div><small>SEASON STATUS</small><strong>SEASON COMPLETE</strong><span>Your final table is ready.</span></div><button class="career-primary" type="button" data-career-tab="table">VIEW TABLE</button>'}<button class="career-secondary career-inbox-mark" type="button" data-inbox-all data-v046-all>MARK ALL READ</button></div>`;
 }
@@ -305,7 +305,7 @@ async function renderCareer() {
   }));
 
   element.querySelector('[data-inbox-next]')?.addEventListener('click', () => {
-    const unreadItem = getNewsItems(activeCareer, inboxFilter).find(item => !item.read);
+    const unreadItem = getRelevantNewsItems(activeCareer, db, inboxFilter).find(item => !item.read);
     if (!unreadItem) return;
     inboxSelectedId = unreadItem.id;
     markNewsRead(activeCareer, unreadItem.id);
@@ -314,7 +314,7 @@ async function renderCareer() {
   });
 
   element.querySelector('[data-inbox-all]')?.addEventListener('click', () => {
-    if (markAllNewsRead(activeCareer, inboxFilter) && settings.autosave) saveCareer();
+    if (markRelevantNewsRead(activeCareer, db, inboxFilter) && settings.autosave) saveCareer();
     renderCareer();
   });
 
