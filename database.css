@@ -189,7 +189,7 @@
 
 .db-player-row {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 58px 58px;
+  grid-template-columns: 42px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   padding: 10px 11px;
@@ -214,16 +214,6 @@
   font-size: 12px;
 }
 
-.db-player-rating {
-  text-align: right;
-}
-
-.db-player-rating b {
-  display: block;
-  color: #ffd66a;
-  font-size: 13px;
-}
-
 .db-empty,
 .db-loading {
   min-height: 180px;
@@ -246,5 +236,5 @@
   .db-toolbar { grid-template-columns: 1fr; }
   .db-summary { grid-template-columns: 1fr 1fr; }
   .db-league-grid { grid-template-columns: 1fr; }
-  .db-player-row { grid-template-columns: 36px minmax(0, 1fr) 46px 46px; gap: 7px; }
+  .db-player-row { grid-template-columns: 36px minmax(0, 1fr); gap: 7px; }
 }

@@ -151,7 +151,7 @@
 .career-squad-list { display: grid; gap: 6px; padding-bottom: 34px; }
 .career-player-row {
   display: grid;
-  grid-template-columns: 22px 46px minmax(180px, 1fr) 65px 55px 70px;
+  grid-template-columns: 22px 46px minmax(180px, 1fr) 65px 70px;
   align-items: center;
   gap: 12px;
   min-height: 62px;

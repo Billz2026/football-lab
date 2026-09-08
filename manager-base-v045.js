@@ -190,7 +190,7 @@ function squadView(db) {
     <div class="career-squad-actions"><button type="button" class="career-secondary" data-auto-pick>AUTO PICK BEST XI</button><span>Select exactly 11 players, including a goalkeeper.</span></div>
     <div class="career-squad-list">${squad.map(player => {
       const status = activeCareer.playerStatus[player.id] || { condition: 100, sharpness: 88, morale: 'Good' };
-      return `<label class="career-player-row ${selected.has(player.id) ? 'is-selected' : ''}"><input type="checkbox" value="${esc(player.id)}" ${selected.has(player.id) ? 'checked' : ''} data-lineup-player><span class="career-player-position">${esc(player.primaryPosition)}</span><span class="career-player-name"><strong>${esc(player.name)}</strong><small>${esc(status.morale)} · ${status.sharpness}% sharp</small></span><span><small>CON</small><strong>${status.condition}%</strong></span><span><small>CA</small><strong>${player.currentAbility || '—'}</strong></span><button type="button" class="career-profile-link" data-player-profile="${esc(player.id)}" aria-label="Open ${esc(player.name)} profile">PROFILE</button></label>`;
+      return `<label class="career-player-row ${selected.has(player.id) ? 'is-selected' : ''}"><input type="checkbox" value="${esc(player.id)}" ${selected.has(player.id) ? 'checked' : ''} data-lineup-player><span class="career-player-position">${esc(player.primaryPosition)}</span><span class="career-player-name"><strong>${esc(player.name)}</strong><small>${esc(status.morale)} · ${status.sharpness}% sharp</small></span><span><small>CON</small><strong>${status.condition}%</strong></span><button type="button" class="career-profile-link" data-player-profile="${esc(player.id)}" aria-label="Open ${esc(player.name)} profile">PROFILE</button></label>`;
     }).join('')}</div>`;
 }
 
@@ -494,7 +494,7 @@ function renderDatabase(browser, db) {
 
     detail.innerHTML = `
       <div class="db-detail-head"><div><p class="eyebrow">${club.isPlaceholder ? 'DEVELOPMENT CLUB' : 'PLAYABLE CLUB'}</p><h3>${esc(club.name)}</h3><span class="db-club-meta">${squad.length} players loaded</span></div></div>
-      <div class="db-squad">${squad.map(player => `<button type="button" class="db-player-row" data-player-profile="${esc(player.id)}"><span class="db-player-pos">${esc(player.primaryPosition)}</span><div><strong>${esc(player.name)}</strong><small>${esc(player.nationalityCode || '—')} · #${esc(player.shirtNumber || '—')}</small></div><div class="db-player-rating"><small>CA</small><b>${player.currentAbility || '—'}</b></div></button>`).join('')}</div>`;
+      <div class="db-squad">${squad.map(player => `<button type="button" class="db-player-row" data-player-profile="${esc(player.id)}"><span class="db-player-pos">${esc(player.primaryPosition)}</span><div><strong>${esc(player.name)}</strong><small>${esc(player.nationalityCode || '—')} · #${esc(player.shirtNumber || '—')}</small></div></button>`).join('')}</div>`;
 
     detail.querySelectorAll('[data-player-profile]').forEach(control => control.addEventListener('click', () => window.FLMPlayerProfile?.open(control.dataset.playerProfile)));
     list.querySelectorAll('button').forEach(item => item.classList.toggle('is-active', item.dataset.clubId === selectedId));
@@ -555,7 +555,7 @@ document.addEventListener('click', event => {
 });
 
 document.getElementById('headerSettings').addEventListener('click', showSettings);
-document.getElementById('brandHome').addEventListener('click', () => window.scrollTo({ top: 0, behavior: settings.reducedMotion ? 'auto' : 'smooth' }));
+document.getElementById('brandHome')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: settings.reducedMotion ? 'auto' : 'smooth' }));
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
 });
