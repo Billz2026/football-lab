@@ -2,11 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createCareer } from '../manager-core.js';
-import { ensurePreseason } from '../preseason-v047.js';
+import { ensurePreseason, resetPreseasonForSeason } from '../preseason-v047.js';
 import { getTransferWindowStatus, processTransferWorld } from '../transfers-v050.js';
 import {
   continueCareer,
   ensureWorldClock,
+  getCareerSeasonCalendar,
   getCurrentAttention,
   getNextPreseasonDate
 } from '../world-clock-v060.js';
@@ -46,8 +47,8 @@ function continueWithoutMarket(career, db) {
 test('V0.6 starts on 5 June and Continue Game advances day by day to real calendar milestones', () => {
   const { career, db } = fixture();
   assert.equal(career.currentDate, '2026-06-05');
-  assert.equal(career.calendar.schemaVersion, 2);
-  assert.equal(career.worldClock.schemaVersion, 1);
+  assert.equal(career.calendar.schemaVersion, 3);
+  assert.equal(career.worldClock.schemaVersion, 2);
 
   const windowOpen = continueWithoutMarket(career, db);
   assert.equal(windowOpen.toDate, '2026-06-15');
@@ -150,4 +151,63 @@ test('transfer-world phases become date based once V0.6 world clock is active', 
   assert.notEqual(second.phaseKey, firstPhase);
   assert.equal(career.roundIndex, 0, 'the real league matchweek must not be changed by transfer processing');
   assert.equal(career.preseason.phase, 'active', 'the real pre-season phase must be restored after transfer processing');
+});
+
+test('2027/28 derives a fresh offseason, window, fixture release and Saturday preseason instead of reusing 2026', () => {
+  const { career, db } = fixture('world-clock-2027');
+  career.season = '2027/28';
+  career.previousSeasonEndDate = '2027-05-30';
+  career.seasonStartDate = '2027-08-20';
+  career.currentDate = '2027-05-31';
+  career.calendar = { currentDate: '2027-05-31', fixturesReleased: false };
+  career.worldClock = { schemaVersion: 1, acknowledgedMilestones: [], history: [], totalDaysAdvanced: 0 };
+  career.news.items.push({ id: 'old-open', key: 'summer-window-opens' }, { id: 'old-release', key: 'fixture-release' });
+  resetPreseasonForSeason(career, db, { startedAt: '2027-05-31T09:00:00.000Z' });
+  ensureWorldClock(career);
+
+  const calendar = getCareerSeasonCalendar(career);
+  assert.equal(calendar.offseasonStartDate, '2027-05-31');
+  assert.equal(calendar.transferWindowOpenDate, '2027-06-15');
+  assert.equal(calendar.fixtureReleaseDate, '2027-06-19');
+  assert.deepEqual(calendar.preseasonFriendlyDates, ['2027-07-10', '2027-07-17', '2027-07-24', '2027-07-31', '2027-08-07']);
+  assert.equal(calendar.transferDeadlineDate, '2027-09-01');
+  assert.equal(career.preseason.fixtures[0].date, '2027-07-10');
+  assert.match(career.preseason.fixtures[0].dateLabel, /2027/);
+
+  const windowOpen = continueWithoutMarket(career, db);
+  assert.equal(windowOpen.toDate, '2027-06-15');
+  assert.equal(windowOpen.reason.type, 'transfer-window-open');
+  assert.ok(career.news.items.some(item => item.key === '2027/28:summer-window-opens'));
+
+  const fixtureRelease = continueWithoutMarket(career, db);
+  assert.equal(fixtureRelease.toDate, '2027-06-19');
+  assert.equal(fixtureRelease.reason.type, 'fixture-release');
+  assert.ok(career.news.items.some(item => item.key === '2027/28:fixture-release'));
+
+  const firstFriendly = continueWithoutMarket(career, db);
+  assert.equal(firstFriendly.toDate, '2027-07-10');
+  assert.equal(firstFriendly.reason.type, 'friendly');
+});
+
+test('2027 transfer processing remains open on the real 2027 dates and returns actual date phase keys', () => {
+  const { career, db } = fixture('world-clock-2027-market');
+  career.season = '2027/28';
+  career.previousSeasonEndDate = '2027-05-30';
+  career.seasonStartDate = '2027-08-20';
+  career.currentDate = '2027-06-15';
+  career.calendar = { currentDate: '2027-06-15', fixturesReleased: false };
+  career.worldClock = { schemaVersion: 2, season: '2027/28', acknowledgedMilestones: [], history: [], totalDaysAdvanced: 0 };
+  resetPreseasonForSeason(career, db);
+  ensureWorldClock(career);
+
+  const status = getTransferWindowStatus(career);
+  assert.equal(status.open, true);
+  assert.equal(status.currentDate, '2027-06-15');
+  assert.equal(status.opens, '2027-06-15');
+  assert.equal(status.closes, '2027-09-01');
+
+  const result = processTransferWorld(career, db);
+  assert.equal(result.phaseKey, 'D:2027-06-15');
+  assert.equal(result.window.currentDate, '2027-06-15');
+  assert.equal(result.window.open, true);
 });
