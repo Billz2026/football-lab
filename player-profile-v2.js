@@ -1,4 +1,4 @@
-const VERSION='2.1.0';
+const VERSION='2.1.1';
 const STYLE_HREF=`./player-profile.css?v=${VERSION}`;
 const STYLE_ID='flm-profile-v21-addon';
 let queued=false;

@@ -87,3 +87,12 @@
 .flm-compare-name{border-bottom-color:#23558e;color:#f4c342;background:#0a2242}
 .flm-compare-row{border-bottom-color:rgba(90,160,225,.2)}
 .flm-compare-row .winner{color:#f4c342}
+.flm-personality-v2-card{border-color:#23558e;border-radius:0;background:linear-gradient(135deg,rgba(10,45,91,.9),rgba(4,20,41,.98))}
+.flm-personality-v2-head{border-right-color:rgba(90,160,225,.28)}
+.flm-personality-v2-head small,.flm-personality-v2-grid small{color:#9caebe}
+.flm-personality-v2-head strong{color:#f4c342}
+.flm-personality-v2-head span{color:#c7d2dc}
+.flm-personality-v2-grid{background:rgba(90,160,225,.2)}
+.flm-personality-v2-grid>div{background:#071c38}
+.flm-personality-v2-grid strong{color:#eef3f6}
+.flm-personality-v2-grid .respect strong{color:#8ee7a8}
