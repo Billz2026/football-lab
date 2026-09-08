@@ -12,3 +12,78 @@
 @media(max-width:1020px){.flm-profile-head{grid-template-columns:92px minmax(0,1fr)}.flm-player-avatar{width:92px;height:116px}.flm-profile-actions{grid-column:1/-1;grid-template-columns:repeat(3,minmax(0,1fr))}.flm-profile-role{grid-column:auto}.flm-profile-status-strip{grid-template-columns:repeat(3,1fr)}.flm-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.flm-info-card{grid-column:1/-1}}
 @media(max-width:680px){.modal.flm-profile-v2-open{padding:8px}.modal.flm-profile-v2-open .modal-card{padding:14px;width:100%;max-height:96vh}.flm-profile-head{grid-template-columns:70px minmax(0,1fr);padding:12px;gap:11px}.flm-player-avatar{width:70px;height:90px}.flm-player-avatar strong{font-size:23px}.flm-profile-name h3{font-size:28px}.flm-profile-sub{font-size:10px}.flm-profile-facts{font-size:8px;gap:6px 10px}.flm-profile-actions{grid-template-columns:1fr 1fr}.flm-profile-role{grid-column:1/-1}.flm-profile-status-strip{grid-template-columns:repeat(2,1fr)}.flm-profile-tabs{grid-template-columns:repeat(3,1fr)}.flm-profile-grid,.flm-secondary-grid,.flm-compare-grid{grid-template-columns:1fr}.flm-info-card{grid-column:auto}.flm-attr-row{grid-template-columns:minmax(78px,.8fr) minmax(80px,1.5fr) 24px}.flm-compare-controls{grid-template-columns:1fr}}
 @media(max-width:430px){.flm-profile-actions{grid-template-columns:1fr}.flm-profile-role{grid-column:auto}.flm-profile-status-strip{grid-template-columns:1fr 1fr}.flm-status-chip{padding:8px 9px}.flm-profile-tab{min-height:38px;font-size:7px}}
+
+/* Football Lab Manager profile theme: navy stadium, blue panels, green match accents. */
+:root{--flm-profile-bg:#061326;--flm-profile-panel:#071c38;--flm-profile-panel-2:#041429;--flm-profile-line:#23558e;--flm-profile-line-strong:#2d6dbb;--flm-profile-blue:#0b2d62;--flm-profile-purple:#0b2d62;--flm-profile-purple-deep:#061326;--flm-profile-accent:#f4c342;--flm-profile-text:#eef3f6;--flm-profile-muted:#9caebe;--flm-profile-muted-blue:#9caebe;--flm-profile-good:#55dc7c}
+.modal.flm-profile-v2-open .modal-backdrop{background:rgba(1,8,18,.86);backdrop-filter:blur(9px)}
+.modal.flm-profile-v2-open .modal-card{width:min(1280px,96vw);max-height:92vh;padding:20px;border:1px solid #2d6dbb;border-radius:2px;background:linear-gradient(180deg,rgba(3,15,32,.91),rgba(3,17,37,.97)),url('./assets/homepage/stadium-home.webp') center/cover no-repeat;box-shadow:0 30px 100px rgba(0,0,0,.78),inset 0 1px rgba(142,231,168,.08)}
+.modal.flm-profile-v2-open .modal-card:before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(3,15,32,.88),rgba(3,15,32,.57) 50%,rgba(3,15,32,.86)),linear-gradient(180deg,rgba(3,15,32,.7),transparent 35%,rgba(3,15,32,.92))}
+.modal.flm-profile-v2-open .modal-card>*{position:relative;z-index:1}
+.modal.flm-profile-v2-open #modalEyebrow{margin:0 48px 10px 2px;color:#9caebe;font-size:9px;letter-spacing:.18em}
+.modal.flm-profile-v2-open .modal-close{border-color:#2d6dbb;border-radius:0;background:#0a2242;color:#eef3f6}
+.modal.flm-profile-v2-open .modal-actions{margin-top:12px;padding-top:12px;border-top:1px solid rgba(90,160,225,.3)}
+.modal.flm-profile-v2-open .modal-actions button{border-color:#2d6dbb;border-radius:0;background:#0a2242;color:#eef3f6}
+.flm-profile{gap:10px;color:#eef3f6}
+.flm-profile-head{grid-template-columns:112px minmax(0,1fr) minmax(250px,.4fr);gap:16px;padding:16px;border:1px solid #2d6dbb;border-radius:0;background:linear-gradient(90deg,rgba(10,45,91,.9),rgba(4,20,41,.9) 44%,rgba(4,20,41,.97))}
+.flm-profile-head:before{width:4px;background:#55dc7c}
+.flm-profile-head:after{right:-80px;top:-135px;border-color:rgba(85,220,124,.2)}
+.flm-player-avatar{width:112px;height:136px;border-radius:0;border-color:#3b82c7;background:linear-gradient(145deg,#0b315c,#061326);box-shadow:inset 0 0 34px rgba(59,130,199,.18)}
+.flm-player-avatar strong{color:#eef3f6}
+.flm-player-avatar span{color:#8ee7a8}
+.flm-profile-name h3{color:#fff;font-size:clamp(30px,4vw,52px);letter-spacing:-.035em}
+.flm-profile-name h3 span{color:#fff}
+.flm-profile-sub{color:#c7d2dc}
+.flm-profile-position{margin-top:10px;padding:5px 9px;border:1px solid #55dc7c;border-radius:0;color:#8ee7a8;background:#174d36;font-size:9px}
+.flm-profile-facts{color:#9caebe}
+.flm-profile-value{padding:10px;border:1px solid #24558e;border-radius:0;background:rgba(4,20,41,.86)}
+.flm-profile-value small{color:#9caebe}
+.flm-profile-value strong{color:#f4c342}
+.flm-profile-role strong{color:#eef3f6}
+.flm-profile-action{min-height:36px;border-color:#2d6dbb;border-radius:0;background:#0a2242;color:#eef3f6}
+.flm-profile-action:hover,.flm-profile-action:focus-visible{border-color:#55dc7c;background:#174d36}
+.flm-profile-status-strip{gap:1px;border:1px solid #24558e;border-radius:0;background:#041429}
+.flm-status-chip{padding:9px 10px;background:rgba(7,28,56,.9)}
+.flm-status-chip small{color:#9caebe}
+.flm-status-chip strong{color:#eef3f6}
+.flm-status-chip.is-positive strong{color:#8ee7a8}
+.flm-status-chip.is-danger{background:rgba(107,25,35,.42)}
+.flm-profile-tabs{gap:1px;border-radius:0;background:#061326}
+.flm-profile-tab{min-height:38px;border:1px solid #2d6dbb;border-radius:0;background:#0b2d62;color:#c7d2dc}
+.flm-profile-tab:hover{color:#eef3f6;border-color:#55dc7c}
+.flm-profile-tab.is-active{border-color:#f4c342;color:#f4c342;background:#174d36}
+.flm-profile-grid{gap:7px}
+.flm-attr-card,.flm-info-card,.flm-section-card{border:1px solid #23558e;border-radius:0;background:rgba(4,20,41,.9)}
+.flm-card-title{padding:9px 11px;border-bottom:1px solid rgba(90,160,225,.32);color:#f4c342;background:rgba(10,45,91,.78);font-size:8px}
+.flm-attr-list{padding:6px 8px 8px}
+.flm-attr-row{min-height:28px;border-bottom-color:rgba(90,160,225,.2);font-size:10px}
+.flm-attr-row>span:first-child{color:#c7d2dc}
+.flm-attr-meter{height:5px;background:#061326}
+.flm-attr-meter span{background:linear-gradient(90deg,#2d6dbb,#55dc7c)}
+.flm-attr-row[data-attribute-tier="excellent"] .flm-attr-meter span{background:linear-gradient(90deg,#3b82c7,#8ee7a8)}
+.flm-attr-row[data-attribute-tier="elite"] .flm-attr-meter span{background:linear-gradient(90deg,#55dc7c,#f4c342)}
+.flm-attr-row.is-top-attribute{background:linear-gradient(90deg,rgba(85,220,124,.14),transparent)}
+.flm-attr-row.is-top-attribute>span:first-child{color:#fff}
+.flm-attr-value{color:#c7d2dc}
+.flm-attr-value.r-mid,.flm-attr-value.r-high{color:#eef3f6}
+.flm-attr-value.r-elite{color:#f4c342}
+.flm-info-list{padding:6px 9px 8px}
+.flm-info-row{min-height:28px;border-bottom-color:rgba(90,160,225,.2);font-size:10px}
+.flm-info-row span:first-child{color:#9caebe}
+.flm-info-row strong{color:#eef3f6}
+.flm-info-row .good{color:#8ee7a8}
+.flm-info-row.is-personality-row{border-color:rgba(244,195,66,.3);background:rgba(244,195,66,.06)}
+.flm-info-row.is-personality-row span:first-child,.flm-info-row.is-personality-row strong{color:#f4c342}
+.flm-pill{border-color:#2d6dbb;border-radius:0;color:#c7d2dc;background:#0a2242}
+.flm-pill.primary{color:#8ee7a8;border-color:#55dc7c;background:#174d36}
+.flm-stats th{color:#9caebe;background:#041429}
+.flm-stats td{border-bottom-color:rgba(90,160,225,.2);color:#c7d2dc}
+.flm-stats tr:last-child td{color:#eef3f6}
+.flm-copy{color:#c7d2dc}
+.flm-copy strong{color:#f4c342}
+.flm-dev-meter{background:#061326}
+.flm-dev-meter span{background:linear-gradient(90deg,#2d6dbb,#55dc7c,#f4c342)}
+.flm-empty-panel{color:#9caebe}
+.flm-compare-controls select{border-color:#2d6dbb;border-radius:0;color:#eef3f6;background:#0a2242}
+.flm-compare-name{border-bottom-color:#23558e;color:#f4c342;background:#0a2242}
+.flm-compare-row{border-bottom-color:rgba(90,160,225,.2)}
+.flm-compare-row .winner{color:#f4c342}
