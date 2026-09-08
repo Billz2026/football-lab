@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { finaliseSeason } from '../season-finalisation-v1.js';
 import {
   CHAMPIONSHIP_2026_27_CLUBS,
   createChampionshipFixtures,
@@ -135,4 +136,49 @@ test('background finalisation is idempotent and attaches promotion to next seaso
   assert.equal(career.worldHistory.length, 1);
   assert.equal(career.nextSeasonContext.promotedFromChampionshipClubIds.length, 3);
   assert.equal(career.nextSeasonContext.championshipStatus, 'complete');
+});
+
+function completePremierLeagueCareer() {
+  const clubIds = Array.from({ length: 20 }, (_, index) => `pl-${index + 1}`);
+  const table = clubIds.map((clubId, index) => ({
+    clubId,
+    played: 38,
+    won: Math.max(1, 28 - index),
+    drawn: 4,
+    lost: 6 + index,
+    goalsFor: 90 - index,
+    goalsAgainst: 30 + index,
+    goalDifference: 60 - index * 2,
+    points: 100 - index * 4
+  }));
+  const allMatches = [];
+  let serial = 0;
+  for (let first = 0; first < clubIds.length; first += 1) {
+    for (let second = first + 1; second < clubIds.length; second += 1) {
+      allMatches.push({ id: `pl-${++serial}-a`, played: true, homeClubId: clubIds[first], awayClubId: clubIds[second], homeGoals: 1, awayGoals: 0 });
+      allMatches.push({ id: `pl-${++serial}-b`, played: true, homeClubId: clubIds[second], awayClubId: clubIds[first], homeGoals: 0, awayGoals: 1 });
+    }
+  }
+  return {
+    id: 'pl-integration',
+    seed: 'pl-world-integration',
+    season: '2026/27',
+    leagueId: 'eng-premier-league',
+    competitionId: 'eng-premier-league',
+    competitionName: 'Premier League',
+    status: 'complete',
+    table,
+    fixtures: [allMatches]
+  };
+}
+
+test('Premier League season finalisation produces both sides of the 2027/28 division handoff', () => {
+  const career = completePremierLeagueCareer();
+  const result = finaliseSeason(career, { completedAt: '2027-05-30T18:00:00.000Z' });
+  assert.equal(result.status, 'finalised');
+  assert.equal(result.championship.status, 'finalised');
+  assert.equal(career.nextSeasonContext.relegatedClubIds.length, 3);
+  assert.equal(career.nextSeasonContext.promotedFromChampionshipClubIds.length, 3);
+  assert.equal(career.worldHistory.length, 1);
+  assert.equal(career.championshipOutcome.status, 'complete');
 });
