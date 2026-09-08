@@ -2,11 +2,15 @@ import { test, expect } from '@playwright/test';
 
 test.describe('V0.4.10 responsive home dashboard', () => {
   test('unfolded Fold viewport uses a compact two-column dashboard with no inherited desktop overlap', async ({ page }) => {
+    // Reproduce a real returning-device state too: the legacy Compact Menu
+    // preference used to override Fold tile heights because of CSS specificity.
+    await page.addInitScript(() => localStorage.setItem('flm-compact', 'true'));
     // Representative unfolded Fold / small-tablet CSS viewport. The previous
     // regression used 760px and missed the broken wider Fold layout.
     await page.setViewportSize({ width: 884, height: 900 });
     await page.goto('/index.html');
     await expect(page.locator('html')).toHaveAttribute('data-mobile-home', 'v049');
+    await expect(page.locator('body')).toHaveClass(/compact/);
 
     await expect(page.locator('.tactical-stage')).toBeHidden();
     await expect(page.locator('.hero-actions')).toBeHidden();
@@ -31,6 +35,7 @@ test.describe('V0.4.10 responsive home dashboard', () => {
         heroBottom: heroRect.bottom,
         menuTop: menuRect.top,
         maxTileHeight: Math.max(...tiles.map(tile => tile.getBoundingClientRect().height)),
+        firstIconMarginTop: getComputedStyle(document.querySelector('.tile-icon')).marginTop,
         scrollWidth: document.documentElement.scrollWidth,
         clientWidth: document.documentElement.clientWidth
       };
@@ -41,6 +46,7 @@ test.describe('V0.4.10 responsive home dashboard', () => {
     expect(layout.heroBrandMinHeight).toBe('0px');
     expect(layout.menuTop).toBeGreaterThanOrEqual(layout.heroBottom - 1);
     expect(layout.maxTileHeight).toBeLessThan(170);
+    expect(layout.firstIconMarginTop).toBe('14px');
     expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
   });
 
