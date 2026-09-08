@@ -13,7 +13,7 @@ import {
   setPlayerRole,
   swapShapePlayers
 } from './matchday-engine-v069.js?v=0.6.10';
-import { renderMatchSubstitutionSheet } from './matchday-substitution-sheet-v1.js?v=1.0.1';
+import { renderMatchSubstitutionSheet } from './matchday-substitution-sheet-v1.js?v=1.0.2';
 
 const STYLE_ID = 'flm-live-match-v0431-style';
 const BASE_STEP_MS = 650;

@@ -23,42 +23,45 @@ function ensureStyles() {
   const style = document.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `
-    .flm-match-dialog:has(.flm-v049-match-sheet){width:min(1180px,100%);padding:12px;border-color:#23558e;border-radius:0;background:#041429}
-    .flm-v049-match-sheet{display:grid;gap:8px;color:#eef3f6}
+    .flm-match-modal{position:fixed;inset:0;width:100vw;height:100vh;padding:18px;z-index:100;align-items:center;justify-content:center}
+    .flm-match-dialog:has(.flm-v049-match-sheet){width:min(1540px,calc(100vw - 36px));max-height:calc(100vh - 36px);padding:12px;border-color:#23558e;border-radius:2px;background:#041429;overflow:hidden}
+    .flm-v049-match-sheet{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:8px;height:100%;min-height:0;color:#eef3f6}
+    .flm-v049-context{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 9px;border:1px solid #23558e;background:#061326;color:#9caebe;font-size:9px;font-weight:800}
+    .flm-v049-context strong{color:#eef3f6;font-size:12px}.flm-v049-context span{color:#f4c342;font-size:8px;letter-spacing:.08em}
     .flm-v049-status{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 9px;border:1px solid #23558e;background:#071c38;color:#9caebe;font-size:8px;letter-spacing:.05em}
     .flm-v049-status strong{color:#f4c342;font-size:9px}
-    .flm-v049-workspace{display:grid;grid-template-columns:minmax(350px,.78fr) minmax(560px,1.22fr);gap:8px;min-height:0}
+    .flm-v049-workspace{display:grid;grid-template-columns:minmax(430px,.82fr) minmax(600px,1.18fr);gap:8px;min-height:0;height:clamp(560px,calc(100vh - 250px),680px)}
     .flm-v049-squad,.flm-v049-board{border:1px solid #23558e;background:#041429;overflow:hidden}
-    .flm-v049-squad{display:grid;grid-template-rows:auto 1fr;min-width:0}
-    .flm-v049-list{display:grid;grid-template-rows:auto repeat(11,minmax(0,1fr)) auto repeat(9,minmax(0,1fr));overflow:hidden;min-height:0}
-    .flm-v049-sheet-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px solid #23558e;background:#0a2242;color:#f4c342;font-size:8px;font-weight:950;letter-spacing:.09em}
+    .flm-v049-squad{display:grid;grid-template-rows:1fr;min-width:0;min-height:0}
+    .flm-v049-list{display:grid;grid-template-rows:28px 22px repeat(11,minmax(0,1fr)) 22px repeat(9,minmax(0,1fr));overflow:hidden;min-height:0;height:100%}
+    .flm-v049-sheet-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 9px;border-bottom:1px solid #23558e;background:#0a2242;color:#f4c342;font-size:8px;font-weight:950;letter-spacing:.09em}
     .flm-v049-sheet-head span:last-child{color:#9caebe;font-size:7px}
-    .flm-v049-section{padding:5px 8px;color:#f4c342;background:#061326;border-bottom:1px solid #23558e;font-size:8px;font-weight:950;letter-spacing:.1em}
+    .flm-v049-section{display:flex;align-items:center;padding:2px 8px;color:#f4c342;background:#061326;border-bottom:1px solid #23558e;font-size:8px;font-weight:950;letter-spacing:.1em}
     .flm-v049-section.bench{border-top:1px solid #23558e}
-    .flm-v049-row{width:100%;display:grid;grid-template-columns:42px minmax(0,1fr) 68px;gap:7px;align-items:center;min-height:0;padding:2px 8px;border:0;border-bottom:1px solid rgba(90,160,225,.2);background:#071c38;color:#eef3f6;text-align:left;cursor:pointer}
+    .flm-v049-row{width:100%;display:grid;grid-template-columns:42px minmax(0,1fr) 68px;gap:7px;align-items:center;min-height:0;padding:1px 8px;border:0;border-bottom:1px solid rgba(90,160,225,.2);background:#071c38;color:#eef3f6;text-align:left;cursor:pointer}
     .flm-v049-row:nth-child(even){background:#0a2242}
     .flm-v049-row:hover,.flm-v049-row.is-selected{background:#174d36}
     .flm-v049-row.is-off{border-left:2px solid #ef786f;background:#3b1d25}
     .flm-v049-row.is-in{border-left:2px solid #55dc7c;background:#174d36}
     .flm-v049-slot{display:grid;gap:1px;justify-items:start;line-height:1}
-    .flm-v049-slot strong{color:#f4c342;font-size:10px}
-    .flm-v049-slot small{color:#8ee7a8;font-size:7px;font-weight:950}
+    .flm-v049-slot strong{color:#f4c342;font-size:9px}
+    .flm-v049-slot small{color:#8ee7a8;font-size:6px;font-weight:950}
     .flm-v049-name{min-width:0}
-    .flm-v049-name strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
-    .flm-v049-name small{display:block;margin-top:1px;color:#9caebe;font-size:7px}
-    .flm-v049-condition{text-align:right;color:#eef3f6;font-size:8px;font-weight:850}
-    .flm-v049-condition small{display:block;margin-top:1px;color:#9caebe;font-size:7px;font-weight:500}
-    .flm-v049-board{display:grid;grid-template-rows:auto auto auto;align-content:start;min-width:0}
+    .flm-v049-name strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
+    .flm-v049-name small{display:block;margin-top:1px;color:#9caebe;font-size:6px}
+    .flm-v049-condition{text-align:right;color:#eef3f6;font-size:7px;font-weight:850}
+    .flm-v049-condition small{display:block;margin-top:1px;color:#9caebe;font-size:6px;font-weight:500}
+    .flm-v049-board{display:grid;grid-template-rows:auto minmax(0,1fr) auto;min-width:0;min-height:0}
     .flm-v049-board-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 9px;border-bottom:1px solid #23558e;background:#071c38}
     .flm-v049-board-head strong{color:#f4c342;font-size:8px;letter-spacing:.1em}
     .flm-v049-board-head span{color:#9caebe;font-size:8px;text-align:right}
-    .flm-v049-pitch{position:relative;height:clamp(410px,calc(100dvh - 420px),560px);margin:8px;border:2px solid #2d8a4e;background:repeating-linear-gradient(90deg,#0b4b1d 0 12.5%,#0d5521 12.5% 25%);overflow:hidden}
+    .flm-v049-pitch{position:relative;height:auto;min-height:0;margin:8px;border:2px solid #2d8a4e;background:repeating-linear-gradient(90deg,#0b4b1d 0 12.5%,#0d5521 12.5% 25%);overflow:hidden}
     .flm-v049-pitch:before{content:'';position:absolute;inset:3%;border:1px solid #ffffff55;pointer-events:none}
     .flm-v049-pitch:after{content:'';position:absolute;left:3%;right:3%;top:50%;border-top:1px solid #ffffff55;pointer-events:none}
     .flm-v049-circle{position:absolute;left:50%;top:50%;width:15%;aspect-ratio:1;border:1px solid #ffffff55;border-radius:50%;transform:translate(-50%,-50%)}
     .flm-v049-box{position:absolute;left:25%;width:50%;height:17%;border:1px solid #ffffff55}
     .flm-v049-box.top{top:3%;border-top:0}.flm-v049-box.bottom{bottom:3%;border-bottom:0}
-    .flm-v049-player{position:absolute;z-index:2;transform:translate(-50%,-50%);width:80px;min-height:34px;padding:3px 4px;border:1px solid #55dc7c;background:#071c38ee;color:#fff;text-align:center;cursor:pointer;box-shadow:0 3px 9px #0009}
+    .flm-v049-player{position:absolute;z-index:2;transform:translate(-50%,-50%);width:104px;min-height:34px;padding:3px 4px;border:1px solid #55dc7c;background:#071c38ee;color:#fff;text-align:center;cursor:pointer;box-shadow:0 3px 9px #0009}
     .flm-v049-player:hover,.flm-v049-player.is-selected{box-shadow:0 0 0 2px #f4c342,0 3px 9px #0009}
     .flm-v049-player.is-off{border-color:#ef786f;background:#3b1d25}.flm-v049-player.is-in{border-color:#55dc7c;background:#174d36}
     .flm-v049-player.is-drop{transform:translate(-50%,-50%) scale(1.05);background:#174d36}
@@ -68,7 +71,7 @@ function ensureStyles() {
     .flm-v049-plan{display:flex;justify-content:space-between;align-items:center;gap:9px;min-height:43px;padding:7px 9px;border-top:1px solid #23558e;background:#071c38}
     .flm-v049-plan span{display:block;color:#9caebe;font-size:7px;letter-spacing:.1em}.flm-v049-plan strong{display:block;margin-top:2px;font-size:10px}.flm-v049-plan .in{color:#55dc7c}.flm-v049-plan .out{color:#ef786f}.flm-v049-plan em{color:#f4c342;font-size:7px;font-style:normal;font-weight:950;text-align:right}
     .flm-v049-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:8px;border-top:1px solid #23558e}.flm-v049-actions button{min-height:32px;padding:0 12px;border:1px solid #2d6dbb;border-radius:0;background:#0a2242;color:#eef3f6;font-size:8px;font-weight:950;cursor:pointer}.flm-v049-actions .primary{background:#f4c342;color:#071326;border-color:#f4c342}.flm-v049-actions button:disabled{cursor:not-allowed;opacity:.45}
-    @media(max-width:900px){.flm-v049-workspace{grid-template-columns:1fr}.flm-v049-list{grid-template-rows:auto repeat(11,34px) auto repeat(9,34px);overflow:auto;max-height:430px}.flm-v049-pitch{height:480px}.flm-v049-board{order:1}.flm-v049-squad{order:2}}
+    @media(max-width:900px){.flm-match-modal{position:absolute;width:100%;height:100%;padding:8px}.flm-match-dialog:has(.flm-v049-match-sheet){width:100%;max-height:96%;overflow:auto}.flm-v049-workspace{grid-template-columns:1fr;height:auto}.flm-v049-list{grid-template-rows:auto repeat(11,34px) auto repeat(9,34px);overflow:auto;max-height:430px}.flm-v049-pitch{height:480px}.flm-v049-board{order:1;min-height:540px}.flm-v049-squad{order:2}.flm-v049-context{align-items:flex-start;flex-direction:column;gap:3px}}
   `;
   document.head.appendChild(style);
 }
@@ -121,6 +124,8 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, o
     };
     const outPlayer = selectedOutId ? playerFor(db, selectedOutId) : null;
     const inPlayer = selectedInId ? playerFor(db, selectedInId) : null;
+    const clubName = id => db.clubs?.find(club => club.id === id)?.name || (id === state.homeClubId ? 'Home' : id === state.awayClubId ? 'Away' : 'Match');
+    const matchContext = `${clubName(state.homeClubId)} ${state.homeGoals ?? 0}–${state.awayGoals ?? 0} ${clubName(state.awayClubId)}`;
     const limit = Number(state.substitutionLimit) || 5;
     const remaining = Math.max(0, limit - (state.substitutions || []).length);
     const windowsUsed = [...new Set(state.substitutionWindowMinutes || [])].length;
@@ -147,7 +152,7 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, o
       return `<button type="button" class="flm-v049-player ${selectedOut ? 'is-off' : ''} ${selectedIn ? 'is-in' : ''}" style="left:${slot.x}%;top:${slot.y}%" data-v049-pitch-out="${esc(player.id)}"><span class="position">${esc(slot.label)}</span><strong>${esc(displayName(player))}</strong><small>${conditionFor(state, player.id)}% CON</small></button>`;
     }).join('');
     dialog.dataset.v049MatchSheet = '1';
-    dialog.innerHTML = `${head('Match Plan','IN-MATCH MANAGEMENT')}<div class="flm-v049-match-sheet"><div class="flm-v049-status"><strong>${remaining} SUBSTITUTIONS REMAINING</strong><span>${windowInfo} · ${state.minute}'</span></div><div class="flm-v049-workspace"><aside class="flm-v049-squad"><div class="flm-v049-list"><div class="flm-v049-sheet-head"><span>MATCHDAY SQUAD</span><span>${lineup.length} / 11 ON PITCH</span></div><div class="flm-v049-section">STARTING XI</div>${starters}<div class="flm-v049-section bench">BENCH · ${bench.length}</div>${bench || '<div class="flm-v049-row"><span class="flm-v049-name"><strong>NO AVAILABLE SUBSTITUTES</strong></span></div>'}</div></aside><section class="flm-v049-board"><div class="flm-v049-board-head"><strong>TACTICAL BOARD</strong><span>Click a player off, then a substitute on.<br>Drag a substitute onto a pitch player.</span></div><div class="flm-v049-pitch"><i class="flm-v049-circle"></i><i class="flm-v049-box top"></i><i class="flm-v049-box bottom"></i>${pitch}</div><div class="flm-v049-plan" data-v049-plan>${planText(outPlayer, inPlayer)}</div></section></div><div class="flm-v049-actions"><button type="button" data-v049-tactics>TACTICS OPTIONS</button><button type="button" data-close-manager>CLOSE</button><button type="button" class="primary" data-v049-confirm ${validPlan ? '' : 'disabled'}>CONFIRM SUB</button></div></div>`;
+    dialog.innerHTML = `${head('Match Plan','IN-MATCH MANAGEMENT')}<div class="flm-v049-match-sheet"><div class="flm-v049-context"><strong>${esc(matchContext)}</strong><span>${state.minute}' · ${windowInfo}</span></div><div class="flm-v049-status"><strong>${remaining} SUBSTITUTIONS REMAINING</strong><span>XI ${lineup.length} · BENCH ${bench.length}</span></div><div class="flm-v049-workspace"><aside class="flm-v049-squad"><div class="flm-v049-list"><div class="flm-v049-sheet-head"><span>MATCHDAY SQUAD</span><span>${lineup.length} / 11 ON PITCH</span></div><div class="flm-v049-section">STARTING XI</div>${starters}<div class="flm-v049-section bench">BENCH · ${bench.length}</div>${benchRows || '<div class="flm-v049-row"><span class="flm-v049-name"><strong>NO AVAILABLE SUBSTITUTES</strong></span></div>'}</div></aside><section class="flm-v049-board"><div class="flm-v049-board-head"><strong>TACTICAL BOARD</strong><span>Click a player off, then a substitute on.<br>Drag a substitute onto a pitch player.</span></div><div class="flm-v049-pitch"><i class="flm-v049-circle"></i><i class="flm-v049-box top"></i><i class="flm-v049-box bottom"></i>${pitch}</div><div class="flm-v049-plan" data-v049-plan>${planText(outPlayer, inPlayer)}</div></section></div><div class="flm-v049-actions"><button type="button" data-v049-tactics>TACTICS OPTIONS</button><button type="button" data-close-manager>CLOSE</button><button type="button" class="primary" data-v049-confirm ${validPlan ? '' : 'disabled'}>CONFIRM SUB</button></div></div>`;
     dialog.querySelectorAll('[data-v049-out],[data-v049-pitch-out]').forEach(button => button.addEventListener('click', () => {
       selectedOutId = button.dataset.v049Out || button.dataset.v049PitchOut;
       render();
