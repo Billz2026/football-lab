@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { finaliseSeason } from '../season-finalisation-v1.js';
+import { finaliseChampionshipBackground } from '../championship-world-v1.js';
 import { simulateNextRound } from '../manager-core.js';
 import {
   ROLLOVER_TARGET_SEASON,
@@ -199,6 +200,27 @@ test('rolled-over career can simulate a Premier League matchweek containing prom
   assert.equal(career.roundIndex, roundWithPromoted + 1);
   assert.ok(career.fixtures[roundWithPromoted].every(fixture => fixture.played));
   assert.ok(career.fixtures[roundWithPromoted].every(fixture => Number.isInteger(fixture.homeGoals) && Number.isInteger(fixture.awayGoals)));
+});
+
+test('2027/28 Championship history is explicitly blocked instead of reusing stale 2026/27 membership', () => {
+  const db = dbFixture();
+  const career = completedCareer();
+  rolloverPremierLeagueSeason(career, { db, rolledAt: '2027-05-31T09:00:00.000Z' });
+  const guard = career.worldHistory.find(record => record.key === 'eng-championship:2027/28');
+
+  assert.ok(guard);
+  assert.equal(guard.status, 'unsupported-membership');
+  assert.deepEqual(guard.promotedClubIds, []);
+  assert.match(guard.reason, /will not reuse the 2026\/27 Championship membership/i);
+
+  const countBefore = career.worldHistory.length;
+  career.nextSeasonContext = {};
+  const result = finaliseChampionshipBackground(career, { completedAt: '2028-05-28T18:00:00.000Z' });
+  assert.equal(result.status, 'already-finalised');
+  assert.equal(result.outcome.status, 'unsupported-membership');
+  assert.equal(career.worldHistory.length, countBefore);
+  assert.equal(career.nextSeasonContext.championshipStatus, 'unsupported-membership');
+  assert.deepEqual(career.nextSeasonContext.promotedFromChampionshipClubIds, []);
 });
 
 test('a relegated user club is blocked instead of being silently retained in the Premier League', () => {
