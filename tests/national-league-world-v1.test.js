@@ -92,17 +92,22 @@ test('an exact tie across 20th and 21st requires a relegation deciding match', (
   const table = Array.from({ length: 24 }, (_, index) => row(`club-${index + 1}`, index));
   const tied = {
     played: 46,
-    won: 8,
-    drawn: 10,
-    lost: 28,
-    goalsFor: 40,
-    goalsAgainst: 70,
-    goalDifference: -30,
-    points: 34
+    won: 7,
+    drawn: 4,
+    lost: 35,
+    goalsFor: 38,
+    goalsAgainst: 69,
+    goalDifference: -31,
+    points: 25
   };
   Object.assign(table[19], tied);
   Object.assign(table[20], tied);
-  table.slice(21).forEach((item, offset) => Object.assign(item, { points: 28 - offset * 3, goalDifference: -35 - offset * 2, goalsFor: 35 - offset, won: 7 - offset }));
+  table.slice(21).forEach((item, offset) => Object.assign(item, {
+    points: 18 - offset * 3,
+    goalDifference: -35 - offset * 2,
+    goalsFor: 35 - offset,
+    won: 5 - offset
+  }));
   const ranking = rankNationalLeagueTable(table, []);
   assert.equal(ranking.decidingMatchRequired, true);
   const group = ranking.unresolvedGroups.find(item => item.consequences.includes('relegation'));
