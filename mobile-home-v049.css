@@ -155,6 +155,11 @@
     background: linear-gradient(145deg, rgba(8,29,57,.94), rgba(4,17,35,.96));
     text-align: left;
   }
+  /* A previously saved Compact Menu preference must not reinstate the
+     desktop 230px tile height or icon spacing on Fold/tablet layouts. */
+  body.compact .menu-tile { min-height: 132px; }
+  body.compact .tile-icon { margin-top: 14px; }
+
   .menu-tile::before,
   .menu-tile::after,
   .tile-art {
@@ -248,6 +253,8 @@
     grid-template-columns: 38px minmax(0, 1fr);
     column-gap: 10px;
   }
+  body.compact .menu-tile { min-height: 104px; }
+  body.compact .tile-icon { margin-top: 10px; }
   .tile-icon {
     width: 34px;
     height: 34px;
@@ -274,6 +281,7 @@
   .hero-brand { padding: 16px 18px 14px; }
   .hero-copy { margin-top: 8px; }
   .menu-section { padding-top: 10px; }
-  .menu-tile { min-height: 112px; }
+  .menu-tile,
+  body.compact .menu-tile { min-height: 112px; }
   .tile-copy small { display: none; }
 }
