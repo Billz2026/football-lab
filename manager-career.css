@@ -477,6 +477,94 @@
   background: #216947;
 }
 
+/* Full-screen club selection: keep the decision surface fixed and let only
+   the club list scroll when a smaller viewport cannot show every club. */
+.modal.club-picker-modal {
+  place-items: stretch;
+  padding: 0;
+}
+
+.modal.club-picker-modal .modal-card {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(22px, 3.2vw, 46px) clamp(24px, 4.4vw, 72px) clamp(18px, 2.5vw, 34px);
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 29, 57, .99), rgba(3, 14, 29, .99)),
+    #061326;
+}
+
+.modal.club-picker-modal .modal-card h2 {
+  flex: 0 0 auto;
+  font-size: clamp(30px, 3.4vw, 52px);
+}
+
+.modal.club-picker-modal .modal-copy {
+  flex: 0 0 auto;
+  max-width: 760px;
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.modal.club-picker-modal .modal-body {
+  min-height: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: auto;
+  margin-top: clamp(12px, 1.5vh, 18px);
+  padding-right: 2px;
+  scrollbar-color: #2d6dbb #061326;
+}
+
+.modal.club-picker-modal .career-club-grid {
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  align-content: start;
+  gap: 8px;
+}
+
+.modal.club-picker-modal .career-club-grid button {
+  min-height: 68px;
+  padding: 10px 13px;
+}
+
+.modal.club-picker-modal .modal-actions {
+  flex: 0 0 auto;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(47, 104, 169, .42);
+}
+
+@media (max-width: 1500px) {
+  .modal.club-picker-modal .career-club-grid {
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .modal.club-picker-modal .modal-card {
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+
+  .modal.club-picker-modal .career-club-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .modal.club-picker-modal .career-club-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Compact inbox hub */
 .career-inbox-heading { align-items: center; margin-bottom: 14px; }
 .career-inbox-heading h2 { font-size: clamp(30px, 3.2vw, 46px); }
