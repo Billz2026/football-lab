@@ -1,5 +1,6 @@
 import * as legacy from './transfers-v050-legacy.js';
 import * as market from './transfer-market-v062-rivalry.js';
+import { deriveCalendarForCareer, seasonStartYear } from './season-calendar-v1.js';
 
 export * from './transfers-v050-legacy.js';
 
@@ -41,16 +42,33 @@ function patchResult(result, round) {
   return result;
 }
 
+function legacyProjectionDate(currentDate, career) {
+  if (!validDate(currentDate)) return currentDate;
+  const start = seasonStartYear(career?.season);
+  if (!Number.isInteger(start) || start === 2026) return currentDate;
+  return `2026-${String(currentDate).slice(5)}`;
+}
+
 function patchNewTransferState(career, before, currentDate, realRound) {
   const state = career.transfers;
   if (!state) return;
-  (state.completed || []).slice(before.completed).forEach(item => patchRound(item, realRound));
+  const newCompleted = (state.completed || []).slice(before.completed);
+  newCompleted.forEach(item => patchRound(item, realRound));
   (state.incomingOffers || []).slice(before.offers).forEach(item => patchRound(item, realRound));
   (state.rumours || []).slice(before.rumours).forEach(item => patchRound(item, realRound));
   (career.news?.items || []).slice(before.news).forEach(item => {
     if (item.category === 'Transfers' && /^(PRE-SEASON|MATCHWEEK)/.test(String(item.dateLabel || ''))) item.dateLabel = shortDate(currentDate);
     patchRound(item, realRound);
   });
+
+  const startYear = seasonStartYear(career?.season) || 2026;
+  for (const transaction of newCompleted) {
+    transaction.date ||= currentDate;
+    transaction.season ||= career.season || '2026/27';
+    const contract = state.contracts?.[transaction.playerId];
+    const years = Number(contract?.years || transaction.contractYears || 0);
+    if (contract && years > 0) contract.expiryYear = startYear + years;
+  }
 }
 
 function withCalendarDate(career, callback, { uniquePhase = false } = {}) {
@@ -68,7 +86,7 @@ function withCalendarDate(career, callback, { uniquePhase = false } = {}) {
   const syntheticRound = uniquePhase ? 500 + Math.max(0, current - epoch) : Math.max(0, realRound);
   const fakeFixtures = [];
   fakeFixtures.length = syntheticRound + 1;
-  fakeFixtures[syntheticRound] = [{ date: currentDate }];
+  fakeFixtures[syntheticRound] = [{ date: legacyProjectionDate(currentDate, career) }];
   const before = {
     completed: career.transfers?.completed?.length || 0,
     offers: career.transfers?.incomingOffers?.length || 0,
@@ -91,6 +109,92 @@ function withCalendarDate(career, callback, { uniquePhase = false } = {}) {
   }
 }
 
+function dynamicWindow(career) {
+  const model = deriveCalendarForCareer(career);
+  const currentDate = career?.currentDate || career?.calendar?.currentDate || model.offseasonStartDate;
+  const current = dayNumber(currentDate);
+  const opens = dayNumber(model.transferWindowOpenDate);
+  const closes = dayNumber(model.transferDeadlineDate);
+  const open = current !== null && opens !== null && closes !== null && current >= opens && current <= closes;
+  const daysRemaining = current !== null && closes !== null ? closes - current : null;
+  return {
+    open,
+    currentDate,
+    opens: model.transferWindowOpenDate,
+    closes: model.transferDeadlineDate,
+    deadlineTime: model.transferDeadlineTime,
+    daysRemaining,
+    deadlineWeek: open && daysRemaining !== null && daysRemaining <= 4,
+    label: open
+      ? `OPEN · CLOSES ${shortDate(model.transferDeadlineDate)} ${model.transferDeadlineTime}`
+      : current !== null && closes !== null && current > closes ? 'CLOSED · DEADLINE PASSED' : 'NOT YET OPEN'
+  };
+}
+
+function addSeasonWindowClosedNews(career) {
+  if (!career) return false;
+  const model = deriveCalendarForCareer(career);
+  const key = `${career.season || 'season'}:summer-window-closed`;
+  career.news ||= { schemaVersion: 1, items: [], generatedRounds: [] };
+  career.news.items ||= [];
+  if (career.news.items.some(item => item.key === key)) return false;
+  career.news.items.push({
+    id: `news-${career.id}-${key}`,
+    key,
+    round: career.roundIndex || 0,
+    period: 'PM',
+    dateLabel: shortDate(model.transferClosedDate),
+    category: 'Transfers',
+    source: 'Transfer Desk',
+    title: 'Summer transfer window closed',
+    body: `The ${career.season || ''} summer registration window has closed. No new permanent transfers can be completed until the next registration period.`,
+    priority: 'important',
+    order: 70000,
+    read: false
+  });
+  return true;
+}
+
+export function startTransferSeason(career, db) {
+  if (!career || !db) throw new Error('Career and database are required to start a transfer season.');
+  legacy.ensureTransferState(career, db);
+  const state = career.transfers;
+  if (state.activeWindowSeason === career.season) return false;
+
+  state.history ||= [];
+  if (Array.isArray(state.completed) && state.completed.length) {
+    state.history.push(...state.completed.map(transaction => ({
+      ...transaction,
+      season: transaction.season || state.activeWindowSeason || '2026/27'
+    })));
+  }
+  state.completed = [];
+  state.rumours = [];
+  state.incomingOffers = [];
+  state.negotiations = {};
+  state.processedWorldPhases = [];
+  state.windowClosedNotified = false;
+  state.activeWindowSeason = career.season || '2026/27';
+  if (Number.isFinite(state.initialTransferBudget)) state.transferBudget = state.initialTransferBudget;
+  if (Number.isFinite(state.initialWageRoom)) state.wageRoom = state.initialWageRoom;
+
+  const activeClubIds = new Set((career.table || []).map(row => row.clubId).filter(Boolean));
+  for (const [clubId, ai] of Object.entries(state.aiClubs || {})) {
+    if (!activeClubIds.has(clubId)) continue;
+    if (Number.isFinite(ai.initialTransferBudget)) ai.transferBudget = ai.initialTransferBudget;
+    if (Number.isFinite(ai.initialWageRoom)) ai.wageRoom = ai.initialWageRoom;
+    ai.signedPlayerIds = [];
+    ai.soldPlayerIds = [];
+  }
+  if (state.marketV61) {
+    state.marketV61.processedDates = [];
+    state.marketV61.aiDealsByDate = {};
+    state.marketV61.rumoursByDate = {};
+    state.marketV61.incomingByDate = {};
+  }
+  return true;
+}
+
 // V0.6.2 explicit exports override the legacy star exports while preserving the proven
 // ownership, contract and budget infrastructure underneath. Rivalry rules are enforced
 // by the market wrapper for user, incoming and AI-to-AI business.
@@ -102,11 +206,21 @@ export const searchTransferMarket = market.searchTransferMarket;
 export const getNegotiation = market.getNegotiation;
 
 export function getTransferWindowStatus(career) {
-  return withCalendarDate(career, () => legacy.getTransferWindowStatus(career));
+  if (worldClockCareer(career)) return dynamicWindow(career);
+  return legacy.getTransferWindowStatus(career);
 }
 
 export function processTransferWorld(career, db) {
-  return withCalendarDate(career, () => market.processTransferWorld(career, db), { uniquePhase: true });
+  const result = withCalendarDate(career, () => market.processTransferWorld(career, db), { uniquePhase: true });
+  if (result && worldClockCareer(career)) {
+    result.window = dynamicWindow(career);
+    result.phaseKey = `D:${career.currentDate || career.calendar?.currentDate}`;
+    const model = deriveCalendarForCareer(career);
+    if (dayNumber(career.currentDate) >= dayNumber(model.transferClosedDate)) {
+      result.changed = addSeasonWindowClosedNews(career) || Boolean(result.changed);
+    }
+  }
+  return result;
 }
 
 export function submitTransferOffer(career, db, playerId, fee) {
