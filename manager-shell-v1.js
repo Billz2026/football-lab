@@ -1,7 +1,7 @@
 // Football Lab Manager Shell V1
 // Presentation/navigation layer only: existing career systems remain authoritative.
 
-const SHELL_VERSION = '1.0.3';
+const SHELL_VERSION = '1.0.4';
 const STYLE_HREF = `./manager-shell-v1.css?v=${SHELL_VERSION}`;
 const MILESTONES = [
   { date: '2026-06-15', label: 'CONTINUE TO 15 JUNE', detail: 'Summer transfer window opens' },

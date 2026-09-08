@@ -413,7 +413,7 @@ async function showNewGame() {
     toolbar.innerHTML = '<label>FIND CLUB<input type="search" data-club-search placeholder="Search clubs" autocomplete="off"></label><label>VIEW<select data-club-sort><option value="name">A–Z</option><option value="venue">STADIUM</option></select></label>';
     const selection = document.createElement('div');
     selection.className = 'career-club-selection';
-    selection.innerHTML = '<strong data-club-selection>SELECT A CLUB</strong><span>Choose your club to continue</span>';
+    selection.innerHTML = '<div><small>YOUR SELECTION</small><strong data-club-selection>NONE SELECTED</strong></div><span data-club-selection-venue>Choose a club to continue</span>';
     const grid = document.createElement('div');
     grid.className = 'career-club-grid';
     const confirm = [...modalActions.querySelectorAll('button')].find(control => control.textContent === 'TAKE CONTROL');
@@ -428,8 +428,9 @@ async function showNewGame() {
         const club = clubs.find(item => item.id === selectedClubId);
         grid.querySelectorAll('[data-start-club]').forEach(item => item.classList.toggle('is-selected', item === control));
         const label = selection.querySelector('[data-club-selection]');
-        if (label) label.textContent = club?.name || 'SELECT A CLUB';
-        selection.querySelector('span').textContent = club?.venue || 'Club selected';
+        if (label) label.textContent = club?.name || 'NONE SELECTED';
+        const venue = selection.querySelector('[data-club-selection-venue]');
+        if (venue) venue.textContent = club?.venue || 'Club selected';
         if (confirm) confirm.disabled = false;
       }));
     };

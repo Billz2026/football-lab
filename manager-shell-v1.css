@@ -12,11 +12,11 @@
   --flm-shell-rail-2: #0a1523;
   --flm-shell-line: #26313e;
   --flm-shell-line-soft: #1a2430;
-  --flm-shell-gold: #efb93f;
-  --flm-shell-gold-2: #ffd76a;
+  --flm-shell-gold: #55dc7c;
+  --flm-shell-gold-2: #bfe8cc;
   --flm-shell-text: #f1f4f7;
   --flm-shell-muted: #8994a1;
-  --flm-shell-good: #63c58b;
+  --flm-shell-good: #55dc7c;
   --flm-shell-bad: #ef6b6b;
   --flm-shell-blue: #76a9ff;
   --flm-shell-sidebar: 226px;
@@ -898,4 +898,166 @@
   .flm-cm-shell .flm-live-scoreboard { grid-template-columns: 1fr auto 1fr !important; padding: 7px 8px !important; }
   .flm-cm-shell .flm-live-team strong { font-size: 12px !important; }
   .flm-cm-shell .flm-live-score b { font-size: 24px !important; }
+}
+
+/* ---------- Final blue / green theme lock ----------
+   Older feature modules still carry prototype black-and-gold declarations.
+   Keep their behaviour, but force every visible career/XI surface through the
+   approved Football Lab palette. */
+.flm-cm-shell {
+  --gold: #55dc7c !important;
+  --gold-bright: #bfe8cc !important;
+  --gold-soft: #2f8c62 !important;
+  --line-strong: rgba(85,220,124,.72) !important;
+  --flm-shell-gold: #55dc7c !important;
+  --flm-shell-gold-2: #bfe8cc !important;
+}
+
+.flm-cm-shell .career-player-row.is-selected,
+.flm-cm-shell .v044-row.is-selected {
+  border-color: #55dc7c !important;
+  background: rgba(23,77,55,.84) !important;
+  box-shadow: inset 3px 0 #55dc7c !important;
+}
+.flm-cm-shell .career-player-position,
+.flm-cm-shell .v044-pos,
+.flm-cm-shell .v044-star,
+.flm-cm-shell .v044-position-heading strong,
+.flm-cm-shell .v044-squad-browser .v044-name small {
+  color: #8ee7a8 !important;
+}
+.flm-cm-shell .career-player-row input,
+.flm-cm-shell .v044-row input { accent-color: #55dc7c !important; }
+
+.flm-cm-shell .v044-toolbar,
+.flm-cm-shell .v044-card,
+.flm-cm-shell .v044-squad-toolbar,
+.flm-cm-shell .v044-position-heading,
+.flm-cm-shell .v044-position-filters,
+.flm-cm-shell .v044-squad-browser,
+.flm-cm-shell .v044-squad-browser .v044-head {
+  border-color: #24558e !important;
+  background: #071c38 !important;
+}
+.flm-cm-shell .v044-squad-browser .v044-row,
+.flm-cm-shell .v044-squad-browser .v044-row:nth-child(4n),
+.flm-cm-shell .v044-squad-browser .v044-row:nth-child(4n+1) {
+  border-color: rgba(90,160,225,.28) !important;
+  background: #0a2242 !important;
+}
+.flm-cm-shell .v044-squad-browser .v044-row.is-selected {
+  border-color: #55dc7c !important;
+  background: #174d36 !important;
+}
+.flm-cm-shell .v044-squad-actions button,
+.flm-cm-shell .v044-squad-actions select,
+.flm-cm-shell .v044-profile {
+  border-color: #2d6dbb !important;
+  background: #0a2242 !important;
+  color: #eef3f6 !important;
+}
+.flm-cm-shell .v044-squad-actions button:first-child,
+.flm-cm-shell .v044-position-filters button.is-active {
+  border-color: #55dc7c !important;
+  background: #174d36 !important;
+  color: #fff !important;
+}
+.flm-cm-shell .v044-squad-actions button[data-v044-clear-squad] {
+  border-color: #2d6dbb !important;
+  background: #0a2242 !important;
+  color: #eef3f6 !important;
+}
+
+.flm-cm-shell .v048-tabs button.is-active,
+.flm-cm-shell .v048-segment button.is-active,
+.flm-cm-shell .v048-plan-actions .primary,
+.flm-cm-shell .v048-quick button.primary {
+  border-color: #55dc7c !important;
+  background: #174d36 !important;
+  color: #fff !important;
+}
+.flm-cm-shell .v048-squad-head,
+.flm-cm-shell .v048-match-sheet-head,
+.flm-cm-shell .v048-instructions,
+.flm-cm-shell .v048-board-footer,
+.flm-cm-shell .v048-squad-row,
+.flm-cm-shell .v048-squad-row:nth-child(even) {
+  border-color: #23558e !important;
+  background: #071c38 !important;
+}
+.flm-cm-shell .v048-pos,
+.flm-cm-shell .v048-slot-id strong,
+.flm-cm-shell .v048-instruction-title,
+.flm-cm-shell .v048-match-sheet-head {
+  color: #8ee7a8 !important;
+}
+.flm-cm-shell .v048-squad-row.is-drop,
+.flm-cm-shell .v048-player.is-drop {
+  outline-color: #55dc7c !important;
+  background: #174d36 !important;
+}
+
+.flm-cm-shell .v060-continue,
+.flm-cm-shell .v054-calendar button,
+.flm-cm-shell .v054-locked button,
+.flm-cm-shell .career-primary,
+.flm-cm-shell .career-play-button {
+  border-color: #55dc7c !important;
+  background: #174d36 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.flm-cm-shell .v060-world-panel,
+.flm-cm-shell .v054-calendar,
+.flm-cm-shell .v054-locked,
+.flm-cm-shell .v054-browser {
+  border-color: #24558e !important;
+  background: #071c38 !important;
+}
+
+.flm-cm-shell .flm-profile-value strong,
+.flm-cm-shell .flm-profile-tab.is-active,
+.flm-cm-shell .flm-card-title,
+.flm-cm-shell .flm-attr-value.r-elite,
+.flm-cm-shell .flm-info-row.is-personality-row span:first-child,
+.flm-cm-shell .flm-info-row.is-personality-row strong,
+.flm-cm-shell .flm-copy strong,
+.flm-cm-shell .flm-compare-name,
+.flm-cm-shell .flm-compare-row .winner {
+  color: #8ee7a8 !important;
+}
+.flm-cm-shell .flm-profile-tab.is-active {
+  border-color: #55dc7c !important;
+  background: #174d36 !important;
+}
+.flm-cm-shell .flm-info-row.is-personality-row {
+  border-color: rgba(85,220,124,.34) !important;
+  background: rgba(85,220,124,.06) !important;
+}
+.flm-cm-shell .flm-profile-v2-open .modal-card,
+.flm-cm-shell .flm-profile-v2-open .flm-profile-head,
+.flm-cm-shell .flm-profile-v2-open .flm-attr-card,
+.flm-cm-shell .flm-profile-v2-open .flm-info-card,
+.flm-cm-shell .flm-profile-v2-open .flm-section-card {
+  background-color: #071c38 !important;
+}
+
+.modal.flm-profile-v2-open .flm-profile-value strong,
+.modal.flm-profile-v2-open .flm-profile-tab.is-active,
+.modal.flm-profile-v2-open .flm-card-title,
+.modal.flm-profile-v2-open .flm-attr-value.r-elite,
+.modal.flm-profile-v2-open .flm-info-row.is-personality-row span:first-child,
+.modal.flm-profile-v2-open .flm-info-row.is-personality-row strong,
+.modal.flm-profile-v2-open .flm-copy strong,
+.modal.flm-profile-v2-open .flm-compare-name,
+.modal.flm-profile-v2-open .flm-compare-row .winner {
+  color: #8ee7a8 !important;
+}
+.modal.flm-profile-v2-open .flm-profile-tab.is-active {
+  border-color: #55dc7c !important;
+  background: #174d36 !important;
+}
+.modal.flm-profile-v2-open .flm-info-row.is-personality-row {
+  border-color: rgba(85,220,124,.34) !important;
+  background: rgba(85,220,124,.06) !important;
 }
