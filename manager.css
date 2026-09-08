@@ -254,6 +254,21 @@ body::before {
   filter: none;
 }
 
+.topbar-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #e8ecef;
+  font-size: clamp(18px, 2.25vw, 32px);
+  font-weight: 900;
+  letter-spacing: .02em;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .55);
+  white-space: nowrap;
+}
+
 .build-chip,
 .version-chip,
 .icon-button {
@@ -430,6 +445,7 @@ body::before {
 @media (max-width: 780px) {
   .page-shell { padding: 0; }
   .topbar { min-height: 76px; }
+  .topbar-title { font-size: 15px; }
   .hero { min-height: 840px; display: block; }
   .hero-brand { min-height: 840px; padding: 122px 16px 350px; align-items: center; text-align: center; }
   .menu-section { margin-top: -440px; padding-left: 16px; padding-right: 16px; }
@@ -442,6 +458,7 @@ body::before {
 }
 
 @media (max-width: 430px) {
+  .topbar-title { max-width: 42vw; white-space: normal; line-height: 1.05; }
   .hero { min-height: 900px; }
   .hero-brand { min-height: 900px; padding-top: 112px; }
   .menu-section { margin-top: -500px; }
