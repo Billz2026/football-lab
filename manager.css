@@ -210,6 +210,198 @@ button { color: inherit; }
 body.compact .menu-tile{min-height:230px}.compact .tile-icon{margin-top:31px}
 body.reduced-motion *, body.reduced-motion *::before, body.reduced-motion *::after { scroll-behavior:auto!important; transition-duration:.001ms!important; animation-duration:.001ms!important; }
 
+/* Home screen V2 — photographic stadium, compact manager menu */
+body {
+  background: #071525;
+}
+
+body::before {
+  display: none;
+}
+
+.page-shell {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+.topbar {
+  position: absolute;
+  z-index: 12;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 88px;
+  padding: 0 clamp(16px, 4vw, 58px);
+  border-bottom: 1px solid rgba(232, 236, 239, .2);
+  background: rgba(5, 17, 34, .84);
+  backdrop-filter: blur(8px);
+}
+
+.topbar::after {
+  width: min(260px, 34vw);
+  background: linear-gradient(90deg, #2e7d32, transparent);
+}
+
+.brand-lockup {
+  width: 170px;
+  height: 82px;
+}
+
+.brand-lockup img {
+  width: 84px;
+  height: 84px;
+  filter: none;
+}
+
+.build-chip,
+.version-chip,
+.icon-button {
+  border-color: rgba(232, 236, 239, .24);
+  background: rgba(7, 21, 37, .76);
+}
+
+.hero {
+  min-height: 720px;
+  display: block;
+  border-bottom: 0;
+  background-image: url('./assets/homepage/stadium-home.webp');
+  background-size: cover;
+  background-position: center center;
+}
+
+.hero::before {
+  background:
+    linear-gradient(180deg, rgba(4, 13, 27, .72) 0%, rgba(4, 13, 27, .24) 32%, rgba(4, 13, 27, .5) 70%, rgba(4, 13, 27, .92) 100%),
+    linear-gradient(90deg, rgba(4, 13, 27, .76) 0%, rgba(4, 13, 27, .2) 52%, rgba(4, 13, 27, .18) 100%);
+}
+
+.hero-brand {
+  width: min(1100px, calc(100% - 32px));
+  min-height: 720px;
+  margin: 0 auto;
+  padding: 150px 0 350px;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-brand .eyebrow {
+  color: #e8ecef;
+  letter-spacing: .24em;
+}
+
+.hero h1 {
+  font-size: clamp(36px, 5vw, 66px);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .55);
+}
+
+.hero h1 span {
+  color: inherit;
+  text-shadow: none;
+}
+
+.hero-copy,
+.hero-actions,
+.tactical-stage {
+  display: none;
+}
+
+.menu-section {
+  position: relative;
+  z-index: 5;
+  max-width: 980px;
+  margin: -365px auto 0;
+  padding: 0 16px 62px;
+}
+
+.section-heading {
+  display: block;
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+.section-heading .eyebrow {
+  margin-bottom: 8px;
+  color: #f4b400;
+}
+
+.section-heading h2 {
+  font-size: clamp(28px, 4vw, 42px);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .65);
+}
+
+.section-heading > p {
+  max-width: none;
+  margin: 8px 0 0;
+  color: #e8ecef;
+  text-align: center;
+}
+
+.menu-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.menu-tile {
+  min-height: 78px;
+  padding: 16px 22px;
+  border: 2px solid rgba(31, 77, 151, .96);
+  border-radius: 0;
+  background: rgba(5, 22, 49, .78);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .2);
+  text-align: center;
+}
+
+.menu-tile::after,
+.menu-tile::before,
+.tile-art,
+.tile-number,
+.tile-icon,
+.tile-copy small,
+.tile-copy em {
+  display: none;
+}
+
+.menu-tile:hover,
+.menu-tile:focus-visible {
+  transform: none;
+  border-color: #45c96b;
+  background: rgba(19, 75, 51, .88);
+  box-shadow: 0 0 0 1px rgba(69, 201, 107, .3), 0 8px 22px rgba(0, 0, 0, .28);
+}
+
+.tile-copy {
+  max-width: none;
+  margin: 0;
+}
+
+.tile-copy strong {
+  font-size: clamp(16px, 1.8vw, 22px);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.site-footer {
+  min-height: 58px;
+  padding: 0 28px;
+  border-top-color: rgba(232, 236, 239, .18);
+  background: #071525;
+}
+
+@media (max-width: 780px) {
+  .topbar { min-height: 76px; }
+  .hero { min-height: 840px; }
+  .hero-brand { min-height: 840px; padding-top: 122px; }
+  .menu-section { margin-top: -440px; }
+  .menu-grid { grid-template-columns: 1fr; }
+  .section-heading > p { font-size: 12px; }
+  .site-footer { padding: 18px 16px; }
+}
+
 @media (max-width: 1120px) {
   .hero { grid-template-columns: 1fr .9fr; }
   .tactical-stage { min-height: 390px; }
@@ -232,4 +424,27 @@ body.reduced-motion *, body.reduced-motion *::before, body.reduced-motion *::aft
   .hero-copy{font-size:13px}.hero-actions{align-items:flex-start;flex-direction:column}.hero-note{font-size:8px}
   .tactical-stage{min-height:235px}.desk-card{min-width:175px;padding:10px 12px}.desk-card span{display:none}
   .menu-tile{min-height:235px}.tile-icon{width:48px;height:48px}.tile-copy strong{font-size:23px}.tile-copy small{font-size:11px}
+}
+
+/* Final responsive overrides for the photographic home screen */
+@media (max-width: 780px) {
+  .page-shell { padding: 0; }
+  .topbar { min-height: 76px; }
+  .hero { min-height: 840px; display: block; }
+  .hero-brand { min-height: 840px; padding: 122px 16px 350px; align-items: center; text-align: center; }
+  .menu-section { margin-top: -440px; padding-left: 16px; padding-right: 16px; }
+  .section-heading { display: block; align-items: initial; text-align: center; }
+  .section-heading > p { text-align: center; }
+  .menu-grid { grid-template-columns: 1fr; gap: 3px; }
+  .menu-tile { min-height: 78px; padding: 16px 18px; }
+  .tile-icon { display: none; }
+  .site-footer { padding: 18px 16px; }
+}
+
+@media (max-width: 430px) {
+  .hero { min-height: 900px; }
+  .hero-brand { min-height: 900px; padding-top: 112px; }
+  .menu-section { margin-top: -500px; }
+  .menu-tile { min-height: 70px; }
+  .tile-copy strong { font-size: 16px; }
 }
