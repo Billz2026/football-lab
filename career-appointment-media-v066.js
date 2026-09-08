@@ -95,8 +95,8 @@ function initializeAppointment(c,db){
   const club=clubFor(c,db);const initial=initialFanSentiment(c.managerReputation,club?.reputation);
   c.appointmentExperience={schemaVersion:APPOINTMENT_SCHEMA_VERSION,stage:'press',completed:false,fanSentiment:initial,initialFanSentiment:initial,fanApplied:false,questionIndex:0,answers:[],communicationProfile:{authority:50,diplomacy:50,motivation:50,mediaHandling:50,playerProtection:50},createdAt:new Date().toISOString()};
   applyInitialFanReaction(c,db);
-  addNews(c,{key:'manager-appointed',category:'Club',source:club?.name||'Club',title:`${c.managerProfile.name} appointed as manager`,body:`${club?.name||'The club'} have appointed ${c.managerProfile.name} as manager. ${c.managerProfile.experienceLabel} background · starting reputation ${c.managerReputation}/100.`,order:52000});
-  addNews(c,{key:'fan-reaction-appointment',category:'Supporters',source:'Supporter reaction',title:`Supporters react to ${c.managerProfile.name}'s appointment`,body:`${fanReactionCopy(initial,c.managerProfile.name,club?.name||'the club')} Initial supporter sentiment: ${fanSentimentLabel(initial)} (${initial}/100).`,order:51990});
+  addNews(c,{key:'manager-appointed',category:'Club',source:club?.name||'Club',title:`${c.managerProfile.name} appointed as manager`,body:`The board has confirmed ${c.managerProfile.name} as the new manager of ${club?.name||'the club'}. The appointment has been warmly received inside the club, with the board expecting clear leadership from day one.`,order:52000});
+  addNews(c,{key:'fan-reaction-appointment',category:'Supporters',source:'Supporter reaction',title:`Supporters react to ${c.managerProfile.name}'s appointment`,body:`${fanReactionCopy(initial,c.managerProfile.name,club?.name||'the club')} Supporters will judge the appointment by your decisions, your leadership and the results on the pitch.`,order:51990});
   return true;
 }
 function applyInitialFanReaction(c,db){

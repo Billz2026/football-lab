@@ -28,6 +28,12 @@ function career(){return manager()?.activeCareer||null;}
 function database(){if(!dbPromise&&manager()?.loadDatabase)dbPromise=Promise.resolve(manager().loadDatabase()).catch(()=>null);return dbPromise||Promise.resolve(null);}
 function formatMoney(value){try{return new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:0}).format(Number(value)||0);}catch{return `£${Math.round(Number(value)||0).toLocaleString('en-GB')}`;}}
 function shortDate(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(value||'')))return value||'TBC';return new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(`${value}T12:00:00Z`)).toUpperCase();}
+function fullDate(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(value||'')))return value||'TBC';return new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${value}T12:00:00Z`));}
+function managerContractFor(c,db,profile=c?.managerProfile){
+  const club=db?.clubs?.find(x=>x.id===c?.clubId);const clubLevel=Number(club?.reputation)||50;const experience=Number(profile?.startingReputation)||50;
+  const weeklyWage=Math.round((9000+(clubLevel*120)+(experience*140))/500)*500;const dateSource=String(c?.currentDate||c?.createdAt||'2026-06-05');const year=/^\d{4}/.test(dateSource)?Number(dateSource.slice(0,4)):2026;
+  return{weeklyWage,startDate:/^\d{4}-\d{2}-\d{2}$/.test(dateSource)?dateSource:`${year}-06-05`,endDate:`${year+3}-06-30`,years:3};
+}
 
 function ensureStyles(){
   if(document.getElementById(STYLE_ID))return;
@@ -88,7 +94,7 @@ function playerRespect(profile,player,careerId){
 function applyPendingProfile(c,db){
   if(!pendingProfile||!c?.id||c.id===pendingProfile.priorCareerId||c.managerProfile?.schemaVersion)return false;
   const profile={...pendingProfile};delete profile.priorCareerId;
-  c.managerName=profile.name;c.managerProfile=profile;c.managerReputation=profile.startingReputation;c.squadRespect=profile.startingSquadRespect;c.boardConfidence=50;
+  c.managerName=profile.name;c.managerProfile=profile;c.managerReputation=profile.startingReputation;c.squadRespect=profile.startingSquadRespect;c.boardConfidence=50;c.managerContract=managerContractFor(c,db,profile);
   c.playerRelationships=c.playerRelationships&&typeof c.playerRelationships==='object'?c.playerRelationships:{};
   for(const player of db.players.filter(p=>p.clubId===c.clubId&&!p.isPlaceholder))c.playerRelationships[player.id]={...(c.playerRelationships[player.id]||{}),managerRespect:playerRespect(profile,player,c.id),trust:50,lastUpdated:c.currentDate||c.createdAt};
   c.managerProfile.lastRespectRound=Number(c.roundIndex)||0;
@@ -122,10 +128,11 @@ function openingFixtures(c,db){
 function patchBriefings(c,db){
   ensureTransferState(c,db);syncCareerNews(c,db);
   const budget=getTransferBudget(c);const expectation=expectationFor(c,db);
+  if(c.managerProfile?.schemaVersion&&!c.managerContract)c.managerContract=managerContractFor(c,db);
   c.boardExpectations={schemaVersion:1,...expectation,transferBudget:budget.transferBudget,wageRoom:budget.wageRoom,confidence:Number(c.boardConfidence)||50};
   const items=c.news?.items||[];const board=items.find(i=>i.key==='board-expectation');
   if(board){board.title='Board expectations and transfer budget';board.body=`Season objective: ${expectation.primary}. Minimum acceptable: ${expectation.minimum}. Stretch target: ${expectation.stretch}. Transfer budget: ${formatMoney(budget.transferBudget)}. Available wage room: ${formatMoney(budget.wageRoom)} per week. These budgets are enforced by the transfer system.`;board.priority='important';}
-  const welcome=items.find(i=>i.key==='welcome');if(welcome&&c.managerProfile?.schemaVersion)welcome.body=`${c.managerProfile.name}, welcome to ${db.clubs.find(x=>x.id===c.clubId)?.name||'the club'}. Your background as a ${c.managerProfile.experienceLabel.toLowerCase()} gives you a starting manager reputation of ${c.managerReputation}/100 and squad respect of ${c.squadRespect}/100. Results and decisions will change both.`;
+  const welcome=items.find(i=>i.key==='welcome');if(welcome&&c.managerProfile?.schemaVersion){const club=db.clubs.find(x=>x.id===c.clubId);const contract=c.managerContract||managerContractFor(c,db);welcome.body=`On behalf of the board, welcome to ${club?.name||'the club'}, ${c.managerProfile.name}. We are delighted to have you as our manager and believe you are the right person to lead the team forward. Your contract has been signed until ${fullDate(contract.endDate)} on a salary of ${formatMoney(contract.weeklyWage)} per week. The board looks forward to seeing your plans take shape on the pitch.`;const appointment=items.find(i=>i.key==='manager-appointed');if(appointment)appointment.body=`The board has confirmed ${c.managerProfile.name} as the new manager of ${club?.name||'the club'}. The appointment has been warmly received inside the club, with the board expecting clear leadership from day one.`;}
   const early=items.find(i=>i.key==='competition-briefing');if(early)early.body='The Premier League fixture list will be formally released on 19 June. Once published, your opening run will appear in the Inbox and the complete 38-match schedule will remain available in Fixtures.';
   const released=items.find(i=>i.key==='fixture-release');if(released){const first=openingFixtures(c,db);released.body=`Your opening six league fixtures: ${first.join(' · ')}. The complete 38-match schedule is available in the Fixtures menu.`;released.title='Premier League fixtures released · opening six confirmed';}
 }
