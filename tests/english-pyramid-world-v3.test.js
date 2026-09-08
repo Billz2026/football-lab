@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { finaliseSeason } from '../season-finalisation-v1.js';
+import { finaliseSeason } from '../season-finalisation-v4.js';
 import {
   rolloverPremierLeagueSeason,
   validatePremierLeagueRollover
