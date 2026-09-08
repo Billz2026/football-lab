@@ -125,12 +125,13 @@ function completeActiveSeason(career, completedAt) {
   return result;
 }
 
-test('2026/27 finalisation uses League Two to create a complete 2027/28 League One membership', () => {
+test('2026/27 finalisation uses League Two and National League to create complete 2027/28 League One and League Two memberships', () => {
   const career = completedCareer();
   const result = finaliseSeason(career, { completedAt: '2027-05-30T18:00:00.000Z' });
   assert.equal(result.status, 'finalised');
   assert.equal(result.leagueOne.status, 'finalised');
   assert.equal(result.leagueTwo.status, 'finalised');
+  assert.equal(result.nationalLeague.status, 'finalised');
 
   const leagueOneMembership = career.worldMemberships.find(record => record.key === 'eng-league-one:2027/28');
   assert.ok(leagueOneMembership);
@@ -144,15 +145,24 @@ test('2026/27 finalisation uses League Two to create a complete 2027/28 League O
 
   const leagueTwoMembership = career.worldMemberships.find(record => record.key === 'eng-league-two:2027/28');
   assert.ok(leagueTwoMembership);
-  assert.equal(leagueTwoMembership.status, 'incomplete-lower-pyramid');
-  assert.equal(leagueTwoMembership.clubCount, 22);
-  assert.equal(leagueTwoMembership.missingPromotionSlots, 2);
-  assert.match(leagueTwoMembership.reason, /National League/i);
+  assert.equal(leagueTwoMembership.status, 'complete');
+  assert.equal(leagueTwoMembership.clubCount, 24);
+  assert.equal(new Set(leagueTwoMembership.clubs.map(club => club.id)).size, 24);
+  assert.equal(leagueTwoMembership.promotedFromNationalLeagueClubIds.length, 2);
+  assert.equal(leagueTwoMembership.relegatedFromLeagueOneClubIds.length, 4);
+
+  const nationalLeagueBoundary = career.worldMemberships.find(record => record.key === 'eng-national-league:2027/28');
+  assert.ok(nationalLeagueBoundary);
+  assert.equal(nationalLeagueBoundary.status, 'incomplete-lower-pyramid');
+  assert.equal(nationalLeagueBoundary.clubCount, 20);
+  assert.equal(nationalLeagueBoundary.missingPromotionSlots, 4);
+  assert.match(nationalLeagueBoundary.reason, /National League North\/South/i);
 
   const boundary = career.worldBoundaries.find(record => record.key === 'english-pyramid:2027/28');
   assert.equal(boundary.leagueOneStatus, 'complete');
-  assert.equal(boundary.leagueTwoStatus, 'incomplete-lower-pyramid');
-  assert.match(boundary.status, /league-one-ready/);
+  assert.equal(boundary.leagueTwoStatus, 'complete');
+  assert.equal(boundary.nationalLeagueStatus, 'incomplete-lower-pyramid');
+  assert.equal(boundary.status, 'league-two-ready-step-two-boundary');
 });
 
 test('League Two feeder survives real Premier League rollovers and reaches the 2029/30 season', () => {
