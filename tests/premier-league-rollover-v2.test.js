@@ -134,7 +134,7 @@ test('season labels advance generically beyond the first rollover', () => {
   assert.equal(nextSeasonLabel('bad-label'), null);
 });
 
-test('2026/27 finalisation creates complete 2027/28 Championship, League One and League Two memberships', () => {
+test('2026/27 finalisation creates complete 2027/28 Championship, League One, League Two and National League memberships', () => {
   const career = completedCareer();
   const championship = career.worldHistory.find(record => record.key === 'eng-championship:2026/27');
   const leagueOne = career.lowerLeagueHistory.find(record => record.key === 'eng-league-one:2026/27');
@@ -143,7 +143,8 @@ test('2026/27 finalisation creates complete 2027/28 Championship, League One and
   const membership = career.worldMemberships.find(record => record.key === 'eng-championship:2027/28');
   const leagueOneMembership = career.worldMemberships.find(record => record.key === 'eng-league-one:2027/28');
   const leagueTwoMembership = career.worldMemberships.find(record => record.key === 'eng-league-two:2027/28');
-  const nationalLeagueBoundary = career.worldMemberships.find(record => record.key === 'eng-national-league:2027/28');
+  const nationalLeagueMembership = career.worldMemberships.find(record => record.key === 'eng-national-league:2027/28');
+  const stepTwoBoundary = career.worldMemberships.find(record => record.key === 'eng-national-league-step-two:2027/28');
 
   assert.equal(championship.status, 'complete');
   assert.equal(leagueOne.status, 'complete');
@@ -175,10 +176,20 @@ test('2026/27 finalisation creates complete 2027/28 Championship, League One and
   assert.equal(leagueTwoMembership.relegatedFromLeagueOneClubIds.length, 4);
   assert.equal(new Set(leagueTwoMembership.clubs.map(club => club.id)).size, 24);
 
-  assert.equal(nationalLeagueBoundary.status, 'incomplete-lower-pyramid');
-  assert.equal(nationalLeagueBoundary.clubCount, 20);
-  assert.equal(nationalLeagueBoundary.missingPromotionSlots, 4);
-  assert.match(nationalLeagueBoundary.reason, /National League North\/South/i);
+  assert.ok(nationalLeagueMembership);
+  assert.equal(nationalLeagueMembership.status, 'complete');
+  assert.equal(nationalLeagueMembership.clubCount, 24);
+  assert.equal(new Set(nationalLeagueMembership.clubs.map(club => club.id)).size, 24);
+  assert.equal(nationalLeagueMembership.promotedFromNationalLeagueNorthClubIds.length, 2);
+  assert.equal(nationalLeagueMembership.promotedFromNationalLeagueSouthClubIds.length, 2);
+  assert.equal(nationalLeagueMembership.relegatedFromLeagueTwoClubIds.length, 2);
+
+  assert.ok(stepTwoBoundary);
+  assert.equal(stepTwoBoundary.status, 'incomplete-step-three-feeder');
+  assert.equal(stepTwoBoundary.clubCount, 40);
+  assert.equal(stepTwoBoundary.targetClubCount, 48);
+  assert.equal(stepTwoBoundary.missingPromotionSlots, 8);
+  assert.equal(stepTwoBoundary.unallocatedRelegatedFromNationalLeagueClubIds.length, 4);
 
   const sourceIds = new Set(CHAMPIONSHIP_2026_27_CLUBS.map(club => club.id));
   const leaving = new Set([...championship.promotedClubIds, ...championship.relegatedClubIds]);
@@ -261,7 +272,7 @@ test('second rollover creates 2028/29 and carries an existing background squad a
   assert.ok(originalBackgroundIds.every(id => carriedIds.has(id)));
 });
 
-test('2028/29 finalisation creates a complete 2029/30 Championship while the League One Step 4 feeder boundary remains explicit', () => {
+test('2028/29 finalisation creates complete 2029/30 Championship and League One memberships while the League Two feeder boundary remains explicit', () => {
   const db = dbFixture();
   const career = completedCareer();
   rolloverPremierLeagueSeason(career, { db });
@@ -272,6 +283,7 @@ test('2028/29 finalisation creates a complete 2029/30 Championship while the Lea
   assert.equal(career.season, '2028/29');
   assert.equal(result.championship.status, 'finalised');
   assert.equal(result.leagueOne.status, 'finalised');
+  assert.equal(result.leagueTwo.status, 'finalised');
   assert.equal(career.championshipOutcome.status, 'complete');
   assert.equal(career.nextSeasonContext.championshipStatus, 'complete');
   assert.equal(career.nextSeasonContext.promotedFromChampionshipClubIds.length, 3);
@@ -284,9 +296,15 @@ test('2028/29 finalisation creates a complete 2029/30 Championship while the Lea
 
   const nextLeagueOne = career.worldMemberships.find(record => record.key === 'eng-league-one:2029/30');
   assert.ok(nextLeagueOne);
-  assert.equal(nextLeagueOne.status, 'incomplete-lower-pyramid');
-  assert.equal(nextLeagueOne.clubCount, 20);
-  assert.equal(nextLeagueOne.missingPromotionSlots, 4);
+  assert.equal(nextLeagueOne.status, 'complete');
+  assert.equal(nextLeagueOne.clubCount, 24);
+  assert.equal(nextLeagueOne.promotedFromLeagueTwoClubIds.length, 4);
+
+  const nextLeagueTwo = career.worldMemberships.find(record => record.key === 'eng-league-two:2029/30');
+  assert.ok(nextLeagueTwo);
+  assert.equal(nextLeagueTwo.status, 'incomplete-lower-pyramid');
+  assert.equal(nextLeagueTwo.clubCount, 22);
+  assert.equal(nextLeagueTwo.missingPromotionSlots, 2);
 
   const validation = validatePremierLeagueRollover(career, db);
   assert.equal(validation.ok, true);
