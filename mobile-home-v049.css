@@ -1,15 +1,27 @@
-/* Football Lab Manager V0.4.9 — mobile / foldable home dashboard */
+/* Football Lab Manager V0.4.10 — mobile / foldable home dashboard */
 
-@media (max-width: 900px) {
+/*
+ * The photographic desktop home screen deliberately uses a tall hero and a
+ * negative menu overlap. Those values must be reset here rather than merely
+ * restyled, otherwise Fold/tablet widths inherit both layouts at once.
+ */
+@media (max-width: 1000px) {
   html, body { overflow-x: hidden; }
+
   .page-shell {
     width: 100%;
     padding-left: max(12px, env(safe-area-inset-left));
     padding-right: max(12px, env(safe-area-inset-right));
   }
 
+  /* Put the home header back into normal document flow on Fold/tablet sizes. */
   .topbar {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
     min-height: 72px;
+    padding: 0 4px;
     gap: 10px;
   }
   .brand-lockup {
@@ -33,8 +45,16 @@
     height: 38px;
     border-radius: 11px;
   }
+  .topbar-title {
+    max-width: 48vw;
+    font-size: clamp(15px, 2.7vw, 22px);
+  }
 
-  /* The desktop artwork is useful at wide widths but wastes the primary mobile viewport. */
+  /*
+   * Reset every desktop hero dimension that can leak into the Fold layout.
+   * The hero is branding only here; the actual entry actions live in the menu
+   * immediately below, so there is no duplicated START NEW GAME control.
+   */
   .hero {
     display: block;
     min-height: 0;
@@ -52,7 +72,13 @@
       linear-gradient(180deg, rgba(4,4,3,.08), rgba(4,4,3,.38));
   }
   .hero-brand {
-    padding: 24px 20px 20px;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 28px 22px 24px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
   }
   .hero .eyebrow {
     margin-bottom: 9px;
@@ -60,38 +86,33 @@
     letter-spacing: .18em;
   }
   .hero h1 {
-    max-width: 720px;
-    font-size: clamp(34px, 7.2vw, 54px);
+    max-width: 100%;
+    font-size: clamp(34px, 6vw, 52px);
     line-height: .96;
-    letter-spacing: -.04em;
+    letter-spacing: -.035em;
+    white-space: normal;
   }
   .hero-copy {
+    display: block;
     max-width: 660px;
     margin-top: 14px;
     font-size: 12.5px;
     line-height: 1.55;
   }
-  .hero-actions {
-    display: grid;
-    grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
-    align-items: center;
-    gap: 12px;
-    margin-top: 18px;
+  .hero-actions,
+  .tactical-stage {
+    display: none;
   }
-  .primary-action {
-    width: 100%;
-    min-height: 46px;
-    border-radius: 11px;
-    padding: 0 16px;
-    font-size: 10px;
-  }
-  .hero-note {
-    font-size: 8px;
-    line-height: 1.35;
-  }
-  .tactical-stage { display: none; }
 
-  .menu-section { padding: 18px 0 24px; }
+  /* Remove the desktop -365px overlap entirely at Fold/tablet widths. */
+  .menu-section {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 18px 0 24px;
+  }
   .section-heading {
     display: flex;
     flex-direction: row;
@@ -99,72 +120,96 @@
     justify-content: space-between;
     gap: 14px;
     margin-bottom: 12px;
+    text-align: left;
   }
-  .section-heading .eyebrow { margin-bottom: 5px; font-size: 8px; }
-  .section-heading h2 { font-size: 24px; }
+  .section-heading .eyebrow {
+    margin-bottom: 5px;
+    font-size: 8px;
+  }
+  .section-heading h2 {
+    font-size: clamp(22px, 3.4vw, 28px);
+  }
   .section-heading > p {
     max-width: 300px;
+    margin: 0;
     font-size: 10px;
     line-height: 1.4;
     text-align: right;
   }
 
-  /* Two-column tile dashboard is the default Fold / tablet layout. */
+  /* Two-column dashboard for the unfolded Fold / small-tablet viewport. */
   .menu-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
   .menu-tile {
-    min-height: 148px;
+    min-height: 132px;
     padding: 14px;
+    border: 1px solid rgba(47,104,169,.72);
     border-radius: 14px;
     display: grid;
     grid-template-columns: 42px minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     column-gap: 11px;
     align-items: start;
+    background: linear-gradient(145deg, rgba(8,29,57,.94), rgba(4,17,35,.96));
+    text-align: left;
+  }
+  .menu-tile::before,
+  .menu-tile::after,
+  .tile-art {
+    display: none;
   }
   .tile-number {
+    display: block;
     grid-column: 1 / -1;
     font-size: 7px;
     letter-spacing: .14em;
   }
   .tile-icon {
+    display: grid;
     grid-column: 1;
     grid-row: 2;
     width: 38px;
     height: 38px;
     margin-top: 14px;
   }
-  .tile-icon svg { width: 19px; height: 19px; }
+  .tile-icon svg {
+    width: 19px;
+    height: 19px;
+  }
   .tile-copy {
+    display: block;
     grid-column: 2;
     grid-row: 2;
     align-self: center;
     max-width: 100%;
-    margin-top: 11px;
+    margin-top: 10px;
   }
   .tile-copy strong {
-    font-size: clamp(15px, 2.8vw, 19px);
+    display: block;
+    font-size: clamp(15px, 2.5vw, 19px);
     line-height: 1.04;
   }
   .tile-copy small {
+    display: block;
     margin-top: 6px;
     font-size: 9px;
     line-height: 1.35;
   }
   .tile-copy em {
+    display: block;
     margin-top: 8px;
     font-size: 7px;
   }
-  .menu-tile .tile-art::after {
-    background: linear-gradient(90deg, rgba(5,5,4,.95) 0%, rgba(5,5,4,.76) 60%, rgba(5,5,4,.34) 100%);
-  }
 
-  .site-footer { padding: 18px 0 max(18px, env(safe-area-inset-bottom)); }
+  .site-footer {
+    min-height: 58px;
+    padding: 18px 0 max(18px, env(safe-area-inset-bottom));
+  }
 }
 
-/* Narrow folded phones: keep the tiles compact, but switch to a single horizontal list. */
+/* Narrow folded phones: single-column compact dashboard. */
 @media (max-width: 520px) {
   .page-shell {
     padding-left: max(10px, env(safe-area-inset-left));
@@ -173,21 +218,30 @@
   .topbar { min-height: 64px; }
   .brand-lockup { width: 104px; height: 60px; }
   .brand-lockup img { width: 76px; height: 76px; }
+  .topbar-title { max-width: 44vw; font-size: 14px; white-space: normal; line-height: 1.05; }
 
-  .hero { margin-top: 8px; border-radius: 15px; }
-  .hero-brand { padding: 20px 15px 16px; }
-  .hero h1 { font-size: clamp(31px, 10vw, 43px); }
-  .hero-copy { font-size: 11.5px; }
-  .hero-actions {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  .hero {
+    margin-top: 8px;
+    border-radius: 15px;
   }
-  .hero-note { display: block; }
+  .hero-brand {
+    min-height: 0;
+    padding: 20px 15px 17px;
+  }
+  .hero h1 { font-size: clamp(31px, 10vw, 43px); }
+  .hero-copy {
+    margin-top: 10px;
+    font-size: 11.5px;
+  }
+  .hero-actions { display: none; }
 
   .section-heading { align-items: start; }
   .section-heading > p { display: none; }
   .section-heading h2 { font-size: 21px; }
-  .menu-grid { grid-template-columns: 1fr; gap: 8px; }
+  .menu-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
   .menu-tile {
     min-height: 104px;
     padding: 12px;
@@ -199,7 +253,10 @@
     height: 34px;
     margin-top: 10px;
   }
-  .tile-icon svg { width: 17px; height: 17px; }
+  .tile-icon svg {
+    width: 17px;
+    height: 17px;
+  }
   .tile-copy { margin-top: 7px; }
   .tile-copy strong { font-size: 16px; }
   .tile-copy small {
@@ -210,11 +267,13 @@
   .tile-copy em { display: none; }
 }
 
-/* Short landscape Fold windows need the same compact treatment even when fairly wide. */
+/* Short landscape Fold windows get a denser but still non-overlapping layout. */
 @media (max-height: 620px) and (max-width: 1000px) {
-  .hero-brand { padding-top: 18px; padding-bottom: 16px; }
-  .hero-copy { margin-top: 10px; }
-  .hero-actions { margin-top: 12px; }
-  .menu-section { padding-top: 12px; }
-  .menu-tile { min-height: 126px; }
+  .topbar { min-height: 58px; }
+  .hero { margin-top: 7px; }
+  .hero-brand { padding: 16px 18px 14px; }
+  .hero-copy { margin-top: 8px; }
+  .menu-section { padding-top: 10px; }
+  .menu-tile { min-height: 112px; }
+  .tile-copy small { display: none; }
 }
