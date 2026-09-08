@@ -297,13 +297,9 @@ function enhanceLiveMatch(live) {
   });
   controls.appendChild(pause);
 
-  const subs = button('MAKE SUB');
+  const subs = button('MATCH PLAN');
   subs.addEventListener('click', () => live.querySelector('[data-open-subs]')?.click());
   controls.appendChild(subs);
-
-  const tactics = button('TACTICS');
-  tactics.addEventListener('click', () => live.querySelector('[data-open-tactics]')?.click());
-  controls.appendChild(tactics);
 
   const speedLabel = document.createElement('span');
   speedLabel.className = 'flm-cm-v2-speed-label';

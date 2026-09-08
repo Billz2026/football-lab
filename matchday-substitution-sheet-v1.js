@@ -81,7 +81,7 @@ function conditionFor(state, id) {
   return Math.round(state.conditions?.[id] ?? 100);
 }
 
-export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, makeSubstitution, setState, addEvent, getShape }) {
+export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, openTactics, makeSubstitution, setState, addEvent, getShape }) {
   ensureStyles();
   let selectedOutId = null;
   let selectedInId = null;
@@ -94,7 +94,13 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, m
   function availableBench() {
     const lineup = new Set(currentLineup());
     const subbedOff = new Set(state.subbedOffIds || []);
-    return (state.userBenchIds || []).filter(id => !lineup.has(id) && !subbedOff.has(id));
+    const configured = [...new Set(state.userBenchIds || [])]
+      .filter(id => !lineup.has(id) && !subbedOff.has(id) && playerFor(db, id));
+    const fallback = (db.players || [])
+      .filter(player => player.clubId === state.userClubId && !player.isPlaceholder && !lineup.has(player.id) && !subbedOff.has(player.id))
+      .sort((a, b) => (b.currentAbility || 0) - (a.currentAbility || 0))
+      .map(player => player.id);
+    return [...new Set([...configured, ...fallback])].slice(0, 9);
   }
 
   function planText(outPlayer, inPlayer) {
@@ -123,7 +129,7 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, m
     const starters = shape.slots.map((slot, index) => {
       const assignment = shape.assignments.find(item => item.slotId === slot.id);
       const player = assignment?.playerId ? playerFor(db, assignment.playerId) : null;
-      if (!player || !lineup.includes(player.id)) return '';
+      if (!player) return '';
       const selected = selectedOutId === player.id;
       return `<button type="button" class="flm-v049-row ${selected ? 'is-off' : ''}" data-v049-out="${esc(player.id)}"><span class="flm-v049-slot"><strong>${index + 1}</strong><small>${esc(slot.label)}</small></span><span class="flm-v049-name"><strong>${esc(displayName(player))}</strong><small>${esc(player.primaryPosition || '—')}</small></span><span class="flm-v049-condition">${conditionFor(state, player.id)}%<small>CONDITION</small></span></button>`;
     }).join('');
@@ -141,7 +147,7 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, m
       return `<button type="button" class="flm-v049-player ${selectedOut ? 'is-off' : ''} ${selectedIn ? 'is-in' : ''}" style="left:${slot.x}%;top:${slot.y}%" data-v049-pitch-out="${esc(player.id)}"><span class="position">${esc(slot.label)}</span><strong>${esc(displayName(player))}</strong><small>${conditionFor(state, player.id)}% CON</small></button>`;
     }).join('');
     dialog.dataset.v049MatchSheet = '1';
-    dialog.innerHTML = `${head('Matchday Tactics','IN-MATCH MANAGEMENT')}<div class="flm-v049-match-sheet"><div class="flm-v049-status"><strong>${remaining} SUBSTITUTIONS REMAINING</strong><span>${windowInfo} · ${state.minute}'</span></div><div class="flm-v049-workspace"><aside class="flm-v049-squad"><div class="flm-v049-list"><div class="flm-v049-sheet-head"><span>MATCHDAY SQUAD</span><span>${lineup.length} / 11 ON PITCH</span></div><div class="flm-v049-section">STARTING XI</div>${starters}<div class="flm-v049-section bench">BENCH · ${bench.length}</div>${bench || '<div class="flm-v049-row"><span class="flm-v049-name"><strong>NO AVAILABLE SUBSTITUTES</strong></span></div>'}</div></aside><section class="flm-v049-board"><div class="flm-v049-board-head"><strong>TACTICAL BOARD</strong><span>Click a player off, then a substitute on.<br>Drag a substitute onto a pitch player.</span></div><div class="flm-v049-pitch"><i class="flm-v049-circle"></i><i class="flm-v049-box top"></i><i class="flm-v049-box bottom"></i>${pitch}</div><div class="flm-v049-plan" data-v049-plan>${planText(outPlayer, inPlayer)}</div></section></div><div class="flm-v049-actions"><button type="button" data-close-manager>CLOSE</button><button type="button" class="primary" data-v049-confirm ${validPlan ? '' : 'disabled'}>CONFIRM SUB</button></div></div>`;
+    dialog.innerHTML = `${head('Match Plan','IN-MATCH MANAGEMENT')}<div class="flm-v049-match-sheet"><div class="flm-v049-status"><strong>${remaining} SUBSTITUTIONS REMAINING</strong><span>${windowInfo} · ${state.minute}'</span></div><div class="flm-v049-workspace"><aside class="flm-v049-squad"><div class="flm-v049-list"><div class="flm-v049-sheet-head"><span>MATCHDAY SQUAD</span><span>${lineup.length} / 11 ON PITCH</span></div><div class="flm-v049-section">STARTING XI</div>${starters}<div class="flm-v049-section bench">BENCH · ${bench.length}</div>${bench || '<div class="flm-v049-row"><span class="flm-v049-name"><strong>NO AVAILABLE SUBSTITUTES</strong></span></div>'}</div></aside><section class="flm-v049-board"><div class="flm-v049-board-head"><strong>TACTICAL BOARD</strong><span>Click a player off, then a substitute on.<br>Drag a substitute onto a pitch player.</span></div><div class="flm-v049-pitch"><i class="flm-v049-circle"></i><i class="flm-v049-box top"></i><i class="flm-v049-box bottom"></i>${pitch}</div><div class="flm-v049-plan" data-v049-plan>${planText(outPlayer, inPlayer)}</div></section></div><div class="flm-v049-actions"><button type="button" data-v049-tactics>TACTICS OPTIONS</button><button type="button" data-close-manager>CLOSE</button><button type="button" class="primary" data-v049-confirm ${validPlan ? '' : 'disabled'}>CONFIRM SUB</button></div></div>`;
     dialog.querySelectorAll('[data-v049-out],[data-v049-pitch-out]').forEach(button => button.addEventListener('click', () => {
       selectedOutId = button.dataset.v049Out || button.dataset.v049PitchOut;
       render();
@@ -186,6 +192,7 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, m
         if (status) status.innerHTML = `<strong>${esc(error.message)}</strong><span>Choose another change</span>`;
       }
     });
+    dialog.querySelector('[data-v049-tactics]')?.addEventListener('click', () => openTactics?.());
     dialog.querySelectorAll('[data-close-manager]').forEach(button => button.addEventListener('click', close));
   }
 
