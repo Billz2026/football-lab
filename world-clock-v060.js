@@ -1,22 +1,24 @@
 import { getTransferWindowStatus, processTransferWorld } from './transfers-v050.js';
+import {
+  BASE_SEASON,
+  BASE_TAKEOVER_DATE,
+  deriveCalendarForCareer,
+  deriveSeasonCalendar
+} from './season-calendar-v1.js';
 
-export const WORLD_CLOCK_SCHEMA_VERSION = 1;
-export const CAREER_CALENDAR_SCHEMA_VERSION = 2;
-export const TAKEOVER_DATE = '2026-06-05';
-export const TRANSFER_OPEN_DATE = '2026-06-15';
-export const FIXTURE_RELEASE_DATE = '2026-06-19';
-export const TRANSFER_DEADLINE_DATE = '2026-09-01';
-export const TRANSFER_CLOSED_DATE = '2026-09-02';
-export const PRESEASON_FIXTURE_DATES = Object.freeze([
-  '2026-07-11',
-  '2026-07-18',
-  '2026-07-25',
-  '2026-08-01',
-  '2026-08-08'
-]);
+export const WORLD_CLOCK_SCHEMA_VERSION = 2;
+export const CAREER_CALENDAR_SCHEMA_VERSION = 3;
+
+const BASE_CALENDAR = deriveSeasonCalendar({ season: BASE_SEASON });
+export const TAKEOVER_DATE = BASE_TAKEOVER_DATE;
+export const TRANSFER_OPEN_DATE = BASE_CALENDAR.transferWindowOpenDate;
+export const FIXTURE_RELEASE_DATE = BASE_CALENDAR.fixtureReleaseDate;
+export const TRANSFER_DEADLINE_DATE = BASE_CALENDAR.transferDeadlineDate;
+export const TRANSFER_CLOSED_DATE = BASE_CALENDAR.transferClosedDate;
+export const PRESEASON_FIXTURE_DATES = Object.freeze([...BASE_CALENDAR.preseasonFriendlyDates]);
 
 const MS_PER_DAY = 86400000;
-const clone = value => JSON.parse(JSON.stringify(value));
+const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
 
 function dayNumber(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return null;
@@ -46,19 +48,52 @@ export function formatCareerDate(value) {
   }).format(date).toUpperCase();
 }
 
-function inferLegacyDate(career) {
-  if (!career) return TAKEOVER_DATE;
+function shortDate(value) {
+  if (!value) return '—';
+  const date = new Date(`${value}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+    .format(date)
+    .toUpperCase();
+}
+
+export function getCareerSeasonCalendar(career) {
+  const derived = deriveCalendarForCareer(career);
+  const existing = career?.calendar || {};
+  return {
+    ...derived,
+    ...Object.fromEntries(Object.entries(existing).filter(([key]) => [
+      'offseasonStartDate',
+      'takeoverDate',
+      'transferWindowOpenDate',
+      'fixtureReleaseDate',
+      'fixtureReleaseTime',
+      'preseasonFriendlyDates',
+      'seasonStartDate',
+      'transferDeadlineDate',
+      'transferClosedDate',
+      'transferDeadlineTime'
+    ].includes(key)))
+  };
+}
+
+function inferLegacyDate(career, model) {
+  if (!career) return model.takeoverDate;
   if (career.currentDate && dayNumber(career.currentDate) !== null) return career.currentDate;
   if (career.calendar?.currentDate && dayNumber(career.calendar.currentDate) !== null) return career.calendar.currentDate;
   if (career.preseason?.phase === 'complete') {
     const lastMatchDate = career.lastMatch?.date;
     if (lastMatchDate && dayNumber(lastMatchDate) !== null) return lastMatchDate;
     const round = Math.max(0, Math.min(career.roundIndex || 0, Math.max(0, (career.fixtures?.length || 1) - 1)));
-    return career.fixtures?.[round]?.find(fixture => fixture.date)?.date || career.seasonStartDate || '2026-08-21';
+    return career.fixtures?.[round]?.find(fixture => fixture.date)?.date || career.seasonStartDate || model.seasonStartDate || model.takeoverDate;
   }
   const played = career.preseason?.fixtures?.filter(fixture => fixture.played).length || 0;
-  if (played > 0) return PRESEASON_FIXTURE_DATES[Math.min(played - 1, PRESEASON_FIXTURE_DATES.length - 1)];
-  return TAKEOVER_DATE;
+  if (played > 0) return model.preseasonFriendlyDates[Math.min(played - 1, model.preseasonFriendlyDates.length - 1)];
+  return model.takeoverDate;
+}
+
+function seasonScopedKey(career, base) {
+  return (career?.season || BASE_SEASON) === BASE_SEASON ? base : `${career.season}:${base}`;
 }
 
 function addNewsOnce(career, { key, dateLabel, category = 'Competitions', source = 'Club Secretary', title, body, priority = 'normal', order = 0 }) {
@@ -86,29 +121,39 @@ function addNewsOnce(career, { key, dateLabel, category = 'Competitions', source
 
 export function syncWorldCalendarNews(career) {
   if (!career?.calendar) return false;
+  const model = getCareerSeasonCalendar(career);
   const current = career.calendar.currentDate;
+  const season = career.season || BASE_SEASON;
+  const opening = career.seasonStartDate || model.seasonStartDate;
   let changed = false;
-  if (compareDates(current, TRANSFER_OPEN_DATE) >= 0) {
+
+  if (compareDates(current, model.transferWindowOpenDate) >= 0) {
     changed = addNewsOnce(career, {
-      key: 'summer-window-opens', dateLabel: '15 JUN', category: 'Transfers', source: 'Football Operations',
+      key: seasonScopedKey(career, 'summer-window-opens'),
+      dateLabel: shortDate(model.transferWindowOpenDate),
+      category: 'Transfers', source: 'Football Operations',
       title: 'Summer transfer window opens',
-      body: 'Premier League clubs can now complete permanent transfers. The summer window remains open until 23:00 BST on 1 September.',
+      body: `Premier League clubs can now complete permanent transfers. The ${season} summer window remains open until ${model.transferDeadlineTime} on ${shortDate(model.transferDeadlineDate)}.`,
       priority: 'important', order: 33000
     }) || changed;
   }
-  if (compareDates(current, FIXTURE_RELEASE_DATE) >= 0) {
+  if (compareDates(current, model.fixtureReleaseDate) >= 0) {
     changed = addNewsOnce(career, {
-      key: 'fixture-release', dateLabel: '19 JUN', category: 'Competitions', source: 'Premier League',
+      key: seasonScopedKey(career, 'fixture-release'),
+      dateLabel: shortDate(model.fixtureReleaseDate),
+      category: 'Competitions', source: 'Premier League',
       title: 'Premier League fixtures released',
-      body: 'The full 38-match 2026/27 league schedule has been published. Every club will play 19 home matches and 19 away matches, with the opening round beginning on 21 August.',
+      body: `The full 38-match ${season} league schedule has been published. Every club will play 19 home matches and 19 away matches${opening ? `, with the opening round beginning on ${shortDate(opening)}` : ''}.`,
       priority: 'important', order: 38000
     }) || changed;
   }
-  if (compareDates(current, TRANSFER_DEADLINE_DATE) >= 0) {
+  if (compareDates(current, model.transferDeadlineDate) >= 0) {
     changed = addNewsOnce(career, {
-      key: 'transfer-deadline-day', dateLabel: '1 SEP', category: 'Transfers', source: 'Transfer Desk',
+      key: seasonScopedKey(career, 'transfer-deadline-day'),
+      dateLabel: shortDate(model.transferDeadlineDate),
+      category: 'Transfers', source: 'Transfer Desk',
       title: 'Transfer deadline day',
-      body: 'The summer transfer window closes tonight at 23:00 BST. Any permanent transfer business must be completed before the deadline.',
+      body: `The ${season} summer transfer window closes tonight at ${model.transferDeadlineTime}. Any permanent transfer business must be completed before the deadline.`,
       priority: 'important', order: 69000
     }) || changed;
   }
@@ -123,24 +168,37 @@ export function ensureWorldClock(career) {
     changed = true;
   }
   const calendar = career.calendar;
+  const model = deriveCalendarForCareer(career);
   const defaults = {
     schemaVersion: CAREER_CALENDAR_SCHEMA_VERSION,
-    takeoverDate: TAKEOVER_DATE,
-    transferWindowOpenDate: TRANSFER_OPEN_DATE,
-    fixtureReleaseDate: FIXTURE_RELEASE_DATE,
-    fixtureReleaseTime: '10:00 BST'
+    season: career.season || BASE_SEASON,
+    offseasonStartDate: model.offseasonStartDate,
+    takeoverDate: model.takeoverDate,
+    transferWindowOpenDate: model.transferWindowOpenDate,
+    fixtureReleaseDate: model.fixtureReleaseDate,
+    fixtureReleaseTime: model.fixtureReleaseTime,
+    preseasonFriendlyDates: [...model.preseasonFriendlyDates],
+    seasonStartDate: career.seasonStartDate || model.seasonStartDate,
+    transferDeadlineDate: model.transferDeadlineDate,
+    transferClosedDate: model.transferClosedDate,
+    transferDeadlineTime: model.transferDeadlineTime
   };
   for (const [key, value] of Object.entries(defaults)) {
-    if (calendar[key] !== value) {
-      calendar[key] = value;
+    const same = Array.isArray(value)
+      ? Array.isArray(calendar[key]) && JSON.stringify(calendar[key]) === JSON.stringify(value)
+      : calendar[key] === value;
+    if (!same) {
+      calendar[key] = clone(value);
       changed = true;
     }
   }
   if (dayNumber(calendar.currentDate) === null) {
-    calendar.currentDate = inferLegacyDate(career);
+    calendar.currentDate = inferLegacyDate(career, model);
     changed = true;
   }
-  const released = compareDates(calendar.currentDate, FIXTURE_RELEASE_DATE) >= 0 || Boolean(career.preseason?.fixtures?.some(fixture => fixture.played)) || (career.roundIndex || 0) > 0;
+  const released = compareDates(calendar.currentDate, calendar.fixtureReleaseDate) >= 0
+    || Boolean(career.preseason?.fixtures?.some(fixture => fixture.played))
+    || (career.roundIndex || 0) > 0;
   if (calendar.fixturesReleased !== released) {
     calendar.fixturesReleased = released;
     changed = true;
@@ -149,9 +207,11 @@ export function ensureWorldClock(career) {
     career.currentDate = calendar.currentDate;
     changed = true;
   }
-  if (!career.worldClock || career.worldClock.schemaVersion !== WORLD_CLOCK_SCHEMA_VERSION) {
+
+  if (!career.worldClock || typeof career.worldClock !== 'object') {
     career.worldClock = {
       schemaVersion: WORLD_CLOCK_SCHEMA_VERSION,
+      season: career.season || BASE_SEASON,
       acknowledgedMilestones: [],
       history: [],
       totalDaysAdvanced: 0,
@@ -163,6 +223,8 @@ export function ensureWorldClock(career) {
     changed = true;
   } else {
     const clock = career.worldClock;
+    if (clock.schemaVersion !== WORLD_CLOCK_SCHEMA_VERSION) { clock.schemaVersion = WORLD_CLOCK_SCHEMA_VERSION; changed = true; }
+    if (clock.season !== (career.season || BASE_SEASON)) { clock.season = career.season || BASE_SEASON; changed = true; }
     if (!Array.isArray(clock.acknowledgedMilestones)) { clock.acknowledgedMilestones = []; changed = true; }
     if (!Array.isArray(clock.history)) { clock.history = []; changed = true; }
     if (!Number.isFinite(clock.totalDaysAdvanced)) { clock.totalDaysAdvanced = 0; changed = true; }
@@ -177,7 +239,11 @@ export function ensureWorldClock(career) {
 export function getNextPreseasonDate(career) {
   if (!career?.preseason || career.preseason.phase === 'complete') return null;
   const index = career.preseason.fixtures?.findIndex(fixture => !fixture.played) ?? -1;
-  return index >= 0 ? PRESEASON_FIXTURE_DATES[index] || null : null;
+  if (index < 0) return null;
+  const fixtureDate = career.preseason.fixtures?.[index]?.date;
+  if (dayNumber(fixtureDate) !== null) return fixtureDate;
+  const model = getCareerSeasonCalendar(career);
+  return model.preseasonFriendlyDates[index] || null;
 }
 
 export function getUserLeagueFixture(career) {
@@ -195,7 +261,7 @@ export function getCurrentAttention(career) {
   if (career.status === 'complete') return { type: 'season-complete', blocking: true, date: current, title: 'Season complete', detail: 'Review the final table and season records.' };
   if (career.preseason?.phase === 'ready') return { type: 'preseason-ready', blocking: true, date: current, title: 'Pre-season complete', detail: 'Confirm the start of the competitive season before advancing.' };
   const friendlyDate = getNextPreseasonDate(career);
-  if (friendlyDate && compareDates(current, friendlyDate) >= 0) return { type: 'friendly', blocking: true, date: friendlyDate, title: 'Pre-season friendly today', detail: 'Play or quick-sim the scheduled friendly before continuing.' };
+  if (friendlyDate && compareDates(current, friendlyDate) >= 0) return { type: 'friendly', blocking: true, date: friendlyDate, title: 'Pre-season friendly today', detail: 'Play or quick-sim this friendly before continuing.' };
   const leagueFixture = getUserLeagueFixture(career);
   if (leagueFixture?.date && compareDates(current, leagueFixture.date) >= 0 && !leagueFixture.played) {
     return { type: 'matchday', blocking: true, date: leagueFixture.date, title: `Premier League Matchweek ${leagueFixture.matchweek || leagueFixture.round}`, detail: 'Your competitive fixture is due. Complete Matchday before continuing.', fixtureId: leagueFixture.id };
@@ -206,12 +272,13 @@ export function getCurrentAttention(career) {
 }
 
 function milestoneForDate(career, date) {
+  const model = getCareerSeasonCalendar(career);
   const acknowledged = new Set(career.worldClock?.acknowledgedMilestones || []);
   const milestones = [
-    { key: 'summer-window-open', date: TRANSFER_OPEN_DATE, type: 'transfer-window-open', title: 'Summer transfer window open', detail: 'Permanent transfer business can now be completed.' },
-    { key: 'fixture-release', date: FIXTURE_RELEASE_DATE, type: 'fixture-release', title: 'Premier League fixtures released', detail: 'The full 38-match league schedule is now available.' },
-    { key: 'deadline-day', date: TRANSFER_DEADLINE_DATE, type: 'deadline-day', title: 'Transfer deadline day', detail: 'The summer transfer window closes tonight at 23:00 BST.' },
-    { key: 'window-closed', date: TRANSFER_CLOSED_DATE, type: 'transfer-window-closed', title: 'Summer transfer window closed', detail: 'Permanent registrations are now closed.' }
+    { key: seasonScopedKey(career, 'summer-window-open'), date: model.transferWindowOpenDate, type: 'transfer-window-open', title: 'Summer transfer window open', detail: 'Permanent transfer business can now be completed.' },
+    { key: seasonScopedKey(career, 'fixture-release'), date: model.fixtureReleaseDate, type: 'fixture-release', title: 'Premier League fixtures released', detail: 'The full 38-match league schedule is now available.' },
+    { key: seasonScopedKey(career, 'deadline-day'), date: model.transferDeadlineDate, type: 'deadline-day', title: 'Transfer deadline day', detail: `The summer transfer window closes tonight at ${model.transferDeadlineTime}.` },
+    { key: seasonScopedKey(career, 'window-closed'), date: model.transferClosedDate, type: 'transfer-window-closed', title: 'Summer transfer window closed', detail: 'Permanent registrations are now closed.' }
   ];
   return milestones.find(item => item.date === date && !acknowledged.has(item.key)) || null;
 }
@@ -222,12 +289,15 @@ function acknowledgeMilestone(career, milestone) {
   if (!career.worldClock.acknowledgedMilestones.includes(milestone.key)) career.worldClock.acknowledgedMilestones.push(milestone.key);
 }
 
-export function shouldProcessTransferDate(date) {
+export function shouldProcessTransferDate(date, career = null) {
   const current = dayNumber(date);
-  const opens = dayNumber(TRANSFER_OPEN_DATE);
-  const closes = dayNumber(TRANSFER_DEADLINE_DATE);
-  const afterClose = dayNumber(TRANSFER_CLOSED_DATE);
-  if (current === null || opens === null || closes === null) return false;
+  if (current === null) return false;
+  const model = career
+    ? getCareerSeasonCalendar(career)
+    : deriveSeasonCalendar({ season: `${String(date).slice(0, 4)}/${String(Number(String(date).slice(0, 4)) + 1).slice(-2)}` });
+  const opens = dayNumber(model.transferWindowOpenDate);
+  const closes = dayNumber(model.transferDeadlineDate);
+  const afterClose = dayNumber(model.transferClosedDate);
   if (current === afterClose) return true;
   if (current < opens || current > closes) return false;
   const daysOpen = current - opens;
@@ -237,12 +307,13 @@ export function shouldProcessTransferDate(date) {
 export function processWorldDay(career, db, date, { processTransfers = true } = {}) {
   ensureWorldClock(career);
   if (dayNumber(date) === null) throw new Error('World clock received an invalid date.');
+  const model = getCareerSeasonCalendar(career);
   career.calendar.currentDate = date;
   career.currentDate = date;
-  career.calendar.fixturesReleased = compareDates(date, FIXTURE_RELEASE_DATE) >= 0;
+  career.calendar.fixturesReleased = compareDates(date, model.fixtureReleaseDate) >= 0;
   career.worldClock.lastProcessedDate = date;
   let transfer = null;
-  if (processTransfers && db && shouldProcessTransferDate(date)) transfer = processTransferWorld(career, db);
+  if (processTransfers && db && shouldProcessTransferDate(date, career)) transfer = processTransferWorld(career, db);
   const newsChanged = syncWorldCalendarNews(career);
   career.updatedAt = new Date().toISOString();
   return { date, transfer, newsChanged };
@@ -307,16 +378,17 @@ export function continueCareer(career, db, { maxDays = 180, processTransfers = t
 export function getNextScheduledEvent(career) {
   ensureWorldClock(career);
   const current = career.currentDate;
+  const model = getCareerSeasonCalendar(career);
   const attention = getCurrentAttention(career);
   if (attention) return attention;
   const candidates = [];
-  if (compareDates(current, TRANSFER_OPEN_DATE) < 0) candidates.push({ type: 'transfer-window-open', date: TRANSFER_OPEN_DATE, title: 'Summer transfer window opens' });
-  if (compareDates(current, FIXTURE_RELEASE_DATE) < 0) candidates.push({ type: 'fixture-release', date: FIXTURE_RELEASE_DATE, title: 'Premier League fixture release' });
+  if (compareDates(current, model.transferWindowOpenDate) < 0) candidates.push({ type: 'transfer-window-open', date: model.transferWindowOpenDate, title: 'Summer transfer window opens' });
+  if (compareDates(current, model.fixtureReleaseDate) < 0) candidates.push({ type: 'fixture-release', date: model.fixtureReleaseDate, title: 'Premier League fixture release' });
   const friendly = getNextPreseasonDate(career);
   if (friendly && compareDates(current, friendly) < 0) candidates.push({ type: 'friendly', date: friendly, title: 'Pre-season friendly' });
   const fixture = getUserLeagueFixture(career);
   if (fixture?.date && compareDates(current, fixture.date) < 0) candidates.push({ type: 'matchday', date: fixture.date, title: `Premier League Matchweek ${fixture.matchweek || fixture.round}`, fixtureId: fixture.id });
-  if (compareDates(current, TRANSFER_DEADLINE_DATE) < 0 && compareDates(current, TRANSFER_OPEN_DATE) >= 0) candidates.push({ type: 'deadline-day', date: TRANSFER_DEADLINE_DATE, title: 'Transfer deadline day' });
+  if (compareDates(current, model.transferDeadlineDate) < 0 && compareDates(current, model.transferWindowOpenDate) >= 0) candidates.push({ type: 'deadline-day', date: model.transferDeadlineDate, title: 'Transfer deadline day' });
   return candidates.sort((a, b) => compareDates(a.date, b.date))[0] || null;
 }
 

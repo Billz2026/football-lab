@@ -1,4 +1,6 @@
-export const PRESEASON_SCHEMA_VERSION = 1;
+import { deriveCalendarForCareer } from './season-calendar-v1.js';
+
+export const PRESEASON_SCHEMA_VERSION = 2;
 export const PRESEASON_FRIENDLY_COUNT = 5;
 export const PRESEASON_TRAINING_FOCI = {
   Balanced: { condition: 5, sharpness: 3, familiarity: 7, description: 'Steady work across fitness, sharpness and tactical understanding.' },
@@ -19,7 +21,23 @@ function hashString(value) {
   return hash >>> 0;
 }
 
-function playableClubs(db) {
+function formatFriendlyDate(value) {
+  if (!value) return 'TBC';
+  const date = new Date(`${value}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(date);
+}
+
+function playableClubs(career, db) {
+  const careerIds = new Set(
+    Array.isArray(career?.seasonClubIds) && career.seasonClubIds.length
+      ? career.seasonClubIds
+      : (career?.table || []).map(row => row.clubId).filter(Boolean)
+  );
+  if (careerIds.size >= 2) {
+    const selected = db.clubs.filter(club => careerIds.has(club.id) && !club.isPlaceholder);
+    if (selected.length >= 2) return selected;
+  }
   const ids = new Set(db.metadata?.playableDemo?.clubIds || []);
   const selected = db.clubs.filter(club => ids.has(club.id) && !club.isPlaceholder);
   return selected.length ? selected : db.clubs.filter(club => !club.isPlaceholder).slice(0, 8);
@@ -30,17 +48,20 @@ function tableRow(clubId) {
 }
 
 function buildFixtures(career, db) {
-  const opponents = playableClubs(db).filter(club => club.id !== career.clubId);
+  const opponents = playableClubs(career, db).filter(club => club.id !== career.clubId);
   if (!opponents.length) return [];
-  const start = hashString(`${career.seed}:${career.clubId}:preseason`) % opponents.length;
+  const start = hashString(`${career.seed}:${career.clubId}:${career.season || 'season'}:preseason`) % opponents.length;
   const ordered = Array.from({ length: Math.min(PRESEASON_FRIENDLY_COUNT, Math.max(1, opponents.length)) }, (_, index) => opponents[(start + index) % opponents.length]);
-  const dates = ['11 Jul 2026', '18 Jul 2026', '25 Jul 2026', '1 Aug 2026', '8 Aug 2026'];
+  const calendar = deriveCalendarForCareer(career);
+  const dates = calendar.preseasonFriendlyDates;
   return ordered.map((opponent, index) => {
     const userHome = index % 2 === 0;
+    const date = dates[index] || null;
     return {
-      id: `ps-${career.id}-${index + 1}`,
+      id: `ps-${career.id}-${career.season || 'season'}-${index + 1}`,
       round: index + 1,
-      dateLabel: dates[index] || `Week ${index + 1}`,
+      date,
+      dateLabel: date ? formatFriendlyDate(date) : `Week ${index + 1}`,
       homeClubId: userHome ? career.clubId : opponent.id,
       awayClubId: userHome ? opponent.id : career.clubId,
       played: false,
@@ -57,11 +78,38 @@ function prepareUserSquad(career, db) {
   for (const player of squad) {
     const status = career.playerStatus[player.id];
     if (!status) continue;
-    const roll = hashString(`${career.seed}:${player.id}:preseason-readiness`);
+    const roll = hashString(`${career.seed}:${player.id}:${career.season || 'season'}:preseason-readiness`);
     status.condition = Math.min(status.condition ?? 100, 93 + (roll % 4));
     status.sharpness = Math.min(status.sharpness ?? 88, 59 + ((roll >>> 3) % 9));
     status.morale ||= 'Good';
   }
+}
+
+function activePreseasonState(career, db, startedAt = new Date().toISOString()) {
+  prepareUserSquad(career, db);
+  return {
+    schemaVersion: PRESEASON_SCHEMA_VERSION,
+    season: career.season || '2026/27',
+    phase: 'active',
+    fixtures: buildFixtures(career, db),
+    trainingFocus: 'Balanced',
+    tacticalFamiliarity: 42,
+    trainingSessions: 0,
+    trainingLog: [],
+    startedAt,
+    completedAt: null,
+    legacyBypass: false
+  };
+}
+
+export function resetPreseasonForSeason(career, db, { startedAt = new Date().toISOString() } = {}) {
+  if (!career || !db) throw new Error('Career and database are required to reset pre-season.');
+  if (career.preseason?.schemaVersion === PRESEASON_SCHEMA_VERSION
+    && career.preseason?.season === career.season
+    && career.preseason?.phase !== 'complete') return false;
+  career.preseason = activePreseasonState(career, db, startedAt);
+  career.updatedAt = startedAt;
+  return true;
 }
 
 export function ensurePreseason(career, db) {
@@ -72,6 +120,7 @@ export function ensurePreseason(career, db) {
   if (oldCareerAlreadyUnderway) {
     career.preseason = {
       schemaVersion: PRESEASON_SCHEMA_VERSION,
+      season: career.season || '2026/27',
       phase: 'complete',
       fixtures: [],
       trainingFocus: 'Balanced',
@@ -83,19 +132,7 @@ export function ensurePreseason(career, db) {
     return true;
   }
 
-  prepareUserSquad(career, db);
-  career.preseason = {
-    schemaVersion: PRESEASON_SCHEMA_VERSION,
-    phase: 'active',
-    fixtures: buildFixtures(career, db),
-    trainingFocus: 'Balanced',
-    tacticalFamiliarity: 42,
-    trainingSessions: 0,
-    trainingLog: [],
-    startedAt: new Date().toISOString(),
-    completedAt: null,
-    legacyBypass: false
-  };
+  career.preseason = activePreseasonState(career, db);
   return true;
 }
 
@@ -166,7 +203,12 @@ export function completePreseasonFriendly(career, friendlyCareer, db) {
   if (index < 0) throw new Error('The completed friendly does not belong to this pre-season.');
 
   const fixture = career.preseason.fixtures[index];
-  Object.assign(fixture, clone(result), { type: 'friendly', dateLabel: fixture.dateLabel, round: fixture.round });
+  Object.assign(fixture, clone(result), {
+    type: 'friendly',
+    date: fixture.date,
+    dateLabel: fixture.dateLabel,
+    round: fixture.round
+  });
 
   const userSquad = new Set(db.players.filter(player => player.clubId === career.clubId && !player.isPlaceholder).map(player => player.id));
   for (const [playerId, friendlyStatus] of Object.entries(friendlyCareer.playerStatus || {})) {

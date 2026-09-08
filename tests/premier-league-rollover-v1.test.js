@@ -92,6 +92,7 @@ function completedCareer({ managedClubId = 'club-01' } = {}) {
     lineupIds: Array.from({ length: 11 }, (_, index) => `${managedClubId}-p${index + 1}`),
     playerStatus: {},
     lastMatch: { date: '2027-05-30' },
+    seasonEndDate: '2027-05-30',
     currentDate: '2027-05-30',
     calendar: { currentDate: '2027-05-30', fixturesReleased: true },
     preseason: { phase: 'complete' },
@@ -119,7 +120,7 @@ test('season label advances from 2026/27 to 2027/28', () => {
   assert.equal(nextSeasonLabel('bad-label'), null);
 });
 
-test('2026/27 completion rolls into a clean 20-club 2027/28 Premier League', () => {
+test('2026/27 completion rolls into a clean 20-club 2027/28 Premier League offseason', () => {
   const db = dbFixture();
   const career = completedCareer();
   const previousHistory = structuredClone(career.seasonHistory);
@@ -142,7 +143,22 @@ test('2026/27 completion rolls into a clean 20-club 2027/28 Premier League', () 
   assert.ok(career.fixtures.flat().every(fixture => fixture.played === false));
   assert.equal(career.seasonStartDate, '2027-08-20');
   assert.equal(career.seasonEndDate, '2028-05-28');
-  assert.equal(career.currentDate, career.seasonStartDate);
+  assert.equal(career.currentDate, '2027-05-31');
+  assert.equal(career.previousSeasonEndDate, '2027-05-30');
+  assert.equal(career.calendar.schemaVersion, 3);
+  assert.equal(career.calendar.fixturesReleased, false);
+  assert.equal(career.calendar.transferWindowOpenDate, '2027-06-15');
+  assert.equal(career.calendar.fixtureReleaseDate, '2027-06-19');
+  assert.equal(career.calendar.transferDeadlineDate, '2027-09-01');
+  assert.equal(career.calendar.transferClosedDate, '2027-09-02');
+  assert.deepEqual(career.calendar.preseasonFriendlyDates, ['2027-07-10', '2027-07-17', '2027-07-24', '2027-07-31', '2027-08-07']);
+  assert.equal(career.worldClock.schemaVersion, 2);
+  assert.equal(career.worldClock.season, '2027/28');
+  assert.equal(career.preseason.schemaVersion, 2);
+  assert.equal(career.preseason.season, '2027/28');
+  assert.equal(career.preseason.phase, 'active');
+  assert.deepEqual(career.preseason.fixtures.map(fixture => fixture.date), ['2027-07-10', '2027-07-17', '2027-07-24', '2027-07-31', '2027-08-07']);
+  assert.equal(career.transfers.activeWindowSeason, '2027/28');
   assert.equal(career.seasonOutcome, null);
   assert.equal(career.seasonResolution, null);
   assert.equal(career.nextSeasonContext, null);
@@ -152,6 +168,7 @@ test('2026/27 completion rolls into a clean 20-club 2027/28 Premier League', () 
   assert.equal(career.seasonRollovers.length, 1);
   assert.equal(career.seasonRollovers[0].fromSeason, '2026/27');
   assert.equal(career.seasonRollovers[0].toSeason, '2027/28');
+  assert.equal(career.seasonRollovers[0].previousSeasonEndDate, '2027-05-30');
 });
 
 test('2027/28 fixtures contain every pairing exactly home and away once', () => {
@@ -184,12 +201,16 @@ test('promoted Championship clubs receive isolated background simulation squads 
   }
 });
 
-test('rolled-over career can simulate a Premier League matchweek containing promoted clubs', () => {
+test('rolled-over career can simulate a Premier League matchweek containing promoted clubs after preseason is complete', () => {
   const db = dbFixture();
   const career = completedCareer();
   const promoted = [...career.nextSeasonContext.promotedFromChampionshipClubIds];
   rolloverPremierLeagueSeason(career, { db });
   augmentDatabaseForCareer(career, db);
+  career.preseason.phase = 'complete';
+  career.currentDate = career.seasonStartDate;
+  career.calendar.currentDate = career.seasonStartDate;
+  career.calendar.fixturesReleased = true;
 
   const roundWithPromoted = career.fixtures.findIndex(round => round.some(fixture => promoted.includes(fixture.homeClubId) || promoted.includes(fixture.awayClubId)));
   assert.ok(roundWithPromoted >= 0);

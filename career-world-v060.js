@@ -1,16 +1,16 @@
-import { beginCompetitiveSeason } from './preseason-v047.js?v=0.4.7';
+import { beginCompetitiveSeason } from './preseason-v047.js?v=0.4.8';
 import {
-  TRANSFER_OPEN_DATE,
   compareDates,
   continueCareer,
   ensureWorldClock,
   formatCareerDate,
+  getCareerSeasonCalendar,
   getCurrentAttention,
   getNextPreseasonDate,
   getNextScheduledEvent,
   getUserLeagueFixture,
   syncWorldCalendarNews
-} from './world-clock-v060.js?v=0.6.0';
+} from './world-clock-v060.js?v=0.6.1';
 
 const SAVE_KEY = 'flm-career-save';
 let queued = false;
@@ -56,10 +56,18 @@ function styles() {
   document.head.appendChild(style);
 }
 
+function compactDate(value) {
+  if (!value) return 'TBC';
+  const date = new Date(`${value}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return 'TBC';
+  return new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'short', timeZone:'UTC' }).format(date).toUpperCase();
+}
+
 function stage(c) {
   if (c.status === 'complete') return 'SEASON COMPLETE';
   if (c.preseason?.phase !== 'complete') {
-    if (compareDates(c.currentDate, TRANSFER_OPEN_DATE) < 0) return 'PRE-SEASON · WINDOW CLOSED';
+    const calendar = getCareerSeasonCalendar(c);
+    if (compareDates(c.currentDate, calendar.transferWindowOpenDate) < 0) return 'PRE-SEASON · WINDOW CLOSED';
     if (!c.calendar?.fixturesReleased) return 'PRE-SEASON · FIXTURES PENDING';
     if (c.preseason?.phase === 'ready') return 'PRE-SEASON · COMPLETE';
     return 'PRE-SEASON';
@@ -113,8 +121,6 @@ function syncOverview(c) {
   const content = document.querySelector('.career-content');
   const overview = document.querySelector('.career-nav [data-career-tab="overview"]');
   if (!content || !overview?.classList.contains('is-active')) return;
-  // The Inbox is the overview now. Its primary action lives in the shell rail;
-  // never inject a second black/gold calendar card into the message workspace.
   if (content.querySelector('.career-inbox-heading')) {
     content.querySelector('.v060-world-panel')?.remove();
     return;
@@ -137,19 +143,21 @@ function syncOverview(c) {
   }
 }
 
-function fixtureLock() {
+function fixtureLock(c) {
   const root = document.querySelector('.career-content');
   if (!root) return;
-  root.innerHTML = `<section class="v054-locked"><div><span class="stamp">FIXTURE RELEASE DAY</span><h2>Fixtures not released yet</h2><div class="date">FRIDAY 19 JUNE 2026 · 10:00 BST</div><p>The Premier League schedule remains under embargo. Continue Game will stop automatically on Fixture Release Day.</p><button type="button" data-v060-continue data-v054-advance>CONTINUE GAME</button></div></section>`;
+  const calendar = getCareerSeasonCalendar(c);
+  root.innerHTML = `<section class="v054-locked"><div><span class="stamp">FIXTURE RELEASE DAY</span><h2>Fixtures not released yet</h2><div class="date">${esc(formatCareerDate(calendar.fixtureReleaseDate))} · ${esc(calendar.fixtureReleaseTime)}</div><p>The ${esc(c.season || '')} Premier League schedule remains under embargo. Continue Game will stop automatically on Fixture Release Day.</p><button type="button" data-v060-continue data-v054-advance>CONTINUE GAME</button></div></section>`;
 }
 
 function syncNavigation(c) {
   const fixtures = document.querySelector('[data-v051-fixtures]');
   if (!fixtures) return;
+  const calendar = getCareerSeasonCalendar(c);
   const locked = !c.calendar?.fixturesReleased;
   fixtures.classList.toggle('v054-lock-nav', locked);
-  fixtures.title = locked ? 'Fixtures will be released on 19 June 2026 at 10:00 BST.' : '';
-  const html = locked ? 'Fixtures<small>19 JUN</small>' : 'Fixtures';
+  fixtures.title = locked ? `Fixtures will be released on ${formatCareerDate(calendar.fixtureReleaseDate)} at ${calendar.fixtureReleaseTime}.` : '';
+  const html = locked ? `Fixtures<small>${esc(compactDate(calendar.fixtureReleaseDate))}</small>` : 'Fixtures';
   if (fixtures.innerHTML !== html) fixtures.innerHTML = html;
 }
 
@@ -229,9 +237,6 @@ async function performContinue() {
   }
 }
 
-// The compact shell uses one Continue control in the sidebar. Expose the
-// authoritative calendar action so the shell does not have to click a hidden
-// page-level button to advance the career.
 window.FLMCareerWorld = Object.freeze({ continue: performContinue });
 
 function sync() {
@@ -257,7 +262,7 @@ document.addEventListener('click', event => {
     event.preventDefault(); event.stopImmediatePropagation(); performContinue(); return;
   }
   if (event.target.closest('[data-v051-fixtures]') && !c.calendar?.fixturesReleased) {
-    event.preventDefault(); event.stopImmediatePropagation(); fixtureLock(); return;
+    event.preventDefault(); event.stopImmediatePropagation(); fixtureLock(c); return;
   }
   if (event.target.closest('[data-v047-play],[data-v047-sim]')) {
     const due = getNextPreseasonDate(c);

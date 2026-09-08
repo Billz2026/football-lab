@@ -39,8 +39,8 @@ test('Continue Game advances the career day by day and stops on June milestones'
 
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('flm-career-save')));
   expect(saved.currentDate).toBe('2026-06-19');
-  expect(saved.calendar.schemaVersion).toBe(2);
-  expect(saved.worldClock.schemaVersion).toBe(1);
+  expect(saved.calendar.schemaVersion).toBe(3);
+  expect(saved.worldClock.schemaVersion).toBe(2);
   expect(saved.worldClock.totalDaysAdvanced).toBe(14);
   expect(saved.worldClock.history.length).toBeGreaterThanOrEqual(2);
 });
