@@ -211,13 +211,27 @@ export function getTransferWindowStatus(career) {
 }
 
 export function processTransferWorld(career, db) {
+  let suppressLegacyClosureNews = false;
+  if (worldClockCareer(career) && seasonStartYear(career.season) !== 2026) {
+    const model = deriveCalendarForCareer(career);
+    const current = dayNumber(career.currentDate || career.calendar?.currentDate);
+    const closed = dayNumber(model.transferClosedDate);
+    if (current !== null && closed !== null && current >= closed) {
+      legacy.ensureTransferState(career, db);
+      if (!career.transfers.windowClosedNotified) {
+        career.transfers.windowClosedNotified = true;
+        suppressLegacyClosureNews = true;
+      }
+    }
+  }
+
   const result = withCalendarDate(career, () => market.processTransferWorld(career, db), { uniquePhase: true });
   if (result && worldClockCareer(career)) {
     result.window = dynamicWindow(career);
     result.phaseKey = `D:${career.currentDate || career.calendar?.currentDate}`;
     const model = deriveCalendarForCareer(career);
-    if (dayNumber(career.currentDate) >= dayNumber(model.transferClosedDate)) {
-      result.changed = addSeasonWindowClosedNews(career) || Boolean(result.changed);
+    if (dayNumber(career.currentDate || career.calendar?.currentDate) >= dayNumber(model.transferClosedDate)) {
+      result.changed = addSeasonWindowClosedNews(career) || Boolean(result.changed) || suppressLegacyClosureNews;
     }
   }
   return result;
