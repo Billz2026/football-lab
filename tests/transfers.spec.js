@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { startCareerThroughCurrentOnboarding } from './helpers/start-career.js';
 
-test.setTimeout(60000);
+test.setTimeout(90000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -9,26 +10,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function bootTransferCareer(page) {
-  await page.getByRole('button', { name: /QUICK START/ }).click();
-  await expect.poll(async () => page.evaluate(() => Boolean(window.FLMManager?.activeCareer)), { timeout: 10000 }).toBeTruthy();
-  await expect.poll(async () => page.evaluate(() => Boolean(document.querySelector('.career-app'))), { timeout: 10000 }).toBeTruthy();
-
-  // The global career-shell browser harness currently has an independent regression where
-  // Quick Start creates the career and renders the shell but does not add its display class.
-  // Keep this feature contract focused on Transfers by opening that already-rendered shell;
-  // do not manufacture career state or bypass any transfer business rules.
-  await page.evaluate(() => {
-    const shell = document.querySelector('.career-app');
-    shell?.classList.add('is-open');
-    const modal = document.getElementById('appModal');
-    if (modal) {
-      modal.classList.remove('is-open', 'flm-appointment-open');
-      modal.setAttribute('aria-hidden', 'true');
-    }
-    document.body.style.overflow = '';
-  });
-
-  await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+  await startCareerThroughCurrentOnboarding(page, { completeAppointment: true });
   await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible({ timeout: 10000 });
 }
 
