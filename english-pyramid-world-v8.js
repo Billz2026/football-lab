@@ -22,11 +22,13 @@ import {
 } from './national-league-step-four-world-v1.js';
 import {
   STEP_FIVE_DIVISION_IDS,
-  STEP_FIVE_2026_27_MEMBERSHIPS,
-  STEP_FIVE_2026_27_TOTAL_CLUBS,
   STEP_FIVE_TO_STEP_FOUR_PREFERENCES,
   simulateStepFiveDivisionSeason
 } from './national-league-step-five-world-v1.js';
+import {
+  RESOLVED_STEP_FIVE_2026_27_MEMBERSHIPS as STEP_FIVE_2026_27_MEMBERSHIPS,
+  RESOLVED_STEP_FIVE_2026_27_TOTAL_CLUBS as STEP_FIVE_2026_27_TOTAL_CLUBS
+} from './national-league-step-five-membership-resolved-v1.js';
 
 export * from './english-pyramid-world-v7.js';
 export const ENGLISH_PYRAMID_WORLD_V8_VERSION = 8;
