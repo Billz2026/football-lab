@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
     paths:
+      - 'manager.js'
+      - 'manager-runtime-v1.js'
+      - 'runtime-matchday-v1.js'
+      - 'runtime-match-centre-v1.js'
+      - 'runtime-commentary-v1.js'
       - 'manager-shell-v1.js'
       - 'matchday-cm-v2.js'
       - 'matchday-cm-v2.css'
@@ -11,18 +16,12 @@ on:
       - 'matchday-density-v332.css'
       - 'matchday-stability-v333.js'
       - 'matchday-stability-v333.css'
-      - 'match-centre-v4.js'
+      - 'match-centre-v5.js'
       - 'match-centre-v4.css'
-      - 'match-centre-v4-mode.js'
-      - 'match-centre-v4-fold-v41.js'
       - 'match-centre-v4-fold-v41.css'
-      - 'match-centre-v4-mobile-v42.js'
       - 'match-centre-v4-mobile-v42.css'
-      - 'match-centre-v4-discipline-v44.js'
       - 'match-centre-v4-discipline-v44.css'
-      - 'match-centre-v45.js'
       - 'match-centre-v45.css'
-      - 'match-centre-v46-lock.js'
       - 'match-centre-v46-lock.css'
       - 'matchday-engine-v069.js'
       - 'matchday-engine-v0431.js'
@@ -33,7 +32,6 @@ on:
       - 'commentary-authoritative-flow-v3.js'
       - 'commentary-authoritative-row-host-v1.js'
       - 'match-drama-v3.js'
-      - 'manager.js'
       - 'package.json'
       - 'tests/helpers/start-career.js'
       - 'tests/structured-attacks-v1.test.js'
@@ -47,6 +45,11 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'manager.js'
+      - 'manager-runtime-v1.js'
+      - 'runtime-matchday-v1.js'
+      - 'runtime-match-centre-v1.js'
+      - 'runtime-commentary-v1.js'
       - 'manager-shell-v1.js'
       - 'matchday-cm-v2.js'
       - 'matchday-cm-v2.css'
@@ -54,18 +57,12 @@ on:
       - 'matchday-density-v332.css'
       - 'matchday-stability-v333.js'
       - 'matchday-stability-v333.css'
-      - 'match-centre-v4.js'
+      - 'match-centre-v5.js'
       - 'match-centre-v4.css'
-      - 'match-centre-v4-mode.js'
-      - 'match-centre-v4-fold-v41.js'
       - 'match-centre-v4-fold-v41.css'
-      - 'match-centre-v4-mobile-v42.js'
       - 'match-centre-v4-mobile-v42.css'
-      - 'match-centre-v4-discipline-v44.js'
       - 'match-centre-v4-discipline-v44.css'
-      - 'match-centre-v45.js'
       - 'match-centre-v45.css'
-      - 'match-centre-v46-lock.js'
       - 'match-centre-v46-lock.css'
       - 'matchday-engine-v069.js'
       - 'matchday-engine-v0431.js'
@@ -76,7 +73,6 @@ on:
       - 'commentary-authoritative-flow-v3.js'
       - 'commentary-authoritative-row-host-v1.js'
       - 'match-drama-v3.js'
-      - 'manager.js'
       - 'package.json'
       - 'tests/helpers/start-career.js'
       - 'tests/structured-attacks-v1.test.js'
@@ -107,17 +103,16 @@ jobs:
 
       - name: Check Matchday syntax
         run: |
+          node --check manager.js
+          node --check manager-runtime-v1.js
+          node --check runtime-matchday-v1.js
+          node --check runtime-match-centre-v1.js
+          node --check runtime-commentary-v1.js
           node --check manager-shell-v1.js
           node --check matchday-cm-v2.js
           node --check matchday-density-v332.js
           node --check matchday-stability-v333.js
-          node --check match-centre-v4.js
-          node --check match-centre-v4-mode.js
-          node --check match-centre-v4-fold-v41.js
-          node --check match-centre-v4-mobile-v42.js
-          node --check match-centre-v4-discipline-v44.js
-          node --check match-centre-v45.js
-          node --check match-centre-v46-lock.js
+          node --check match-centre-v5.js
           node --check matchday-engine-v069.js
           node --check matchday-engine-v0431.js
           node --check matchday-structured-attacks-v1.js
