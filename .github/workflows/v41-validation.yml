@@ -76,6 +76,7 @@ jobs:
             scripts/validate-database.mjs \
             tests/manager-career.spec.js \
             tests/manager-core.test.js \
+            tests/transfers.spec.js \
             tests/transfer-centre-ui-v1.test.js \
             tests/english-pyramid-world-v6.test.js \
             tests/english-pyramid-world-v7.test.js \
@@ -111,6 +112,9 @@ jobs:
       - name: Install Chromium
         timeout-minutes: 10
         run: npx playwright install chromium
+
+      - name: Run Transfer Centre browser contract
+        run: npx playwright test tests/transfers.spec.js --config=playwright.ci.config.js --reporter=line --workers=1
 
       - name: Run manager browser regression suite
         id: browser-tests
