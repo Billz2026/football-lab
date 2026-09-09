@@ -101,7 +101,8 @@ async function ensureNav() {
     });
   }
   const pending = getIncomingOffers(c, { includeResolved: false }).length;
-  button.innerHTML = pending ? `Transfers<small>${pending} NEW</small>` : 'Transfers';
+  const navMarkup = pending ? `Transfers<small>${pending} NEW</small>` : 'Transfers';
+  if (button.innerHTML !== navMarkup) button.innerHTML = navMarkup;
   button.disabled = Boolean(document.querySelector('[data-live-match]'));
   button.classList.toggle('is-active', open);
 }
@@ -293,6 +294,10 @@ async function renderTransfers(force=false) {
 }
 
 async function scan(){queued=false;if(!window.FLMManager)return;loadStyles();await ensureNav();if(open)await renderTransfers();}
-function queue(){if(queued)return;queued=true;queueMicrotask(()=>scan().catch(()=>{queued=false;rendering=false;}));}
+function queue(){
+  if(queued)return;
+  queued=true;
+  requestAnimationFrame(()=>scan().catch(()=>{queued=false;rendering=false;}));
+}
 document.addEventListener('click',event=>{if(event.target.closest('[data-cm-transfer-tab]'))return;if(event.target.closest('.career-nav-button'))open=false;},true);
 loadStyles();new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true});queue();
