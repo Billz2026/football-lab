@@ -6,4 +6,4 @@
  * authoritative domain modules.
  */
 
-import './manager-runtime-v1.js?v=1.0.0';
+import './manager-runtime-v1.js?v=1.1.0';
