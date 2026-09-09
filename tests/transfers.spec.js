@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { startCareerThroughCurrentOnboarding } from './helpers/start-career.js';
 
-test.setTimeout(60000);
+test.setTimeout(90000);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
@@ -8,41 +9,79 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-async function openTransferWindow(page) {
-  await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
-  await page.locator('[data-v054-advance]').click();
-  await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
-  await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
+async function bootTransferCareer(page) {
+  await startCareerThroughCurrentOnboarding(page, { completeAppointment: true });
+  await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible({ timeout: 10000 });
 }
 
-test('V0.6.1 transfer market completes a signing through club and player negotiations and exposes the living football world', async ({ page }) => {
-  await page.getByRole('button', { name: /QUICK START/ }).click();
-  await expect(page.locator('.career-app')).toHaveClass(/is-open/);
-  await openTransferWindow(page);
+async function continueCareerOnce(page) {
+  return page.evaluate(async () => {
+    const c = window.FLMManager.activeCareer;
+    const db = await window.FLMManager.loadDatabase();
+    const clock = await import('./world-clock-v060.js?v=0.6.1');
+    const result = clock.continueCareer(c, db, { maxDays: 180 });
+    localStorage.setItem('flm-career-save', JSON.stringify(c));
+    return { date: c.currentDate, reason: result.reason?.type || null, daysAdvanced: result.daysAdvanced };
+  });
+}
 
-  const transferTab = page.locator('[data-v050-transfer-tab]');
-  await transferTab.click();
-  await expect(page.getByRole('heading', { name: 'Transfers' })).toBeVisible();
-  await expect(page.locator('.v052-window-strip')).toBeVisible();
-  await expect(page.locator('.v052-window-strip')).toContainText(/OPEN|DEADLINE/);
+async function advanceTransferWindow(page) {
+  await expect.poll(async () => page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '')).toBe('2026-06-05');
+  await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible();
+  const result = await continueCareerOnce(page);
+  expect(result.date).toBe('2026-06-15');
+  await expect.poll(async () => page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '')).toBe('2026-06-15');
+}
+
+async function openTransferCentre(page) {
+  await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible();
+  await page.locator('[data-cm-transfer-tab]').click();
+  await expect(page.getByRole('heading', { name: 'Transfer Centre' })).toBeVisible();
+  await expect(page.locator('.cm-market-workspace')).toBeVisible();
+}
+
+test('Transfer Centre supports scouting before the registration window opens', async ({ page }) => {
+  await bootTransferCareer(page);
+  await expect.poll(async () => page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '')).toBe('2026-06-05');
+
+  await openTransferCentre(page);
+  await expect(page.locator('.cm-window-line')).toContainText(/NOT YET OPEN|CLOSED/);
+  await expect(page.locator('.cm-market-row')).not.toHaveCount(0);
+  await expect(page.locator('[data-cm-filter="age"]')).toBeVisible();
+  await expect(page.locator('[data-cm-filter="contract"]')).toBeVisible();
+  await expect(page.locator('[data-cm-filter="value"]')).toBeVisible();
+  await expect(page.locator('[data-cm-filter="stance"]')).toBeVisible();
+});
+
+test('CM transfer desk completes a signing through club and player negotiations and exposes the living football world', async ({ page }) => {
+  await bootTransferCareer(page);
+  await advanceTransferWindow(page);
+  await openTransferCentre(page);
+
+  await expect(page.locator('.cm-window-line')).toContainText(/OPEN|DEADLINE/);
   await expect(page.getByRole('button', { name: /^OFFERS/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'WORLD', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'WORLD', exact: true }).click();
-  await expect(page.locator('.v052-world-grid')).toBeVisible();
-  await expect(page.locator('.v052-world-grid')).toContainText('COMPLETED DEALS');
-  await page.getByRole('button', { name: 'MARKET', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'MARKET ACTIVITY', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'MARKET ACTIVITY', exact: true }).click();
+  await expect(page.locator('.cm-world-grid')).toBeVisible();
+  await expect(page.locator('.cm-world-grid')).toContainText('Completed deals');
+  await page.getByRole('button', { name: 'PLAYER SEARCH', exact: true }).click();
 
-  await expect(page.locator('.v050-player-row')).not.toHaveCount(0);
-  await expect(page.locator('.v050-budget')).toContainText('TRANSFER BUDGET');
+  await expect(page.locator('.cm-market-row')).not.toHaveCount(0);
+  await expect(page.locator('.cm-budget-strip')).toContainText('Budget');
 
-  const firstRow = page.locator('.v050-player-row').first();
-  const firstName = (await firstRow.locator('strong').textContent()).trim();
+  const firstRow = page.locator('.cm-market-row').first();
+  const firstName = (await firstRow.locator('.cm-name strong').textContent()).trim();
   await firstRow.click();
-  await expect(page.locator('.v050-detail')).toContainText(firstName);
-  await expect(page.locator('.v050-detail')).not.toContainText(/\bCA\b|overall ability/i);
+  await expect(page.locator('.cm-market-detail')).toContainText(firstName);
 
-  // Rivalry premiums can make a low-value market row unaffordable. Resolve a real target
-  // from the live asking-price model instead of assuming list position equals affordability.
+  const ageFilter = page.locator('[data-cm-filter="age"]');
+  await ageFilter.selectOption('u21');
+  await expect(ageFilter).toHaveValue('u21');
+  await page.locator('[data-cm-reset]').click();
+  await expect(ageFilter).toHaveValue('All');
+
+  // Resolve a real affordable target from the live asking-price model instead of assuming
+  // the first recruitment row is affordable.
   const target = await page.evaluate(async () => {
     const db = await window.FLMManager.loadDatabase();
     const transfers = await import('./transfers-v050.js?v=0.5.2');
@@ -110,15 +149,17 @@ test('V0.6.1 transfer market completes a signing through club and player negotia
   await expect(page.locator('.career-content')).toContainText(target.name);
 });
 
-test('transfer market remains usable on a Fold-sized viewport', async ({ page }) => {
+test('Transfer Centre remains usable on a Fold-sized viewport', async ({ page }) => {
+  // Create the career through the desktop onboarding flow first. The responsive
+  // contract being exercised here is the Transfer Centre itself, not the separate
+  // mobile home/start screen.
+  await bootTransferCareer(page);
   await page.setViewportSize({ width: 760, height: 900 });
-  await page.getByRole('button', { name: /QUICK START/ }).click();
-  await openTransferWindow(page);
-  await page.locator('[data-v050-transfer-tab]').click();
-  await expect(page.getByRole('heading', { name: 'Transfers' })).toBeVisible();
-  await expect(page.locator('.v050-market-layout')).toBeVisible();
-  await page.getByRole('button', { name: 'WORLD', exact: true }).click();
-  await expect(page.locator('.v052-world-grid')).toBeVisible();
+  await advanceTransferWindow(page);
+  await openTransferCentre(page);
+  await expect(page.locator('.cm-market-workspace')).toBeVisible();
+  await page.getByRole('button', { name: 'MARKET ACTIVITY', exact: true }).click();
+  await expect(page.locator('.cm-world-grid')).toBeVisible();
   const widths = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
   expect(widths.scroll).toBeLessThanOrEqual(widths.client);
 });

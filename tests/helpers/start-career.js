@@ -8,6 +8,13 @@ async function appointmentState(page){
 }
 
 async function completeAppointmentExperience(page){
+  // The manager profile is applied asynchronously after TAKE CONTROL. Appointment
+  // Media deliberately will not initialise until that profile exists, so force and
+  // await that dependency before asking the appointment module to refresh.
+  await page.evaluate(()=>window.FLMManagerStartV064?.refresh?.());
+  await expect.poll(async()=>page.evaluate(()=>Boolean(window.FLMManager?.activeCareer?.managerProfile?.schemaVersion)),{timeout:10000}).toBeTruthy();
+  await page.evaluate(()=>window.FLMAppointmentMedia?.refresh?.());
+
   // Appointment initialisation is asynchronous after the career shell opens.
   // Do not treat "modal not visible yet" as "no appointment"; that race was
   // letting the modal appear later and block every Matchday interaction.
@@ -75,7 +82,13 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   const clubs=page.locator('[data-start-club]');
   await expect(clubs.first()).toBeVisible();
   await clubs.nth(clubIndex).click();
-  await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+
+  // Selecting a club only updates the picker state. TAKE CONTROL is the action that
+  // actually creates the career and renders the canonical career shell.
+  const takeControl=page.getByRole('button',{name:'TAKE CONTROL',exact:true});
+  await expect(takeControl).toBeEnabled();
+  await takeControl.click();
+  await expect(page.locator('#careerApp')).toHaveClass(/is-open/);
 
   if(completeAppointment)await completeAppointmentExperience(page);
 }

@@ -28,10 +28,11 @@ test('Continue Game advances the career day by day and stops on June milestones'
   await quickStart(page);
   await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
   await expect(page.locator('.v060-world-panel')).toContainText('Summer transfer window opens');
+  await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible();
 
   await page.locator('.v060-world-panel [data-v060-continue]').click();
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
-  await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
+  await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible();
 
   await page.locator('.v060-world-panel [data-v060-continue]').click();
   await expect(page.locator('.v054-date-chip')).toContainText('19 JUN 2026');

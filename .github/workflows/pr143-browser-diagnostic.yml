@@ -1,0 +1,35 @@
+name: PR143 browser diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  browser-diagnostic:
+    name: browser-${{ matrix.group }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: A
+            specs: tests/manager-career.spec.js tests/news-inbox.spec.js tests/preseason.spec.js tests/mobile-home.spec.js
+          - group: B
+            specs: tests/transfers.spec.js tests/interactions-v053.spec.js tests/calendar-profile.spec.js tests/player-profile-v2.spec.js
+          - group: C
+            specs: tests/career-manager-v064.spec.js tests/appointment-media-v066.spec.js tests/world-clock.spec.js
+          - group: D
+            specs: tests/transfer-market-v061.spec.js tests/database-readonly.spec.js tests/matchday-v070.spec.js
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install chromium
+      - name: Run diagnostic group ${{ matrix.group }}
+        run: npx playwright test ${{ matrix.specs }} --config=playwright.ci.config.js --reporter=line --workers=1
