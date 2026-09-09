@@ -75,6 +75,25 @@ function persist(c) {
 function panelCopy(c, validation) {
   const source = c?.season || 'Current season';
   const target = nextSeasonLabel(c?.season) || 'Next season';
+  if (validation.status === 'career-complete') {
+    const summary = c?.careerSummary || {};
+    return {
+      eyebrow: '40-SEASON CAREER COMPLETE',
+      title: `${c?.managerName || 'Manager'} retires after ${source}`,
+      body: `${summary.seasonsCompleted || 40} seasons · ${summary.matches || 0} matches · ${summary.winPercentage || 0}% wins · ${summary.leagueTitles || 0} league titles · Hall of Fame ${summary.hallOfFameScore || 0}. No 41st season can be created.`,
+      button: 'CAREER COMPLETE',
+      blocked: true
+    };
+  }
+  if (validation.status === 'career-limit-reached') {
+    return {
+      eyebrow: 'FINAL CAREER SEASON',
+      title: `${source} is Season 40 of 40`,
+      body: validation.reason || 'This is the final playable season. Complete all season resolution requirements; no 41st season will be generated.',
+      button: 'NO FURTHER ROLLOVER',
+      blocked: true
+    };
+  }
   if (validation.ok) {
     return {
       eyebrow: 'SEASON ROLLOVER READY',
