@@ -34,7 +34,7 @@ jobs:
         run: |
           cat > tests/__diag_match_centre_v5.spec.js <<'EOF'
           import { test, expect } from '@playwright/test';
-          import { clearPersistedState, startCareer } from './helpers/start-career.js';
+          import { startCareerThroughCurrentOnboarding } from './helpers/start-career.js';
 
           test('career start diagnostic', async ({ page }) => {
             page.on('pageerror', error => {
@@ -46,13 +46,19 @@ jobs:
               }
             });
 
-            await clearPersistedState(page);
+            await page.goto('/index.html');
+            await page.evaluate(() => {
+              localStorage.clear();
+              sessionStorage.clear();
+            });
+            await page.reload();
+
             try {
-              await startCareer(page);
+              await startCareerThroughCurrentOnboarding(page, { completeAppointment: false });
             } catch (error) {
               console.log(`DIAG_URL: ${page.url()}`);
               console.log(`CAREER_APP_COUNT: ${await page.locator('.career-app').count()}`);
-              console.log(`CLUB_ROW_COUNT: ${await page.locator('.club-row').count()}`);
+              console.log(`START_CLUB_COUNT: ${await page.locator('[data-start-club]').count()}`);
               console.log(`VISIBLE_MODAL_COUNT: ${await page.locator('.modal:visible').count()}`);
               console.log(`BODY_TEXT:\n${(await page.locator('body').innerText()).slice(0, 5000)}`);
               throw error;
