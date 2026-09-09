@@ -33,6 +33,13 @@ jobs:
           set -euo pipefail
           for file in \
             manager.js \
+            manager-runtime-v1.js \
+            runtime-foundation-v1.js \
+            runtime-matchday-v1.js \
+            runtime-match-centre-v1.js \
+            runtime-career-integrity-v1.js \
+            runtime-commentary-v1.js \
+            match-centre-v5.js \
             manager-core.js \
             world-clock-v060.js \
             career-world-v060.js \
