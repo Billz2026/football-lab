@@ -138,8 +138,11 @@ test('CM transfer desk completes a signing through club and player negotiations 
 });
 
 test('Transfer Centre remains usable on a Fold-sized viewport', async ({ page }) => {
-  await page.setViewportSize({ width: 760, height: 900 });
+  // Create the career through the desktop onboarding flow first. The responsive
+  // contract being exercised here is the Transfer Centre itself, not the separate
+  // mobile home/start screen.
   await bootTransferCareer(page);
+  await page.setViewportSize({ width: 760, height: 900 });
   await advanceTransferWindow(page);
   await openTransferCentre(page);
   await expect(page.locator('.cm-market-workspace')).toBeVisible();
