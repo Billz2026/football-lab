@@ -1,93 +1,14 @@
 /*
  * Football Lab Manager runtime manifest — consolidation pass v1.
  *
- * Purpose:
- * - Keep manager.js as a stable, minimal public entrypoint.
- * - Quarantine the historical patch stack in one documented manifest.
- * - Preserve the exact existing evaluation order while the systems below
- *   are consolidated into authoritative domain modules.
- *
- * IMPORTANT: Do not add new feature patches here unless they are part of
- * an explicit consolidation. New work should target the canonical system
- * that owns the behaviour.
+ * This is now the single runtime composition root.
+ * Each import below owns one contiguous domain slice of the legacy bootstrap
+ * so behaviour and evaluation order remain unchanged while the internals are
+ * progressively merged into canonical modules.
  */
 
-// 01. State guard + core manager foundation
-import './matchday-state-native-guard-v1.js?v=1.0.0';
-import './manager-base-v045.js?v=0.4.14';
-
-// 02. Player data integrity / audits
-import './player-audit-v1.js?v=1.0.0';
-import './player-audit-v2.js?v=2.0.0';
-import './player-audit-v3.js?v=3.0.0';
-
-// 03. Career presentation and preseason
-import './career-news-ui-v0461.js?v=0.4.8';
-import './career-news-ui-v0462-fix.js?v=0.4.6.2';
-import './career-preseason-ui-v047.js?v=0.4.10';
-import './career-preseason-ui-v0471-fix.js?v=0.4.7.1';
-import './career-tactics-v048.js?v=0.4.10';
-import './matchday-ux-v048.js?v=0.4.8';
-import './mobile-home-v049.js?v=0.4.10';
-
-// 04. Career simulation / world / transfers
-import './career-season-v051.js?v=0.5.2';
-import './career-season-rollover-v1.js?v=2.0.0';
-import './career-interactions-v053.js?v=0.5.3';
-import './career-world-v060.js?v=0.6.4';
-import './career-transfers-gate-v054.js?v=0.6.0';
-
-// 05. Manager shell and team selection
-import './manager-shell-v1.js?v=1.0.4';
-import './team-selection-v1.js?v=1.0.1';
-import './manual-tactics-guard-v1.js?v=1.0.1';
-
-// 06. Matchday legacy stack — preserve order until Matchday canonicalisation
-import './matchday-cm-v2.js?v=2.0.2';
-import './matchday-cm-v3.js?v=3.0.0';
-import './matchday-xg-ui-v1.js?v=1.0.0';
-import './matchday-experience-v31.js?v=3.1.0';
-import './matchday-polish-v321.js?v=3.2.1';
-import './matchday-console-v33.js?v=3.3.1';
-import './matchday-console-v331-compat.js?v=3.3.1';
-import './matchday-density-v332.js?v=3.3.2';
-import './matchday-state-native-restore-v1.js?v=1.0.0';
-import './matchday-live-state-authority-v3.js?v=3.0.0';
-import './matchday-stability-v333.js?v=3.3.3';
-
-// 07. Match Centre legacy stack — next major consolidation target
-import './match-centre-v4.js?v=4.0.1';
-import './match-centre-v4-ratings-integrity-v1.js?v=1.0.0';
-import './match-centre-v4-mode.js?v=4.0.0';
-import './match-centre-v4-fold-v41.js?v=4.1.0';
-import './match-centre-v4-mobile-v42.js?v=4.2.0';
-import './match-centre-v4-discipline-v44.js?v=4.4.1';
-import './match-centre-v45.js?v=4.5.3';
-import './match-centre-v46-lock.js?v=4.6.2';
-
-// 08. Matchday safeguards and database boundary
-import './matchday-substitution-guard-v071.js?v=0.7.1';
-import './matchday-manager-modal-intent-v1.js?v=1.0.0';
-import './database-readonly-v1.js?v=1.0.0';
-
-// 09. Career integrity / manager identity / board / player profiles
-import './discipline-integrity-v063.js?v=0.6.3';
-import './career-manager-start-v064.js?v=0.6.6';
-import './board-expectations-v067.js?v=0.6.7';
-import './career-personality-v2.js?v=2.0.0';
-import './career-appointment-media-v066.js?v=0.6.9';
-import './player-profile-v2.js?v=2.1.2';
-import './career-integrity-v067.js?v=0.6.7';
-import './match-fulltime-single-continue-v064.js?v=0.6.7';
-import './recording-fixes-v068.js?v=0.6.8';
-import './matchday-runtime-fixes-v070.js?v=0.7.0';
-
-// 10. Commentary legacy stack — preserve order until Commentary canonicalisation
-import './commentary-engine-v1.js?v=1.0.1';
-import './commentary-side-guard-v1.js?v=1.0.0';
-import './commentary-realtime-v1.js?v=1.1.0';
-import './commentary-match-fixes-v11.js?v=1.1.0';
-import './commentary-v2.js?v=2.0.1';
-import './commentary-v3.js?v=3.0.1';
-import './commentary-authoritative-attacks-v2.js?v=2.0.0';
-import './commentary-authoritative-row-host-v1.js?v=1.0.0';
+import './runtime-foundation-v1.js?v=1.0.0';
+import './runtime-matchday-v1.js?v=1.0.0';
+import './runtime-match-centre-v1.js?v=1.0.0';
+import './runtime-career-integrity-v1.js?v=1.0.0';
+import './runtime-commentary-v1.js?v=1.0.0';
