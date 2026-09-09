@@ -12,8 +12,8 @@ import {
   makeSubstitution,
   setPlayerRole,
   swapShapePlayers
-} from './matchday-engine-v069.js?v=0.6.10';
-import { renderMatchSubstitutionSheet } from './matchday-substitution-sheet-v1.js?v=1.0.3';
+} from './matchday-engine-v069.js?v=0.6.11';
+import { renderMatchSubstitutionSheet } from './matchday-substitution-sheet-v1.js?v=1.0.4';
 
 const STYLE_ID = 'flm-live-match-v0431-style';
 const BASE_STEP_MS = 650;
@@ -96,7 +96,7 @@ export async function playLiveMatch({root,career,completedCareer,db,reducedMotio
   const goalFlash=async event=>{ flash.querySelector('[data-goal-scorer]').textContent=player(db,event.playerId)?.name||'GOAL'; flash.querySelector('[data-goal-score]').textContent=`${state.homeGoals} — ${state.awayGoals}`; flash.classList.add('is-visible'); await sleep(reducedMotion?300:Math.max(850,1350/Math.max(1,speed))); flash.classList.remove('is-visible'); };
 
   const closeManager=()=>{ modal.classList.remove('is-open'); modal.setAttribute('aria-hidden','true'); paused=halfTimeBreak?true:managerWasPaused; updateSpeedButtons(); stateLabel.textContent=halfTimeBreak?'HALF TIME':paused?'PAUSED':'LIVE'; };
-  const openManager=renderer=>{ managerWasPaused=paused; paused=true; updateSpeedButtons(); stateLabel.textContent=halfTimeBreak?'HALF TIME':'PAUSED'; renderer(); modal.classList.add('is-open'); modal.setAttribute('aria-hidden','false'); };
+  const openManager=renderer=>{ if(!modal.classList.contains('is-open')) managerWasPaused=paused; paused=true; updateSpeedButtons(); stateLabel.textContent=halfTimeBreak?'HALF TIME':'PAUSED'; renderer(); modal.classList.add('is-open'); modal.setAttribute('aria-hidden','false'); };
   const head=(title,eyebrow='IN-MATCH MANAGEMENT')=>`<div class="flm-dialog-head"><div><p>${esc(eyebrow)}</p><h3>${esc(title)}</h3></div><button data-close-manager>✕</button></div>`;
   const bindClose=()=>dialog.querySelectorAll('[data-close-manager]').forEach(btn=>btn.addEventListener('click',closeManager));
 
@@ -110,11 +110,11 @@ export async function playLiveMatch({root,career,completedCareer,db,reducedMotio
   const renderOpposition=()=>{ const opp=getOpponentSnapshot(state,db); dialog.innerHTML=`${head(opp.clubName,'OPPOSITION VIEW')}<div class="flm-opp-card"><div class="flm-opp-shape">${Object.entries(opp.tactics).map(([k,v])=>`<div><small>${esc(tacticLabel(k))}</small><strong>${esc(v)}</strong></div>`).join('')}</div><div class="flm-player-live-list">${opp.lineupIds.map(id=>{const p=player(db,id);return `<div class="flm-player-live-row"><span>${esc(p?.primaryPosition||'')}</span><strong>${esc(p?.name||id)}</strong><small class="role">${esc(p?.positionGroup||'')}</small><small></small><b>${opp.redCards?'10 MEN':'XI'}</b></div>`;}).join('')}</div></div><div class="flm-dialog-actions"><button class="primary" data-close-manager>CLOSE</button></div>`; bindClose(); };
 
   const matchPlanButton=root.querySelector('[data-open-tactics]'); matchPlanButton.addEventListener('click',()=>openManager(renderSubs)); const legacySubsButton=root.querySelector('[data-open-subs]'); if(legacySubsButton&&legacySubsButton!==matchPlanButton) legacySubsButton.addEventListener('click',()=>openManager(renderSubs)); root.querySelector('[data-open-shape]').addEventListener('click',()=>openManager(renderShape)); root.querySelector('[data-open-ratings]').addEventListener('click',()=>openManager(renderRatings)); root.querySelector('[data-open-opposition]').addEventListener('click',()=>openManager(renderOpposition));
-  root.querySelectorAll('[data-match-speed]').forEach(control=>control.addEventListener('click',()=>{ if(halfTimeBreak) return; const next=Number(control.dataset.matchSpeed); paused=next===0; if(!paused) speed=next; updateSpeedButtons(); stateLabel.textContent=paused?'PAUSED':'LIVE'; }));
+  root.querySelectorAll('[data-match-speed]').forEach(control=>control.addEventListener('click',()=>{ if(halfTimeBreak||modal.classList.contains('is-open')) return; const next=Number(control.dataset.matchSpeed); paused=next===0; if(!paused) speed=next; updateSpeedButtons(); stateLabel.textContent=paused?'PAUSED':'LIVE'; }));
   root.querySelector('[data-resume-second-half]').addEventListener('click',()=>{ if(!halfTimeBreak) return; halfTimeBreak=false; paused=false; shell.classList.remove('is-half-time'); matchStatus.textContent='LIVE'; stateLabel.textContent='SECOND HALF'; updateSpeedButtons(); });
 
   refreshScore(); refreshStats(); refreshTactics(); updateSpeedButtons();
-  const playback=(async()=>{ while(state.minute<90&&shell.isConnected){ while(paused&&shell.isConnected) await sleep(70); await sleep(Math.max(60,BASE_STEP_MS/speed)); if(!shell.isConnected) break; const advanced=advanceInteractiveMatch(state,career,db); state=advanced.state; clock.textContent=`${String(state.minute).padStart(2,'0')}:00`; refreshScore(); refreshStats(); refreshTactics(); for(const event of advanced.events){ await addEvent(event); if(event.type==='goal'){ refreshScore(); await goalFlash(event); } }
+  const playback=(async()=>{ while(state.minute<90&&shell.isConnected){ while(paused&&shell.isConnected) await sleep(70); await sleep(Math.max(60,BASE_STEP_MS/speed)); if(!shell.isConnected) break; if(paused) continue; const advanced=advanceInteractiveMatch(state,career,db); state=advanced.state; clock.textContent=`${String(state.minute).padStart(2,'0')}:00`; refreshScore(); refreshStats(); refreshTactics(); for(const event of advanced.events){ await addEvent(event); if(event.type==='goal'){ refreshScore(); await goalFlash(event); } }
       if(state.minute===45){ halfTimeBreak=true; paused=true; shell.classList.add('is-half-time'); clock.textContent='45:00'; matchStatus.textContent='HALF TIME'; stateLabel.textContent='HALF TIME'; root.querySelector('[data-half-time-score]').textContent=`${state.homeGoals}–${state.awayGoals}`; updateSpeedButtons(); while(halfTimeBreak&&shell.isConnected) await sleep(80); }
     }
     if(!shell.isConnected) return; finished=true; paused=true; clock.textContent='90:00'; refreshScore(); refreshStats(); stateLabel.textContent='FULL TIME'; matchStatus.textContent='FULL TIME'; shell.classList.remove('is-half-time'); shell.classList.add('is-full-time'); root.querySelector('[data-full-time-score]').textContent=`${home?.name||'Home'} ${state.homeGoals}–${state.awayGoals} ${away?.name||'Away'}`; root.querySelectorAll('[data-match-speed],[data-open-tactics],[data-open-subs],[data-open-shape],[data-open-ratings],[data-open-opposition]').forEach(button=>button.disabled=true);

@@ -1,5 +1,6 @@
 import * as base from './matchday-structured-flow-v1.js?v=1.0.0';
 import { applyMatchDrama, MATCH_DRAMA_VERSION } from './match-drama-v3.js?v=3.0.0';
+import { substitutionStatus } from './matchday-substitution-state-v1.js?v=1.0.0';
 
 export {
   FORMATION_LAYOUTS,
@@ -101,11 +102,12 @@ function applyRules(inputState, career, db) {
   state.substitutionWindowLimit = rules.maxInPlayWindows;
   state.substitutionWindowMinutes ||= [];
 
-  if (rules.kind === 'friendly') {
+  if (rules.kind === 'friendly' && !state.matchdayBenchRegistered) {
     state.userBenchIds = availableUserSquad(career, db, state).map(player => player.id);
-  } else {
+  } else if (rules.kind !== 'friendly') {
     state.userBenchIds = [...(state.userBenchIds || [])].slice(0, rules.benchLimit);
   }
+  state.matchdayBenchRegistered = true;
   for (const id of state.userBenchIds || []) initialiseBenchPlayer(state, career, id);
   return state;
 }
@@ -228,6 +230,14 @@ function publishLiveState(state, emittedEvents = []) {
     conditions: { ...(state.conditions || {}) },
     minutesPlayed: { ...(state.minutesPlayed || {}) },
     subbedOffIds: [...(state.subbedOffIds || [])],
+    userBenchIds: [...(state.userBenchIds || [])],
+    injuredIds: [...(state.injuredIds || [])],
+    sentOffIds: [...(state.sentOffIds || [])],
+    substitutions: (state.substitutions || []).map(sub => ({ ...sub })),
+    substitutionLimit: state.substitutionLimit,
+    substitutionWindowLimit: state.substitutionWindowLimit,
+    substitutionWindowMinutes: [...(state.substitutionWindowMinutes || [])],
+    matchRulesKind: state.matchRulesKind,
     events: history.map(cloneStructuredEvent),
     structuredCommentarySnapshotVersion: '3.0.0',
     source: 'matchday-engine-v069'
@@ -244,16 +254,6 @@ function isHalfTimeSubstitution(state) {
 
 function windowKey(state) {
   return Math.max(0, Math.floor(Number(state.minute) || 0));
-}
-
-function assertWindowAvailable(state, rules) {
-  if (rules.kind !== 'competitive' || isHalfTimeSubstitution(state)) return;
-  const key = windowKey(state);
-  const used = [...new Set(state.substitutionWindowMinutes || [])];
-  if (used.includes(key)) return;
-  if (used.length >= rules.maxInPlayWindows) {
-    throw new Error('You have used all three in-play substitution windows. Half-time changes do not use a window.');
-  }
 }
 
 function recordWindow(state, rules) {
@@ -298,11 +298,13 @@ export function makeSubstitution(inputState, outId, inId, db, career = {}) {
   const fixture = fixtureForState(career, state);
   const rules = substitutionRulesForFixture(fixture);
   if ((state.subbedOffIds || []).includes(inId)) throw new Error('A substituted player cannot return to the match.');
-  assertWindowAvailable(state, rules);
+  const availability = substitutionStatus(state, db, outId);
+  if (availability.reason) throw new Error(availability.reason);
+  if (!availability.benchIds.includes(inId)) throw new Error('Choose an eligible player from your matchday bench.');
   const result = base.makeSubstitution(state, outId, inId, db, career);
   const next = applyRules(result.state, career, db);
   recordWindow(next, rules);
   publishLiveXg(next);
-  publishLiveState(next, []);
+  publishLiveState(next, [result.event]);
   return { ...result, state: next };
 }

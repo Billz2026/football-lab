@@ -1,4 +1,6 @@
-export const MATCHDAY_MANAGER_MODAL_INTENT_VERSION='1.1.0';
+import { userMatchLineup } from './matchday-substitution-state-v1.js?v=1.0.0';
+
+export const MATCHDAY_MANAGER_MODAL_INTENT_VERSION='1.2.0';
 
 const LIVE_SELECTOR='.flm-live-match,[data-live-match]';
 const MODAL_SELECTOR='[data-manager-modal]';
@@ -21,6 +23,20 @@ function now(){
   return typeof performance!=='undefined'&&typeof performance.now==='function'?performance.now():Date.now();
 }
 
+function requestInjuryManagement(live, playerId) {
+  const snapshot = window.__flmLiveStateV332;
+  const modal = live?.querySelector(MODAL_SELECTOR);
+  if (!modal || !live.isConnected || !snapshot || snapshot.minute >= 90
+    || !userMatchLineup(snapshot).includes(playerId)
+    || !(snapshot.injuredIds || []).includes(playerId)
+    || !(snapshot.events || []).some(event => event.type === 'injury'
+      && event.clubId === snapshot.userClubId && event.playerId === playerId)) return false;
+  // One specific engine-confirmed injury may open management without a click.
+  // Do not relax the trusted-click guard for other presentation helpers.
+  modal.dataset.flInjuryManagerIntent = playerId;
+  return true;
+}
+
 function closeUnintendedModal(modal){
   const close=modal.querySelector('[data-manager-dialog] [data-close-manager]');
   if(close){
@@ -41,6 +57,16 @@ function guardManagerModal(live){
   }
 
   if(modal.dataset.flTrustedManagerOpen==='1')return;
+
+  const injuryId = modal.dataset.flInjuryManagerIntent;
+  if (injuryId) {
+    delete modal.dataset.flInjuryManagerIntent;
+    if (requestInjuryManagement(live, injuryId)) {
+      delete modal.dataset.flInjuryManagerIntent;
+      modal.dataset.flTrustedManagerOpen='1';
+      return;
+    }
+  }
 
   if(now()<=trustedIntentUntil){
     modal.dataset.flTrustedManagerOpen='1';
@@ -118,6 +144,7 @@ if(typeof window!=='undefined'&&typeof document!=='undefined'){
 
   window.FLMMatchdayManagerModalIntent=Object.freeze({
     version:MATCHDAY_MANAGER_MODAL_INTENT_VERSION,
+    requestInjuryManagement,
     refresh:queue
   });
 }

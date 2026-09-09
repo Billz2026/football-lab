@@ -75,6 +75,7 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   const clubs=page.locator('[data-start-club]');
   await expect(clubs.first()).toBeVisible();
   await clubs.nth(clubIndex).click();
+  await page.getByRole('button', { name: 'TAKE CONTROL', exact: true }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
   if(completeAppointment)await completeAppointmentExperience(page);
