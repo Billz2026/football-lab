@@ -46,10 +46,13 @@ jobs:
             career-integrity-v067.js \
             national-league-step-three-world-v1.js \
             national-league-step-four-world-v1.js \
+            national-league-step-five-world-v1.js \
             english-pyramid-world-v6.js \
             english-pyramid-world-v7.js \
+            english-pyramid-world-v8.js \
             season-finalisation-v6.js \
             season-finalisation-v7.js \
+            season-finalisation-v8.js \
             matchday-live-v04.js \
             matchday-engine-v069.js \
             matchday-engine-v0431.js \
@@ -65,6 +68,7 @@ jobs:
             tests/manager-core.test.js \
             tests/english-pyramid-world-v6.test.js \
             tests/english-pyramid-world-v7.test.js \
+            tests/english-pyramid-world-v8.test.js \
             tests/match-integrity-engine-v067.test.js \
             tests/kit-colours-v1.test.js \
             tests/matchday-v070.spec.js \
@@ -87,7 +91,7 @@ jobs:
         run: npm run validate:database
 
       - name: Test career simulation
-        run: node --test tests/manager-core.test.js tests/english-pyramid-world-v6.test.js tests/english-pyramid-world-v7.test.js tests/match-integrity-engine-v067.test.js tests/world-clock.test.js tests/personality-v2.test.js tests/appointment-media-v1.test.js tests/integrity-v067.test.js tests/kit-colours-v1.test.js
+        run: node --test tests/manager-core.test.js tests/english-pyramid-world-v6.test.js tests/english-pyramid-world-v7.test.js tests/english-pyramid-world-v8.test.js tests/match-integrity-engine-v067.test.js tests/world-clock.test.js tests/personality-v2.test.js tests/appointment-media-v1.test.js tests/integrity-v067.test.js tests/kit-colours-v1.test.js
 
       - name: Install Chromium
         timeout-minutes: 10
