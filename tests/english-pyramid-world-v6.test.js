@@ -5,7 +5,7 @@ import {
   STEP_THREE_2026_27_MEMBERSHIPS,
   simulateStepThreeDivisionSeason
 } from '../national-league-step-three-world-v1.js';
-import { finaliseSeason } from '../season-finalisation-v1.js';
+import { finaliseSeason } from '../season-finalisation-v6.js';
 import { rolloverPremierLeagueSeason, validatePremierLeagueRollover } from '../premier-league-rollover-v3.js';
 
 const clubIds = () => Array.from({ length: 20 }, (_, index) => `v6-pl-${String(index + 1).padStart(2, '0')}`);
