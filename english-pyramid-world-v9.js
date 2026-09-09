@@ -10,9 +10,9 @@ import {
   STEP_SIX_DIVISION_IDS,
   STEP_SIX_2026_27_MEMBERSHIPS,
   STEP_SIX_2026_27_TOTAL_CLUBS,
-  STEP_SIX_TO_STEP_FIVE_PREFERENCES,
-  simulateStepSixDivisionSeason
+  STEP_SIX_TO_STEP_FIVE_PREFERENCES
 } from './national-league-step-six-world-v1.js';
+import { simulateResolvedStepSixDivisionSeason } from './national-league-step-six-simulation-resolved-v1.js';
 
 export * from './english-pyramid-world-v8.js';
 export const ENGLISH_PYRAMID_WORLD_V9_VERSION=9;
@@ -37,7 +37,7 @@ function simulateStepSixV9(career,competitionId,season,completedAt){
   const existing=outcomeIn(career,competitionId,season);if(existing)return{status:'already-finalised',outcome:existing};
   const clubs=stepSixClubsForSeason(career,competitionId,season);
   if(!clubs)return{status:'unsupported-membership',outcome:{schemaVersion:ENGLISH_PYRAMID_WORLD_V9_VERSION,key:key(competitionId,season),competitionId,season,status:'unsupported-membership',promotedClubIds:[],relegatedClubIds:[],reason:`${season} Step 6 membership requires Step 7 feeder promotions plus FA Committee Step 6 relegation/reprieve decisions.`}};
-  const outcome=simulateStepSixDivisionSeason({competitionId,season,clubs,seed:`${career.seed||career.id||'career'}:${competitionId}:v9`,completedAt});
+  const outcome=simulateResolvedStepSixDivisionSeason({competitionId,season,clubs,seed:`${career.seed||career.id||'career'}:${competitionId}:v9`,completedAt});
   career.lowerLeagueHistory.push(outcome);
   return{status:outcome.status==='complete'?'finalised':outcome.status,outcome};
 }
