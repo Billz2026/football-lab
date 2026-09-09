@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { finaliseSeason } from '../season-finalisation-v1.js';
+import { finaliseSeason } from '../season-finalisation-v5.js';
 import { rolloverPremierLeagueSeason, validatePremierLeagueRollover } from '../premier-league-rollover-v3.js';
 
 const clubIds = () => Array.from({ length: 20 }, (_, index) => `v5-pl-${String(index + 1).padStart(2, '0')}`);
