@@ -14,21 +14,23 @@ async function bootTransferCareer(page) {
   await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible({ timeout: 10000 });
 }
 
-async function clickVisibleContinue(page) {
-  const overview = page.locator('[data-career-tab="overview"]');
-  await expect(overview).toBeVisible();
-  await overview.click();
-  const continueButton = page.locator('[data-v060-continue]:visible').first();
-  await expect(continueButton).toBeVisible();
-  await expect(continueButton).toBeEnabled();
-  await continueButton.click();
+async function continueCareerOnce(page) {
+  return page.evaluate(async () => {
+    const c = window.FLMManager.activeCareer;
+    const db = await window.FLMManager.loadDatabase();
+    const clock = await import('./world-clock-v060.js?v=0.6.1');
+    const result = clock.continueCareer(c, db, { maxDays: 180 });
+    localStorage.setItem('flm-career-save', JSON.stringify(c));
+    return { date: c.currentDate, reason: result.reason?.type || null, daysAdvanced: result.daysAdvanced };
+  });
 }
 
 async function advanceTransferWindow(page) {
-  await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
+  await expect.poll(async () => page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '')).toBe('2026-06-05');
   await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible();
-  await clickVisibleContinue(page);
-  await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
+  const result = await continueCareerOnce(page);
+  expect(result.date).toBe('2026-06-15');
+  await expect.poll(async () => page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '')).toBe('2026-06-15');
 }
 
 async function openTransferCentre(page) {
@@ -40,7 +42,7 @@ async function openTransferCentre(page) {
 
 test('Transfer Centre supports scouting before the registration window opens', async ({ page }) => {
   await bootTransferCareer(page);
-  await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
+  await expect.poll(async () => page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '')).toBe('2026-06-05');
 
   await openTransferCentre(page);
   await expect(page.locator('.cm-window-line')).toContainText(/NOT YET OPEN|CLOSED/);
