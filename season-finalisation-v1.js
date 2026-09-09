@@ -1,1 +1,1 @@
-export * from './season-finalisation-v6.js';
+export * from './season-finalisation-v7.js';
