@@ -1,3 +1,5 @@
+import { substitutionStatus, userMatchLineup } from './matchday-substitution-state-v1.js?v=1.0.0';
+
 export const COMMENTARY_V2_VERSION='2.0.0';
 
 const clean=v=>String(v||'').replace(/\s+/g,' ').trim();
@@ -117,13 +119,16 @@ function renderIncidents(live,db,memory){
 }
 
 function injuryPrompt(live,event,db,memory){
-  const snap=window.__flmLiveStateV332;if(!snap||event.clubId!==snap.userClubId)return;const key=`${event.minute}|${event.playerId}`;if(memory.injuries.has(key))return;memory.injuries.add(key);
+  const snap=window.__flmLiveStateV332;if(!snap||event.clubId!==snap.userClubId||!userMatchLineup(snap).includes(event.playerId))return;const key=`${event.minute}|${event.playerId}`;if(memory.injuries.has(key))return;memory.injuries.add(key);
   const name=playerName(db,event.playerId)||'Your player',stage=live.querySelector('[data-cm4-stage]')||live;let banner=live.querySelector('[data-cv2-injury-prompt]');
   if(!banner){banner=document.createElement('div');banner.className='cv2-injury-prompt';banner.dataset.cv2InjuryPrompt='1';stage.appendChild(banner);}banner.dataset.playerId=event.playerId||'';banner.innerHTML=`<strong>INJURY · ${esc(name)}</strong><span>Match paused. Select a replacement.</span>`;banner.hidden=false;
-  const pause=live.querySelector('[data-match-speed="0"]');if(pause&&!pause.classList.contains('is-active'))pause.click();const open=live.querySelector('[data-open-tactics]');if(open&&!open.disabled)open.click();
-  let tries=0;const timer=setInterval(()=>{tries++;const dialog=live.querySelector('[data-manager-dialog]')||document.querySelector('[data-manager-dialog]');if(dialog){let note=dialog.querySelector('[data-cv2-injury-dialog]');const head=dialog.querySelector('.flm-dialog-head');if(!note&&head){note=document.createElement('div');note.className='cv2-injury-dialog';note.dataset.cv2InjuryDialog='1';head.after(note);}const bench=[...(dialog.querySelector('[data-sub-in]')?.options||[])].some(o=>clean(o.value));if(note)note.textContent=bench?`${name} is injured. Select the replacement and confirm the substitution.`:`${name} is injured, but no substitutes are available.`;const rows=[...dialog.querySelectorAll('[data-v2-out-list] .v2-sub-player')],target=rows.find(r=>r.dataset.cm46PlayerId===event.playerId)||rows.find(r=>lower(r.querySelector('strong')?.textContent)===lower(name));target?.click();if(!bench)banner.querySelector('span').textContent='No substitutes available. You must continue short-handed.';clearInterval(timer);}else if(tries>=20){banner.querySelector('span').textContent='Open substitutions to replace the injured player.';clearInterval(timer);}},80);
+  const pause=live.querySelector('[data-match-speed="0"]');if(pause&&!pause.classList.contains('is-active'))pause.click();const open=live.querySelector('[data-open-tactics]');if(open&&!open.disabled){window.FLMMatchdayManagerModalIntent?.requestInjuryManagement?.(live,event.playerId);open.click();}
+  const availability=substitutionStatus(snap,db,event.playerId);
+  banner.querySelector('span').textContent=availability.canSubstitute
+    ? 'Match paused. Select a replacement and confirm the substitution.'
+    : `Match paused. ${availability.reason}`;
 }
-function syncInjuries(live,db,memory){const snap=window.__flmLiveStateV332;if(!snap||live.dataset.cm44State==='fulltime')return;const banner=live.querySelector('[data-cv2-injury-prompt]');if(banner&&!banner.hidden&&banner.dataset.playerId&&snap.subbedOffIds?.includes(banner.dataset.playerId)){banner.hidden=true;document.querySelector('[data-cv2-injury-dialog]')?.remove();}for(const e of (snap.events||[]).filter(x=>x.type==='injury'))injuryPrompt(live,e,db,memory);}
+function syncInjuries(live,db,memory){const snap=window.__flmLiveStateV332;if(!snap)return;const banner=live.querySelector('[data-cv2-injury-prompt]');if(banner&&!banner.hidden&&(!userMatchLineup(snap).includes(banner.dataset.playerId)||snap.minute>=90)){banner.hidden=true;live.querySelector('[data-cv2-injury-dialog]')?.remove();}if(snap.minute>=90||live.dataset.cm44State==='fulltime')return;for(const e of (snap.events||[]).filter(x=>x.type==='injury'))injuryPrompt(live,e,db,memory);}
 
 function ensureStyles(){if(document.getElementById('fl-commentary-v2-style'))return;const style=document.createElement('style');style.id='fl-commentary-v2-style';style.textContent=`
 [data-commentary-feed] .flm-commentary-line[data-cv2-duplicate="1"]{display:none!important}

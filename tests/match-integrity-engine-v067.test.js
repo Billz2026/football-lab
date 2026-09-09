@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   createInteractiveMatch,
+  advanceInteractiveMatch,
   makeSubstitution,
   substitutionRulesForFixture
 } from '../matchday-engine-v069.js';
+import { eligibleBenchIds, substitutionStatus, userMatchLineup } from '../matchday-substitution-state-v1.js';
 
 const positions=['GK','DR','DC','DC','DL','MC','MC','AMC','AMR','ST','AML','DMC','ST','DC','MC','ST','DR','ML','MR','DC','GK','ST','MC','DL'];
 const groups=['GK','DEF','DEF','DEF','DEF','MID','MID','MID','ATT','ATT','ATT','MID','ATT','DEF','MID','ATT','DEF','MID','MID','DEF','GK','ATT','MID','DEF'];
@@ -100,4 +102,97 @@ test('half-time substitutions do not consume a Premier League substitution windo
   state=makeNextSub(state,c,2,45).state;
   state=makeNextSub(state,c,3,60).state;
   assert.deepEqual(state.substitutionWindowMinutes,[30,60]);
+});
+
+for (const side of ['home', 'away']) {
+  test(`injured ${side} player can be replaced and engine snapshot remains consistent on resume`, () => {
+    const c = career('friendly');
+    c.fixtures[0][0].id += `-injury-${side}`;
+    if (side === 'away') Object.assign(c.fixtures[0][0], { homeClubId: 'away', awayClubId: 'home' });
+    const previousWindow = globalThis.window;
+    globalThis.window = { dispatchEvent() {} };
+    try {
+      let state = createInteractiveMatch(c, db);
+      const registered = [...state.userBenchIds];
+      const outId = userMatchLineup(state).find(id => players.find(p => p.id === id).positionGroup !== 'GK');
+      const slot = state.userShape.assignments.find(a => a.playerId === outId).slotId;
+      state.minute = 5;
+      state.injuredIds.push(outId);
+      state.conditions[outId] = 38;
+      const availability = substitutionStatus(state, db, outId);
+      assert.equal(availability.canSubstitute, true);
+      const inId = availability.replacementIds[0];
+      state = makeSubstitution(state, outId, inId, db, c).state;
+      assert.equal(userMatchLineup(state).length, 11);
+      assert.ok(userMatchLineup(state).includes(inId));
+      assert.ok(!userMatchLineup(state).includes(outId));
+      assert.equal(state.userShape.assignments.find(a => a.playerId === inId).slotId, slot);
+      assert.deepEqual(state.userBenchIds, registered);
+      assert.ok(!eligibleBenchIds(state, db).includes(inId));
+      assert.ok(!eligibleBenchIds(state, db).includes(outId));
+      let snapshot = globalThis.window.__flmLiveStateV332;
+      for (const key of ['userBenchIds', 'substitutions', 'injuredIds', 'subbedOffIds', 'sentOffIds', 'substitutionWindowMinutes']) {
+        assert.deepEqual(snapshot[key], state[key]);
+        assert.notEqual(snapshot[key], state[key]);
+      }
+      assert.equal(snapshot.substitutionLimit, 11);
+      assert.equal(snapshot.substitutionWindowLimit, null);
+      state = advanceInteractiveMatch(state, c, db).state;
+      snapshot = globalThis.window.__flmLiveStateV332;
+      assert.equal(state.minute, 6);
+      assert.ok(userMatchLineup(snapshot).includes(inId));
+      assert.equal(snapshot.events.filter(e => e.type === 'substitution' && e.playerId === inId).length, 1);
+      assert.equal(snapshot.substitutions.length, 1);
+    } finally {
+      if (previousWindow === undefined) delete globalThis.window;
+      else globalThis.window = previousWindow;
+    }
+  });
+}
+
+test('eligibility excludes reserves, substituted players, injuries and dismissals', () => {
+  const c = career('league');
+  const state = createInteractiveMatch(c, db);
+  const registered = [...state.userBenchIds];
+  state.injuredIds = [registered[0]];
+  state.sentOffIds = [registered[1]];
+  state.subbedOffIds = [registered[2]];
+  const available = eligibleBenchIds(state, db);
+  assert.deepEqual(available, registered.slice(3));
+  const outId = state.homeLineupIds[1];
+  const reserve = players.find(p => p.clubId === c.clubId && !state.homeLineupIds.includes(p.id) && !registered.includes(p.id));
+  for (const inId of [registered[0], registered[1], reserve.id]) {
+    assert.throws(() => makeSubstitution(state, outId, inId, db, c), /eligible player from your matchday bench/);
+  }
+  state.userBenchIds = [];
+  assert.deepEqual(eligibleBenchIds(state, db), []);
+  assert.match(substitutionStatus(state, db, outId).reason, /No eligible substitutes/);
+});
+
+test('the same availability rules describe limits, windows, half-time and goalkeeper requirements', () => {
+  const state = createInteractiveMatch(career('league'), db);
+  const outId = state.homeLineupIds[1];
+  state.minute = 80;
+  state.substitutionWindowMinutes = [20, 55, 70];
+  assert.match(substitutionStatus(state, db, outId).reason, /three in-play substitution windows/);
+  state.minute = 45;
+  assert.equal(substitutionStatus(state, db, outId).canSubstitute, true);
+  state.substitutions = Array.from({ length: 5 }, () => ({}));
+  assert.match(substitutionStatus(state, db, outId).reason, /all 5 substitutions/);
+  state.substitutions = [];
+  state.userBenchIds = state.userBenchIds.filter(id => players.find(p => p.id === id).positionGroup !== 'GK');
+  const keeper = state.homeLineupIds.find(id => players.find(p => p.id === id).positionGroup === 'GK');
+  assert.match(substitutionStatus(state, db, keeper).reason, /goalkeeper replacement/);
+  state.minute = 90;
+  assert.match(substitutionStatus(state, db, outId).reason, /already over/);
+});
+
+test('friendly bench registration does not admit newly added reserve players mid-match', () => {
+  const c = career('friendly');
+  let state = createInteractiveMatch(c, db);
+  const before = [...state.userBenchIds];
+  const expanded = { ...db, players: [...players, { ...players[12], id: 'late-arrival' }] };
+  state = advanceInteractiveMatch(state, c, expanded).state;
+  assert.deepEqual(state.userBenchIds, before);
+  assert.ok(!eligibleBenchIds(state, expanded).includes('late-arrival'));
 });

@@ -25,44 +25,33 @@ async function currentActivePause(page) {
   });
 }
 
-async function resumeShortHandedIfNeeded(page, shell) {
-  const notice = page.getByText('No substitutes available. You must continue short-handed.', { exact: false }).last();
-  if (!(await notice.count())) return false;
-  if (!(await notice.isVisible().catch(() => false))) return false;
-  await shell.locator('[data-cm4-speed="4"]').click();
-  return true;
-}
-
 async function replaceInjuredPlayer(page, shell, injury) {
-  await shell.locator('[data-cm4-subs]').click();
-  const dialog = page.locator('.flm-match-dialog.v2-sub-dialog');
+  const dialog = page.locator('[data-manager-dialog]');
+  if (!(await dialog.isVisible())) await shell.locator('[data-cm4-tactics]').click();
   await expect(dialog).toBeVisible();
-
-  const option = dialog.locator(`[data-sub-out] option[value="${injury.playerId}"]`);
-  await expect(option).toHaveCount(1);
-  const optionText = await option.textContent();
-  const injuredName = String(optionText || '').split('·')[0].trim();
-  if (!injuredName) throw new Error(`Could not resolve injured player ${injury.playerId}`);
-
-  const outgoing = dialog.locator('[data-v2-out-list] .v2-sub-player').filter({ hasText: injuredName }).first();
+  const outgoing = dialog.locator(`[data-v049-out="${injury.playerId}"]`);
   await expect(outgoing).toBeVisible();
   await outgoing.click();
-
-  const incoming = dialog.locator('[data-v2-in-list] .v2-sub-player:not(:disabled)').first();
-  if (!(await incoming.count())) {
+  const availability = await page.evaluate(async outId => {
+    const db = await window.FLMManager.loadDatabase();
+    const { substitutionStatus } = await import('/matchday-substitution-state-v1.js?v=1.0.0');
+    return substitutionStatus(window.__flmLiveStateV332, db, outId);
+  }, injury.playerId);
+  if (!availability.canSubstitute) {
     if (await dialog.isVisible()) {
       await dialog.locator('[data-close-manager]').first().click();
     }
     await shell.locator('[data-cm4-speed="4"]').click();
     return;
   }
-
+  const incoming = dialog.locator(`[data-v049-in="${availability.replacementIds[0]}"]`);
   await expect(incoming).toBeEnabled();
   await incoming.click();
 
-  const confirm = dialog.locator('[data-apply-sub]');
+  const confirm = dialog.locator('[data-v049-confirm]');
   await expect(confirm).toBeEnabled();
   await confirm.click();
+  await expect.poll(() => page.evaluate(id => window.__flmLiveStateV332.subbedOffIds.includes(id), injury.playerId)).toBe(true);
 
   if (await dialog.isVisible()) {
     await dialog.locator('[data-close-manager]').first().click();
@@ -77,11 +66,6 @@ async function runMatchToClock(page, live, shell, targetClock, timeout) {
   while (Date.now() < deadline) {
     const clock = String(await shell.locator('[data-cm4-clock]').textContent() || '').trim();
     if (clock === targetClock) return;
-
-    if (await resumeShortHandedIfNeeded(page, shell)) {
-      await page.waitForTimeout(250);
-      continue;
-    }
 
     const pause = await currentActivePause(page);
     if (pause?.userInjury) {

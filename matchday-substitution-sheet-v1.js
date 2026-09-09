@@ -1,3 +1,5 @@
+import { userMatchLineup, eligibleBenchIds, substitutionStatus } from './matchday-substitution-state-v1.js?v=1.0.0';
+
 const STYLE_ID = 'flm-matchday-substitution-sheet-v1-style';
 
 const esc = value => String(value ?? '')
@@ -89,26 +91,18 @@ function conditionFor(state, id) {
 
 export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, openTactics, makeSubstitution, setState, addEvent, getShape }) {
   ensureStyles();
-  let selectedOutId = null;
+  let selectedOutId = userMatchLineup(state).find(id => (state.injuredIds || []).includes(id)) || null;
   let selectedInId = null;
   let draggedBenchId = null;
   let suppressClickUntil = 0;
   let busy = false;
 
   function currentLineup() {
-    return state.userClubId === state.homeClubId ? [...(state.homeLineupIds || [])] : [...(state.awayLineupIds || [])];
+    return userMatchLineup(state);
   }
 
   function availableBench() {
-    const lineup = new Set(currentLineup());
-    const subbedOff = new Set(state.subbedOffIds || []);
-    const configured = [...new Set(state.userBenchIds || [])]
-      .filter(id => !lineup.has(id) && !subbedOff.has(id) && playerFor(db, id));
-    const fallback = (db.players || [])
-      .filter(player => player.clubId === state.userClubId && !player.isPlaceholder && !lineup.has(player.id) && !subbedOff.has(player.id))
-      .sort((a, b) => (b.currentAbility || 0) - (a.currentAbility || 0))
-      .map(player => player.id);
-    return [...new Set([...configured, ...fallback])].slice(0, 9);
+    return eligibleBenchIds(state, db);
   }
 
   function planText(outPlayer, inPlayer) {
@@ -131,15 +125,15 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, o
     const inPlayer = selectedInId ? playerFor(db, selectedInId) : null;
     const clubName = id => db.clubs?.find(club => club.id === id)?.name || (id === state.homeClubId ? 'Home' : id === state.awayClubId ? 'Away' : 'Match');
     const matchContext = `${clubName(state.homeClubId)} ${state.homeGoals ?? 0}–${state.awayGoals ?? 0} ${clubName(state.awayClubId)}`;
-    const limit = Number(state.substitutionLimit) || 5;
-    const remaining = Math.max(0, limit - (state.substitutions || []).length);
+    const availability = substitutionStatus(state, db, selectedOutId);
+    const remaining = availability.remaining;
     const windowsUsed = [...new Set(state.substitutionWindowMinutes || [])].length;
     const windowInfo = state.substitutionWindowLimit == null ? 'FULL SQUAD BENCH' : `${Math.max(0, state.substitutionWindowLimit - windowsUsed)} WINDOWS LEFT`;
-    const validPlan = Boolean(outPlayer && inPlayer && remaining > 0 && !busy);
+    const validPlan = Boolean(outPlayer && inPlayer && availability.canSubstitute && availability.replacementIds.includes(selectedInId) && !busy);
     const starters = shape.slots.map((slot, index) => {
       const assignment = shape.assignments.find(item => item.slotId === slot.id);
       const player = assignment?.playerId ? playerFor(db, assignment.playerId) : null;
-      if (!player) return '';
+      if (!player || !lineup.includes(player.id)) return '';
       const selected = selectedOutId === player.id;
       return `<button type="button" class="flm-v049-row ${selected ? 'is-off' : ''}" data-v049-out="${esc(player.id)}"><span class="flm-v049-slot"><strong>${index + 1}</strong><small>${esc(slot.label)}</small></span><span class="flm-v049-name"><strong>${esc(displayName(player))}</strong><small>${esc(player.primaryPosition || '—')}</small></span><span class="flm-v049-condition">${conditionFor(state, player.id)}%<small>CONDITION</small></span></button>`;
     }).join('');
@@ -151,13 +145,19 @@ export function renderMatchSubstitutionSheet({ dialog, state, db, head, close, o
     const pitch = shape.slots.map(slot => {
       const assignment = shape.assignments.find(item => item.slotId === slot.id);
       const player = assignment?.playerId ? playerFor(db, assignment.playerId) : null;
-      if (!player) return '';
+      if (!player || !lineup.includes(player.id)) return '';
       const selectedOut = selectedOutId === player.id;
       const selectedIn = selectedInId === player.id;
       return `<button type="button" class="flm-v049-player ${selectedOut ? 'is-off' : ''} ${selectedIn ? 'is-in' : ''}" style="left:${slot.x}%;top:${slot.y}%" data-v049-pitch-out="${esc(player.id)}"><span class="position">${esc(slot.label)}</span><strong>${esc(displayName(player))}</strong><small>${conditionFor(state, player.id)}% CON</small></button>`;
     }).join('');
     dialog.dataset.v049MatchSheet = '1';
     dialog.innerHTML = `${head('Match Plan','IN-MATCH MANAGEMENT')}<div class="flm-v049-match-sheet"><div class="flm-v049-context"><strong>${esc(matchContext)}</strong><span>${state.minute}' · ${windowInfo}</span></div><div class="flm-v049-status"><strong>${remaining} SUBSTITUTIONS REMAINING</strong><span>XI ${lineup.length} · BENCH ${bench.length}</span></div><div class="flm-v049-workspace"><aside class="flm-v049-squad"><div class="flm-v049-list"><div class="flm-v049-sheet-head"><span>MATCHDAY SQUAD</span><span>${lineup.length} / 11 ON PITCH</span></div><div class="flm-v049-section">STARTING XI</div>${starters}<div class="flm-v049-section bench">BENCH · ${bench.length}</div>${benchRows || '<div class="flm-v049-row"><span class="flm-v049-name"><strong>NO AVAILABLE SUBSTITUTES</strong></span></div>'}</div></aside><section class="flm-v049-board"><div class="flm-v049-board-head"><strong>TACTICAL BOARD</strong><span>Click players to plan a change, or drag a bench row onto a starter.</span></div><div class="flm-v049-pitch"><i class="flm-v049-circle"></i><i class="flm-v049-box top"></i><i class="flm-v049-box bottom"></i>${pitch}</div><div class="flm-v049-plan" data-v049-plan>${planText(outPlayer, inPlayer)}</div></section></div><div class="flm-v049-actions"><button type="button" data-v049-tactics>TACTICS OPTIONS</button><button type="button" data-close-manager>CLOSE</button><button type="button" class="primary" data-v049-confirm ${validPlan ? '' : 'disabled'}>CONFIRM SUB</button></div></div>`;
+    // Friendlies can register more than nine substitutes. Keep them reachable
+    // without squeezing all rows into the old fixed nine-bench grid.
+    const list = dialog.querySelector('.flm-v049-list');
+    list.style.gridTemplateRows = `28px 22px repeat(${lineup.length}, minmax(26px, 1fr)) 22px repeat(${Math.max(1, bench.length)}, minmax(26px, 1fr))`;
+    list.style.overflowY = 'auto';
+    if (availability.reason) dialog.querySelector('.flm-v049-status strong').textContent = availability.reason;
     const clearDropHighlights = () => {
       dialog.querySelectorAll('.flm-v049-player.is-drop,.flm-v049-row.is-drop').forEach(item => item.classList.remove('is-drop'));
     };

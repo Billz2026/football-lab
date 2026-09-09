@@ -251,7 +251,7 @@ function tableView(db) {
 
 async function playCurrentMatch(element, db) {
   const completedCareer = simulateNextRound(activeCareer, db);
-  const { playLiveMatch } = await import('./matchday-live-v04.js?v=0.4.4');
+  const { playLiveMatch } = await import('./matchday-live-v04.js?v=0.4.5');
   await playLiveMatch({
     root: element.querySelector('.career-content'),
     career: activeCareer,
