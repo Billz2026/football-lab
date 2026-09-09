@@ -55,12 +55,12 @@ function setText(node,value){if(node&&node.textContent!==value)node.textContent=
 function setData(node,key,value){if(node&&node.dataset[key]!==String(value))node.dataset[key]=String(value);}
 function setAttr(node,key,value){if(node&&node.getAttribute(key)!==String(value))node.setAttribute(key,String(value));}
 
-function pollFor(selector,{timeout=2500,interval=35}={}){
+function pollFor(selector,{timeout=5000,interval=35,ready=()=>true}={}){
   return new Promise(resolve=>{
     const started=performance.now();
     const tick=()=>{
       const node=document.querySelector(selector);
-      if(node)return resolve(node);
+      if(node&&ready(node))return resolve(node);
       if(performance.now()-started>=timeout)return resolve(null);
       setTimeout(tick,interval);
     };
@@ -76,10 +76,10 @@ async function startFriendlyDirect(){
   launching=true;
   try{
     let play=document.querySelector('[data-v047-play]');
-    if(!play){
+    if(!play||play.disabled){
       const tab=document.querySelector('.career-nav [data-v047-preseason-tab]');
       if(tab&&!tab.disabled)tab.click();
-      play=await pollFor('[data-v047-play]',{timeout:3500});
+      play=await pollFor('[data-v047-play]',{ready:node=>!node.disabled});
     }
     if(play&&!play.disabled)play.click();
   }finally{setTimeout(()=>{launching=false;},250);}
