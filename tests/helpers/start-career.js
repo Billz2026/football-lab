@@ -77,11 +77,11 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   await clubs.nth(clubIndex).click();
 
   // Selecting a club only updates the picker state. TAKE CONTROL is the action that
-  // actually creates the career and renders the career shell.
+  // actually creates the career and renders the canonical career shell.
   const takeControl=page.getByRole('button',{name:'TAKE CONTROL',exact:true});
   await expect(takeControl).toBeEnabled();
   await takeControl.click();
-  await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+  await expect(page.locator('#careerApp')).toHaveClass(/is-open/);
 
   if(completeAppointment)await completeAppointmentExperience(page);
 }
