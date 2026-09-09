@@ -14,10 +14,20 @@ async function bootTransferCareer(page) {
   await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible({ timeout: 10000 });
 }
 
+async function clickVisibleContinue(page) {
+  const overview = page.locator('[data-career-tab="overview"]');
+  await expect(overview).toBeVisible();
+  await overview.click();
+  const continueButton = page.locator('[data-v060-continue]:visible').first();
+  await expect(continueButton).toBeVisible();
+  await expect(continueButton).toBeEnabled();
+  await continueButton.click();
+}
+
 async function advanceTransferWindow(page) {
   await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
   await expect(page.locator('[data-cm-transfer-tab]')).toBeVisible();
-  await page.locator('[data-v054-advance]').click();
+  await clickVisibleContinue(page);
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
 }
 
