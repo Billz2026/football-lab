@@ -51,10 +51,17 @@ jobs:
           let output = header;
           for (const file of sources) {
             if (!fs.existsSync(file)) throw new Error(`Missing Match Centre source: ${file}`);
-            const source = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
-            if (/^\s*(?:import|export)\b/m.test(source)) {
-              throw new Error(`${file} contains static import/export syntax and cannot be safely scoped.`);
+            let source = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
+
+            // These legacy files were independent ES modules. Named exports were
+            // module-boundary metadata only; inside the consolidated IIFE the same
+            // declarations remain intact after removing only the `export` keyword.
+            source = source.replace(/^\s*export\s+(?=(?:const|let|var|function|class)\b)/gm, '');
+
+            if (/^\s*import\b/m.test(source) || /^\s*export\b/m.test(source)) {
+              throw new Error(`${file} still contains unsupported static module syntax after safe export normalisation.`);
             }
+
             output += `/* ===== BEGIN CONSOLIDATED SOURCE: ${file} ===== */\n`;
             output += `(() => {\n'use strict';\n${source}\n})();\n`;
             output += `/* ===== END CONSOLIDATED SOURCE: ${file} ===== */\n\n`;
