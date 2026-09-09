@@ -75,6 +75,12 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   const clubs=page.locator('[data-start-club]');
   await expect(clubs.first()).toBeVisible();
   await clubs.nth(clubIndex).click();
+
+  // Club rows now select a club; TAKE CONTROL is the explicit confirmation
+  // that creates the career. Keep the test helper aligned with the real UI.
+  const takeControl=page.getByRole('button',{name:'TAKE CONTROL',exact:true});
+  await expect(takeControl).toBeEnabled();
+  await takeControl.click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
   if(completeAppointment)await completeAppointmentExperience(page);
