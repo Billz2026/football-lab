@@ -1,0 +1,107 @@
+name: Diagnose Match Centre v5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-match-centre-v5.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Create diagnostic browser test
+        shell: bash
+        run: |
+          cat > tests/__diag_match_centre_v5.spec.js <<'EOF'
+          import { test, expect } from '@playwright/test';
+          import { clearPersistedState, startCareer } from './helpers/start-career.js';
+
+          test('career start diagnostic', async ({ page }) => {
+            page.on('pageerror', error => {
+              console.log(`PAGEERROR: ${error.stack || error.message}`);
+            });
+            page.on('console', message => {
+              if (message.type() === 'error' || message.type() === 'warning') {
+                console.log(`BROWSER_${message.type().toUpperCase()}: ${message.text()}`);
+              }
+            });
+
+            await clearPersistedState(page);
+            try {
+              await startCareer(page);
+            } catch (error) {
+              console.log(`DIAG_URL: ${page.url()}`);
+              console.log(`CAREER_APP_COUNT: ${await page.locator('.career-app').count()}`);
+              console.log(`CLUB_ROW_COUNT: ${await page.locator('.club-row').count()}`);
+              console.log(`VISIBLE_MODAL_COUNT: ${await page.locator('.modal:visible').count()}`);
+              console.log(`BODY_TEXT:\n${(await page.locator('body').innerText()).slice(0, 5000)}`);
+              throw error;
+            }
+
+            await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+          });
+          EOF
+
+      - name: Test canonical Match Centre v5
+        id: v5
+        continue-on-error: true
+        run: npx playwright test tests/__diag_match_centre_v5.spec.js --reporter=line
+
+      - name: Restore legacy eight-module Match Centre chain locally
+        shell: bash
+        run: |
+          cat > runtime-match-centre-v1.js <<'EOF'
+          import './match-centre-v4.js?v=4.0.1';
+          import './match-centre-v4-ratings-integrity-v1.js?v=1.0.0';
+          import './match-centre-v4-mode.js?v=4.0.0';
+          import './match-centre-v4-fold-v41.js?v=4.1.0';
+          import './match-centre-v4-mobile-v42.js?v=4.2.0';
+          import './match-centre-v4-discipline-v44.js?v=4.4.1';
+          import './match-centre-v45.js?v=4.5.3';
+          import './match-centre-v46-lock.js?v=4.6.2';
+          EOF
+
+      - name: Test legacy Match Centre chain
+        id: legacy
+        continue-on-error: true
+        run: npx playwright test tests/__diag_match_centre_v5.spec.js --reporter=line
+
+      - name: Report comparison
+        shell: bash
+        run: |
+          echo "canonical_v5=${{ steps.v5.outcome }}"
+          echo "legacy_chain=${{ steps.legacy.outcome }}"
+          if [ "${{ steps.v5.outcome }}" = "failure" ] && [ "${{ steps.legacy.outcome }}" = "success" ]; then
+            echo 'RESULT: v5 consolidation introduces the career-start regression.'
+            exit 2
+          fi
+          if [ "${{ steps.v5.outcome }}" = "failure" ] && [ "${{ steps.legacy.outcome }}" = "failure" ]; then
+            echo 'RESULT: regression reproduces with both v5 and legacy Match Centre; not caused by consolidation.'
+            exit 3
+          fi
+          if [ "${{ steps.v5.outcome }}" = "success" ] && [ "${{ steps.legacy.outcome }}" = "success" ]; then
+            echo 'RESULT: both configurations pass; earlier failure is outside this isolated transition.'
+            exit 0
+          fi
+          echo 'RESULT: unexpected comparison; inspect logs.'
+          exit 4
