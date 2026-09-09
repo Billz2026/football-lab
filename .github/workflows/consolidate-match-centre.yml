@@ -1,0 +1,97 @@
+name: Consolidate Match Centre
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/consolidate-match-centre.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  consolidate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build canonical Match Centre v5
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+
+          const sources = [
+            'match-centre-v4.js',
+            'match-centre-v4-ratings-integrity-v1.js',
+            'match-centre-v4-mode.js',
+            'match-centre-v4-fold-v41.js',
+            'match-centre-v4-mobile-v42.js',
+            'match-centre-v4-discipline-v44.js',
+            'match-centre-v45.js',
+            'match-centre-v46-lock.js'
+          ];
+
+          const header = `/*
+           * Football Lab Manager — Match Centre v5
+           * Canonical consolidated runtime generated from the proven v4-v4.6 stack.
+           *
+           * Each former ES module is kept in an isolated lexical scope so duplicate
+           * const/let/var/function names cannot collide. Runtime evaluation order is
+           * identical to the previous eight-import chain.
+           *
+           * Do not add another Match Centre patch file. Future Match Centre changes
+           * belong in this canonical module (or in its source generator workflow
+           * until the legacy sections are fully refactored internally).
+           */\n\n`;
+
+          let output = header;
+          for (const file of sources) {
+            if (!fs.existsSync(file)) throw new Error(`Missing Match Centre source: ${file}`);
+            const source = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
+            if (/^\s*(?:import|export)\b/m.test(source)) {
+              throw new Error(`${file} contains static import/export syntax and cannot be safely scoped.`);
+            }
+            output += `/* ===== BEGIN CONSOLIDATED SOURCE: ${file} ===== */\n`;
+            output += `(() => {\n'use strict';\n${source}\n})();\n`;
+            output += `/* ===== END CONSOLIDATED SOURCE: ${file} ===== */\n\n`;
+          }
+
+          fs.writeFileSync('match-centre-v5.js', output);
+
+          const runtime = `/*
+           * Football Lab Manager — canonical Match Centre runtime boundary.
+           *
+           * The former v4 → v4.6 patch chain is physically consolidated into
+           * match-centre-v5.js. Legacy source files remain in the repository only
+           * as rollback/reference material and are no longer imported at runtime.
+           */
+
+          import './match-centre-v5.js?v=5.0.0';
+          `;
+          fs.writeFileSync('runtime-match-centre-v1.js', runtime);
+          NODE
+
+          node --check match-centre-v5.js
+          node --check runtime-match-centre-v1.js
+
+          if grep -Eq "^\s*import './match-centre-v4|^\s*import './match-centre-v45|^\s*import './match-centre-v46" runtime-match-centre-v1.js; then
+            echo 'Legacy Match Centre import remains active.' >&2
+            exit 1
+          fi
+
+      - name: Commit consolidated runtime
+        shell: bash
+        run: |
+          if git diff --quiet -- match-centre-v5.js runtime-match-centre-v1.js && git ls-files --error-unmatch match-centre-v5.js >/dev/null 2>&1; then
+            echo 'No Match Centre consolidation changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add match-centre-v5.js runtime-match-centre-v1.js
+          git commit -m 'Consolidate Match Centre runtime into v5'
+          git push
