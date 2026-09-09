@@ -1,4 +1,9 @@
 import * as base from './premier-league-rollover-v2.js';
+import {
+  canRolloverCareer,
+  ensureCareerLifecycleState,
+  finaliseCareerIfLimitReached
+} from './career-lifecycle-v1.js';
 
 export * from './premier-league-rollover-v2.js';
 
@@ -9,7 +14,22 @@ function currentRollover(career) {
   return latest;
 }
 
+function careerLimitValidation(career) {
+  ensureCareerLifecycleState(career);
+  if (career?.status === 'complete' && career?.seasonOutcome) finaliseCareerIfLimitReached(career);
+  return canRolloverCareer(career);
+}
+
+export function validatePremierLeagueRollover(career, db) {
+  const lifecycle = careerLimitValidation(career);
+  if (!lifecycle.ok) return lifecycle;
+  return base.validatePremierLeagueRollover(career, db);
+}
+
 export function rolloverPremierLeagueSeason(career, options = {}) {
+  const lifecycle = careerLimitValidation(career);
+  if (!lifecycle.ok) return { status: lifecycle.status, reason: lifecycle.reason, career };
+
   const existing = currentRollover(career);
   if (existing) {
     return {
@@ -18,5 +38,7 @@ export function rolloverPremierLeagueSeason(career, options = {}) {
       rollover: JSON.parse(JSON.stringify(existing))
     };
   }
-  return base.rolloverPremierLeagueSeason(career, options);
+  const result = base.rolloverPremierLeagueSeason(career, options);
+  if (result?.career) ensureCareerLifecycleState(result.career);
+  return result;
 }

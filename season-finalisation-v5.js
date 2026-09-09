@@ -1,5 +1,6 @@
 import { competitionRulesFor, rankCompetitionTable } from './competition-rules-v1.js';
 import { finaliseEnglishPyramidBackground } from './english-pyramid-world-v5.js';
+import { ensureCareerLifecycleState, finaliseCareerIfLimitReached } from './career-lifecycle-v1.js';
 
 export const SEASON_HISTORY_SCHEMA_VERSION = 1;
 
@@ -12,6 +13,7 @@ export function ensureSeasonHistoryState(career) {
   if (!Object.prototype.hasOwnProperty.call(career, 'seasonResolution')) career.seasonResolution = null;
   if (!Object.prototype.hasOwnProperty.call(career, 'nextSeasonContext')) career.nextSeasonContext = null;
   if (!Object.prototype.hasOwnProperty.call(career, 'defendingChampionClubId')) career.defendingChampionClubId = null;
+  ensureCareerLifecycleState(career);
   return career;
 }
 
@@ -44,6 +46,13 @@ function pyramidResult(career, completedAt) {
   };
 }
 
+function retirementResult(career, completedAt) {
+  const retirement = finaliseCareerIfLimitReached(career, { completedAt });
+  return retirement.status === 'retired' || retirement.status === 'already-retired'
+    ? { careerRetirement: retirement }
+    : {};
+}
+
 export function finaliseSeason(career, { completedAt = new Date().toISOString() } = {}) {
   ensureSeasonHistoryState(career);
   if (!isSeasonComplete(career)) return { status: 'not-complete', outcome: null };
@@ -63,7 +72,7 @@ export function finaliseSeason(career, { completedAt = new Date().toISOString() 
       europeanQualificationStatus: existing.europeanQualification?.status || 'pending'
     };
     const lowerWorld = pyramidResult(career, existing.completedAt || completedAt);
-    return { status: 'already-finalised', outcome: existing, ...lowerWorld };
+    return { status: 'already-finalised', outcome: existing, ...lowerWorld, ...retirementResult(career, existing.completedAt || completedAt) };
   }
 
   const ranking = rankCompetitionTable(career);
@@ -119,5 +128,5 @@ export function finaliseSeason(career, { completedAt = new Date().toISOString() 
     europeanQualificationStatus: outcome.europeanQualification.status
   };
   const lowerWorld = pyramidResult(career, completedAt);
-  return { status: 'finalised', outcome, ...lowerWorld };
+  return { status: 'finalised', outcome, ...lowerWorld, ...retirementResult(career, completedAt) };
 }
