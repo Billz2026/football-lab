@@ -2,6 +2,7 @@
  * Dynamic 0–100 club stature used by transfer willingness.
  * Raw provider reputation is kept untouched; career reputation lives in the save.
  */
+import { marketReputationTier } from './market-reputation-v061.js';
 
 export const CLUB_REPUTATION_VERSION = 1;
 
@@ -42,8 +43,6 @@ function initialScore(club) {
   if (Number.isFinite(PREMIER_START[club.name])) return PREMIER_START[club.name];
   const raw = Number(club.reputation);
   if (Number.isFinite(raw)) {
-    // Fallback for leagues not yet manually audited. Converts legacy ~2500–9500
-    // values to the new 25–92 band without pretending the source is authoritative.
     return Math.round(clamp(25 + ((raw - 2500) / 7000) * 67, 25, 92));
   }
   return 60;
@@ -181,6 +180,7 @@ function requiredReputation(player, career, db) {
   const currentClubRep = effectiveClubReputation(career, db, player?.clubId);
   const listed = Boolean(career?.transfers?.listedPlayerIds?.includes(player?.id));
   const personality = String(player?.personality || player?.personalityLabel || '').toLowerCase();
+  const reviewedTier = marketReputationTier(player);
 
   let required;
   if (ability >= 185) required = 92;
@@ -194,14 +194,20 @@ function requiredReputation(player, career, db) {
   else if (ability >= 124) required = 58;
   else required = 52;
 
-  // Elite youngsters with major upside are more selective than their current
-  // ability alone would imply.
+  const tierFloor = {
+    'world-icon': 93,
+    'global-superstar': 90,
+    'elite': 86,
+    'star': 80,
+    'squad-key': 75
+  }[reviewedTier] || 0;
+  required = Math.max(required, tierFloor);
+
   if (age <= 23 && potential >= 180) required += 4;
   else if (age <= 23 && potential >= 170) required += 2;
 
-  // Players established at major clubs normally need a comparable destination.
-  if (currentClubRep >= 84 && ability >= 160) required = Math.max(required, currentClubRep - 4);
-  else if (currentClubRep >= 78 && ability >= 150) required = Math.max(required, currentClubRep - 6);
+  if (currentClubRep >= 84 && (ability >= 160 || tierFloor >= 86)) required = Math.max(required, currentClubRep - 4);
+  else if (currentClubRep >= 78 && (ability >= 150 || tierFloor >= 80)) required = Math.max(required, currentClubRep - 6);
 
   if (/ambitious|high ambition|driven/.test(personality)) required += 2;
   if (listed) required -= 4;
@@ -251,11 +257,11 @@ export function evaluatePlayerInterest(player, buyerClubId, career, db) {
     clubReputation: buyerScore,
     requiredReputation: required,
     gap,
+    marketTier: reviewedTier,
     message
   };
 }
 
-// Lightweight browser synchronisation so reputation snapshots survive season rollover.
 if (typeof window !== 'undefined') {
   let queued = false;
   const sync = async () => {
