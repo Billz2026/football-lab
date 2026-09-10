@@ -1,14 +1,13 @@
-/* Football Lab Manager — interaction stability hotfix v2.
+/* Football Lab Manager — interaction stability hotfix v3.
  *
- * Two legacy behaviours were colliding with the current career UI:
- * 1) career-interactions-v053 owns an older player-name click handler whose
- *    openProfile() can wait 20 x 50 ms after the canonical profile API has
- *    replaced the API it originally wrapped. We intercept squad player intent
- *    at window-capture level before that legacy document listener can run.
- * 2) career-appointment-media polls and queues from global DOM/click activity.
- *    Completed press summaries are now persisted as dismissed immediately when
- *    completion fires, while the just-completed summary is still allowed to be
- *    shown once in the current call stack. Any stale/reopened copy is closed.
+ * The current player profile is an integrated career screen. A legacy wrapper
+ * in career-interactions-v053 can still call openModalShell() after the new
+ * profile has rendered. Because that shared modal retains the previous press
+ * conference summary, every player click can appear to reopen FIRST IMPRESSION
+ * SET even though the appointment flow itself is already complete.
+ *
+ * This guard keeps squad profiles on the direct integrated path and removes
+ * that stale shared-modal reopen before it can paint.
  */
 
 let allowSummaryCareerId = null;
@@ -41,14 +40,53 @@ function setAppointmentLock(career) {
   try { localStorage.setItem(key, '1'); } catch {}
 }
 
-function closeAppointmentFrame() {
-  const modal = document.getElementById('appModal');
-  if (!modal?.classList.contains('flm-appointment-open')) return false;
-  modal.classList.remove('is-open', 'flm-appointment-open');
+function modalParts() {
+  return {
+    modal: document.getElementById('appModal'),
+    title: document.getElementById('modalTitle'),
+    body: document.getElementById('modalBody')
+  };
+}
+
+function integratedPlayerProfileVisible() {
+  return Boolean(document.querySelector('.career-app.is-open .career-content > .flm-instant-profile'));
+}
+
+function modalContainsCompletedAppointment() {
+  const { modal, title, body } = modalParts();
+  if (!modal) return false;
+  if (title?.textContent?.trim() === 'FIRST IMPRESSION SET') return true;
+  if (body?.querySelector('.flm-appointment[data-appointment-v066="summary"]')) return true;
+  return false;
+}
+
+function closeSharedModal() {
+  const { modal } = modalParts();
+  if (!modal?.classList.contains('is-open')) return false;
+  modal.classList.remove('is-open', 'flm-appointment-open', 'club-picker-modal', 'flm-profile-v2-open');
   modal.setAttribute('aria-hidden', 'true');
   modal.querySelector('.modal-card')?.classList.remove('modal-wide');
   document.body.style.overflow = document.querySelector('.career-app.is-open') ? 'hidden' : '';
   return true;
+}
+
+function closeAppointmentFrame() {
+  const { modal } = modalParts();
+  if (!modal?.classList.contains('flm-appointment-open')) return false;
+  return closeSharedModal();
+}
+
+function closeGhostProfileModal() {
+  const { modal } = modalParts();
+  if (!integratedPlayerProfileVisible() || !modal?.classList.contains('is-open')) return false;
+
+  // The legacy career-interactions wrapper reopens the generic modal after the
+  // integrated profile render. If that modal still contains the completed
+  // appointment screen, it is never a legitimate player-profile UI.
+  if (modalContainsCompletedAppointment() || modal.classList.contains('flm-appointment-open')) {
+    return closeSharedModal();
+  }
+  return false;
 }
 
 function saveAppointmentDismissal(career) {
@@ -70,10 +108,8 @@ function saveAppointmentDismissal(career) {
 }
 
 function isCompletedSummaryVisible() {
-  const modal = document.getElementById('appModal');
-  if (!modal?.classList.contains('flm-appointment-open') || !modal.classList.contains('is-open')) return false;
-  if (modal.querySelector('.flm-appointment[data-appointment-v066="summary"]')) return true;
-  return document.getElementById('modalTitle')?.textContent?.trim() === 'FIRST IMPRESSION SET';
+  const { modal } = modalParts();
+  return Boolean(modal?.classList.contains('is-open') && modalContainsCompletedAppointment());
 }
 
 function summaryIsAllowed(career) {
@@ -93,14 +129,8 @@ function enforceCompletedAppointment({ closeStale = true } = {}) {
   const visible = isCompletedSummaryVisible();
   const locked = hasAppointmentLock(career);
 
-  // Completion itself is persisted as dismissed immediately. The appointment
-  // module can still render the summary once because it calls renderSummary()
-  // directly after dispatching flm:appointment-complete.
   if (!state.dismissed || !locked) saveAppointmentDismissal(career);
-
-  // A newly completed conference may remain visible once. Anything else is a
-  // stale reopen caused by the appointment module's global queue/polling.
-  if (visible && closeStale && !allowed) closeAppointmentFrame();
+  if (visible && closeStale && !allowed) closeSharedModal();
   return true;
 }
 
@@ -121,21 +151,30 @@ function warmPlayerProfile() {
   try { window.FLMPlayerProfile?.preload?.(); } catch {}
 }
 
+function settleProfileOpen(result) {
+  // A wrapped legacy open() may reopen the shared modal after awaiting the
+  // integrated renderer. Cover both the immediate microtask and its completion.
+  queueMicrotask(closeGhostProfileModal);
+  requestAnimationFrame(closeGhostProfileModal);
+  Promise.resolve(result).finally(() => {
+    closeGhostProfileModal();
+    requestAnimationFrame(closeGhostProfileModal);
+  });
+}
+
 function openSquadPlayerNow(playerId) {
   if (!playerId) return;
   enforceCompletedAppointment();
   warmPlayerProfile();
-  window.FLMPlayerProfile?.open?.(playerId, { source: 'squad' });
+  const result = window.FLMPlayerProfile?.open?.(playerId, { source: 'squad' });
+  settleProfileOpen(result);
 }
 
-// Pre-warm as soon as the user moves toward a player. This costs no click time.
 window.addEventListener('pointerover', event => {
   if (squadPlayerIdFromTarget(event.target)) warmPlayerProfile();
 }, true);
 
-// Open on pointerdown rather than waiting for click. More importantly, this
-// window-capture listener runs before career-interactions-v053's document
-// capture listener, removing its hard-coded retry loop from squad navigation.
+// Open on pointerdown and stop the older document-level v053/v044 listeners.
 window.addEventListener('pointerdown', event => {
   if (event.button !== 0) return;
   const playerId = squadPlayerIdFromTarget(event.target);
@@ -160,11 +199,10 @@ window.addEventListener('click', event => {
     event.stopPropagation();
     event.stopImmediatePropagation();
 
-    // Pointerdown already opened this player. Suppress the compatibility click
-    // so neither the v053 legacy listener nor the v044 target listener fires.
     if (playerId === suppressPlayerClickId && performance.now() < suppressPlayerClickUntil) {
       suppressPlayerClickId = null;
       suppressPlayerClickUntil = 0;
+      closeGhostProfileModal();
       return;
     }
 
@@ -184,7 +222,7 @@ window.addEventListener('click', event => {
   }
 
   const closeTrigger = target.closest('.modal-close,[data-close-modal]');
-  const modal = document.getElementById('appModal');
+  const { modal } = modalParts();
   if (closeTrigger && modal?.classList.contains('flm-appointment-open')) {
     const career = activeCareer();
     if (career?.appointmentExperience?.completed) {
@@ -206,7 +244,7 @@ window.addEventListener('keydown', event => {
   }
 
   if (event.key !== 'Escape') return;
-  const modal = document.getElementById('appModal');
+  const { modal } = modalParts();
   if (!modal?.classList.contains('flm-appointment-open')) return;
   const career = activeCareer();
   if (career?.appointmentExperience?.completed) {
@@ -221,11 +259,9 @@ window.addEventListener('flm:appointment-complete', event => {
   if (!career?.appointmentExperience?.completed) return;
 
   allowSummaryCareerId = event.detail?.careerId || career.id;
-  allowSummaryUntil = Date.now() + 30000;
-
-  // This is the key persistence fix: do not wait for ENTER CAREER or the X.
-  // The summary will still render once because the appointment module renders
-  // it directly after this event returns.
+  // The completion screen only needs a very small grace period to render once.
+  // It must never be eligible to reopen during normal career navigation.
+  allowSummaryUntil = Date.now() + 1500;
   saveAppointmentDismissal(career);
 });
 
@@ -234,12 +270,11 @@ function repairLoadedCareer() {
   const state = career?.appointmentExperience;
   if (!state?.completed) return false;
 
-  // A completed conference loaded from storage is never a new completion in
-  // this page session. Persist dismissal before the polling module can reopen it.
   if (!summaryIsAllowed(career)) {
     saveAppointmentDismissal(career);
-    if (isCompletedSummaryVisible()) closeAppointmentFrame();
+    if (isCompletedSummaryVisible()) closeSharedModal();
   }
+  closeGhostProfileModal();
   return true;
 }
 
@@ -257,8 +292,6 @@ function scheduleRepair() {
 document.addEventListener('DOMContentLoaded', scheduleRepair, { once: true });
 if (document.readyState !== 'loading') scheduleRepair();
 
-// Some current saves become active without a stable lifecycle event. Repair
-// during bootstrap only, then stop. This is not a permanent game-loop poll.
 const bootstrapStarted = Date.now();
 const bootstrapRepair = setInterval(() => {
   if (repairLoadedCareer() || Date.now() - bootstrapStarted > 12000) {
@@ -266,21 +299,22 @@ const bootstrapRepair = setInterval(() => {
   }
 }, 25);
 
-// If the old appointment module physically inserts FIRST IMPRESSION SET again,
-// this observer is the final guard. New-completion summaries are allowed once;
-// stale copies are removed immediately.
+// This observer also catches the v053 ghost-modal path, which adds only
+// `is-open` and therefore bypassed the previous flm-appointment-open check.
 const modalObserver = new MutationObserver(() => {
+  if (closeGhostProfileModal()) return;
+
   const career = activeCareer();
   if (!career?.appointmentExperience?.completed) return;
 
   saveAppointmentDismissal(career);
   if (isCompletedSummaryVisible() && !summaryIsAllowed(career)) {
-    closeAppointmentFrame();
+    closeSharedModal();
   }
 });
 
 function observeAppointmentModal() {
-  const modal = document.getElementById('appModal');
+  const { modal } = modalParts();
   if (!modal) return false;
   modalObserver.observe(modal, {
     attributes: true,
