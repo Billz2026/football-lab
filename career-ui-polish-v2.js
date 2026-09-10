@@ -96,13 +96,19 @@
     if (!Number.isFinite(wage) || wage <= 0) return;
     let changed = false;
     const formatted = new Intl.NumberFormat('en-GB', { style:'currency', currency:'GBP', maximumFractionDigits:0 }).format(wage);
+    const salaryPattern = /salary of £[\d,]+ per week/gi;
 
     const pools = [c.news, c.inbox, c.messages, c.careerNews, c.newsItems].filter(Array.isArray);
     pools.forEach(items => items.forEach(item => {
       if (typeof item?.body !== 'string') return;
-      const next = item.body.replace(/salary of £[\d,]+ per week/gi, `salary of ${formatted} per week`);
+      const next = item.body.replace(salaryPattern, `salary of ${formatted} per week`);
       if (next !== item.body) { item.body = next; changed = true; }
     }));
+
+    document.querySelectorAll('.career-inbox-detail p').forEach(node => {
+      const next = node.textContent.replace(salaryPattern, `salary of ${formatted} per week`);
+      if (next !== node.textContent) node.textContent = next;
+    });
 
     if (c.managerContract && Number(c.managerContract.weeklyWage) !== wage) {
       c.managerContract.weeklyWage = wage;
