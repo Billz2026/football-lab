@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* Football Lab Manager — main menu polish pass
+   Keeps the existing stadium artwork untouched and only refines the UI layer. */
+
+:root {
+  --flm-ui: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  --flm-copy: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --flm-panel: rgba(4, 20, 43, .80);
+  --flm-panel-hover: rgba(7, 31, 61, .90);
+  --flm-line: rgba(54, 118, 200, .80);
+  --flm-line-hover: rgba(115, 177, 242, .96);
+}
+
+html,
+body {
+  min-height: 100%;
+  font-family: var(--flm-copy);
+}
+
+.page-shell {
+  min-height: 100svh;
+}
+
+/* Cleaner title bar: retain the game name, remove build/debug chrome. */
+.topbar {
+  min-height: 78px;
+  border-bottom: 1px solid rgba(225, 235, 246, .16);
+  background: rgba(5, 17, 34, .88);
+  backdrop-filter: blur(9px);
+}
+
+.topbar::after {
+  display: none;
+}
+
+.topbar-meta {
+  display: none;
+}
+
+.topbar-title {
+  font-family: var(--flm-ui);
+  font-size: clamp(25px, 2.2vw, 34px);
+  font-weight: 700;
+  letter-spacing: .045em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .52);
+}
+
+/* Keep the existing stadium image and its current treatment intact. */
+main {
+  position: relative;
+  min-height: 100svh;
+}
+
+.hero {
+  min-height: 100svh;
+}
+
+/* The duplicate Football Lab Manager / Manager Centre hero copy is no longer needed. */
+.hero-brand {
+  display: none;
+}
+
+/* Main menu sits directly over the existing stadium image. */
+.menu-section {
+  position: absolute;
+  z-index: 6;
+  top: clamp(155px, 23vh, 225px);
+  left: 50%;
+  width: min(1120px, calc(100% - 56px));
+  max-width: none;
+  margin: 0;
+  padding: 0 0 36px;
+  transform: translateX(-50%);
+}
+
+.section-heading {
+  display: block;
+  margin: 0 0 28px;
+  text-align: center;
+}
+
+.section-heading > div {
+  display: block;
+}
+
+/* MAIN MENU becomes the sole large screen heading. */
+.section-heading .eyebrow {
+  margin: 0;
+  color: #f5f7fa;
+  font-family: var(--flm-ui);
+  font-size: clamp(52px, 6vw, 78px);
+  font-weight: 700;
+  line-height: .94;
+  letter-spacing: .018em;
+  text-transform: uppercase;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, .58);
+}
+
+.section-heading h2 {
+  display: none;
+}
+
+.section-heading > p {
+  max-width: none;
+  margin: 14px 0 0;
+  color: rgba(246, 249, 252, .94);
+  font-family: var(--flm-copy);
+  font-size: clamp(17px, 1.55vw, 22px);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -.012em;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .72);
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.menu-tile,
+body.compact .menu-tile {
+  min-height: 96px;
+  padding: 18px 24px;
+  border: 1px solid var(--flm-line);
+  border-radius: 2px;
+  background: var(--flm-panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .025),
+    0 4px 14px rgba(0, 0, 0, .20);
+  text-align: center;
+  backdrop-filter: blur(4px);
+  transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+.menu-tile::before,
+.menu-tile::after,
+.tile-art,
+.tile-number,
+.tile-icon,
+.tile-copy small,
+.tile-copy em {
+  display: none !important;
+}
+
+.tile-copy {
+  display: block;
+  max-width: none;
+  margin: 0;
+}
+
+.tile-copy strong {
+  display: block;
+  color: #f3f6f9;
+  font-family: var(--flm-ui);
+  font-size: clamp(23px, 2vw, 30px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .45);
+}
+
+.menu-tile:hover,
+.menu-tile:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--flm-line-hover);
+  background: var(--flm-panel-hover);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .04),
+    0 8px 20px rgba(0, 0, 0, .26);
+  outline: none;
+}
+
+.menu-tile:active {
+  transform: translateY(0);
+  background: rgba(8, 35, 68, .96);
+}
+
+/* Remove the development/status footer for a cleaner title-screen finish. */
+.site-footer {
+  display: none;
+}
+
+/* Z Fold / compact tablet layout: keep the two-column game-menu identity. */
+@media (min-width: 601px) and (max-width: 1000px) {
+  .topbar {
+    min-height: 70px;
+  }
+
+  .topbar-title {
+    font-size: clamp(22px, 3.6vw, 30px);
+  }
+
+  .hero {
+    min-height: 100svh;
+  }
+
+  .menu-section {
+    top: clamp(122px, 17vh, 170px);
+    width: min(900px, calc(100% - 32px));
+    padding-bottom: 24px;
+  }
+
+  .section-heading {
+    margin-bottom: 22px;
+  }
+
+  .section-heading .eyebrow {
+    font-size: clamp(46px, 7.2vw, 64px);
+  }
+
+  .section-heading > p {
+    margin-top: 11px;
+    font-size: clamp(16px, 2.5vw, 20px);
+  }
+
+  .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .menu-tile,
+  body.compact .menu-tile {
+    min-height: 82px;
+    padding: 14px 16px;
+  }
+
+  .tile-copy strong {
+    font-size: clamp(21px, 3.5vw, 27px);
+  }
+}
+
+/* Folded phones and genuinely narrow screens can collapse to one column. */
+@media (max-width: 600px) {
+  .topbar {
+    min-height: 64px;
+  }
+
+  .topbar-title {
+    max-width: 88vw;
+    font-size: clamp(20px, 6.5vw, 27px);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  main,
+  .hero {
+    min-height: max(100svh, 700px);
+  }
+
+  .menu-section {
+    top: 100px;
+    width: calc(100% - 24px);
+    padding-bottom: 22px;
+  }
+
+  .section-heading {
+    margin-bottom: 18px;
+  }
+
+  .section-heading .eyebrow {
+    font-size: clamp(42px, 14vw, 58px);
+  }
+
+  .section-heading > p {
+    max-width: 440px;
+    margin: 10px auto 0;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .menu-grid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .menu-tile,
+  body.compact .menu-tile {
+    min-height: 66px;
+    padding: 12px 14px;
+  }
+
+  .tile-copy strong {
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-tile {
+    transition: none;
+  }
+}
