@@ -2,7 +2,7 @@
  * Adds player willingness on top of seller realism and rivalry rules.
  */
 import * as market from './transfer-market-v062-rivalry.js';
-import { evaluatePlayerInterest, ensureClubReputationState } from './club-reputation-v1.js';
+import { evaluatePlayerInterest, ensureClubReputationState } from './club-reputation-v1.js?v=1.0.1';
 
 const clone = value => JSON.parse(JSON.stringify(value));
 
