@@ -41,7 +41,7 @@ async function loadTransfers(){
   loading=true;
   document.querySelector('[data-v054-transfer-gate]')?.remove();
   try{
-    await import('./career-transfers-ui-v050.js?v=0.5.2');
+    await import('./career-transfers-ui-v050.js?v=0.5.5');
     loaded=true;
   } finally {
     loading=false;
