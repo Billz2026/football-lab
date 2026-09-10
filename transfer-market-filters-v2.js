@@ -1,4 +1,4 @@
-/* Football Lab Manager — transfer market filters v2
+/* Football Lab Manager — transfer market filters v2.1
  * Click-first recruitment filtering layered over the stable transfer UI.
  */
 import {
@@ -6,14 +6,15 @@ import {
   estimateWeeklyWage,
   getAskingPrice,
   getPlayerContract,
+  getPlayerInterest,
   getTransferBudget,
   searchTransferMarket
-} from './transfers-v050.js?v=0.6.2';
+} from './transfers-v050.js?v=0.6.3';
 
 (() => {
   'use strict';
 
-  const VERSION = '2.0.0';
+  const VERSION = '2.1.0';
   const STYLE_ID = 'flm-transfer-filters-v2-style';
   let db = null;
   let dbPromise = null;
@@ -22,7 +23,7 @@ import {
   let advanced = false;
   const filters = {
     age:'any', value:'any', contract:'any', wage:'any', club:'all', nationality:'all',
-    sort:'value-desc', affordable:false, expiring:false, u23:false
+    sort:'value-desc', affordable:false, expiring:false, u23:false, interested:false
   };
 
   const manager = () => window.FLMManager;
@@ -89,6 +90,7 @@ import {
       if(filters.affordable&&(asking>budget.transferBudget||wage>budget.wageRoom))return false;
       if(filters.expiring&&Number(contract?.expiryYear||9999)>year+1)return false;
       if(filters.u23&&(!Number.isFinite(age)||age>23))return false;
+      if(filters.interested&&!getPlayerInterest(p,db,c,c.clubId)?.canApproach)return false;
       return true;
     });
     const data=p=>({value:estimatePlayerValue(p),age:Number(p.reportedAge||99),wage:Number(getPlayerContract(c,p)?.weeklyWage||estimateWeeklyWage(p)),contract:Number(getPlayerContract(c,p)?.expiryYear||9999),name:String(p.name||'')});
@@ -115,7 +117,7 @@ import {
         <select data-v057-sort aria-label="Sort"><option value="value-desc" ${filters.sort==='value-desc'?'selected':''}>Value · High to low</option><option value="value-asc" ${filters.sort==='value-asc'?'selected':''}>Value · Low to high</option><option value="age-asc" ${filters.sort==='age-asc'?'selected':''}>Age · Youngest</option><option value="age-desc" ${filters.sort==='age-desc'?'selected':''}>Age · Oldest</option><option value="contract" ${filters.sort==='contract'?'selected':''}>Contract · Expiring</option><option value="wage-asc" ${filters.sort==='wage-asc'?'selected':''}>Wage · Low to high</option><option value="name" ${filters.sort==='name'?'selected':''}>Name · A-Z</option></select>
         <button type="button" class="v057-toggle ${advanced?'is-active':''}" data-v057-more>${advanced?'LESS FILTERS':'MORE FILTERS'}</button>
       </div>
-      <div class="v057-quick"><button class="v057-chip ${filters.affordable?'is-active':''}" data-v057-chip="affordable">AFFORDABLE ONLY</button><button class="v057-chip ${filters.expiring?'is-active':''}" data-v057-chip="expiring">EXPIRING SOON</button><button class="v057-chip ${filters.u23?'is-active':''}" data-v057-chip="u23">U23</button><span class="v057-summary" data-v057-summary></span></div>
+      <div class="v057-quick"><button class="v057-chip ${filters.interested?'is-active':''}" data-v057-chip="interested">INTERESTED ONLY</button><button class="v057-chip ${filters.affordable?'is-active':''}" data-v057-chip="affordable">AFFORDABLE ONLY</button><button class="v057-chip ${filters.expiring?'is-active':''}" data-v057-chip="expiring">EXPIRING SOON</button><button class="v057-chip ${filters.u23?'is-active':''}" data-v057-chip="u23">U23</button><span class="v057-summary" data-v057-summary></span></div>
       <div class="v057-more" data-v057-panel ${advanced?'':'hidden'}>
         <label class="v057-field"><span>Age</span><select data-v057-filter="age"><option value="any">Any age</option><option value="u21" ${filters.age==='u21'?'selected':''}>21 and under</option><option value="u23" ${filters.age==='u23'?'selected':''}>23 and under</option><option value="24-28" ${filters.age==='24-28'?'selected':''}>24–28</option><option value="29-32" ${filters.age==='29-32'?'selected':''}>29–32</option><option value="33+" ${filters.age==='33+'?'selected':''}>33+</option></select></label>
         <label class="v057-field"><span>Value</span><select data-v057-filter="value"><option value="any">Any value</option><option value="0-5" ${filters.value==='0-5'?'selected':''}>Up to £5m</option><option value="5-15" ${filters.value==='5-15'?'selected':''}>£5m–£15m</option><option value="15-30" ${filters.value==='15-30'?'selected':''}>£15m–£30m</option><option value="30-60" ${filters.value==='30-60'?'selected':''}>£30m–£60m</option><option value="60+" ${filters.value==='60+'?'selected':''}>£60m+</option></select></label>
@@ -157,7 +159,7 @@ import {
   function schedule(){if(frame)cancelAnimationFrame(frame);frame=requestAnimationFrame(async()=>{frame=0;styles();await loadDb();render()})}
 
   function reset(){
-    Object.assign(filters,{age:'any',value:'any',contract:'any',wage:'any',club:'all',nationality:'all',sort:'value-desc',affordable:false,expiring:false,u23:false});selectedId=null;
+    Object.assign(filters,{age:'any',value:'any',contract:'any',wage:'any',club:'all',nationality:'all',sort:'value-desc',affordable:false,expiring:false,u23:false,interested:false});selectedId=null;
     const search=document.querySelector('[data-v050-search]'),pos=document.querySelector('[data-v050-position]');
     if(search){search.value='';search.dispatchEvent(new Event('input',{bubbles:true}))}
     if(pos){pos.value='All';pos.dispatchEvent(new Event('change',{bubbles:true}))}
