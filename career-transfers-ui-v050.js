@@ -16,7 +16,7 @@ import {
   submitContractOffer,
   submitTransferOffer,
   toggleTransferListed
-} from './transfers-v050.js?v=0.5.2';
+} from './transfers-v050.js?v=0.5.5';
 
 const SAVE_KEY = 'flm-career-save';
 let db = null;
@@ -28,6 +28,10 @@ let position = 'All';
 let queued = false;
 let rendering = false;
 let flash = null;
+let syncPromise = null;
+let marketFrame = 0;
+let marketScrollTop = 0;
+const boundRoots = new WeakSet();
 
 const esc = value => String(value ?? '')
   .replaceAll('&', '&amp;')
@@ -42,14 +46,20 @@ const club = id => db?.clubs?.find(item => item.id === id);
 const player = id => db?.players?.find(item => item.id === id);
 const clubName = id => club(id)?.shortName || club(id)?.name || 'Unknown club';
 const money = value => `£${Number(value || 0).toLocaleString('en-GB')}`;
-const compactMoney = value => value >= 1000000 ? `£${(value / 1000000).toFixed(value >= 10000000 ? 1 : 2)}m` : `£${Math.round(value / 1000)}k`;
+const compactMoney = value => value >= 1000000
+  ? `£${(value / 1000000).toFixed(value >= 10000000 ? 1 : 2)}m`
+  : `£${Math.round(value / 1000)}k`;
 
 function loadStyles() {
-  if (document.getElementById('flm-transfers-v050-style')) return;
+  const existing = document.getElementById('flm-transfers-v050-style');
+  if (existing) {
+    if (!existing.href.includes('v=0.5.5')) existing.href = './career-transfers-v050.css?v=0.5.5';
+    return;
+  }
   const link = document.createElement('link');
   link.id = 'flm-transfers-v050-style';
   link.rel = 'stylesheet';
-  link.href = './career-transfers-v050.css?v=0.5.2';
+  link.href = './career-transfers-v050.css?v=0.5.5';
   document.head.appendChild(link);
 }
 
@@ -62,20 +72,46 @@ function persist(c) {
 }
 
 async function sync() {
-  const c = career();
-  if (!c || !manager()?.loadDatabase) return null;
-  db ||= await manager().loadDatabase();
-  const stateChanged = ensureTransferState(c, db);
-  const world = processTransferWorld(c, db);
-  if (stateChanged || world.changed) persist(c);
-  return { c, db, world };
+  if (syncPromise) return syncPromise;
+  syncPromise = (async () => {
+    const c = career();
+    if (!c || !manager()?.loadDatabase) return null;
+    db ||= await manager().loadDatabase();
+    const stateChanged = ensureTransferState(c, db);
+    const world = processTransferWorld(c, db);
+    if (stateChanged || world.changed) persist(c);
+    return { c, db, world };
+  })();
+
+  try {
+    return await syncPromise;
+  } finally {
+    syncPromise = null;
+  }
 }
 
-async function ensureNav() {
+function updateNavBadge(c = career()) {
+  const button = document.querySelector('.career-nav [data-v050-transfer-tab]');
+  if (!button || !c?.transfers) return;
+  let pending = 0;
+  try {
+    pending = getIncomingOffers(c, { includeResolved: false }).length;
+  } catch (_) {
+    pending = 0;
+  }
+  const nextLabel = pending
+    ? `Transfers<small>${pending} OFFER${pending === 1 ? '' : 'S'}</small>`
+    : 'Transfers';
+  if (button.innerHTML !== nextLabel) button.innerHTML = nextLabel;
+  button.disabled = Boolean(document.querySelector('[data-live-match]'));
+  button.classList.toggle('is-active', open);
+}
+
+function ensureNav() {
   const nav = document.querySelector('.career-nav');
   const c = career();
   if (!nav || !c) return;
-  await sync();
+
   let button = nav.querySelector('[data-v050-transfer-tab]');
   if (!button) {
     button = document.createElement('button');
@@ -83,18 +119,17 @@ async function ensureNav() {
     button.className = 'career-nav-button v050-transfer-nav';
     button.dataset.v050TransferTab = '1';
     nav.querySelector('[data-career-tab="squad"]')?.after(button);
-    button.addEventListener('click', () => {
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
       if (button.disabled) return;
-      document.querySelector('[data-career-tab="overview"]')?.click();
       open = true;
-      queueMicrotask(() => renderTransfers(true));
+      tab = 'Market';
+      flash = null;
+      requestAnimationFrame(() => renderTransfers(true));
     });
   }
-  const pending = getIncomingOffers(c, { includeResolved: false }).length;
-  const nextLabel = pending ? `Transfers<small>${pending} OFFER${pending === 1 ? '' : 'S'}</small>` : 'Transfers';
-  if (button.innerHTML !== nextLabel) button.innerHTML = nextLabel;
-  button.disabled = Boolean(document.querySelector('[data-live-match]'));
-  button.classList.toggle('is-active', open);
+  updateNavBadge(c);
 }
 
 function playerMeta(p) {
@@ -141,7 +176,9 @@ function marketDetail(c, p) {
           <input type="number" min="250000" step="250000" value="${defaultFee}" data-v050-fee aria-label="Transfer fee offer" />
           <button class="v050-action" data-v050-offer>MAKE OFFER</button>
         </div>
-        ${status === 'countered' ? `<button class="v050-action secondary" style="margin-top:7px" data-v050-counter>ACCEPT COUNTER · ${compactMoney(negotiation.counterFee)}</button>` : `<button class="v050-action secondary" style="margin-top:7px" data-v050-asking>MEET ASKING PRICE · ${compactMoney(asking)}</button>`}
+        ${status === 'countered'
+          ? `<button class="v050-action secondary" style="margin-top:7px" data-v050-counter>ACCEPT COUNTER · ${compactMoney(negotiation.counterFee)}</button>`
+          : `<button class="v050-action secondary" style="margin-top:7px" data-v050-asking>MEET ASKING PRICE · ${compactMoney(asking)}</button>`}
         ${latest ? `<div class="v050-message ${status === 'rejected' ? 'bad' : ''}">${esc(latest)}</div>` : ''}
       </div>`;
   }
@@ -160,19 +197,74 @@ function marketDetail(c, p) {
     ${action}`;
 }
 
-function marketView(c) {
-  const players = searchTransferMarket(c, db, { query, position });
+function marketPlayers(c) {
+  return searchTransferMarket(c, db, { query, position });
+}
+
+function ensureSelected(players) {
   if (!players.some(p => p.id === selectedId)) selectedId = players[0]?.id || null;
-  const selected = player(selectedId);
+  return players.find(p => p.id === selectedId) || null;
+}
+
+function marketRows(c, players) {
+  if (!players.length) {
+    return `<div class="v050-empty"><strong>NO MATCHES</strong><span>Change the search or position filter.</span></div>`;
+  }
+  return players.slice(0, 120).map(p => `
+    <button class="v050-player-row ${p.id === selectedId ? 'is-selected' : ''}" data-v050-player="${esc(p.id)}">
+      <span class="v050-pos">${esc(p.primaryPosition || p.positionGroup || '—')}</span>
+      <span><strong>${esc(p.name)}</strong><small>${esc(clubName(p.clubId))} · Age ${esc(p.reportedAge || '—')} · Jun ${getPlayerContract(c, p)?.expiryYear || '—'}</small></span>
+      <span class="v050-value">${compactMoney(estimatePlayerValue(p))}</span>
+    </button>`).join('');
+}
+
+function marketView(c) {
+  const players = marketPlayers(c);
+  const selected = ensureSelected(players);
   return `
     <div class="v050-market-tools">
-      <input type="search" value="${esc(query)}" placeholder="Search players or positions" data-v050-search aria-label="Search transfer market" />
+      <div class="v050-search-wrap"><input type="search" value="${esc(query)}" placeholder="Search players or positions" data-v050-search aria-label="Search transfer market" /><span data-v050-market-count>${Math.min(players.length, 120)} / ${players.length}</span></div>
       <select data-v050-position aria-label="Filter position"><option ${position === 'All' ? 'selected' : ''}>All</option><option ${position === 'GK' ? 'selected' : ''}>GK</option><option ${position === 'DEF' ? 'selected' : ''}>DEF</option><option ${position === 'MID' ? 'selected' : ''}>MID</option><option ${position === 'ATT' ? 'selected' : ''}>ATT</option></select>
     </div>
     <div class="v050-market-layout">
-      <div class="v050-player-list">${players.length ? players.slice(0, 120).map(p => `<button class="v050-player-row ${p.id === selectedId ? 'is-selected' : ''}" data-v050-player="${esc(p.id)}"><span class="v050-pos">${esc(p.primaryPosition || p.positionGroup || '—')}</span><span><strong>${esc(p.name)}</strong><small>${esc(clubName(p.clubId))} · Age ${esc(p.reportedAge || '—')} · Jun ${getPlayerContract(c, p)?.expiryYear || '—'}</small></span><span class="v050-value">${compactMoney(estimatePlayerValue(p))}</span></button>`).join('') : `<div class="v050-empty"><strong>NO MATCHES</strong><span>Change the search or position filter.</span></div>`}</div>
-      <article class="v050-detail">${marketDetail(c, selected)}</article>
+      <div class="v050-player-list" data-v050-player-list>${marketRows(c, players)}</div>
+      <article class="v050-detail" data-v050-detail>${marketDetail(c, selected)}</article>
     </div>`;
+}
+
+function refreshMarket(c, { resetScroll = false, detailOnly = false } = {}) {
+  const root = document.querySelector('.career-content');
+  if (!root || tab !== 'Market' || !root.querySelector('.v050-transfer-page')) return;
+
+  const list = root.querySelector('[data-v050-player-list]');
+  const detail = root.querySelector('[data-v050-detail]');
+  if (!list || !detail) return;
+
+  if (detailOnly) {
+    root.querySelectorAll('[data-v050-player]').forEach(button => {
+      button.classList.toggle('is-selected', button.dataset.v050Player === selectedId);
+    });
+    detail.innerHTML = marketDetail(c, player(selectedId));
+    return;
+  }
+
+  const previousScroll = resetScroll ? 0 : list.scrollTop;
+  const players = marketPlayers(c);
+  const selected = ensureSelected(players);
+  list.innerHTML = marketRows(c, players);
+  detail.innerHTML = marketDetail(c, selected);
+  const count = root.querySelector('[data-v050-market-count]');
+  if (count) count.textContent = `${Math.min(players.length, 120)} / ${players.length}`;
+  list.scrollTop = previousScroll;
+}
+
+function scheduleMarketRefresh(resetScroll = false) {
+  if (marketFrame) cancelAnimationFrame(marketFrame);
+  marketFrame = requestAnimationFrame(() => {
+    marketFrame = 0;
+    const c = career();
+    if (c && db) refreshMarket(c, { resetScroll });
+  });
 }
 
 function negotiationsView(c) {
@@ -226,113 +318,258 @@ function ownSquadView(c) {
   }).join('')}</div>`;
 }
 
+function bindRoot(root) {
+  if (boundRoots.has(root)) return;
+  boundRoots.add(root);
+
+  root.addEventListener('input', event => {
+    const search = event.target.closest?.('[data-v050-search]');
+    if (!search) return;
+    query = search.value;
+    selectedId = null;
+    scheduleMarketRefresh(true);
+  });
+
+  root.addEventListener('change', event => {
+    const filter = event.target.closest?.('[data-v050-position]');
+    if (!filter) return;
+    position = filter.value;
+    selectedId = null;
+    scheduleMarketRefresh(true);
+  });
+
+  root.addEventListener('click', event => {
+    const c = career();
+    if (!c || !db) return;
+
+    const tabButton = event.target.closest('[data-v050-tab]');
+    if (tabButton) {
+      tab = tabButton.dataset.v050Tab;
+      void renderTransfers(true);
+      return;
+    }
+
+    const playerButton = event.target.closest('[data-v050-player]');
+    if (playerButton) {
+      const list = root.querySelector('[data-v050-player-list]');
+      if (list) marketScrollTop = list.scrollTop;
+      selectedId = playerButton.dataset.v050Player;
+      refreshMarket(c, { detailOnly: true });
+      return;
+    }
+
+    if (event.target.closest('[data-v050-asking]')) {
+      const p = player(selectedId);
+      const input = root.querySelector('[data-v050-fee]');
+      if (p && input) input.value = String(getAskingPrice(p, db, c));
+      return;
+    }
+
+    if (event.target.closest('[data-v050-offer]')) {
+      try {
+        const feeInput = root.querySelector('[data-v050-fee]');
+        const result = submitTransferOffer(c, db, selectedId, Number(feeInput?.value));
+        persist(c);
+        flash = {
+          text: result.status === 'accepted' ? 'Transfer fee accepted. Negotiate personal terms.' : result.negotiation.messages.at(-1),
+          good: result.status === 'accepted',
+          bad: result.status === 'rejected'
+        };
+      } catch (error) {
+        flash = { text: error.message, bad: true };
+      }
+      void renderTransfers(true);
+      return;
+    }
+
+    if (event.target.closest('[data-v050-counter]')) {
+      try {
+        acceptSellerCounter(c, db, selectedId);
+        persist(c);
+        flash = { text: 'Counter-offer accepted. Personal terms can now be negotiated.', good: true };
+      } catch (error) {
+        flash = { text: error.message, bad: true };
+      }
+      void renderTransfers(true);
+      return;
+    }
+
+    if (event.target.closest('[data-v050-contract]')) {
+      try {
+        const wageInput = root.querySelector('[data-v050-wage]');
+        const yearsInput = root.querySelector('[data-v050-years]');
+        const result = submitContractOffer(c, db, selectedId, Number(wageInput?.value), Number(yearsInput?.value));
+        persist(c);
+        if (result.status === 'completed') {
+          flash = { text: `${player(result.transaction.playerId)?.name || 'Player'} has signed for ${clubName(c.clubId)}.`, good: true };
+          tab = 'My Squad';
+          selectedId = null;
+        } else {
+          flash = { text: result.negotiation.messages.at(-1), bad: true };
+        }
+      } catch (error) {
+        flash = { text: error.message, bad: true };
+      }
+      void renderTransfers(true);
+      return;
+    }
+
+    const openNegotiation = event.target.closest('[data-v050-open-neg]');
+    if (openNegotiation) {
+      selectedId = openNegotiation.dataset.v050OpenNeg;
+      tab = 'Market';
+      void renderTransfers(true);
+      return;
+    }
+
+    const listButton = event.target.closest('[data-v050-list]');
+    if (listButton) {
+      try {
+        const listed = toggleTransferListed(c, db, listButton.dataset.v050List);
+        persist(c);
+        flash = { text: listed ? 'Player added to the transfer list. Clubs will assess him as the window develops.' : 'Player removed from the transfer list.' };
+      } catch (error) {
+        flash = { text: error.message, bad: true };
+      }
+      void renderTransfers(true);
+      return;
+    }
+
+    const accept = event.target.closest('[data-v052-accept]');
+    if (accept) {
+      try {
+        const result = respondToIncomingOffer(c, db, accept.dataset.v052Accept, 'accept');
+        persist(c);
+        tab = 'My Squad';
+        flash = { text: `Offer accepted. ${player(result.transaction.playerId)?.name || 'Player'} has left for ${clubName(result.transaction.toClubId)}. Recheck your starting XI.`, good: true };
+      } catch (error) {
+        flash = { text: error.message, bad: true };
+      }
+      void renderTransfers(true);
+      return;
+    }
+
+    const reject = event.target.closest('[data-v052-reject]');
+    if (reject) {
+      try {
+        respondToIncomingOffer(c, db, reject.dataset.v052Reject, 'reject');
+        persist(c);
+        flash = { text: 'Transfer offer rejected.' };
+      } catch (error) {
+        flash = { text: error.message, bad: true };
+      }
+      void renderTransfers(true);
+      return;
+    }
+
+    const counter = event.target.closest('[data-v052-counter]');
+    if (counter) {
+      const offerId = counter.dataset.v052Counter;
+      const input = root.querySelector(`[data-v052-counter-fee="${CSS.escape(offerId)}"]`);
+      try {
+        const result = respondToIncomingOffer(c, db, offerId, 'counter', Number(input?.value));
+        persist(c);
+        if (result.status === 'completed') {
+          tab = 'My Squad';
+          flash = { text: `Counter accepted. ${player(result.transaction.playerId)?.name || 'Player'} has been sold for ${compactMoney(result.transaction.fee)}.`, good: true };
+        } else {
+          flash = { text: 'The buying club rejected your counter-offer and walked away.', bad: true };
+        }
+      } catch (error) {
+        flash = { text: error.message, bad: true };
+      }
+      void renderTransfers(true);
+    }
+  });
+}
+
 async function renderTransfers(force = false) {
   if (!open || rendering) return;
-  const root = document.querySelector('.career-content');
-  const synced = await sync();
-  if (!root || !synced) return;
-  if (!force && root.dataset.v050Transfers === '1') return;
-  rendering = true;
-  const c = synced.c;
-  const budget = getTransferBudget(c);
-  const window = getTransferWindowStatus(c);
-  const pendingOffers = getIncomingOffers(c, { includeResolved: false }).length;
-  document.querySelectorAll('.career-nav-button').forEach(button => button.classList.remove('is-active'));
-  document.querySelector('[data-v050-transfer-tab]')?.classList.add('is-active');
-  root.dataset.v050Transfers = '1';
-  root.innerHTML = `
-    <section class="v050-transfer-page">
-      <div class="v050-transfer-head"><div><p class="eyebrow">${window.deadlineWeek ? 'DEADLINE WEEK · 1 SEP 23:00' : window.open ? 'SUMMER TRANSFER WINDOW · OPEN' : 'SUMMER TRANSFER WINDOW · CLOSED'}</p><h2>Transfers</h2></div><div class="v050-budget v052-budget"><div><small>TRANSFER BUDGET</small><strong>${compactMoney(budget.transferBudget)}</strong></div><div><small>WAGE ROOM / WEEK</small><strong>${compactMoney(budget.wageRoom)}</strong></div><div class="${window.open ? 'is-open' : 'is-closed'}"><small>WINDOW</small><strong>${window.deadlineWeek ? `${Math.max(0, window.daysRemaining)} DAYS` : window.open ? 'OPEN' : 'CLOSED'}</strong></div></div></div>
-      <div class="v052-window-strip ${window.deadlineWeek ? 'deadline' : window.open ? 'open' : 'closed'}"><strong>${esc(window.label)}</strong><span>${window.open ? `${Math.max(0, window.daysRemaining)} days until the 1 September deadline.` : 'Permanent deals cannot now be registered.'}</span></div>
-      ${flash ? `<div class="v050-message ${flash.good ? 'good' : flash.bad ? 'bad' : ''}">${esc(flash.text)}</div>` : ''}
-      <div class="v050-tabs"><button class="${tab === 'Market' ? 'is-active' : ''}" data-v050-tab="Market">MARKET</button><button class="${tab === 'Negotiations' ? 'is-active' : ''}" data-v050-tab="Negotiations">NEGOTIATIONS</button><button class="${tab === 'Offers' ? 'is-active' : ''}" data-v050-tab="Offers">OFFERS${pendingOffers ? ` · ${pendingOffers}` : ''}</button><button class="${tab === 'World' ? 'is-active' : ''}" data-v050-tab="World">WORLD</button><button class="${tab === 'My Squad' ? 'is-active' : ''}" data-v050-tab="My Squad">MY SQUAD</button></div>
-      ${tab === 'Market' ? marketView(c) : tab === 'Negotiations' ? negotiationsView(c) : tab === 'Offers' ? offersView(c) : tab === 'World' ? worldView(c) : ownSquadView(c)}
-    </section>`;
-  flash = null;
+  let root = document.querySelector('.career-content');
+  if (!root) return;
+  if (!force && root.dataset.v050Transfers === '1' && root.querySelector('.v050-transfer-page')) return;
 
-  root.querySelectorAll('[data-v050-tab]').forEach(button => button.addEventListener('click', () => { tab = button.dataset.v050Tab; renderTransfers(true); }));
-  root.querySelector('[data-v050-search]')?.addEventListener('input', event => { query = event.target.value; selectedId = null; renderTransfers(true); });
-  root.querySelector('[data-v050-position]')?.addEventListener('change', event => { position = event.target.value; selectedId = null; renderTransfers(true); });
-  root.querySelectorAll('[data-v050-player]').forEach(button => button.addEventListener('click', () => { selectedId = button.dataset.v050Player; renderTransfers(true); }));
-  root.querySelector('[data-v050-asking]')?.addEventListener('click', () => {
-    const p = player(selectedId); const input = root.querySelector('[data-v050-fee]'); if (p && input) input.value = String(getAskingPrice(p, db, c));
-  });
-  root.querySelector('[data-v050-offer]')?.addEventListener('click', () => {
-    try {
-      const result = submitTransferOffer(c, db, selectedId, Number(root.querySelector('[data-v050-fee]').value));
-      persist(c);
-      flash = { text: result.status === 'accepted' ? 'Transfer fee accepted. Negotiate personal terms.' : result.negotiation.messages.at(-1), good: result.status === 'accepted', bad: result.status === 'rejected' };
-    } catch (error) { flash = { text: error.message, bad: true }; }
-    renderTransfers(true);
-  });
-  root.querySelector('[data-v050-counter]')?.addEventListener('click', () => {
-    try { acceptSellerCounter(c, db, selectedId); persist(c); flash = { text: 'Counter-offer accepted. Personal terms can now be negotiated.', good: true }; }
-    catch (error) { flash = { text: error.message, bad: true }; }
-    renderTransfers(true);
-  });
-  root.querySelector('[data-v050-contract]')?.addEventListener('click', () => {
-    try {
-      const result = submitContractOffer(c, db, selectedId, Number(root.querySelector('[data-v050-wage]').value), Number(root.querySelector('[data-v050-years]').value));
-      persist(c);
-      if (result.status === 'completed') {
-        flash = { text: `${player(result.transaction.playerId)?.name || 'Player'} has signed for ${clubName(c.clubId)}.`, good: true };
-        tab = 'My Squad'; selectedId = null;
-      } else flash = { text: result.negotiation.messages.at(-1), bad: true };
-    } catch (error) { flash = { text: error.message, bad: true }; }
-    renderTransfers(true);
-  });
-  root.querySelectorAll('[data-v050-open-neg]').forEach(button => button.addEventListener('click', () => { selectedId = button.dataset.v050OpenNeg; tab = 'Market'; renderTransfers(true); }));
-  root.querySelectorAll('[data-v050-list]').forEach(button => button.addEventListener('click', () => {
-    try { const listed = toggleTransferListed(c, db, button.dataset.v050List); persist(c); flash = { text: listed ? 'Player added to the transfer list. Clubs will assess him as the window develops.' : 'Player removed from the transfer list.' }; }
-    catch (error) { flash = { text: error.message, bad: true }; }
-    renderTransfers(true);
-  }));
-  root.querySelectorAll('[data-v052-accept]').forEach(button => button.addEventListener('click', () => {
-    try {
-      const result = respondToIncomingOffer(c, db, button.dataset.v052Accept, 'accept');
-      persist(c); tab = 'My Squad';
-      flash = { text: `Offer accepted. ${player(result.transaction.playerId)?.name || 'Player'} has left for ${clubName(result.transaction.toClubId)}. Recheck your starting XI.`, good: true };
-    } catch (error) { flash = { text: error.message, bad: true }; }
-    renderTransfers(true);
-  }));
-  root.querySelectorAll('[data-v052-reject]').forEach(button => button.addEventListener('click', () => {
-    try { respondToIncomingOffer(c, db, button.dataset.v052Reject, 'reject'); persist(c); flash = { text: 'Transfer offer rejected.' }; }
-    catch (error) { flash = { text: error.message, bad: true }; }
-    renderTransfers(true);
-  }));
-  root.querySelectorAll('[data-v052-counter]').forEach(button => button.addEventListener('click', () => {
-    const offerId = button.dataset.v052Counter;
-    const input = root.querySelector(`[data-v052-counter-fee="${CSS.escape(offerId)}"]`);
-    try {
-      const result = respondToIncomingOffer(c, db, offerId, 'counter', Number(input?.value));
-      persist(c);
-      if (result.status === 'completed') {
-        tab = 'My Squad';
-        flash = { text: `Counter accepted. ${player(result.transaction.playerId)?.name || 'Player'} has been sold for ${compactMoney(result.transaction.fee)}.`, good: true };
-      } else flash = { text: 'The buying club rejected your counter-offer and walked away.', bad: true };
-    } catch (error) { flash = { text: error.message, bad: true }; }
-    renderTransfers(true);
-  }));
-  rendering = false;
+  rendering = true;
+  try {
+    const synced = await sync();
+    if (!synced || !open) return;
+    root = document.querySelector('.career-content');
+    if (!root) return;
+
+    const currentList = root.querySelector('[data-v050-player-list]');
+    if (currentList) marketScrollTop = currentList.scrollTop;
+
+    const c = synced.c;
+    const budget = getTransferBudget(c);
+    const window = getTransferWindowStatus(c);
+    const pendingOffers = getIncomingOffers(c, { includeResolved: false }).length;
+
+    document.querySelectorAll('.career-nav-button').forEach(button => button.classList.remove('is-active'));
+    document.querySelector('[data-v050-transfer-tab]')?.classList.add('is-active');
+
+    root.dataset.v050Transfers = '1';
+    root.innerHTML = `
+      <section class="v050-transfer-page">
+        <div class="v050-transfer-head">
+          <div><p class="eyebrow">${window.deadlineWeek ? 'DEADLINE WEEK · 1 SEP 23:00' : window.open ? 'SUMMER TRANSFER WINDOW · OPEN' : 'SUMMER TRANSFER WINDOW · CLOSED'}</p><h2>Transfers</h2></div>
+          <div class="v050-budget v052-budget">
+            <div><small>TRANSFER BUDGET</small><strong>${compactMoney(budget.transferBudget)}</strong></div>
+            <div><small>WAGE ROOM / WEEK</small><strong>${compactMoney(budget.wageRoom)}</strong></div>
+            <div class="${window.open ? 'is-open' : 'is-closed'}"><small>WINDOW</small><strong>${window.deadlineWeek ? `${Math.max(0, window.daysRemaining)} DAYS` : window.open ? 'OPEN' : 'CLOSED'}</strong></div>
+          </div>
+        </div>
+        <div class="v052-window-strip ${window.deadlineWeek ? 'deadline' : window.open ? 'open' : 'closed'}"><strong>${esc(window.label)}</strong><span>${window.open ? `${Math.max(0, window.daysRemaining)} days until the 1 September deadline.` : 'Permanent deals cannot now be registered.'}</span></div>
+        ${flash ? `<div class="v050-message v050-page-flash ${flash.good ? 'good' : flash.bad ? 'bad' : ''}">${esc(flash.text)}</div>` : ''}
+        <div class="v050-tabs">
+          <button class="${tab === 'Market' ? 'is-active' : ''}" data-v050-tab="Market">MARKET</button>
+          <button class="${tab === 'Negotiations' ? 'is-active' : ''}" data-v050-tab="Negotiations">NEGOTIATIONS</button>
+          <button class="${tab === 'Offers' ? 'is-active' : ''}" data-v050-tab="Offers">OFFERS${pendingOffers ? ` · ${pendingOffers}` : ''}</button>
+          <button class="${tab === 'World' ? 'is-active' : ''}" data-v050-tab="World">WORLD</button>
+          <button class="${tab === 'My Squad' ? 'is-active' : ''}" data-v050-tab="My Squad">MY SQUAD</button>
+        </div>
+        ${tab === 'Market' ? marketView(c) : tab === 'Negotiations' ? negotiationsView(c) : tab === 'Offers' ? offersView(c) : tab === 'World' ? worldView(c) : ownSquadView(c)}
+      </section>`;
+
+    bindRoot(root);
+    updateNavBadge(c);
+    flash = null;
+
+    if (tab === 'Market') {
+      requestAnimationFrame(() => {
+        const list = root.querySelector('[data-v050-player-list]');
+        if (list) list.scrollTop = marketScrollTop;
+      });
+    }
+  } finally {
+    rendering = false;
+  }
 }
 
 async function scan() {
-  queued = false;
   if (!window.FLMManager) return;
   loadStyles();
-  await ensureNav();
-  if (open) await renderTransfers();
+  ensureNav();
+  if (open) await renderTransfers(false);
 }
 
 function queue() {
   if (queued) return;
   queued = true;
-  queueMicrotask(() => scan().catch(() => { queued = false; rendering = false; }));
+  requestAnimationFrame(() => {
+    queued = false;
+    scan().catch(() => { rendering = false; });
+  });
 }
 
 document.addEventListener('click', event => {
   if (event.target.closest('[data-v050-transfer-tab]')) return;
-  if (event.target.closest('.career-nav-button')) open = false;
+  if (event.target.closest('.career-nav-button')) {
+    open = false;
+    if (marketFrame) {
+      cancelAnimationFrame(marketFrame);
+      marketFrame = 0;
+    }
+  }
 }, true);
 
 loadStyles();
