@@ -1,0 +1,65 @@
+/* Football Lab Manager — Transfers layout refinement v0.5.6
+   Uses the full career workspace instead of leaving prototype-era dead space. */
+
+.flm-cm-shell .career-content:has(.v050-transfer-page){
+  overflow:hidden!important;
+  padding:11px 12px 12px!important;
+}
+
+.flm-cm-shell .career-content>.v050-transfer-page,
+.flm-cm-shell .v050-transfer-page{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+}
+
+.flm-cm-shell .v050-transfer-head,
+.flm-cm-shell .v052-window-strip,
+.flm-cm-shell .v050-tabs,
+.flm-cm-shell .v050-market-tools,
+.flm-cm-shell .v050-market-layout{
+  width:100%!important;
+  max-width:none!important;
+}
+
+.flm-cm-shell .v050-market-layout{
+  grid-template-columns:minmax(390px,42%) minmax(0,58%)!important;
+  height:calc(100dvh - 292px)!important;
+  min-height:520px!important;
+  max-height:none!important;
+}
+
+.flm-cm-shell .v050-player-list,
+.flm-cm-shell .v050-detail{
+  height:100%!important;
+}
+
+.flm-cm-shell .v050-detail{
+  padding:20px 24px!important;
+}
+
+@media (min-width:1500px){
+  .flm-cm-shell .v050-market-layout{
+    grid-template-columns:minmax(430px,40%) minmax(0,60%)!important;
+  }
+  .flm-cm-shell .v050-detail{padding:22px 28px!important}
+}
+
+@media (max-width:1100px){
+  .flm-cm-shell .career-content:has(.v050-transfer-page){overflow:auto!important}
+  .flm-cm-shell .v050-market-layout{
+    grid-template-columns:minmax(330px,44%) minmax(0,56%)!important;
+    height:calc(100dvh - 300px)!important;
+    min-height:500px!important;
+  }
+}
+
+@media (max-width:900px){
+  .flm-cm-shell .v050-market-layout{
+    grid-template-columns:1fr!important;
+    height:auto!important;
+    min-height:0!important;
+  }
+  .flm-cm-shell .v050-player-list{height:300px!important}
+  .flm-cm-shell .v050-detail{height:auto!important;min-height:390px!important}
+}
