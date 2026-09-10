@@ -24,31 +24,28 @@ function closeAppointmentFrame() {
 }
 
 function saveAppointmentDismissal(career) {
-  const manager = flmManager();
   const state = career?.appointmentExperience;
   if (!career || !state?.completed) return false;
 
   state.dismissed = true;
   state.stage = 'complete';
 
-  // Keep compatibility with the appointment module's legacy save key while
-  // also asking the authoritative manager save system to persist the career.
+  // manager-core serialises careers with JSON.stringify as well, so writing the
+  // canonical save key here is the same representation used by the main save.
   try {
     career.updatedAt = new Date().toISOString();
     localStorage.setItem('flm-career-save', JSON.stringify(career));
-  } catch {}
-
-  document.dispatchEvent(new CustomEvent('flm:career-save-requested', {
-    detail: { career, source: 'appointment-dismissal-hotfix' }
-  }));
-
-  Promise.resolve(manager?.saveActiveCareer?.()).catch(error => {
+  } catch (error) {
     console.warn('FLM appointment dismissal save:', error);
-  });
+  }
+
   return true;
 }
 
 function repairStaleCompletedSummary() {
+  // A press conference completed during this page session is allowed to show
+  // its summary exactly once. A completed state loaded from an older save is
+  // stale UI and should never reopen over normal career navigation.
   if (appointmentCompletedThisSession) return false;
   const career = activeCareer();
   const state = career?.appointmentExperience;
@@ -73,6 +70,11 @@ window.addEventListener('click', event => {
   const profileTrigger = target.closest('[data-v044-profile]');
   const playerId = profileTrigger?.dataset?.v044Profile;
   if (playerId) {
+    // Repair an old completed summary before changing the career content. This
+    // prevents the appointment MutationObserver from reopening it over the
+    // newly rendered player profile.
+    repairStaleCompletedSummary();
+
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation();
@@ -115,8 +117,37 @@ function scheduleRepair() {
   });
 }
 
-['flm:career-opened', 'flm:career-data-refresh', 'flm:career-sync-complete']
+['flm:career-opened', 'flm:career-created', 'flm:career-data-refresh', 'flm:career-sync-complete']
   .forEach(eventName => document.addEventListener(eventName, scheduleRepair));
 
 document.addEventListener('DOMContentLoaded', scheduleRepair, { once: true });
 if (document.readyState !== 'loading') scheduleRepair();
+
+// Existing saves can become active after DOMContentLoaded without emitting a
+// stable public lifecycle event. Poll briefly during bootstrap only; once the
+// stale completed state is repaired the timer stops permanently.
+const staleRepairStarted = Date.now();
+const staleRepairTimer = setInterval(() => {
+  if (repairStaleCompletedSummary() || Date.now() - staleRepairStarted > 10000) {
+    clearInterval(staleRepairTimer);
+  }
+}, 50);
+
+// If the appointment module manages to open an old completed summary between
+// lifecycle ticks, close it immediately rather than waiting for its 1.4 s poll.
+const modalObserver = new MutationObserver(() => {
+  const modal = document.getElementById('appModal');
+  if (!modal?.classList.contains('flm-appointment-open')) return;
+  repairStaleCompletedSummary();
+});
+
+const observeAppointmentModal = () => {
+  const modal = document.getElementById('appModal');
+  if (!modal) return false;
+  modalObserver.observe(modal, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+  return true;
+};
+
+if (!observeAppointmentModal()) {
+  document.addEventListener('DOMContentLoaded', observeAppointmentModal, { once: true });
+}
