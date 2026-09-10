@@ -42,6 +42,26 @@ function patchResult(result, round) {
   return result;
 }
 
+function normalizeIncomingOfferLimits(career) {
+  const state = career?.transfers;
+  if (!state?.incomingOffers?.length || !state.aiClubs) return false;
+  let changed = false;
+  for (const offer of state.incomingOffers) {
+    if (offer?.status !== 'pending') continue;
+    const buyer = state.aiClubs[offer.buyerClubId];
+    const budget = Number(buyer?.transferBudget);
+    const offeredFee = Number(offer.offeredFee);
+    const maxFee = Number(offer.maxFee);
+    if (!Number.isFinite(budget) || !Number.isFinite(offeredFee) || budget < offeredFee) continue;
+    const affordableMax = Math.min(Number.isFinite(maxFee) ? maxFee : offeredFee, budget);
+    if (offer.maxFee !== affordableMax) {
+      offer.maxFee = affordableMax;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 function legacyProjectionDate(currentDate, career) {
   if (!validDate(currentDate)) return currentDate;
   const start = seasonStartYear(career?.season);
@@ -226,13 +246,17 @@ export function processTransferWorld(career, db) {
   }
 
   const result = withCalendarDate(career, () => market.processTransferWorld(career, db), { uniquePhase: true });
+  const offerLimitsChanged = normalizeIncomingOfferLimits(career);
   if (result && worldClockCareer(career)) {
     result.window = dynamicWindow(career);
     result.phaseKey = `D:${career.currentDate || career.calendar?.currentDate}`;
+    result.changed = Boolean(result.changed) || offerLimitsChanged;
     const model = deriveCalendarForCareer(career);
     if (dayNumber(career.currentDate || career.calendar?.currentDate) >= dayNumber(model.transferClosedDate)) {
       result.changed = addSeasonWindowClosedNews(career) || Boolean(result.changed) || suppressLegacyClosureNews;
     }
+  } else if (result && offerLimitsChanged) {
+    result.changed = true;
   }
   return result;
 }
@@ -250,6 +274,7 @@ export function submitContractOffer(career, db, playerId, weeklyWage, years = 4)
 }
 
 export function respondToIncomingOffer(career, db, offerId, action, counterFee = null) {
+  normalizeIncomingOfferLimits(career);
   return withCalendarDate(career, () => legacy.respondToIncomingOffer(career, db, offerId, action, counterFee));
 }
 
