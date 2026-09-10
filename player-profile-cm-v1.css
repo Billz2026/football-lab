@@ -1,0 +1,191 @@
+/* Football Lab Manager — dense player profile presentation v1 */
+.flm-cm-profile .flm-ip-header{
+  display:grid!important;
+  grid-template-columns:108px minmax(0,1fr) auto!important;
+  gap:0!important;
+  align-items:stretch!important;
+  min-height:94px;
+  padding:0!important;
+  border:1px solid #24598c!important;
+  border-left:4px solid #55dc7c!important;
+  background:linear-gradient(90deg,#0b355f 0%,#082746 58%,#061a31 100%)!important;
+}
+.flm-cm-profile .flm-cm-number{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  min-width:108px;
+  padding:8px 10px;
+  border-right:1px solid #24598c;
+  background:#061a31b8;
+  text-align:center;
+}
+.flm-cm-profile .flm-cm-number-value{
+  display:block;
+  min-height:54px;
+  color:#f4f7fa;
+  font-size:58px;
+  font-weight:950;
+  line-height:.9;
+  letter-spacing:-.06em;
+  font-variant-numeric:tabular-nums;
+}
+.flm-cm-profile .flm-cm-number-label{
+  display:block;
+  margin-top:5px;
+  color:#74e3a0;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.flm-cm-profile .flm-cm-number.is-unassigned .flm-cm-number-value{color:transparent}
+.flm-cm-profile .flm-cm-number.is-unassigned .flm-cm-number-label{color:#8ca3b6}
+.flm-cm-profile .flm-ip-title{
+  min-width:0;
+  display:flex!important;
+  flex-direction:column;
+  justify-content:center;
+  padding:13px 18px!important;
+  border-left:0!important;
+}
+.flm-cm-profile .flm-ip-title h2{
+  margin:0!important;
+  color:#f4f7fb!important;
+  font-size:clamp(29px,3.1vw,45px)!important;
+  line-height:.98!important;
+  letter-spacing:-.035em!important;
+}
+.flm-cm-profile .flm-ip-title h2 strong{font-weight:950}
+.flm-cm-profile .flm-ip-subline{
+  margin-top:8px!important;
+  color:#9ab0c3!important;
+  font-size:9px!important;
+  font-weight:800!important;
+  letter-spacing:.02em;
+}
+.flm-cm-profile .flm-ip-summary{
+  min-width:330px;
+  border-left:1px solid #24598c!important;
+  background:#06182c8f!important;
+}
+.flm-cm-profile .flm-ip-summary>div{min-width:160px!important;padding:12px 13px!important}
+.flm-cm-profile .flm-ip-summary>button{grid-column:1/-1!important}
+
+.flm-cm-profile .flm-ip-tabs{margin-top:7px!important}
+.flm-cm-profile .flm-cm-profile-meta{
+  display:grid;
+  grid-template-columns:1.55fr 1.2fr .8fr;
+  gap:7px;
+  margin:0 0 7px;
+}
+.flm-cm-profile .flm-cm-meta-group{
+  min-width:0;
+  border:1px solid #24598e;
+  background:#06182c;
+}
+.flm-cm-profile .flm-cm-meta-title{
+  padding:6px 9px;
+  background:#104776;
+  color:#f1f5f8;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.flm-cm-profile .flm-cm-state-grid,
+.flm-cm-profile .flm-cm-fact-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.flm-cm-profile .flm-cm-fact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.flm-cm-profile .flm-cm-state,
+.flm-cm-profile .flm-cm-fact{
+  min-width:0;
+  padding:7px 9px;
+  border-right:1px solid #123758;
+  border-bottom:1px solid #123758;
+}
+.flm-cm-profile .flm-cm-state:nth-child(3n),.flm-cm-profile .flm-cm-fact:nth-child(2n){border-right:0}
+.flm-cm-profile .flm-cm-state span,.flm-cm-profile .flm-cm-fact span{
+  display:block;
+  color:#7895ad;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.flm-cm-profile .flm-cm-state strong,.flm-cm-profile .flm-cm-fact strong{
+  display:block;
+  margin-top:3px;
+  overflow:hidden;
+  color:#e6eef4;
+  font-size:10px;
+  font-weight:950;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.flm-cm-profile .flm-cm-state strong.is-positive{color:#55dc7c}
+.flm-cm-profile .flm-cm-position-wrap{display:flex;align-items:center;gap:5px;min-height:59px;padding:9px;flex-wrap:wrap}
+.flm-cm-profile .flm-cm-position-wrap span{padding:4px 7px;border:1px solid #3579aa;background:#0a3158;color:#dbe9f2;font-size:8px;font-weight:950}
+.flm-cm-profile .flm-cm-position-wrap span:first-child{border-color:#55dc7c;background:#174d36;color:#eaffef}
+
+.flm-cm-profile .flm-ip-profile-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:7px!important;
+}
+.flm-cm-profile .flm-ip-profile-grid>.flm-ip-side-card{display:none!important}
+.flm-cm-profile .flm-ip-profile-grid>.flm-ip-attributes{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100%!important;
+  min-height:326px;
+}
+.flm-cm-profile .flm-ip-attribute-list{
+  display:flex!important;
+  flex:1!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+}
+.flm-cm-profile .flm-ip-attribute-row{min-height:20px}
+.flm-cm-profile .flm-ip-season-card{margin-top:7px!important}
+.flm-cm-profile .flm-ip-panel[data-flm-profile-panel]{padding-bottom:0!important}
+
+.flm-cm-profile .flm-cm-history-shell{display:grid;gap:7px}
+.flm-cm-profile .flm-cm-history-summary{display:grid;grid-template-columns:1.4fr .8fr .8fr;gap:7px}
+.flm-cm-profile .flm-cm-history-current,.flm-cm-profile .flm-cm-history-note{
+  padding:12px 14px;border:1px solid #24598e;background:#06182c
+}
+.flm-cm-profile .flm-cm-history-current span,.flm-cm-profile .flm-cm-history-note span{display:block;color:#7895ad;font-size:7px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+.flm-cm-profile .flm-cm-history-current strong,.flm-cm-profile .flm-cm-history-note strong{display:block;margin-top:4px;color:#f1f5f8;font-size:12px}
+.flm-cm-profile .flm-cm-history-current em,.flm-cm-profile .flm-cm-history-note em{display:block;margin-top:3px;color:#8ca5b9;font-size:8px;font-style:normal}
+.flm-cm-profile .flm-cm-history-table{width:100%;border-collapse:collapse;font-size:9px}
+.flm-cm-profile .flm-cm-history-table th{padding:7px 9px;background:#104776;color:#a9c5da;font-size:7px;letter-spacing:.06em;text-align:left;text-transform:uppercase}
+.flm-cm-profile .flm-cm-history-table td{padding:8px 9px;border-bottom:1px solid #123758;color:#d8e3eb}
+.flm-cm-profile .flm-cm-history-table td:not(:first-child),.flm-cm-profile .flm-cm-history-table th:not(:first-child){text-align:center}
+.flm-cm-profile .flm-cm-transfer-row{display:grid;grid-template-columns:1fr auto 1fr auto;gap:10px;align-items:center;padding:9px 11px;border-bottom:1px solid #123758;font-size:9px}
+.flm-cm-profile .flm-cm-transfer-row strong{color:#e8f0f5}.flm-cm-profile .flm-cm-transfer-row i{color:#55dc7c;font-style:normal}.flm-cm-profile .flm-cm-transfer-row b{color:#f4c342}
+.flm-cm-profile .flm-cm-data-note{padding:9px 11px;border:1px solid #204d77;background:#041325;color:#809ab0;font-size:8px;line-height:1.55}
+
+@media(max-width:1100px){
+  .flm-cm-profile .flm-ip-header{grid-template-columns:90px minmax(0,1fr)!important}
+  .flm-cm-profile .flm-ip-summary{grid-column:1/-1;min-width:0;border-left:0!important;border-top:1px solid #24598c!important}
+  .flm-cm-profile .flm-cm-number{min-width:90px}.flm-cm-profile .flm-cm-number-value{font-size:50px}
+  .flm-cm-profile .flm-cm-profile-meta{grid-template-columns:1fr 1fr}.flm-cm-profile .flm-cm-profile-meta>.flm-cm-meta-group:first-child{grid-column:1/-1}
+}
+@media(max-width:780px){
+  .flm-cm-profile .flm-ip-profile-grid{grid-template-columns:1fr!important}
+  .flm-cm-profile .flm-ip-profile-grid>.flm-ip-attributes{min-height:0}
+  .flm-cm-profile .flm-cm-profile-meta{grid-template-columns:1fr}
+  .flm-cm-profile .flm-cm-profile-meta>.flm-cm-meta-group:first-child{grid-column:auto}
+  .flm-cm-profile .flm-cm-history-summary{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .flm-cm-profile .flm-ip-header{grid-template-columns:74px minmax(0,1fr)!important}
+  .flm-cm-profile .flm-cm-number{min-width:74px;padding:6px}.flm-cm-profile .flm-cm-number-value{font-size:42px}.flm-cm-profile .flm-cm-number-label{font-size:6px}
+  .flm-cm-profile .flm-ip-title{padding:10px 12px!important}.flm-cm-profile .flm-ip-title h2{font-size:26px!important}
+  .flm-cm-profile .flm-cm-state-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.flm-cm-profile .flm-cm-state:nth-child(3n){border-right:1px solid #123758}.flm-cm-profile .flm-cm-state:nth-child(2n){border-right:0}
+  .flm-cm-profile .flm-cm-transfer-row{grid-template-columns:1fr auto 1fr}.flm-cm-profile .flm-cm-transfer-row b{grid-column:1/-1}
+}
