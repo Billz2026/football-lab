@@ -1,0 +1,110 @@
+/* Football Lab Manager — career detail polish v2
+   Focused pass for player profiles, squad readability and inbox scale. */
+
+/* Player profile: stronger identity and quicker visual scanning. */
+.flm-cm-shell .flm-instant-profile .flm-ip-title h2{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-size:clamp(38px,3.1vw,52px)!important;
+  font-weight:700!important;
+  line-height:1!important;
+  letter-spacing:-.035em!important;
+}
+.flm-cm-shell .flm-instant-profile .flm-ip-subline{
+  margin-top:9px!important;
+  color:#c0cfda!important;
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:12px!important;
+  font-weight:500!important;
+}
+.flm-cm-shell .flm-ip-profile-grid{
+  align-items:start!important;
+}
+.flm-cm-shell .flm-ip-profile-grid>.flm-ip-card{
+  align-self:start!important;
+}
+.flm-cm-shell .flm-ip-attribute-row{
+  min-height:31px!important;
+}
+.flm-cm-shell .flm-ip-attribute-row span{
+  color:#bccbd6!important;
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:11.5px!important;
+  font-weight:500!important;
+}
+.flm-cm-shell .flm-ip-attribute-row strong{
+  min-width:30px!important;
+  color:#f3f6f8!important;
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:14px!important;
+  font-weight:700!important;
+  font-variant-numeric:tabular-nums!important;
+}
+.flm-cm-shell .flm-ip-attribute-row strong[data-polish-tier="elite"]{color:#5fe08d!important}
+.flm-cm-shell .flm-ip-attribute-row strong[data-polish-tier="strong"]{color:#78b9ef!important}
+.flm-cm-shell .flm-ip-attribute-row strong[data-polish-tier="standard"]{color:#f3f6f8!important}
+.flm-cm-shell .flm-ip-attribute-row strong[data-polish-tier="weak"]{color:#778b9c!important}
+.flm-cm-shell .flm-ip-info-list span{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:10.5px!important;
+}
+.flm-cm-shell .flm-ip-info-list strong{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:11px!important;
+  font-weight:600!important;
+}
+.flm-cm-shell .flm-ip-season-card{margin-top:8px!important}
+.flm-cm-shell .flm-ip-empty{min-height:82px!important;padding:15px!important}
+
+/* Squad: full names, less condensed typography, retain compact two-column layout. */
+.flm-cm-shell .v044-name strong,
+.flm-cm-shell .career-player-name strong{
+  color:#f2f6f9!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  font-size:11.5px!important;
+  font-weight:600!important;
+  letter-spacing:-.01em!important;
+}
+.flm-cm-shell .v044-row{min-height:31px!important}
+.flm-cm-shell .v044-pos{font-size:10px!important}
+.flm-cm-shell .v044-cell b{font-size:10px!important;font-variant-numeric:tabular-nums!important}
+.flm-cm-shell .v044-profile{font-size:8px!important;letter-spacing:.05em!important}
+
+/* Inbox: keep dense structure but stop the text feeling microscopic. */
+.flm-cm-shell .career-inbox-heading h2{font-size:24px!important}
+.flm-cm-shell .career-inbox-subtitle{font-size:9px!important}
+.flm-cm-shell .career-inbox-tabs button{font-size:9px!important}
+.flm-cm-shell .career-inbox-list-head{font-size:8px!important}
+.flm-cm-shell .career-inbox-row{min-height:45px!important}
+.flm-cm-shell .career-inbox-row-date{font-size:8px!important}
+.flm-cm-shell .career-inbox-row-copy strong{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:9.5px!important;
+  font-weight:600!important;
+}
+.flm-cm-shell .career-inbox-row-copy small{font-size:7.5px!important}
+.flm-cm-shell .career-inbox-detail{padding:22px 28px!important}
+.flm-cm-shell .career-inbox-detail h3{
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:26px!important;
+  font-weight:700!important;
+  letter-spacing:-.025em!important;
+}
+.flm-cm-shell .career-inbox-detail p{
+  max-width:980px!important;
+  color:#c8d4dd!important;
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:13px!important;
+  line-height:1.65!important;
+}
+.flm-cm-shell .career-inbox-detail-meta,
+.flm-cm-shell .career-inbox-detail-source{font-size:8px!important}
+
+/* Fold/tablet: preserve two-column squad where viable and keep profile readable. */
+@media (min-width:720px) and (max-width:1100px){
+  .flm-cm-shell .flm-instant-profile .flm-ip-title h2{font-size:38px!important}
+  .flm-cm-shell .flm-ip-attribute-row span{font-size:11px!important}
+  .flm-cm-shell .flm-ip-attribute-row strong{font-size:13px!important}
+  .flm-cm-shell .career-inbox-detail{padding:18px 20px!important}
+  .flm-cm-shell .career-inbox-detail h3{font-size:22px!important}
+  .flm-cm-shell .career-inbox-detail p{font-size:12px!important}
+}
