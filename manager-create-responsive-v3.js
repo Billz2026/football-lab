@@ -1,4 +1,4 @@
-/* Football Lab Manager — Create Manager full-screen Fold layout v3 */
+/* Football Lab Manager — Create Manager full-screen Fold layout v3.1 */
 (function () {
   'use strict';
 
@@ -16,6 +16,7 @@
   padding: 0 !important;
   place-items: stretch !important;
   align-items: stretch !important;
+  overflow: hidden !important;
 }
 
 .modal.${ACTIVE_CLASS} .modal-backdrop {
@@ -39,14 +40,14 @@
   border-radius: 0 !important;
   overflow: hidden !important;
   display: grid !important;
-  grid-template-columns: minmax(280px, 0.82fr) minmax(420px, 1.18fr) !important;
+  grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr) !important;
   grid-template-rows: auto auto 1fr auto !important;
   grid-template-areas:
     'eyebrow body'
     'title body'
     'copy body'
     '. actions' !important;
-  column-gap: clamp(34px, 5vw, 72px) !important;
+  column-gap: clamp(28px, 4vw, 64px) !important;
   row-gap: 12px !important;
   background:
     linear-gradient(90deg, rgba(3,16,33,.96) 0 41%, rgba(3,16,33,.82) 52%, rgba(3,16,33,.98) 100%),
@@ -99,11 +100,23 @@
 .modal.${ACTIVE_CLASS} #modalBody {
   grid-area: body;
   align-self: center;
-  min-width: 0;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
   min-height: 0 !important;
   margin: 0 !important;
   padding: 0 0 0 clamp(6px, 1vw, 14px) !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+}
+
+.modal.${ACTIVE_CLASS} #modalBody > *,
+.modal.${ACTIVE_CLASS} #modalBody form,
+.modal.${ACTIVE_CLASS} .manager-create-fields,
+.modal.${ACTIVE_CLASS} .manager-create-field,
+.modal.${ACTIVE_CLASS} .manager-create-field > * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .modal.${ACTIVE_CLASS} #modalActions {
@@ -141,6 +154,7 @@
 
 .modal.${ACTIVE_CLASS} .manager-create-fields > .manager-create-field {
   min-width: 0 !important;
+  max-width: 100% !important;
   margin: 0 !important;
 }
 
@@ -152,12 +166,99 @@
 .modal.${ACTIVE_CLASS} .manager-create-fields select,
 .modal.${ACTIVE_CLASS} .manager-create-fields textarea {
   width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   min-height: 60px !important;
-  max-width: none !important;
   box-sizing: border-box !important;
   font-size: 17px !important;
 }
 
+/* Z Fold unfolded / compact tablet portrait: use the full width as a single composition.
+   The previous desktop split squeezed the form past the right edge. */
+@media (min-width: 701px) and (max-width: 1180px) {
+  .modal.${ACTIVE_CLASS} .modal-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto !important;
+    grid-template-areas: 'eyebrow' 'title' 'copy' 'body' 'actions' !important;
+    row-gap: 8px !important;
+    padding: clamp(24px, 3.3vw, 36px) clamp(28px, 4.2vw, 46px) clamp(22px, 3vw, 34px) !important;
+    background:
+      linear-gradient(180deg, rgba(3,16,33,.90) 0%, rgba(3,16,33,.80) 46%, rgba(3,16,33,.95) 100%),
+      url('./assets/homepage/stadium-home.webp') center/cover no-repeat !important;
+  }
+
+  .modal.${ACTIVE_CLASS} .modal-card::after {
+    display: none !important;
+  }
+
+  .modal.${ACTIVE_CLASS} #modalEyebrow {
+    align-self: start;
+    margin: 0 64px 6px 0 !important;
+  }
+
+  .modal.${ACTIVE_CLASS} #modalTitle {
+    max-width: none !important;
+    margin-right: 64px !important;
+    font-size: clamp(42px, 7vw, 64px) !important;
+    line-height: .96 !important;
+  }
+
+  .modal.${ACTIVE_CLASS} #modalCopy {
+    max-width: 760px !important;
+    margin: 8px 64px 0 0 !important;
+    font-size: clamp(14px, 2vw, 18px) !important;
+    line-height: 1.45 !important;
+  }
+
+  .modal.${ACTIVE_CLASS} #modalBody {
+    align-self: start;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: clamp(18px, 3vh, 32px) 0 0 !important;
+    overflow: hidden !important;
+  }
+
+  .modal.${ACTIVE_CLASS} #modalBody > *,
+  .modal.${ACTIVE_CLASS} #modalBody form {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .modal.${ACTIVE_CLASS} .manager-create-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .modal.${ACTIVE_CLASS} .manager-create-fields > .manager-create-field,
+  .modal.${ACTIVE_CLASS} .manager-create-fields > .manager-create-field > *,
+  .modal.${ACTIVE_CLASS} .manager-create-fields input,
+  .modal.${ACTIVE_CLASS} .manager-create-fields select,
+  .modal.${ACTIVE_CLASS} .manager-create-fields textarea {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .modal.${ACTIVE_CLASS} .manager-create-fields > .manager-create-field:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
+  }
+
+  .modal.${ACTIVE_CLASS} #modalActions {
+    width: 100% !important;
+    padding: 14px 0 0 !important;
+    margin: 0 !important;
+  }
+
+  .modal.${ACTIVE_CLASS} .modal-close {
+    top: 18px !important;
+    right: 18px !important;
+  }
+}
+
+/* Folded / narrow phone: preserve the existing single-column layout. */
 @media (max-width: 700px) {
   .modal.${ACTIVE_CLASS} .modal-card {
     overflow-y: auto !important;
@@ -171,7 +272,7 @@
   .modal.${ACTIVE_CLASS} .modal-card::after { display: none; }
   .modal.${ACTIVE_CLASS} #modalTitle { max-width: none; font-size: clamp(38px, 11vw, 56px) !important; }
   .modal.${ACTIVE_CLASS} #modalCopy { max-width: none !important; font-size: 14px !important; }
-  .modal.${ACTIVE_CLASS} #modalBody { align-self: start; padding: 12px 0 0 !important; }
+  .modal.${ACTIVE_CLASS} #modalBody { align-self: start; padding: 12px 0 0 !important; overflow: visible !important; }
   .modal.${ACTIVE_CLASS} .manager-create-fields { grid-template-columns: 1fr !important; gap: 12px !important; }
   .modal.${ACTIVE_CLASS} .manager-create-fields > .manager-create-field { grid-column: auto !important; }
   .modal.${ACTIVE_CLASS} #modalActions { padding-left: 0 !important; }
