@@ -8,6 +8,19 @@ const career = () => manager()?.activeCareer || null;
 const day = value => /^\d{4}-\d{2}-\d{2}$/.test(String(value || '')) ? Date.parse(`${value}T00:00:00Z`) : NaN;
 const isOpen = c => Number.isFinite(day(c?.currentDate || c?.calendar?.currentDate)) && day(c?.currentDate || c?.calendar?.currentDate) >= day(TRANSFER_OPEN);
 
+function ensureLayoutStyles(){
+  let link=document.querySelector('link[data-v056-transfer-layout]');
+  if(link){
+    if(!link.href.includes('v=0.5.6'))link.href='./career-transfers-layout-v056.css?v=0.5.6';
+    return;
+  }
+  link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href='./career-transfers-layout-v056.css?v=0.5.6';
+  link.dataset.v056TransferLayout='1';
+  document.head.appendChild(link);
+}
+
 function lockedView(){
   const root=document.querySelector('.career-content');
   if(!root)return;
@@ -39,6 +52,7 @@ async function loadTransfers(){
   const c=career();
   if(!c || !isOpen(c)){ensureGate(c);return;}
   loading=true;
+  ensureLayoutStyles();
   document.querySelector('[data-v054-transfer-gate]')?.remove();
   try{
     await import('./career-transfers-ui-v050.js?v=0.5.5');
