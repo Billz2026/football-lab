@@ -222,6 +222,7 @@ export function evaluatePlayerInterest(player, buyerClubId, career, db) {
   const buyerScore = effectiveClubReputation(career, db, buyerClubId);
   const required = requiredReputation(player, career, db);
   const gap = Math.round((buyerScore - required) * 10) / 10;
+  const reviewedTier = marketReputationTier(player);
 
   let key = 'interested';
   let label = 'Interested';
