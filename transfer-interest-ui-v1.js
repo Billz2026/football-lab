@@ -1,6 +1,6 @@
 /* Football Lab Manager — transfer interest UI v1 */
 import { getPlayerInterest } from './transfers-v050.js?v=0.6.3';
-import { effectiveClubReputation, reputationLabel } from './club-reputation-v1.js';
+import { effectiveClubReputation, reputationLabel } from './club-reputation-v1.js?v=1.0.1';
 
 (() => {
   'use strict';
