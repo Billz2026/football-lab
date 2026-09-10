@@ -1,5 +1,5 @@
 import * as legacy from './transfers-v050-legacy.js';
-import * as market from './transfer-market-v062-rivalry.js';
+import * as market from './transfer-market-v063-interest.js';
 import { deriveCalendarForCareer, seasonStartYear } from './season-calendar-v1.js';
 
 export * from './transfers-v050-legacy.js';
@@ -215,15 +215,16 @@ export function startTransferSeason(career, db) {
   return true;
 }
 
-// V0.6.2 explicit exports override the legacy star exports while preserving the proven
-// ownership, contract and budget infrastructure underneath. Rivalry rules are enforced
-// by the market wrapper for user, incoming and AI-to-AI business.
+// V0.6.3 explicit exports override the legacy star exports while preserving the proven
+// ownership, contract and budget infrastructure underneath. Rivalry and player-interest
+// rules are enforced by the market wrapper for user, incoming and AI-to-AI business.
 export const estimatePlayerValue = market.estimatePlayerValue;
 export const estimateWeeklyWage = market.estimateWeeklyWage;
 export const getTransferStance = market.getTransferStance;
 export const getAskingPrice = market.getAskingPrice;
 export const searchTransferMarket = market.searchTransferMarket;
 export const getNegotiation = market.getNegotiation;
+export const getPlayerInterest = market.getPlayerInterest;
 
 export function getTransferWindowStatus(career) {
   if (worldClockCareer(career)) return dynamicWindow(career);
@@ -285,8 +286,8 @@ export function migrateExistingRivalTransfers(career, db) {
 // Load transfer interaction in the browser and immediately repair old AI-only hard-rival
 // transfers when a saved career opens. User-completed deals are never auto-reverted.
 if (typeof window !== 'undefined') {
-  import('./career-transfer-negotiation-v061.js').catch(error => console.error('V0.6.2 transfer negotiation UI:', error));
-  import('./career-transfer-negotiation-v061-finish.js').catch(error => console.error('V0.6.2 transfer completion UI:', error));
+  import('./career-transfer-negotiation-v061.js').catch(error => console.error('V0.6.3 transfer negotiation UI:', error));
+  import('./career-transfer-negotiation-v061-finish.js').catch(error => console.error('V0.6.3 transfer completion UI:', error));
 
   const checkedCareers = new WeakSet();
   let migrationQueued = false;
@@ -303,7 +304,7 @@ if (typeof window !== 'undefined') {
       }
     } catch (error) {
       checkedCareers.delete(career);
-      console.error('V0.6.2 rivalry save migration:', error);
+      console.error('V0.6.3 rivalry save migration:', error);
     }
   };
   const queueRivalryMigration = () => {
