@@ -18,3 +18,4 @@ import './interaction-hotfix-v1.js?v=1.0.3';
 import './player-profile-warm-v1.js?v=1.0.1';
 import './career-ui-polish-v2.js?v=2.0.1';
 import './player-profile-cm-v2.js?v=2.0.0';
+import './player-performance-v1.js?v=1.0.0';
