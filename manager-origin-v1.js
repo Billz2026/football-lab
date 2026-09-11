@@ -160,6 +160,8 @@ function showOriginModal() {
   cancel.textContent = 'CANCEL';
   cancel.addEventListener('click', () => {
     pendingOrigin = null;
+    pendingPreviousCareerId = null;
+    stopCareerWatch();
     closeOriginModal();
   });
 
@@ -198,6 +200,7 @@ function showOriginModal() {
       continueButton.disabled = false;
     });
   });
+  parts.body.querySelector('input[name="manager-origin"]')?.focus();
 }
 
 function persistCareer(career) {
@@ -257,12 +260,21 @@ document.addEventListener('click', event => {
 }, true);
 
 document.addEventListener('click', event => {
-  if (!pendingOrigin) return;
   const parts = modalParts();
-  if (!parts?.modal.classList.contains('club-picker-modal')) return;
+  if (!parts) return;
+  const closeTarget = event.target.closest?.('[data-close-modal]');
   const button = event.target.closest?.('button');
-  if (!button) return;
-  if (button.textContent.trim().toUpperCase() === 'CANCEL' || button.hasAttribute('data-close-modal')) {
+
+  if (parts.modal.classList.contains('manager-origin-modal') && closeTarget) {
+    pendingOrigin = null;
+    pendingPreviousCareerId = null;
+    stopCareerWatch();
+    parts.modal.classList.remove('manager-origin-modal');
+    return;
+  }
+
+  if (!pendingOrigin || !parts.modal.classList.contains('club-picker-modal')) return;
+  if (closeTarget || button?.textContent.trim().toUpperCase() === 'CANCEL') {
     pendingOrigin = null;
     pendingPreviousCareerId = null;
     stopCareerWatch();
