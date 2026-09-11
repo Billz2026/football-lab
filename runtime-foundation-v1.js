@@ -22,4 +22,5 @@ import './career-world-v060.js?v=0.6.4';
 import './career-transfers-gate-v054.js?v=0.6.1';
 import './manager-shell-v1.js?v=1.0.4';
 import './team-selection-v2.js?v=2.0.0';
+import './squad-v2-compat-v1.js?v=1.0.0';
 import './manual-tactics-guard-v1.js?v=1.0.1';
