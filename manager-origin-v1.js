@@ -51,8 +51,8 @@ const ORIGINS = Object.freeze([
 
 let pendingOrigin = null;
 let pendingPreviousCareerId = null;
-let bypassNewGameIntercept = false;
 let careerWatchTimer = null;
+let capturedClubPicker = null;
 
 function esc(value) {
   return String(value ?? '')
@@ -109,6 +109,43 @@ function modalParts() {
   };
 }
 
+function detachChildren(parent) {
+  const fragment = document.createDocumentFragment();
+  if (!parent) return fragment;
+  while (parent.firstChild) fragment.appendChild(parent.firstChild);
+  return fragment;
+}
+
+function captureCurrentClubPicker() {
+  const parts = modalParts();
+  if (!parts?.body || !parts.actions) return null;
+  if (parts.title?.textContent?.trim() !== 'CHOOSE YOUR CLUB') return null;
+  return {
+    modalClassName: parts.modal.className,
+    cardClassName: parts.card?.className || '',
+    eyebrow: parts.eyebrow?.textContent || '',
+    title: parts.title?.textContent || '',
+    copy: parts.copy?.textContent || '',
+    body: detachChildren(parts.body),
+    actions: detachChildren(parts.actions)
+  };
+}
+
+function restoreClubPicker(snapshot) {
+  const parts = modalParts();
+  if (!parts || !snapshot) return false;
+  parts.modal.className = snapshot.modalClassName;
+  if (parts.card) parts.card.className = snapshot.cardClassName;
+  parts.eyebrow.textContent = snapshot.eyebrow;
+  parts.title.textContent = snapshot.title;
+  parts.copy.textContent = snapshot.copy;
+  parts.body.replaceChildren(snapshot.body);
+  parts.actions.replaceChildren(snapshot.actions);
+  parts.modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  return true;
+}
+
 function closeOriginModal() {
   const parts = modalParts();
   if (!parts) return;
@@ -116,6 +153,7 @@ function closeOriginModal() {
   parts.modal.setAttribute('aria-hidden', 'true');
   parts.card?.classList.remove('modal-wide');
   document.body.style.overflow = '';
+  capturedClubPicker = null;
 }
 
 function impactMarkup(origin) {
@@ -137,13 +175,14 @@ function impactMarkup(origin) {
   return `<small>CAREER IMPACT</small><h3>${esc(origin.label)}</h3><p>${esc(origin.impact)}</p><div class="manager-origin-bars">${bars}</div><div class="manager-origin-note">These modifiers are stored in the normal career save and are intentionally capped to small identity-level nudges.</div>`;
 }
 
-function showOriginModal() {
+function showOriginModal(snapshot) {
   injectStyles();
   const parts = modalParts();
-  if (!parts) return;
+  if (!parts || !snapshot) return;
+  capturedClubPicker = snapshot;
   let selectedId = null;
 
-  parts.eyebrow.textContent = '01 · NEW CAREER';
+  parts.eyebrow.textContent = 'NEW CAREER · MANAGER ORIGIN';
   parts.title.textContent = 'CHOOSE YOUR MANAGER ORIGIN';
   parts.copy.textContent = 'Your background shapes how you begin the job. Pick the identity that matches how you want to manage.';
   parts.body.innerHTML = `
@@ -172,14 +211,16 @@ function showOriginModal() {
   continueButton.disabled = true;
   continueButton.addEventListener('click', () => {
     const origin = ORIGINS.find(item => item.id === selectedId);
-    if (!origin) return;
+    if (!origin || !capturedClubPicker) return;
     pendingOrigin = origin;
     pendingPreviousCareerId = window.FLMManager?.activeCareer?.id || null;
-    parts.modal.classList.remove('manager-origin-modal');
-    bypassNewGameIntercept = true;
-    const trigger = document.querySelector('[data-action="new-game"]');
-    if (trigger) trigger.click();
-    bypassNewGameIntercept = false;
+    const snapshotToRestore = capturedClubPicker;
+    capturedClubPicker = null;
+    if (!restoreClubPicker(snapshotToRestore)) {
+      pendingOrigin = null;
+      pendingPreviousCareerId = null;
+      return;
+    }
     watchForCreatedCareer();
   });
 
@@ -240,7 +281,7 @@ function watchForCreatedCareer() {
       stopCareerWatch();
       return;
     }
-    if (Date.now() - startedAt > 60000) {
+    if (Date.now() - startedAt > 600000) {
       pendingOrigin = null;
       pendingPreviousCareerId = null;
       stopCareerWatch();
@@ -248,15 +289,29 @@ function watchForCreatedCareer() {
   }, 80);
 }
 
+// The existing manager-creation module deliberately bypasses its own New Game
+// interceptor when it hands off to the canonical club picker. We let that click
+// reach the base runtime, then detach the fully wired club-picker DOM and place
+// the origin step in front of it. Restoring those same nodes preserves all of the
+// existing club-selection event listeners without opening a second save path.
 document.addEventListener('click', event => {
   const action = event.target.closest?.('[data-action]')?.dataset.action;
-  if (action === 'quick-start') { pendingOrigin = null; pendingPreviousCareerId = null; }
-  if (action !== 'new-game' || bypassNewGameIntercept) return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  pendingOrigin = null;
-  pendingPreviousCareerId = null;
-  showOriginModal();
+  if (action === 'quick-start') {
+    pendingOrigin = null;
+    pendingPreviousCareerId = null;
+    capturedClubPicker = null;
+    stopCareerWatch();
+    return;
+  }
+  if (action !== 'new-game') return;
+  queueMicrotask(() => {
+    const snapshot = captureCurrentClubPicker();
+    if (!snapshot) return;
+    pendingOrigin = null;
+    pendingPreviousCareerId = null;
+    stopCareerWatch();
+    showOriginModal(snapshot);
+  });
 }, true);
 
 document.addEventListener('click', event => {
@@ -268,6 +323,7 @@ document.addEventListener('click', event => {
   if (parts.modal.classList.contains('manager-origin-modal') && closeTarget) {
     pendingOrigin = null;
     pendingPreviousCareerId = null;
+    capturedClubPicker = null;
     stopCareerWatch();
     parts.modal.classList.remove('manager-origin-modal');
     return;
