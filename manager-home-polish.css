@@ -62,6 +62,20 @@ main {
   background-color: #071525;
 }
 
+/* Pull the stadium back slightly so the interface, not the photograph, owns the screen. */
+.hero::before {
+  background:
+    linear-gradient(180deg,
+      rgba(4, 13, 27, .48) 0%,
+      rgba(4, 13, 27, .22) 30%,
+      rgba(4, 13, 27, .36) 64%,
+      rgba(4, 13, 27, .78) 100%),
+    linear-gradient(90deg,
+      rgba(4, 13, 27, .34) 0%,
+      rgba(4, 13, 27, .10) 50%,
+      rgba(4, 13, 27, .22) 100%) !important;
+}
+
 /* The duplicate Football Lab Manager / Manager Centre hero copy is no longer needed. */
 .hero-brand {
   display: none;
@@ -71,18 +85,18 @@ main {
 .menu-section {
   position: absolute;
   z-index: 6;
-  top: clamp(155px, 23vh, 225px);
+  top: clamp(185px, 27vh, 270px);
   left: 50%;
-  width: min(900px, calc(100% - 56px));
+  width: min(1040px, calc(100% - 48px));
   max-width: none;
   margin: 0;
-  padding: 0 0 36px;
+  padding: 0 0 42px;
   transform: translateX(-50%);
 }
 
 .section-heading {
   display: block;
-  margin: 0 0 24px;
+  margin: 0 0 30px;
   text-align: center;
 }
 
@@ -95,7 +109,7 @@ main {
   margin: 0;
   color: #f5f7fa;
   font-family: var(--flm-ui);
-  font-size: clamp(52px, 6vw, 78px);
+  font-size: clamp(60px, 6.8vw, 92px);
   font-weight: 700;
   line-height: .94;
   letter-spacing: .018em;
@@ -111,14 +125,14 @@ main {
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px 12px;
+  gap: 14px;
   align-items: stretch;
 }
 
 .menu-tile,
 body.compact .menu-tile {
-  min-height: 78px;
-  padding: 16px 22px;
+  min-height: 90px;
+  padding: 18px 24px;
   border: 1px solid var(--flm-line);
   border-radius: 2px;
   background: var(--flm-panel);
@@ -150,7 +164,7 @@ body.compact .menu-tile {
   display: block;
   color: #f3f6f9;
   font-family: var(--flm-ui);
-  font-size: clamp(23px, 2vw, 30px);
+  font-size: clamp(24px, 2.1vw, 31px);
   font-weight: 600;
   line-height: 1;
   letter-spacing: .04em;
@@ -163,7 +177,7 @@ body.compact .menu-tile {
   order: 1;
   grid-column: 2 / 6;
   position: relative;
-  min-height: 108px !important;
+  min-height: 128px !important;
   overflow: hidden;
   border-color: rgba(116, 177, 240, .98) !important;
   background:
@@ -183,7 +197,7 @@ body.compact .menu-tile {
 }
 
 .tile-new .tile-copy strong {
-  font-size: clamp(30px, 2.8vw, 40px);
+  font-size: clamp(36px, 3.2vw, 46px);
   font-weight: 700;
   letter-spacing: .052em;
 }
@@ -200,8 +214,13 @@ body.compact .menu-tile {
 
 .tile-quick,
 .tile-load {
-  min-height: 78px !important;
-  background: rgba(4, 22, 46, .86) !important;
+  min-height: 92px !important;
+  background: rgba(4, 22, 46, .88) !important;
+}
+
+.tile-quick .tile-copy strong,
+.tile-load .tile-copy strong {
+  font-size: clamp(24px, 2.1vw, 31px);
 }
 
 .tile-database {
@@ -222,18 +241,18 @@ body.compact .menu-tile {
 .tile-database,
 .tile-fame,
 .tile-settings {
-  min-height: 54px !important;
-  padding: 11px 16px !important;
-  border-color: rgba(82, 126, 177, .56) !important;
-  background: rgba(3, 18, 39, .69) !important;
-  opacity: .88;
+  min-height: 64px !important;
+  padding: 13px 18px !important;
+  border-color: rgba(82, 126, 177, .60) !important;
+  background: rgba(3, 18, 39, .74) !important;
+  opacity: .94;
 }
 
 .tile-database .tile-copy strong,
 .tile-fame .tile-copy strong,
 .tile-settings .tile-copy strong {
-  color: rgba(235, 241, 248, .88);
-  font-size: clamp(17px, 1.45vw, 21px);
+  color: rgba(235, 241, 248, .90);
+  font-size: clamp(19px, 1.6vw, 24px);
   font-weight: 500;
   letter-spacing: .045em;
 }
