@@ -128,7 +128,8 @@ function injectStyles() {
     .flm-v2-head,.flm-v2-row{display:grid;grid-template-columns:42px minmax(165px,1fr) 54px 54px 104px;gap:6px;align-items:center}
     .flm-v2-head{min-height:25px;padding:3px 8px;border-bottom:1px solid #23558e;background:#061326;color:#9caebe;font-size:7px;font-weight:950;letter-spacing:.08em}
     .flm-v2-list{min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#2d6dbb #041429}
-    .flm-v2-row{min-height:29px;padding:2px 8px;border-bottom:1px solid rgba(90,160,225,.18);background:#071c38;color:#eef3f6;font-size:8px;cursor:grab}
+    .flm-v2-row{min-height:29px;padding:2px 8px;border-bottom:1px solid rgba(90,160,225,.18);background:#071c38;color:#eef3f6;font-size:8px}
+    .flm-v2-row[draggable="true"]{cursor:grab}.flm-v2-row[draggable="false"]{cursor:default}
     .flm-v2-row:nth-child(even){background:#0a2242}.flm-v2-row:hover{background:#10345f}.flm-v2-row.is-xi{border-left:3px solid #55dc7c;background:#0c382d}.flm-v2-row.is-bench{border-left:3px solid #f4c342;background:#302711}
     .flm-v2-pos{color:#f4c342;font-size:9px;font-weight:950}.flm-v2-name{min-width:0}.flm-v2-name strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px}.flm-v2-name small{display:block;margin-top:1px;color:#9caebe;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .flm-v2-metric{text-align:center}.flm-v2-metric strong{display:block;font-size:9px}.flm-v2-metric small{display:block;color:#7f93a4;font-size:6px}
@@ -172,7 +173,8 @@ function renderSelection(container, c, squad) {
   const roster = squad.map(player => {
     const status = statusFor(c, player);
     const state = lineupSet.has(player.id) ? 'is-xi' : benchSet.has(player.id) ? 'is-bench' : '';
-    return `<div class="flm-v2-row ${state}" draggable="true" data-flm-v2-player="${esc(player.id)}">
+    const canDrag = !state;
+    return `<div class="flm-v2-row ${state}" draggable="${canDrag ? 'true' : 'false'}" data-flm-v2-player="${esc(player.id)}">
       <span class="flm-v2-pos">${esc(player.primaryPosition || player.positionGroup || '—')}</span>
       <span class="flm-v2-name"><strong>${esc(displayName(player))}</strong><small>${esc(status.morale)}${player.secondaryPositions?.length ? ` · ${esc(player.secondaryPositions.join('/'))}` : ''}</small></span>
       <span class="flm-v2-metric"><strong>${status.condition}%</strong><small>CON</small></span>
@@ -185,7 +187,7 @@ function renderSelection(container, c, squad) {
     const id = ids[index] || '';
     const player = playerById(squad, id);
     const status = player ? statusFor(c, player) : null;
-    return `<div class="flm-v2-slot ${player ? '' : 'empty'}" data-flm-v2-drop="${kind}" data-flm-v2-index="${index}" ${player ? `draggable="true" data-flm-v2-selected-player="${esc(player.id)}"` : ''}>
+    return `<div class="flm-v2-slot ${player ? '' : 'empty'}" data-flm-v2-drop="${kind}" data-flm-v2-index="${index}">
       <span class="flm-v2-slot-no">${startNumber + index}</span>
       <span class="flm-v2-slot-player"><strong>${esc(player ? displayName(player) : 'EMPTY')}</strong><small>${esc(player?.primaryPosition || (kind === 'xi' ? 'Starting XI' : 'Substitute'))}</small></span>
       <span class="flm-v2-slot-condition">${status ? `${status.condition}%` : '—'}</span>
@@ -195,7 +197,7 @@ function renderSelection(container, c, squad) {
 
   container.innerHTML = `
     <section class="flm-v2-panel flm-v2-roster">
-      <div class="flm-v2-panel-title">FIRST TEAM <span>${squad.length} PLAYERS · DRAG OR CLICK</span></div>
+      <div class="flm-v2-panel-title">FIRST TEAM <span>${squad.length} PLAYERS · DRAG RESERVES OR CLICK</span></div>
       <div class="flm-v2-head"><span>POS</span><span>PLAYER</span><span>CON</span><span>SHP</span><span>SELECT</span></div>
       <div class="flm-v2-list">${roster}</div>
     </section>
@@ -215,19 +217,14 @@ function renderSelection(container, c, squad) {
 
 function addTo(c, squad, playerId, target, targetIndex = null) {
   if (!playerById(squad, playerId)) return;
-  let lineup = [...(c.lineupIds || [])].filter(id => id !== playerId);
-  let bench = [...(c.benchIds || [])].filter(id => id !== playerId);
-
+  const lineup = [...(c.lineupIds || [])].filter(id => id !== playerId);
+  const bench = [...(c.benchIds || [])].filter(id => id !== playerId);
   const list = target === 'xi' ? lineup : bench;
-  const other = target === 'xi' ? bench : lineup;
   const limit = target === 'xi' ? 11 : BENCH_LIMIT;
 
   if (Number.isInteger(targetIndex) && targetIndex >= 0 && targetIndex < limit) {
-    const displaced = list[targetIndex];
-    if (displaced && displaced !== playerId) {
-      if (other.length < (target === 'xi' ? BENCH_LIMIT : 11)) other.push(displaced);
-    }
-    list[targetIndex] = playerId;
+    if (targetIndex < list.length) list[targetIndex] = playerId;
+    else list.push(playerId);
   } else if (list.length < limit) {
     list.push(playerId);
   } else {
@@ -235,8 +232,7 @@ function addTo(c, squad, playerId, target, targetIndex = null) {
     return;
   }
 
-  if (target === 'xi') setSelection(c, squad, list, other);
-  else setSelection(c, squad, other, list);
+  setSelection(c, squad, lineup, bench);
 }
 
 function removePlayer(c, squad, playerId) {
@@ -261,9 +257,9 @@ function bindSelection(container, c, squad) {
     renderSelection(container, c, squad);
   }));
 
-  container.querySelectorAll('[data-flm-v2-player],[data-flm-v2-selected-player]').forEach(node => {
+  container.querySelectorAll('[data-flm-v2-player][draggable="true"]').forEach(node => {
     node.addEventListener('dragstart', event => {
-      const playerId = node.dataset.flmV2Player || node.dataset.flmV2SelectedPlayer;
+      const playerId = node.dataset.flmV2Player;
       if (!playerId) return;
       event.dataTransfer.setData('application/x-flm-player', playerId);
       event.dataTransfer.effectAllowed = 'move';
@@ -300,7 +296,7 @@ function enhanceActions(c, squad, container) {
   const actions = document.querySelector('.career-squad-actions');
   if (!actions || actions.dataset.flmV2Actions === '1') return;
   actions.dataset.flmV2Actions = '1';
-  actions.innerHTML = `<div class="flm-v2-toolbar"><button type="button" data-flm-v2-auto-xi>AUTO PICK XI</button><button type="button" data-flm-v2-auto-bench>AUTO BENCH</button><button type="button" class="danger" data-flm-v2-clear>CLEAR SQUAD</button><span class="flm-v2-note">Select your XI and up to ${BENCH_LIMIT} substitutes. Drag players directly into a slot.</span></div>`;
+  actions.innerHTML = `<div class="flm-v2-toolbar"><button type="button" data-flm-v2-auto-xi>AUTO PICK XI</button><button type="button" data-flm-v2-auto-bench>AUTO BENCH</button><button type="button" class="danger" data-flm-v2-clear>CLEAR SQUAD</button><span class="flm-v2-note">Select your XI and up to ${BENCH_LIMIT} substitutes. Drag unselected players directly into a slot.</span></div>`;
 
   actions.querySelector('[data-flm-v2-auto-xi]')?.addEventListener('click', () => {
     const ids = autoPickLineup(database.players, c.clubId);
