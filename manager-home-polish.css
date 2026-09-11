@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
 
 /* Football Lab Manager — main menu polish
-   Desktop remains unchanged. Foldable/tablet rules keep the same stadium
-   artwork and menu identity while fitting the usable viewport. */
+   Establish a clear game-menu hierarchy while preserving the stadium artwork,
+   existing actions and responsive behaviour across desktop, tablet and Fold. */
 
 :root {
   --flm-ui: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
@@ -47,8 +47,7 @@ body {
   text-shadow: 0 2px 10px rgba(0, 0, 0, .52);
 }
 
-/* Always use the exact desktop stadium asset on the title screen.
-   Restating it here prevents older responsive rules from replacing it. */
+/* Always use the exact desktop stadium asset on the title screen. */
 main {
   position: relative;
   min-height: 100svh;
@@ -74,7 +73,7 @@ main {
   z-index: 6;
   top: clamp(155px, 23vh, 225px);
   left: 50%;
-  width: min(1120px, calc(100% - 56px));
+  width: min(900px, calc(100% - 56px));
   max-width: none;
   margin: 0;
   padding: 0 0 36px;
@@ -83,7 +82,7 @@ main {
 
 .section-heading {
   display: block;
-  margin: 0 0 28px;
+  margin: 0 0 24px;
   text-align: center;
 }
 
@@ -104,33 +103,22 @@ main {
   text-shadow: 0 3px 12px rgba(0, 0, 0, .58);
 }
 
-.section-heading h2 {
-  display: none;
-}
-
+.section-heading h2,
 .section-heading > p {
-  max-width: none;
-  margin: 14px 0 0;
-  color: rgba(246, 249, 252, .94);
-  font-family: var(--flm-copy);
-  font-size: clamp(17px, 1.55vw, 22px);
-  font-weight: 400;
-  line-height: 1.35;
-  letter-spacing: -.012em;
-  text-align: center;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, .72);
+  display: none;
 }
 
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px 12px;
+  align-items: stretch;
 }
 
 .menu-tile,
 body.compact .menu-tile {
-  min-height: 96px;
-  padding: 18px 24px;
+  min-height: 78px;
+  padding: 16px 22px;
   border: 1px solid var(--flm-line);
   border-radius: 2px;
   background: var(--flm-panel);
@@ -139,7 +127,7 @@ body.compact .menu-tile {
     0 4px 14px rgba(0, 0, 0, .20);
   text-align: center;
   backdrop-filter: blur(4px);
-  transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+  transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease, opacity .16s ease;
 }
 
 .menu-tile::before,
@@ -170,20 +158,110 @@ body.compact .menu-tile {
   text-shadow: 0 1px 4px rgba(0, 0, 0, .45);
 }
 
+/* Fix 1 — establish a proper game-menu hierarchy. */
+.tile-new {
+  order: 1;
+  grid-column: 2 / 6;
+  position: relative;
+  min-height: 108px !important;
+  overflow: hidden;
+  border-color: rgba(116, 177, 240, .98) !important;
+  background:
+    linear-gradient(90deg, rgba(16, 55, 94, .94), rgba(6, 29, 58, .91)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .055),
+    0 9px 24px rgba(0, 0, 0, .30) !important;
+}
+
+.tile-new::before {
+  display: block !important;
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: rgba(143, 202, 255, .98);
+}
+
+.tile-new .tile-copy strong {
+  font-size: clamp(30px, 2.8vw, 40px);
+  font-weight: 700;
+  letter-spacing: .052em;
+}
+
+.tile-quick {
+  order: 2;
+  grid-column: 2 / 4;
+}
+
+.tile-load {
+  order: 3;
+  grid-column: 4 / 6;
+}
+
+.tile-quick,
+.tile-load {
+  min-height: 78px !important;
+  background: rgba(4, 22, 46, .86) !important;
+}
+
+.tile-database {
+  order: 4;
+  grid-column: 1 / 3;
+}
+
+.tile-fame {
+  order: 5;
+  grid-column: 3 / 5;
+}
+
+.tile-settings {
+  order: 6;
+  grid-column: 5 / 7;
+}
+
+.tile-database,
+.tile-fame,
+.tile-settings {
+  min-height: 54px !important;
+  padding: 11px 16px !important;
+  border-color: rgba(82, 126, 177, .56) !important;
+  background: rgba(3, 18, 39, .69) !important;
+  opacity: .88;
+}
+
+.tile-database .tile-copy strong,
+.tile-fame .tile-copy strong,
+.tile-settings .tile-copy strong {
+  color: rgba(235, 241, 248, .88);
+  font-size: clamp(17px, 1.45vw, 21px);
+  font-weight: 500;
+  letter-spacing: .045em;
+}
+
 .menu-tile:hover,
 .menu-tile:focus-visible {
   transform: translateY(-1px);
-  border-color: var(--flm-line-hover);
-  background: var(--flm-panel-hover);
+  border-color: var(--flm-line-hover) !important;
+  background: var(--flm-panel-hover) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .04),
-    0 8px 20px rgba(0, 0, 0, .26);
+    0 8px 20px rgba(0, 0, 0, .26) !important;
+  opacity: 1;
   outline: none;
+}
+
+.tile-new:hover,
+.tile-new:focus-visible {
+  background:
+    linear-gradient(90deg, rgba(20, 67, 113, .98), rgba(8, 38, 74, .96)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .075),
+    0 12px 28px rgba(0, 0, 0, .34) !important;
 }
 
 .menu-tile:active {
   transform: translateY(0);
-  background: rgba(8, 35, 68, .96);
+  background: rgba(8, 35, 68, .96) !important;
 }
 
 /* Remove the development/status footer for a cleaner title-screen finish. */
@@ -211,7 +289,7 @@ body.compact .menu-tile {
 
   .menu-section {
     top: clamp(94px, 12svh, 126px);
-    width: min(900px, calc(100% - 32px));
+    width: min(820px, calc(100% - 32px));
     padding-bottom: 24px;
   }
 
@@ -223,30 +301,44 @@ body.compact .menu-tile {
     font-size: clamp(42px, 6.4vw, 58px);
   }
 
-  .section-heading > p {
-    margin-top: 10px;
-    font-size: clamp(15px, 2.2vw, 18px);
-  }
-
   .menu-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px 9px;
   }
 
   .menu-tile,
   body.compact .menu-tile {
-    min-height: 76px;
-    padding: 13px 16px;
+    min-height: 68px;
+    padding: 12px 14px;
+  }
+
+  .tile-new {
+    min-height: 88px !important;
+  }
+
+  .tile-new .tile-copy strong {
+    font-size: clamp(27px, 4vw, 34px);
   }
 
   .tile-copy strong {
     font-size: clamp(20px, 3vw, 25px);
   }
+
+  .tile-database,
+  .tile-fame,
+  .tile-settings {
+    min-height: 48px !important;
+    padding: 9px 10px !important;
+  }
+
+  .tile-database .tile-copy strong,
+  .tile-fame .tile-copy strong,
+  .tile-settings .tile-copy strong {
+    font-size: clamp(15px, 2.2vw, 18px);
+  }
 }
 
-/* Z Fold-class inner displays and portrait/near-square tablets.
-   Keep the desktop photo, show more of it, and fit all six options without
-   the large dead area seen on the Fold screenshot. */
+/* Z Fold-class inner displays and portrait/near-square tablets. */
 @media (min-width: 601px) and (max-width: 1200px) and (max-aspect-ratio: 5/4) {
   .page-shell {
     width: 100%;
@@ -291,7 +383,7 @@ body.compact .menu-tile {
 
   .menu-section {
     top: clamp(72px, 9svh, 104px);
-    width: min(880px, calc(100% - 28px));
+    width: min(800px, calc(100% - 28px));
     padding-bottom: 18px;
   }
 
@@ -303,28 +395,36 @@ body.compact .menu-tile {
     font-size: clamp(38px, 5.5vw, 52px);
   }
 
-  .section-heading > p {
-    max-width: 720px;
-    margin: 8px auto 0;
-    font-size: clamp(14px, 2vw, 17px);
-  }
-
   .menu-grid {
-    gap: 8px;
+    gap: 7px;
   }
 
   .menu-tile,
   body.compact .menu-tile {
-    min-height: 72px;
-    padding: 12px 14px;
+    min-height: 62px;
+    padding: 11px 12px;
+  }
+
+  .tile-new {
+    min-height: 80px !important;
+  }
+
+  .tile-new .tile-copy strong {
+    font-size: clamp(25px, 3.8vw, 32px);
   }
 
   .tile-copy strong {
-    font-size: clamp(19px, 2.8vw, 24px);
+    font-size: clamp(18px, 2.8vw, 23px);
+  }
+
+  .tile-database,
+  .tile-fame,
+  .tile-settings {
+    min-height: 46px !important;
   }
 }
 
-/* Folded phones and genuinely narrow screens can collapse to one column. */
+/* Folded phones and genuinely narrow screens collapse to one column. */
 @media (max-width: 600px) {
   .page-shell {
     padding-left: 0;
@@ -376,26 +476,49 @@ body.compact .menu-tile {
     font-size: clamp(38px, 12vw, 52px);
   }
 
-  .section-heading > p {
-    max-width: 440px;
-    margin: 8px auto 0;
-    font-size: 14px;
-    line-height: 1.3;
-  }
-
   .menu-grid {
     grid-template-columns: 1fr;
     gap: 7px;
   }
 
+  .tile-new,
+  .tile-quick,
+  .tile-load,
+  .tile-database,
+  .tile-fame,
+  .tile-settings {
+    grid-column: 1;
+  }
+
   .menu-tile,
   body.compact .menu-tile {
-    min-height: 62px;
-    padding: 11px 14px;
+    min-height: 58px;
+    padding: 10px 14px;
+  }
+
+  .tile-new {
+    min-height: 76px !important;
+  }
+
+  .tile-new .tile-copy strong {
+    font-size: 26px;
   }
 
   .tile-copy strong {
     font-size: 20px;
+  }
+
+  .tile-database,
+  .tile-fame,
+  .tile-settings {
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+  }
+
+  .tile-database .tile-copy strong,
+  .tile-fame .tile-copy strong,
+  .tile-settings .tile-copy strong {
+    font-size: 16px;
   }
 }
 
