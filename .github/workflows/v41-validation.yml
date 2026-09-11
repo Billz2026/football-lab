@@ -37,6 +37,7 @@ jobs:
             runtime-foundation-v1.js \
             team-selection-v2.js \
             career-tactics-v2.js \
+            appointment-modal-dismiss-guard-v1.js \
             runtime-matchday-v1.js \
             runtime-match-centre-v1.js \
             runtime-career-integrity-v1.js \
