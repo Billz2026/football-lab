@@ -52,6 +52,7 @@ const ORIGINS = Object.freeze([
 let pendingOrigin = null;
 let pendingPreviousCareerId = null;
 let careerWatchTimer = null;
+let clubPickerWaitTimer = null;
 let capturedClubPicker = null;
 
 function esc(value) {
@@ -120,6 +121,9 @@ function captureCurrentClubPicker() {
   const parts = modalParts();
   if (!parts?.body || !parts.actions) return null;
   if (parts.title?.textContent?.trim() !== 'CHOOSE YOUR CLUB') return null;
+  if (!parts.body.querySelector('[data-start-club]')) return null;
+  const takeControl = [...parts.actions.querySelectorAll('button')].find(button => button.textContent.trim().toUpperCase() === 'TAKE CONTROL');
+  if (!takeControl) return null;
   return {
     modalClassName: parts.modal.className,
     cardClassName: parts.card?.className || '',
@@ -146,9 +150,37 @@ function restoreClubPicker(snapshot) {
   return true;
 }
 
+function stopClubPickerWait() {
+  if (clubPickerWaitTimer) clearInterval(clubPickerWaitTimer);
+  clubPickerWaitTimer = null;
+}
+
+function waitForClubPickerAndShowOrigin() {
+  stopClubPickerWait();
+  const startedAt = Date.now();
+  clubPickerWaitTimer = setInterval(() => {
+    const parts = modalParts();
+    if (!parts?.modal.classList.contains('is-open')) {
+      stopClubPickerWait();
+      return;
+    }
+    const snapshot = captureCurrentClubPicker();
+    if (snapshot) {
+      stopClubPickerWait();
+      pendingOrigin = null;
+      pendingPreviousCareerId = null;
+      stopCareerWatch();
+      showOriginModal(snapshot);
+      return;
+    }
+    if (Date.now() - startedAt > 10000) stopClubPickerWait();
+  }, 25);
+}
+
 function closeOriginModal() {
   const parts = modalParts();
   if (!parts) return;
+  stopClubPickerWait();
   parts.modal.classList.remove('is-open', 'manager-origin-modal');
   parts.modal.setAttribute('aria-hidden', 'true');
   parts.card?.classList.remove('modal-wide');
@@ -291,27 +323,21 @@ function watchForCreatedCareer() {
 
 // The existing manager-creation module deliberately bypasses its own New Game
 // interceptor when it hands off to the canonical club picker. We let that click
-// reach the base runtime, then detach the fully wired club-picker DOM and place
-// the origin step in front of it. Restoring those same nodes preserves all of the
-// existing club-selection event listeners without opening a second save path.
+// reach the base runtime, wait for its asynchronous database render to finish,
+// then detach the fully wired picker DOM and place the origin step in front of it.
+// Restoring those same nodes preserves the existing club-selection listeners.
 document.addEventListener('click', event => {
   const action = event.target.closest?.('[data-action]')?.dataset.action;
   if (action === 'quick-start') {
     pendingOrigin = null;
     pendingPreviousCareerId = null;
     capturedClubPicker = null;
+    stopClubPickerWait();
     stopCareerWatch();
     return;
   }
   if (action !== 'new-game') return;
-  queueMicrotask(() => {
-    const snapshot = captureCurrentClubPicker();
-    if (!snapshot) return;
-    pendingOrigin = null;
-    pendingPreviousCareerId = null;
-    stopCareerWatch();
-    showOriginModal(snapshot);
-  });
+  queueMicrotask(waitForClubPickerAndShowOrigin);
 }, true);
 
 document.addEventListener('click', event => {
@@ -324,6 +350,7 @@ document.addEventListener('click', event => {
     pendingOrigin = null;
     pendingPreviousCareerId = null;
     capturedClubPicker = null;
+    stopClubPickerWait();
     stopCareerWatch();
     parts.modal.classList.remove('manager-origin-modal');
     return;
