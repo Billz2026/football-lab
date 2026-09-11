@@ -59,7 +59,7 @@ async function completeAppointmentExperience(page){
   await expect(page.locator('#appModal')).toHaveAttribute('aria-hidden','true',{timeout:5000});
 }
 
-export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firstName='Test',lastName='Manager',experience='professional',completeAppointment=true}={}){
+export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firstName='Test',lastName='Manager',experience='professional',managerOrigin='tactical-specialist',completeAppointment=true}={}){
   await page.getByRole('button',{name:'START NEW GAME',exact:true}).click();
 
   await expect(page.locator('[data-manager-setup-v064="identity"]')).toBeVisible();
@@ -70,6 +70,16 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   await expect(page.locator('[data-manager-setup-v064="experience"]')).toBeVisible();
   await page.locator(`[data-mgr-exp="${experience}"]`).click();
   await page.locator('[data-mgr-finish]').click();
+
+  // New Career now includes an explicit manager-origin step before club choice.
+  // Select deterministically so existing match/career tests exercise the real flow.
+  await expect(page.getByRole('heading',{name:'CHOOSE YOUR MANAGER ORIGIN'})).toBeVisible();
+  const origin=page.locator(`input[name="manager-origin"][value="${managerOrigin}"]`);
+  await expect(origin).toBeVisible();
+  await origin.check();
+  const originContinue=page.getByRole('button',{name:'CONTINUE',exact:true});
+  await expect(originContinue).toBeEnabled();
+  await originContinue.click();
 
   await expect(page.getByRole('heading',{name:'CHOOSE YOUR CLUB'})).toBeVisible();
   const clubs=page.locator('[data-start-club]');
