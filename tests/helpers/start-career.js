@@ -55,11 +55,22 @@ async function completeAppointmentExperience(page){
   }
 
   await expect.poll(async()=>Boolean((await appointmentState(page))?.dismissed),{timeout:5000}).toBeTruthy();
-  await expect(page.locator('#appModal')).not.toHaveClass(/flm-appointment-open/,{timeout:5000});
-  await expect(page.locator('#appModal')).toHaveAttribute('aria-hidden','true',{timeout:5000});
+
+  // Some career modules can mark the appointment dismissed during the same
+  // render cycle that leaves the summary frame on screen. In that state the
+  // career is complete but the normal ENTER CAREER control still owns modal
+  // cleanup. Exercise that control rather than mutating modal classes in tests.
+  const modal=page.locator('#appModal');
+  if(await modal.evaluate(node=>node.classList.contains('flm-appointment-open'))){
+    const enter=modal.locator('[data-appt-enter]');
+    if(await enter.isVisible({timeout:500}).catch(()=>false))await enter.click();
+  }
+
+  await expect(modal).not.toHaveClass(/flm-appointment-open/,{timeout:5000});
+  await expect(modal).toHaveAttribute('aria-hidden','true',{timeout:5000});
 }
 
-export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firstName='Test',lastName='Manager',experience='professional',completeAppointment=true}={}){
+export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firstName='Test',lastName='Manager',experience='professional',managerOrigin='tactical-specialist',completeAppointment=true}={}){
   await page.getByRole('button',{name:'START NEW GAME',exact:true}).click();
 
   await expect(page.locator('[data-manager-setup-v064="identity"]')).toBeVisible();
@@ -70,6 +81,16 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   await expect(page.locator('[data-manager-setup-v064="experience"]')).toBeVisible();
   await page.locator(`[data-mgr-exp="${experience}"]`).click();
   await page.locator('[data-mgr-finish]').click();
+
+  // New Career now includes an explicit manager-origin step before club choice.
+  // Select deterministically so existing match/career tests exercise the real flow.
+  await expect(page.getByRole('heading',{name:'CHOOSE YOUR MANAGER ORIGIN'})).toBeVisible();
+  const origin=page.locator(`input[name="manager-origin"][value="${managerOrigin}"]`);
+  await expect(origin).toBeVisible();
+  await origin.check();
+  const originContinue=page.getByRole('button',{name:'CONTINUE',exact:true});
+  await expect(originContinue).toBeEnabled();
+  await originContinue.click();
 
   await expect(page.getByRole('heading',{name:'CHOOSE YOUR CLUB'})).toBeVisible();
   const clubs=page.locator('[data-start-club]');
@@ -82,6 +103,10 @@ export async function startCareerThroughCurrentOnboarding(page,{clubIndex=0,firs
   await expect(takeControl).toBeEnabled();
   await takeControl.click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
+
+  // The origin must be part of the canonical active career, not just UI state.
+  await expect.poll(()=>page.evaluate(()=>window.FLMManager?.activeCareer?.managerOrigin?.id||null),{timeout:5000}).toBe(managerOrigin);
+  await expect.poll(()=>page.evaluate(()=>Boolean(window.FLMManager?.activeCareer?.managerModifiers)),{timeout:5000}).toBeTruthy();
 
   if(completeAppointment)await completeAppointmentExperience(page);
 }

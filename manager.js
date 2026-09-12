@@ -28,3 +28,4 @@ import './transfer-interest-ui-v1.js?v=1.0.1';
 import './manager-create-responsive-v1.js?v=1.0.0';
 import './manager-create-responsive-v2.js?v=2.0.0';
 import './manager-create-responsive-v3.js?v=3.1.0';
+import './manager-origin-v1.js?v=1.0.0';
