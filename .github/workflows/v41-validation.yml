@@ -35,6 +35,9 @@ jobs:
             manager.js \
             manager-runtime-v1.js \
             runtime-foundation-v1.js \
+            team-selection-v2.js \
+            career-tactics-v2.js \
+            appointment-modal-dismiss-guard-v1.js \
             runtime-matchday-v1.js \
             runtime-match-centre-v1.js \
             runtime-career-integrity-v1.js \
@@ -89,6 +92,7 @@ jobs:
             tests/step-six-resolution-v1.test.js \
             tests/procedural-lower-feeder-v1.test.js \
             tests/match-integrity-engine-v067.test.js \
+            tests/matchday-bench-selection-v2.test.js \
             tests/kit-colours-v1.test.js \
             tests/matchday-v070.spec.js \
             tests/career-manager-v064.spec.js \
@@ -110,7 +114,7 @@ jobs:
         run: npm run validate:database
 
       - name: Test career simulation
-        run: node --test tests/manager-core.test.js tests/english-pyramid-world-v6.test.js tests/english-pyramid-world-v7.test.js tests/english-pyramid-world-v8.test.js tests/step-five-membership-resolution-v1.test.js tests/english-pyramid-world-v9.test.js tests/step-six-resolution-v1.test.js tests/procedural-lower-feeder-v1.test.js tests/match-integrity-engine-v067.test.js tests/world-clock.test.js tests/personality-v2.test.js tests/appointment-media-v1.test.js tests/integrity-v067.test.js tests/kit-colours-v1.test.js
+        run: node --test tests/manager-core.test.js tests/english-pyramid-world-v6.test.js tests/english-pyramid-world-v7.test.js tests/english-pyramid-world-v8.test.js tests/step-five-membership-resolution-v1.test.js tests/english-pyramid-world-v9.test.js tests/step-six-resolution-v1.test.js tests/procedural-lower-feeder-v1.test.js tests/match-integrity-engine-v067.test.js tests/matchday-bench-selection-v2.test.js tests/world-clock.test.js tests/personality-v2.test.js tests/appointment-media-v1.test.js tests/integrity-v067.test.js tests/kit-colours-v1.test.js
 
       - name: Install Chromium
         timeout-minutes: 10
