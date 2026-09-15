@@ -27,7 +27,7 @@ export {
   swapShapePlayers
 } from './matchday-engine-v043.js';
 
-export const LIVE_ENGINE_VERSION = 10;
+export const LIVE_ENGINE_VERSION = 11;
 export const XG_MODEL = Object.freeze({
   version: 1,
   method: 'shot-derived-contextual',
@@ -224,8 +224,26 @@ function applyConditionIntegrity(prepared,state,career){
   }
 }
 
+function applySelectedBench(state,career,db){
+  if(!Array.isArray(career?.benchIds))return state;
+  const lineup=new Set(career.lineupIds || []);
+  const squadIds=new Set((db.players || []).filter(player=>player.clubId===career.clubId&&!player.isPlaceholder).map(player=>player.id));
+  const selected=[...new Set(career.benchIds)].filter(id=>squadIds.has(id)&&!lineup.has(id)).slice(0,9);
+  state.userBenchIds=selected;
+  state.conditions ||= {};
+  state.ratings ||= {};
+  state.minutesPlayed ||= {};
+  for(const id of selected){
+    const status=career.playerStatus?.[id];
+    if(state.conditions[id]==null)state.conditions[id]=status?.condition ?? 100;
+    if(state.ratings[id]==null)state.ratings[id]=6.5;
+    if(state.minutesPlayed[id]==null)state.minutesPlayed[id]=0;
+  }
+  return state;
+}
+
 export function createInteractiveMatch(career, db) {
-  const state = ensureXgState(baseCreateInteractiveMatch(career, db));
+  const state = applySelectedBench(ensureXgState(baseCreateInteractiveMatch(career, db)),career,db);
   const fixture=fixtureForState(career,state) || {};
   state.liveEngineVersion = LIVE_ENGINE_VERSION;
   state.userReadiness = readinessFor(career);
