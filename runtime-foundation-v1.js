@@ -9,6 +9,7 @@ import './career-league-integrity-v1.js?v=1.0.0';
 import './player-audit-v1.js?v=1.0.0';
 import './player-audit-v2.js?v=2.0.0';
 import './player-audit-v3.js?v=3.0.0';
+import './player-audit-v4.js?v=4.0.0';
 import './career-news-ui-v0461.js?v=0.4.8';
 import './career-news-ui-v0462-fix.js?v=0.4.6.2';
 import './career-preseason-ui-v047.js?v=0.4.10';
