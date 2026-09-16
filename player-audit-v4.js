@@ -2,9 +2,9 @@
 //
 // API-Football's current snapshot stores Moises Caicedo with the full paternal /
 // maternal surname "Caicedo Corozo". Audit v3 deliberately uses strict identity
-// matching, so the expanded provider surname stopped the Chelsea calibration from
-// applying. Keep the strict matcher in v3 and repair this known provider identity
-// here rather than broadening surname matching for every player.
+// matching, so the expanded provider surname can cause v3 to create a synthetic
+// duplicate. Keep the strict matcher in v3, prefer the real provider-backed record
+// here, and suppress only the synthetic duplicate created by that missed identity.
 
 const REVIEW_DATE = '2026-09-16';
 const CHELSEA_ID = 'flm-club-api-football-49';
@@ -19,12 +19,20 @@ function normalise(value) {
 }
 
 function isCaicedo(player) {
-  if (!player || player.clubId !== CHELSEA_ID || player.isPlaceholder) return false;
+  if (!player || player.clubId !== CHELSEA_ID) return false;
   const name = normalise(player.name);
   const lastName = normalise(player.lastName);
   return lastName === 'caicedo' || lastName === 'caicedo corozo' ||
     name.endsWith(' caicedo') || name.endsWith(' caicedo corozo') ||
     /(^| )moises( isaac)? caicedo( corozo)?$/.test(name);
+}
+
+function isProviderBacked(player) {
+  return Boolean(player?.externalIds?.apiFootball || player?.dataQuality?.source === 'api-football');
+}
+
+function isAuditV3Synthetic(player) {
+  return String(player?.id || '').startsWith('flm-audit-v3-') || Boolean(player?.externalIds?.curatedAuditV3);
 }
 
 function applyCaicedoCalibration(player) {
@@ -54,24 +62,55 @@ function applyCaicedoCalibration(player) {
   return player;
 }
 
+function suppressSyntheticDuplicate(player, canonicalId) {
+  if (!isAuditV3Synthetic(player)) return false;
+  player.unavailableInPremierLeagueDatabase = true;
+  player.isPlaceholder = true;
+  player.importanceScore = 0;
+  player.squadImportance = 'duplicate-suppressed';
+  player.duplicateOfPlayerId = canonicalId;
+  player.audit = {
+    reviewDate: REVIEW_DATE,
+    club: 'Chelsea',
+    importance: 0,
+    role: 'duplicate-suppressed',
+    source: 'provider-full-surname-compatibility-audit'
+  };
+  return true;
+}
+
 export function applyPremierLeagueAuditV4(db) {
   if (!db?.players || db.__premierLeagueAuditV4 === REVIEW_DATE) return db;
   db.playerAudit ||= {};
 
   const matches = db.players.filter(isCaicedo);
-  if (matches.length === 1) {
-    applyCaicedoCalibration(matches[0]);
+  const providerMatches = matches.filter(isProviderBacked);
+  const canonical = providerMatches.length === 1
+    ? providerMatches[0]
+    : matches.length === 1
+      ? matches[0]
+      : null;
+
+  if (canonical) {
+    applyCaicedoCalibration(canonical);
+    const suppressedIds = matches
+      .filter(player => player.id !== canonical.id)
+      .filter(player => suppressSyntheticDuplicate(player, canonical.id))
+      .map(player => player.id);
+
     db.playerAudit.v4CaicedoIdentity = {
       reviewDate: REVIEW_DATE,
       status: 'corrected',
-      playerId: matches[0].id,
-      providerLastName: matches[0].lastName
+      playerId: canonical.id,
+      providerLastName: canonical.lastName,
+      suppressedDuplicateIds: suppressedIds
     };
   } else {
     db.playerAudit.v4CaicedoIdentity = {
       reviewDate: REVIEW_DATE,
       status: matches.length === 0 ? 'not-found' : 'ambiguous',
-      matches: matches.map(player => player.id)
+      matches: matches.map(player => player.id),
+      providerMatches: providerMatches.map(player => player.id)
     };
   }
 
