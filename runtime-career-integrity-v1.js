@@ -10,6 +10,7 @@ import './career-manager-start-v064.js?v=0.6.6';
 import './board-expectations-v067.js?v=0.6.7';
 import './career-personality-v2.js?v=2.0.0';
 import './career-appointment-media-v066.js?v=0.6.9';
+import './appointment-modal-state-guard-v1.js?v=1.0.0';
 import './player-profile-v2.js?v=2.1.2';
 import './career-integrity-v067.js?v=0.6.7';
 import './match-fulltime-single-continue-v064.js?v=0.6.7';
