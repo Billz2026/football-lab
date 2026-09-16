@@ -55,19 +55,121 @@
 .flm-cm-shell .flm-ip-season-card{margin-top:8px!important}
 .flm-cm-shell .flm-ip-empty{min-height:82px!important;padding:15px!important}
 
-/* Squad: full names, less condensed typography, retain compact two-column layout. */
-.flm-cm-shell .v044-name strong,
-.flm-cm-shell .career-player-name strong{
-  color:#f2f6f9!important;
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
-  font-size:11.5px!important;
-  font-weight:600!important;
-  letter-spacing:-.01em!important;
+/* Squad: two aligned, readable columns within the existing career workspace. */
+.flm-cm-shell .career-content:has(.v044-squad-browser) {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto minmax(0,1fr);
+  gap:5px;
+  padding:8px 12px!important;
+  overflow:hidden!important;
 }
-.flm-cm-shell .v044-row{min-height:31px!important}
-.flm-cm-shell .v044-pos{font-size:10px!important}
-.flm-cm-shell .v044-cell b{font-size:10px!important;font-variant-numeric:tabular-nums!important}
-.flm-cm-shell .v044-profile{font-size:8px!important;letter-spacing:.05em!important}
+.flm-cm-shell .career-content:has(.v044-squad-browser)>* { min-width:0; }
+.flm-cm-shell .career-content:has(.v044-squad-browser)>.career-page-heading {
+  grid-column:1; min-height:40px!important; margin:0!important; padding:4px 10px!important;
+}
+.flm-cm-shell .career-content:has(.v044-squad-browser)>.flm-squad-number-toolbar {
+  grid-column:2; margin:0; align-items:center;
+}
+/* Preparation progress remains in the career sidebar; keep this workspace for selection. */
+.flm-cm-shell .career-content:has(.v044-squad-browser)>.v047-banner { display:none!important; }
+.flm-cm-shell .v044-squad-toolbar {
+  grid-column:1/-1; grid-template-columns:140px 140px minmax(0,1fr)!important;
+  margin:0!important; padding:4px 8px!important; gap:8px!important;
+}
+.flm-cm-shell .v044-squad-toolbar label {
+  font-size:11px!important; letter-spacing:.03em!important; gap:2px;
+}
+.flm-cm-shell .v044-squad-toolbar select,
+.flm-cm-shell .v044-squad-actions button {
+  min-height:28px!important; font-size:12px!important; letter-spacing:.02em!important;
+}
+.flm-cm-shell .v044-squad-toolbar label select { background:#0c2b49!important; color:#eef5fa!important; }
+.flm-cm-shell .v044-squad-browser {
+  --squad-columns:20px 32px minmax(0,1fr) 64px 40px 40px 44px;
+  grid-column:1/-1; min-height:0; overflow:auto; scrollbar-gutter:stable;
+  background:#081d34!important;
+}
+.flm-cm-shell .v044-squad-browser .v044-position-heading { padding:4px 8px!important; }
+.flm-cm-shell .v044-squad-browser .v044-position-heading strong { font-size:13px!important; }
+.flm-cm-shell .v044-squad-browser .v044-position-heading span { font-size:11px!important; letter-spacing:.02em; }
+.flm-cm-shell .v044-squad-browser .v044-position-filters { padding:0 8px 4px!important; gap:3px!important; }
+.flm-cm-shell .v044-squad-browser .v044-position-filters button {
+  min-height:24px!important; min-width:34px!important; font-size:11px!important; padding:0 6px!important;
+}
+.flm-cm-shell .v044-squad-browser .v044-head-pair,
+.flm-cm-shell .v044-squad-browser .v044-list {
+  display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  column-gap:8px!important; row-gap:0!important; padding:0 4px!important;
+}
+.flm-cm-shell .v044-squad-browser .v044-head,
+.flm-cm-shell .v044-squad-browser .v044-row {
+  display:grid!important; grid-template-columns:var(--squad-columns)!important;
+  gap:4px!important; padding:2px 6px!important; min-width:0;
+}
+.flm-cm-shell .v044-squad-browser .v044-head {
+  min-height:23px; align-items:center; font-size:11px!important;
+  letter-spacing:.015em!important; color:#bdd1e0!important;
+  border-bottom:1px solid #487497;
+}
+.flm-cm-shell .v044-squad-browser .v044-head>span:nth-child(5),
+.flm-cm-shell .v044-squad-browser .v044-head>span:nth-child(6) { text-align:right; }
+.flm-cm-shell .v044-squad-browser .v044-row {
+  min-height:30px!important; border:0!important; border-bottom:1px solid #294762!important;
+  background:#0b223a!important; cursor:pointer;
+}
+.flm-cm-shell .v044-squad-browser .v044-row[data-stripe="alternate"] { background:#102d49!important; }
+.flm-cm-shell .v044-squad-browser .v044-row:hover { background:#1b3c58!important; }
+.flm-cm-shell .v044-squad-browser .v044-row.is-selected {
+  background:#164c39!important; box-shadow:inset 3px 0 #63e29b!important;
+}
+.flm-cm-shell .v044-squad-browser .v044-row:focus-within { outline:2px solid #9bd1ff; outline-offset:-2px; }
+.flm-cm-shell .v044-squad-browser .v044-row[hidden] { display:none!important; }
+.flm-cm-shell .v044-squad-browser .v044-row>* { min-width:0; }
+.flm-cm-shell .v044-squad-browser .v044-row input { width:16px!important; height:16px!important; margin:0; }
+.flm-cm-shell .v044-squad-browser .v044-name strong {
+  display:block; color:#f2f6f9!important;
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-size:13px!important; font-weight:600!important; line-height:14px!important;
+  letter-spacing:-.02em!important; overflow-wrap:anywhere;
+}
+.flm-cm-shell .v044-squad-browser .v044-name small { display:none; }
+.flm-cm-shell .v044-squad-browser .v044-pos { font-size:11px!important; }
+.flm-cm-shell .v044-squad-browser .v044-status {
+  display:block!important; font-size:11px!important; font-weight:500!important;
+  line-height:1.15; color:#b9cbda!important; overflow-wrap:anywhere;
+}
+.flm-cm-shell .v044-squad-browser .v044-row[data-status="unavailable"] .v044-status {
+  color:#ffb6b6!important; font-weight:700!important;
+}
+.flm-cm-shell .v044-squad-browser .v044-cell { display:block!important; text-align:right; }
+.flm-cm-shell .v044-squad-browser .v044-cell b {
+  font-size:13px!important; font-weight:600; font-variant-numeric:tabular-nums!important;
+}
+.flm-cm-shell .v044-squad-browser [data-fitness="watch"] b { color:#f6d485!important; }
+.flm-cm-shell .v044-squad-browser [data-fitness="low"] b { color:#ffb6b6!important; }
+.flm-cm-shell .v044-squad-browser .v044-profile {
+  display:block!important; min-height:24px!important; padding:0 4px!important;
+  font-size:11px!important; letter-spacing:.02em!important;
+}
+/* A narrow workspace uses one complete table; never hide fitness or unavailable players. */
+@media(max-width:1150px) {
+  .flm-cm-shell .v044-squad-browser .v044-head-pair,
+  .flm-cm-shell .v044-squad-browser .v044-list { grid-template-columns:minmax(0,1fr)!important; }
+  .flm-cm-shell .v044-squad-browser .v044-head:nth-child(2) { display:none!important; }
+  .flm-cm-shell .v044-squad-browser .v044-row { min-height:34px!important; }
+  .flm-cm-shell .v044-squad-toolbar { grid-template-columns:1fr 1fr!important; }
+  .flm-cm-shell .v044-squad-actions { grid-column:1/-1; justify-content:flex-start; flex-wrap:wrap; }
+}
+@media(max-width:720px) {
+  .flm-cm-shell .career-content:has(.v044-squad-browser) {
+    display:flex!important; flex-direction:column; overflow:auto!important;
+  }
+  .flm-cm-shell .v044-squad-browser { flex:0 0 auto; overflow:visible; }
+  .flm-cm-shell .v044-squad-browser .v044-head-pair,
+  .flm-cm-shell .v044-squad-browser .v044-list { min-width:460px; }
+  .flm-cm-shell .career-content:has(.v044-squad-browser)>.career-page-heading { flex-direction:row!important; }
+}
 
 /* Inbox: keep dense structure but stop the text feeling microscopic. */
 .flm-cm-shell .career-inbox-heading h2{font-size:24px!important}
