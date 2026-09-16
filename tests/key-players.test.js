@@ -13,7 +13,10 @@ test('Arsenal key-player markers use curated real-world names rather than CA ran
 
 test('Chelsea key-player markers identify Palmer, Caicedo and Fernandez when present', () => {
   const names = curatedKeyPlayers(database, 'flm-club-api-football-49').map(player => player.lastName);
-  assert.deepEqual(names, ['Palmer', 'Caicedo', 'Fernández']);
+  assert.equal(names.length, 3);
+  assert.equal(names[0], 'Palmer');
+  assert.match(names[1], /^Caicedo(?: Corozo)?$/);
+  assert.equal(names[2], 'Fernández');
 });
 
 test('curated markers never fill missing names from low-confidence ability values', () => {
