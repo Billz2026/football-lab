@@ -9,11 +9,23 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+async function clickVisibleContinue(page) {
+  const shellContinue = page.locator('[data-shell-continue]');
+  if (await shellContinue.isVisible({ timeout: 500 }).catch(() => false)) {
+    await shellContinue.click();
+    return;
+  }
+
+  const legacyContinue = page.locator('.career-header [data-v060-continue], .career-content [data-v060-continue]').filter({ visible: true }).first();
+  await expect(legacyContinue).toBeVisible({ timeout: 3000 });
+  await legacyContinue.click();
+}
+
 async function continueUntil(page, targetDate, maxSteps = 30) {
   for (let step = 0; step < maxSteps; step += 1) {
     const current = await page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '');
     if (current >= targetDate) return;
-    await page.locator('.career-header [data-v060-continue]').click();
+    await clickVisibleContinue(page);
     await page.waitForTimeout(80);
   }
   throw new Error(`Continue Game did not reach ${targetDate}`);
