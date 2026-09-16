@@ -1,4 +1,35 @@
 const id = 'flm-mobile-home-v049';
+const compatibilityStyleId = 'flm-mobile-home-v049-compat';
+
+if (!document.getElementById(compatibilityStyleId)) {
+  const style = document.createElement('style');
+  style.id = compatibilityStyleId;
+  style.textContent = `
+    @media (max-width: 1000px) {
+      html[data-mobile-home="v049"] .menu-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      html[data-mobile-home="v049"] .menu-tile {
+        grid-column: auto !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      html[data-mobile-home="v049"] .menu-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      html[data-mobile-home="v049"] .menu-tile,
+      html[data-mobile-home="v049"] body.compact .menu-tile {
+        min-height: 62px !important;
+        padding: 11px 14px !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 const markReady = () => {
   document.documentElement.dataset.mobileHome = 'v049';
 };
