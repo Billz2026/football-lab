@@ -1,7 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { createCareer, PREMIER_LEAGUE_2026_27_MATCHWEEK_DATES } from '../manager-core.js';
+import {
+  createCareer,
+  getNextFixture,
+  parseCareer,
+  PREMIER_LEAGUE_2026_27_MATCHWEEK_DATES,
+  serializeCareer,
+  simulateNextRound,
+  sortedTable
+} from '../manager-core.js';
+import { finaliseSeason } from '../season-finalisation-v1.js';
 
 const [metadata, clubs, players] = await Promise.all([
   readFile(new URL('../data/current/metadata.json', import.meta.url), 'utf8').then(JSON.parse),
@@ -104,4 +113,100 @@ test('20-club career creates a complete 38-match home-and-away league season', (
   const midweeks = career.fixtures.filter(round => new Date(`${round[0].date}T12:00:00Z`).getUTCDay() === 3);
   assert.equal(midweeks.length, 5);
   assert.equal(career.fixtures.at(-1)[0].kickoffTime, '16:00');
+});
+
+test('real 20-club season survives 38 rounds, save/load checkpoints and finalises exactly once', () => {
+  const playable = playableClubs();
+  const db = { metadata, clubs, players };
+  const options = {
+    clubId: playable[0].id,
+    clubs: playable,
+    players,
+    seed: 'epl20-full-season-stress',
+    managerName: 'Season Stress Manager'
+  };
+  let career = createCareer(options);
+  let control = createCareer(options);
+  const checkpoints = new Set([1, 10, 25, 37]);
+
+  for (let matchweek = 1; matchweek <= 38; matchweek += 1) {
+    assert.equal(career.status, 'active', `career ended before matchweek ${matchweek}`);
+    assert.ok(getNextFixture(career), `no next fixture before matchweek ${matchweek}`);
+
+    career = simulateNextRound(career, db);
+    control = simulateNextRound(control, db);
+
+    assert.equal(career.roundIndex, matchweek);
+    assert.ok(career.table.every(row => row.played === matchweek), `table drift after matchweek ${matchweek}`);
+    assert.equal(career.fixtures.flat().filter(fixture => fixture.played).length, matchweek * 10);
+    assert.equal(career.fixtures.slice(matchweek).flat().some(fixture => fixture.played), false);
+
+    if (matchweek < 38) assert.equal(career.status, 'active');
+
+    if (checkpoints.has(matchweek)) {
+      const restored = parseCareer(serializeCareer(career), db);
+      assert.equal(restored.roundIndex, career.roundIndex);
+      assert.deepEqual(restored.table, career.table);
+      assert.deepEqual(restored.fixtures, career.fixtures);
+      assert.deepEqual(restored.playerStatus, career.playerStatus);
+      career = restored;
+    }
+  }
+
+  assert.equal(career.status, 'complete');
+  assert.equal(career.roundIndex, 38);
+  assert.equal(getNextFixture(career), null);
+  assert.equal(career.fixtures.flat().length, 380);
+  assert.ok(career.fixtures.flat().every(fixture => fixture.played));
+
+  assert.deepEqual(career.fixtures, control.fixtures);
+  assert.deepEqual(career.table, control.table);
+  assert.deepEqual(career.playerStatus, control.playerStatus);
+
+  const table = sortedTable(career.table);
+  assert.equal(table.length, 20);
+  for (const row of table) {
+    assert.equal(row.played, 38);
+    assert.equal(row.won + row.drawn + row.lost, 38);
+    assert.equal(row.goalDifference, row.goalsFor - row.goalsAgainst);
+    assert.equal(row.points, row.won * 3 + row.drawn);
+  }
+
+  const totals = table.reduce((sum, row) => ({
+    played: sum.played + row.played,
+    won: sum.won + row.won,
+    drawn: sum.drawn + row.drawn,
+    lost: sum.lost + row.lost,
+    goalsFor: sum.goalsFor + row.goalsFor,
+    goalsAgainst: sum.goalsAgainst + row.goalsAgainst,
+    points: sum.points + row.points
+  }), { played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0 });
+
+  assert.equal(totals.played, 760);
+  assert.equal(totals.won, totals.lost);
+  assert.equal(totals.drawn % 2, 0);
+  assert.equal(totals.goalsFor, totals.goalsAgainst);
+  assert.equal(totals.points, totals.won * 3 + totals.drawn);
+
+  for (const status of Object.values(career.playerStatus)) {
+    assert.ok(status.condition >= 55 && status.condition <= 100);
+    assert.ok(status.sharpness >= 1 && status.sharpness <= 100);
+    assert.ok(Number.isInteger(status.appearances) && status.appearances >= 0 && status.appearances <= 38);
+    assert.ok(Number.isInteger(status.goals) && status.goals >= 0);
+  }
+  for (const playerId of career.lineupIds) {
+    assert.equal(career.playerStatus[playerId]?.appearances, 38, `${playerId} did not receive 38 league appearances`);
+  }
+
+  assert.equal(career.seasonHistory.length, 1);
+  assert.ok(career.seasonOutcome?.championClubId);
+  assert.equal(career.seasonOutcome.finalTable.length, 20);
+  assert.equal(career.seasonOutcome.relegatedClubIds.length, 3);
+  assert.equal(career.nextSeasonContext.defendingChampionClubId, career.seasonOutcome.championClubId);
+
+  const completedAt = career.seasonHistory[0].completedAt;
+  const repeated = finaliseSeason(career, { completedAt: '2099-01-01T00:00:00.000Z' });
+  assert.equal(repeated.status, 'already-finalised');
+  assert.equal(career.seasonHistory.length, 1);
+  assert.equal(career.seasonHistory[0].completedAt, completedAt);
 });
