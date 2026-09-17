@@ -53204,8 +53204,8 @@
     "externalIds": {
       "apiFootball": 138780
     },
-    "name": "N. Williams",
-    "firstName": "N.",
+    "name": "Neco Shay Williams",
+    "firstName": "Neco Shay",
     "lastName": "Williams",
     "dateOfBirth": null,
     "reportedAge": 24,
@@ -53279,13 +53279,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:05:27.560Z"
     },
     "isPlaceholder": false
   },
@@ -53294,8 +53296,8 @@
     "externalIds": {
       "apiFootball": 2771
     },
-    "name": "O. Aina",
-    "firstName": "O.",
+    "name": "Temitayo Olufisayo Olaoluwa Aina",
+    "firstName": "Temitayo Olufisayo Olaoluwa",
     "lastName": "Aina",
     "dateOfBirth": null,
     "reportedAge": 29,
@@ -53369,13 +53371,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:05:34.726Z"
     },
     "isPlaceholder": false
   },
@@ -53384,8 +53388,8 @@
     "externalIds": {
       "apiFootball": 354753
     },
-    "name": "O. Diomande",
-    "firstName": "O.",
+    "name": "Ousmane Diomande",
+    "firstName": "Ousmane",
     "lastName": "Diomande",
     "dateOfBirth": null,
     "reportedAge": 22,
@@ -53459,13 +53463,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:05:41.898Z"
     },
     "isPlaceholder": false
   },
@@ -53474,9 +53480,9 @@
     "externalIds": {
       "apiFootball": 284428
     },
-    "name": "O. Hutchinson",
-    "firstName": "O.",
-    "lastName": "Hutchinson",
+    "name": "Omari Elijah Giraud-Hutchinson",
+    "firstName": "Omari Elijah",
+    "lastName": "Giraud-Hutchinson",
     "dateOfBirth": null,
     "reportedAge": 22,
     "nationalityCode": null,
@@ -53549,13 +53555,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:05:49.071Z"
     },
     "isPlaceholder": false
   },
@@ -53564,8 +53572,8 @@
     "externalIds": {
       "apiFootball": 19305
     },
-    "name": "R. Yates",
-    "firstName": "R.",
+    "name": "Ryan James Yates",
+    "firstName": "Ryan James",
     "lastName": "Yates",
     "dateOfBirth": null,
     "reportedAge": 28,
@@ -53639,13 +53647,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:05:56.244Z"
     },
     "isPlaceholder": false
   },
@@ -53654,8 +53664,8 @@
     "externalIds": {
       "apiFootball": 19312
     },
-    "name": "S. Benda",
-    "firstName": "S.",
+    "name": "Steven-Andreas Benda",
+    "firstName": "Steven-Andreas",
     "lastName": "Benda",
     "dateOfBirth": null,
     "reportedAge": 27,
@@ -53729,13 +53739,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:06:03.413Z"
     },
     "isPlaceholder": false
   },
@@ -53744,8 +53756,8 @@
     "externalIds": {
       "apiFootball": 1095
     },
-    "name": "X. Schlager",
-    "firstName": "X.",
+    "name": "Xaver Schlager",
+    "firstName": "Xaver",
     "lastName": "Schlager",
     "dateOfBirth": null,
     "reportedAge": 28,
@@ -53819,13 +53831,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:06:10.600Z"
     },
     "isPlaceholder": false
   },
@@ -53834,8 +53848,8 @@
     "externalIds": {
       "apiFootball": 329357
     },
-    "name": "Z. Abbott",
-    "firstName": "Z.",
+    "name": "Zach Abbott",
+    "firstName": "Zach",
     "lastName": "Abbott",
     "dateOfBirth": null,
     "reportedAge": 19,
@@ -53909,13 +53923,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:06:17.762Z"
     },
     "isPlaceholder": false
   },
@@ -53924,8 +53940,8 @@
     "externalIds": {
       "apiFootball": 383771
     },
-    "name": "Z. Blake",
-    "firstName": "Z.",
+    "name": "Zyan Blake",
+    "firstName": "Zyan",
     "lastName": "Blake",
     "dateOfBirth": null,
     "reportedAge": 2025,
@@ -53999,13 +54015,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:06:24.931Z"
     },
     "isPlaceholder": false
   },
@@ -54014,9 +54032,9 @@
     "externalIds": {
       "apiFootball": 284324
     },
-    "name": "A. Garnacho",
-    "firstName": "A.",
-    "lastName": "Garnacho",
+    "name": "Alejandro Garnacho Ferreyra",
+    "firstName": "Alejandro",
+    "lastName": "Garnacho Ferreyra",
     "dateOfBirth": null,
     "reportedAge": 21,
     "nationalityCode": null,
@@ -54089,13 +54107,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:06:32.105Z"
     },
     "isPlaceholder": false
   },
@@ -54104,9 +54124,9 @@
     "externalIds": {
       "apiFootball": 162714
     },
-    "name": "A. Onana",
-    "firstName": "A.",
-    "lastName": "Onana",
+    "name": "Amadou Ba Zeund Georges Mvom Onana",
+    "firstName": "Amadou Ba Zeund Georges",
+    "lastName": "Mvom Onana",
     "dateOfBirth": null,
     "reportedAge": 24,
     "nationalityCode": null,
@@ -54179,13 +54199,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:06:39.281Z"
     },
     "isPlaceholder": false
   },
@@ -54194,8 +54216,8 @@
     "externalIds": {
       "apiFootball": 18846
     },
-    "name": "A. Wan-Bissaka",
-    "firstName": "A.",
+    "name": "Aaron Wan-Bissaka",
+    "firstName": "Aaron",
     "lastName": "Wan-Bissaka",
     "dateOfBirth": null,
     "reportedAge": 28,
@@ -54269,13 +54291,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:06:46.456Z"
     },
     "isPlaceholder": false
   },
@@ -54464,8 +54488,8 @@
     "externalIds": {
       "apiFootball": 380715
     },
-    "name": "B. Broggio",
-    "firstName": "B.",
+    "name": "Benjamin Tomaso Broggio",
+    "firstName": "Benjamin Tomaso",
     "lastName": "Broggio",
     "dateOfBirth": null,
     "reportedAge": 18,
@@ -54539,13 +54563,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:06:53.632Z"
     },
     "isPlaceholder": false
   },
@@ -54554,9 +54580,9 @@
     "externalIds": {
       "apiFootball": 453101
     },
-    "name": "B. Burrows",
-    "firstName": "B.",
-    "lastName": "Burrows",
+    "name": "Bradley-Paul Burrowes",
+    "firstName": "Bradley-Paul",
+    "lastName": "Burrowes",
     "dateOfBirth": null,
     "reportedAge": 17,
     "nationalityCode": null,
@@ -54629,13 +54655,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:00.798Z"
     },
     "isPlaceholder": false
   },
@@ -54644,8 +54672,8 @@
     "externalIds": {
       "apiFootball": 1904
     },
-    "name": "B. Kamara",
-    "firstName": "B.",
+    "name": "Boubacar Bernard Kamara",
+    "firstName": "Boubacar Bernard",
     "lastName": "Kamara",
     "dateOfBirth": null,
     "reportedAge": 26,
@@ -54719,13 +54747,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:08.003Z"
     },
     "isPlaceholder": false
   },
@@ -54824,9 +54854,9 @@
     "externalIds": {
       "apiFootball": 19071
     },
-    "name": "E. Buendía",
-    "firstName": "E.",
-    "lastName": "Buendía",
+    "name": "Emiliano Buendía Stati",
+    "firstName": "Emiliano",
+    "lastName": "Buendía Stati",
     "dateOfBirth": null,
     "reportedAge": 29,
     "nationalityCode": null,
@@ -54899,13 +54929,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:15.182Z"
     },
     "isPlaceholder": false
   },
@@ -55004,8 +55036,8 @@
     "externalIds": {
       "apiFootball": 138816
     },
-    "name": "I. Maatsen",
-    "firstName": "I.",
+    "name": "Ian Ethan Maatsen",
+    "firstName": "Ian Ethan",
     "lastName": "Maatsen",
     "dateOfBirth": null,
     "reportedAge": 23,
@@ -55079,13 +55111,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:22.367Z"
     },
     "isPlaceholder": false
   },
@@ -55094,8 +55128,8 @@
     "externalIds": {
       "apiFootball": 19191
     },
-    "name": "J.  McGinn",
-    "firstName": "J.",
+    "name": "John McGinn",
+    "firstName": "John",
     "lastName": "McGinn",
     "dateOfBirth": null,
     "reportedAge": 31,
@@ -55169,13 +55203,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:43.897Z"
     },
     "isPlaceholder": false
   },
@@ -55184,9 +55220,9 @@
     "externalIds": {
       "apiFootball": 360268
     },
-    "name": "J. Jimoh",
-    "firstName": "J.",
-    "lastName": "Jimoh",
+    "name": "Jamaldeen Jimoh-Aloba",
+    "firstName": "Jamaldeen",
+    "lastName": "Jimoh-Aloba",
     "dateOfBirth": null,
     "reportedAge": 19,
     "nationalityCode": null,
@@ -55259,13 +55295,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:29.543Z"
     },
     "isPlaceholder": false
   },
@@ -55274,8 +55312,8 @@
     "externalIds": {
       "apiFootball": 406244
     },
-    "name": "J. Manzambi",
-    "firstName": "J.",
+    "name": "Johan Manzambi",
+    "firstName": "Johan",
     "lastName": "Manzambi",
     "dateOfBirth": null,
     "reportedAge": 20,
@@ -55349,13 +55387,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:36.721Z"
     },
     "isPlaceholder": false
   },
@@ -55364,8 +55404,8 @@
     "externalIds": {
       "apiFootball": 284390
     },
-    "name": "J. Wright",
-    "firstName": "J.",
+    "name": "James Wright",
+    "firstName": "James",
     "lastName": "Wright",
     "dateOfBirth": null,
     "reportedAge": 21,
@@ -55439,13 +55479,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:51.069Z"
     },
     "isPlaceholder": false
   },
@@ -55544,9 +55586,9 @@
     "externalIds": {
       "apiFootball": 983
     },
-    "name": "L. Bailey",
-    "firstName": "L.",
-    "lastName": "Bailey",
+    "name": "Leon Patrick Bailey Butler",
+    "firstName": "Leon Patrick",
+    "lastName": "Bailey Butler",
     "dateOfBirth": null,
     "reportedAge": 28,
     "nationalityCode": null,
@@ -55619,13 +55661,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:07:58.245Z"
     },
     "isPlaceholder": false
   },
@@ -55634,9 +55678,9 @@
     "externalIds": {
       "apiFootball": 284457
     },
-    "name": "L. Bogarde",
-    "firstName": "L.",
-    "lastName": "Bogarde",
+    "name": "Lamare Trenton Chansey Bogarde",
+    "firstName": "Lamare Trenton",
+    "lastName": "Chansey Bogarde",
     "dateOfBirth": null,
     "reportedAge": 21,
     "nationalityCode": null,
@@ -55709,13 +55753,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:08:05.430Z"
     },
     "isPlaceholder": false
   },
@@ -55724,8 +55770,8 @@
     "externalIds": {
       "apiFootball": 511
     },
-    "name": "L. Goretzka",
-    "firstName": "L.",
+    "name": "Leon Christoph Goretzka",
+    "firstName": "Leon Christoph",
     "lastName": "Goretzka",
     "dateOfBirth": null,
     "reportedAge": 30,
@@ -55799,13 +55845,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:08:12.606Z"
     },
     "isPlaceholder": false
   },
@@ -55814,8 +55862,8 @@
     "externalIds": {
       "apiFootball": 357247
     },
-    "name": "L. Lynch",
-    "firstName": "L.",
+    "name": "Luka Lynch",
+    "firstName": "Luka",
     "lastName": "Lynch",
     "dateOfBirth": null,
     "reportedAge": 18,
@@ -55889,13 +55937,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:08:19.785Z"
     },
     "isPlaceholder": false
   },
@@ -55904,8 +55954,8 @@
     "externalIds": {
       "apiFootball": 36878
     },
-    "name": "M. Bizot",
-    "firstName": "M.",
+    "name": "Marco Bizot",
+    "firstName": "Marco",
     "lastName": "Bizot",
     "dateOfBirth": null,
     "reportedAge": 34,
@@ -55979,13 +56029,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:08:26.952Z"
     },
     "isPlaceholder": false
   },
@@ -55994,8 +56046,8 @@
     "externalIds": {
       "apiFootball": 19298
     },
-    "name": "M. Cash",
-    "firstName": "M.",
+    "name": "Matthew Stuart Cash",
+    "firstName": "Matthew Stuart",
     "lastName": "Cash",
     "dateOfBirth": null,
     "reportedAge": 28,
@@ -56069,13 +56121,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:08:34.135Z"
     },
     "isPlaceholder": false
   },
@@ -56084,8 +56138,8 @@
     "externalIds": {
       "apiFootball": 478441
     },
-    "name": "M. Cissé",
-    "firstName": "M.",
+    "name": "Modou Kéba Cissé",
+    "firstName": "Modou Kéba",
     "lastName": "Cissé",
     "dateOfBirth": null,
     "reportedAge": 20,
@@ -56159,13 +56213,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:08:41.327Z"
     },
     "isPlaceholder": false
   },
@@ -56174,8 +56230,8 @@
     "externalIds": {
       "apiFootball": 162012
     },
-    "name": "M. Ruggeri",
-    "firstName": "M.",
+    "name": "Matteo Ruggeri",
+    "firstName": "Matteo",
     "lastName": "Ruggeri",
     "dateOfBirth": null,
     "reportedAge": 23,
@@ -56249,13 +56305,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:08:48.491Z"
     },
     "isPlaceholder": false
   },
@@ -56264,8 +56322,8 @@
     "externalIds": {
       "apiFootball": 283058
     },
-    "name": "N. Jackson",
-    "firstName": "N.",
+    "name": "Nicolas Jackson",
+    "firstName": "Nicolas",
     "lastName": "Jackson",
     "dateOfBirth": null,
     "reportedAge": 24,
@@ -56339,13 +56397,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:08:55.671Z"
     },
     "isPlaceholder": false
   },
@@ -56444,8 +56504,8 @@
     "externalIds": {
       "apiFootball": 2287
     },
-    "name": "R. Barkley",
-    "firstName": "R.",
+    "name": "Ross Barkley",
+    "firstName": "Ross",
     "lastName": "Barkley",
     "dateOfBirth": null,
     "reportedAge": 32,
@@ -56519,13 +56579,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:09:02.843Z"
     },
     "isPlaceholder": false
   },
@@ -56534,8 +56596,8 @@
     "externalIds": {
       "apiFootball": 412084
     },
-    "name": "R. Fortes",
-    "firstName": "R.",
+    "name": "Rodrigo Fortes",
+    "firstName": "Rodrigo",
     "lastName": "Fortes",
     "dateOfBirth": null,
     "reportedAge": 18,
@@ -56609,13 +56671,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:09:10.018Z"
     },
     "isPlaceholder": false
   },
@@ -56624,9 +56688,9 @@
     "externalIds": {
       "apiFootball": 19194
     },
-    "name": "T. Abraham",
-    "firstName": "T.",
-    "lastName": "Abraham",
+    "name": "Tammy Bakumo-Abraham",
+    "firstName": "Tammy",
+    "lastName": "Bakumo-Abraham",
     "dateOfBirth": null,
     "reportedAge": 28,
     "nationalityCode": null,
@@ -56699,13 +56763,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:09:17.185Z"
     },
     "isPlaceholder": false
   },
@@ -56714,8 +56780,8 @@
     "externalIds": {
       "apiFootball": 416250
     },
-    "name": "T. Carroll",
-    "firstName": "T.",
+    "name": "Theodore Carroll",
+    "firstName": "Theodore",
     "lastName": "Carroll",
     "dateOfBirth": null,
     "reportedAge": 19,
@@ -56789,13 +56855,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:09:24.364Z"
     },
     "isPlaceholder": false
   },
@@ -56804,8 +56872,8 @@
     "externalIds": {
       "apiFootball": 19179
     },
-    "name": "T. Mings",
-    "firstName": "T.",
+    "name": "Tyrone Deon Mings",
+    "firstName": "Tyrone Deon",
     "lastName": "Mings",
     "dateOfBirth": null,
     "reportedAge": 32,
@@ -56879,13 +56947,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:09:31.534Z"
     },
     "isPlaceholder": false
   },
@@ -57164,9 +57234,9 @@
     "externalIds": {
       "apiFootball": 889
     },
-    "name": "V. Lindelöf",
-    "firstName": "V.",
-    "lastName": "Lindelöf",
+    "name": "Victor Jörgen Nilsson Lindelöf",
+    "firstName": "Victor Jörgen",
+    "lastName": "Nilsson Lindelöf",
     "dateOfBirth": null,
     "reportedAge": 32,
     "nationalityCode": null,
@@ -57239,13 +57309,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:09:53.057Z"
     },
     "isPlaceholder": false
   },
@@ -57254,8 +57326,8 @@
     "externalIds": {
       "apiFootball": 199578
     },
-    "name": "Z. Suzuki",
-    "firstName": "Z.",
+    "name": "Zion Suzuki",
+    "firstName": "Zion",
     "lastName": "Suzuki",
     "dateOfBirth": null,
     "reportedAge": 23,
@@ -57329,13 +57401,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:10:00.226Z"
     },
     "isPlaceholder": false
   },
@@ -57344,9 +57418,9 @@
     "externalIds": {
       "apiFootball": 141133
     },
-    "name": "A. Alese",
-    "firstName": "A.",
-    "lastName": "Alese",
+    "name": "Ajibola Joshua Odunayo Afolarin Alese",
+    "firstName": "Ajibola Joshua Odunayo",
+    "lastName": "Afolarin Alese",
     "dateOfBirth": null,
     "reportedAge": 24,
     "nationalityCode": null,
@@ -57419,13 +57493,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:10:07.397Z"
     },
     "isPlaceholder": false
   },
@@ -57434,8 +57510,8 @@
     "externalIds": {
       "apiFootball": 19446
     },
-    "name": "A. Browne",
-    "firstName": "A.",
+    "name": "Alan James Browne",
+    "firstName": "Alan James",
     "lastName": "Browne",
     "dateOfBirth": null,
     "reportedAge": 30,
@@ -57509,13 +57585,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:10:14.584Z"
     },
     "isPlaceholder": false
   },
@@ -57614,9 +57692,9 @@
     "externalIds": {
       "apiFootball": 38750
     },
-    "name": "B. Brobbey",
-    "firstName": "B.",
-    "lastName": "Brobbey",
+    "name": "Brian Ebenezer Adjei Brobbey",
+    "firstName": "Brian Ebenezer",
+    "lastName": "Adjei Brobbey",
     "dateOfBirth": null,
     "reportedAge": 23,
     "nationalityCode": null,
@@ -57689,13 +57767,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:10:28.937Z"
     },
     "isPlaceholder": false
   },
@@ -57884,8 +57964,8 @@
     "externalIds": {
       "apiFootball": 339201
     },
-    "name": "C. Rigg",
-    "firstName": "C.",
+    "name": "Christopher Rigg",
+    "firstName": "Christopher",
     "lastName": "Rigg",
     "dateOfBirth": null,
     "reportedAge": 18,
@@ -57959,13 +58039,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:10:50.465Z"
     },
     "isPlaceholder": false
   },
@@ -57974,8 +58056,8 @@
     "externalIds": {
       "apiFootball": 336659
     },
-    "name": "C. Talbi",
-    "firstName": "C.",
+    "name": "Chemsdine Talbi",
+    "firstName": "Chemsdine",
     "lastName": "Talbi",
     "dateOfBirth": null,
     "reportedAge": 20,
@@ -58049,13 +58131,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:10:57.643Z"
     },
     "isPlaceholder": false
   },
@@ -58064,8 +58148,8 @@
     "externalIds": {
       "apiFootball": 55904
     },
-    "name": "D. Ballard",
-    "firstName": "D.",
+    "name": "Daniel George Ballard",
+    "firstName": "Daniel George",
     "lastName": "Ballard",
     "dateOfBirth": null,
     "reportedAge": 26,
@@ -58139,13 +58223,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:11:04.812Z"
     },
     "isPlaceholder": false
   },
@@ -58154,8 +58240,8 @@
     "externalIds": {
       "apiFootball": 452697
     },
-    "name": "D. Methalie",
-    "firstName": "D.",
+    "name": "Dayann Methalie",
+    "firstName": "Dayann",
     "lastName": "Methalie",
     "dateOfBirth": null,
     "reportedAge": 19,
@@ -58229,13 +58315,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:11:11.992Z"
     },
     "isPlaceholder": false
   },
@@ -58244,8 +58332,8 @@
     "externalIds": {
       "apiFootball": 20638
     },
-    "name": "E. Le Fée",
-    "firstName": "E.",
+    "name": "Enzo Jérémy Le Fée",
+    "firstName": "Enzo Jérémy",
     "lastName": "Le Fée",
     "dateOfBirth": null,
     "reportedAge": 25,
@@ -58319,13 +58407,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:11:19.171Z"
     },
     "isPlaceholder": false
   },
@@ -58514,8 +58604,8 @@
     "externalIds": {
       "apiFootball": 1464
     },
-    "name": "G. Xhaka",
-    "firstName": "G.",
+    "name": "Granit Xhaka",
+    "firstName": "Granit",
     "lastName": "Xhaka",
     "dateOfBirth": null,
     "reportedAge": 33,
@@ -58589,13 +58679,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:11:40.685Z"
     },
     "isPlaceholder": false
   },
@@ -58604,8 +58696,8 @@
     "externalIds": {
       "apiFootball": 327631
     },
-    "name": "H. Diarra",
-    "firstName": "H.",
+    "name": "Mouhamadou Habib Diarra",
+    "firstName": "Mouhamadou Habib",
     "lastName": "Diarra",
     "dateOfBirth": null,
     "reportedAge": 21,
@@ -58679,13 +58771,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:11:47.852Z"
     },
     "isPlaceholder": false
   },
@@ -58694,8 +58788,8 @@
     "externalIds": {
       "apiFootball": 381014
     },
-    "name": "J. Jones",
-    "firstName": "J.",
+    "name": "Jenson Oliver Jones",
+    "firstName": "Jenson Oliver",
     "lastName": "Jones",
     "dateOfBirth": null,
     "reportedAge": 19,
@@ -58769,13 +58863,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:11:55.027Z"
     },
     "isPlaceholder": false
   },
@@ -58874,8 +58970,8 @@
     "externalIds": {
       "apiFootball": 362766
     },
-    "name": "J. Whittaker",
-    "firstName": "J.",
+    "name": "Jack Whittaker",
+    "firstName": "Jack",
     "lastName": "Whittaker",
     "dateOfBirth": null,
     "reportedAge": 19,
@@ -58949,13 +59045,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:12:09.420Z"
     },
     "isPlaceholder": false
   },
@@ -59054,9 +59152,9 @@
     "externalIds": {
       "apiFootball": 19911
     },
-    "name": "L. O&apos;Nien",
-    "firstName": "L.",
-    "lastName": "O&apos;Nien",
+    "name": "Luke Terry O'Nien",
+    "firstName": "Luke Terry",
+    "lastName": "O'Nien",
     "dateOfBirth": null,
     "reportedAge": 31,
     "nationalityCode": null,
@@ -59129,13 +59227,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:12:16.579Z"
     },
     "isPlaceholder": false
   },
@@ -59144,8 +59244,8 @@
     "externalIds": {
       "apiFootball": 278454
     },
-    "name": "M. Ellborg",
-    "firstName": "M.",
+    "name": "Melker Åke Ellborg",
+    "firstName": "Melker Åke",
     "lastName": "Ellborg",
     "dateOfBirth": null,
     "reportedAge": 22,
@@ -59219,13 +59319,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:12:23.771Z"
     },
     "isPlaceholder": false
   },
@@ -59234,9 +59336,9 @@
     "externalIds": {
       "apiFootball": 311543
     },
-    "name": "N. Angulo",
-    "firstName": "N.",
-    "lastName": "Angulo",
+    "name": "Nilson David Angulo Ramírez",
+    "firstName": "Nilson David",
+    "lastName": "Angulo Ramírez",
     "dateOfBirth": null,
     "reportedAge": 22,
     "nationalityCode": null,
@@ -59309,13 +59411,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:12:30.937Z"
     },
     "isPlaceholder": false
   },
@@ -59324,9 +59428,9 @@
     "externalIds": {
       "apiFootball": 1146
     },
-    "name": "N. Mukiele",
-    "firstName": "N.",
-    "lastName": "Mukiele",
+    "name": "Nordi Mukiele Mulere",
+    "firstName": "Nordi",
+    "lastName": "Mukiele Mulere",
     "dateOfBirth": null,
     "reportedAge": 28,
     "nationalityCode": null,
@@ -59399,13 +59503,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:12:38.115Z"
     },
     "isPlaceholder": false
   },
@@ -59414,8 +59520,8 @@
     "externalIds": {
       "apiFootball": 365331
     },
-    "name": "N. Sadiki",
-    "firstName": "N.",
+    "name": "Noah Junior Sadiki",
+    "firstName": "Noah Junior",
     "lastName": "Sadiki",
     "dateOfBirth": null,
     "reportedAge": 21,
@@ -59489,13 +59595,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-17T10:12:45.278Z"
     },
     "isPlaceholder": false
   },
