@@ -9,34 +9,39 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test('Player Profile V2.1 uses one status/value presentation, visual meters and personality behaviour', async ({ page }) => {
+test('integrated player profile exposes attributes, status, development and navigation without a legacy modal', async ({ page }) => {
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   await expect(page.locator('.v044-list')).toBeVisible();
 
   await openFirstSquadProfile(page);
-  await expect(page.locator('#appModal')).toHaveClass(/is-open/);
-  await expect(page.locator('#appModal')).toHaveClass(/flm-profile-v2-open/);
+  const profile = page.locator('[data-flm-instant-profile]');
+  await expect(profile).toBeVisible();
+  await expect(page.locator('#appModal')).not.toHaveClass(/is-open/);
+  await expect(page.locator('link[data-flm-fast-profile]')).toHaveCount(1);
 
-  const profile = page.locator('.flm-profile');
-  await expect(profile).toHaveAttribute('data-profile-version', '2.1.2');
-  await expect(page.locator('link[data-flm-profile-v2-style]')).toHaveCount(1);
-  await expect(profile.locator('.flm-profile-status-strip .flm-status-chip')).toHaveCount(6);
-  await expect(profile.locator('.flm-card-title', { hasText: 'CURRENT STATUS' })).toHaveCount(0);
-  await expect(profile.locator('.v053-profile-summary small', { hasText: 'LIVE VALUE' })).toHaveCount(0);
+  await expect(profile.locator('.flm-ip-tabs [data-flm-profile-tab]')).toHaveCount(6);
+  await expect(profile.locator('.flm-ip-card-title', { hasText: 'TECHNICAL' })).toHaveCount(1);
+  await expect(profile.locator('.flm-ip-card-title', { hasText: 'MENTAL' })).toHaveCount(1);
+  await expect(profile.locator('.flm-ip-card-title', { hasText: 'PHYSICAL' })).toHaveCount(1);
+  await expect(profile.locator('.flm-ip-card-title', { hasText: 'STATUS' })).toHaveCount(1);
+  await expect(profile.locator('.flm-ip-card-title', { hasText: 'PERSONAL' })).toHaveCount(1);
+  await expect(profile.locator('.flm-ip-card-title', { hasText: 'POSITIONS' })).toHaveCount(1);
 
-  const meters = profile.locator('.flm-attr-meter');
-  expect(await meters.count()).toBeGreaterThan(20);
-  const widths = await meters.evaluateAll(nodes => nodes.map(node => node.style.getPropertyValue('--attribute-fill')));
-  expect(widths.every(value => /%$/.test(value))).toBeTruthy();
-  await expect(profile.locator('.flm-attr-row.is-top-attribute')).toHaveCount(5);
+  const attributes = profile.locator('.flm-ip-attribute-row');
+  expect(await attributes.count()).toBeGreaterThan(20);
+  const values = await attributes.locator('strong').allTextContents();
+  expect(values.every(value => {
+    const number = Number(value.trim());
+    return Number.isFinite(number) && number >= 1 && number <= 20;
+  })).toBeTruthy();
 
-  const firstValue = await profile.locator('.flm-attr-value').first().textContent();
-  expect(Number(firstValue)).toBeGreaterThanOrEqual(1);
-  expect(Number(firstValue)).toBeLessThanOrEqual(20);
+  await profile.getByRole('button', { name: 'DEVELOPMENT', exact: true }).click();
+  await expect(profile.locator('[data-flm-profile-panel]')).toContainText('DEVELOPMENT');
+  await expect(profile.locator('[data-flm-profile-panel]')).toContainText('Personality');
+  await expect(profile.locator('[data-flm-profile-panel]')).toContainText(/Current Ability.*Potential Ability.*remain concealed/i);
 
-  await expect.poll(async () => page.evaluate(() => Object.keys(window.FLMManager?.activeCareer?.playerPersonalities || {}).length)).toBeGreaterThan(100);
-  await expect(profile.locator('[data-personality-v2-card]')).toBeVisible();
-  await expect(profile.locator('[data-personality-v2-card]')).toContainText('PLAYER CHARACTER');
-  await expect(profile.locator('[data-personality-v2-card]')).toContainText('TEMPERAMENT');
+  await profile.getByRole('button', { name: 'CONTRACT', exact: true }).click();
+  await expect(profile.locator('[data-flm-profile-panel]')).toContainText('Weekly wage');
+  await expect(profile.locator('[data-flm-profile-panel]')).toContainText('Expiry');
 });
