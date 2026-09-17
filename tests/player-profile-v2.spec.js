@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openFirstSquadProfile } from './helpers/current-ui.js';
 
 test.setTimeout(60000);
 
@@ -13,12 +14,12 @@ test('Player Profile V2.1 uses one status/value presentation, visual meters and 
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   await expect(page.locator('.v044-list')).toBeVisible();
 
-  await page.locator('.v044-name strong').first().click();
+  await openFirstSquadProfile(page);
   await expect(page.locator('#appModal')).toHaveClass(/is-open/);
   await expect(page.locator('#appModal')).toHaveClass(/flm-profile-v2-open/);
 
   const profile = page.locator('.flm-profile');
-  await expect(profile).toHaveAttribute('data-profile-version', '2.1.0');
+  await expect(profile).toHaveAttribute('data-profile-version', '2.1.2');
   await expect(page.locator('link[data-flm-profile-v2-style]')).toHaveCount(1);
   await expect(profile.locator('.flm-profile-status-strip .flm-status-chip')).toHaveCount(6);
   await expect(profile.locator('.flm-card-title', { hasText: 'CURRENT STATUS' })).toHaveCount(0);

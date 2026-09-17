@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { continueGame } from './helpers/current-ui.js';
 
 test.setTimeout(90000);
 
@@ -11,14 +12,14 @@ test.beforeEach(async ({ page }) => {
 async function quickStart(page) {
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
-  await expect(page.locator('[data-v060-continue]').first()).toBeVisible();
+  await expect(page.locator('[data-shell-continue]')).toBeVisible();
 }
 
 async function continueUntil(page, targetDate, maxSteps = 30) {
   for (let step = 0; step < maxSteps; step += 1) {
     const current = await page.evaluate(() => window.FLMManager.activeCareer?.currentDate || '');
     if (current >= targetDate) return current;
-    await page.locator('.career-header [data-v060-continue]').click();
+    await continueGame(page);
     await page.waitForTimeout(80);
   }
   throw new Error(`Continue Game did not reach ${targetDate}`);
@@ -29,11 +30,11 @@ test('Continue Game advances the career day by day and stops on June milestones'
   await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
   await expect(page.locator('.v060-world-panel')).toContainText('Summer transfer window opens');
 
-  await page.locator('.v060-world-panel [data-v060-continue]').click();
+  await continueGame(page);
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
   await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
 
-  await page.locator('.v060-world-panel [data-v060-continue]').click();
+  await continueGame(page);
   await expect(page.locator('.v054-date-chip')).toContainText('19 JUN 2026');
   await expect(page.locator('[data-v051-fixtures]')).not.toHaveClass(/v054-lock-nav/);
 
@@ -47,8 +48,8 @@ test('Continue Game advances the career day by day and stops on June milestones'
 
 test('future friendlies cannot be played early and Continue Game stops on the scheduled date', async ({ page }) => {
   await quickStart(page);
-  await page.locator('.v060-world-panel [data-v060-continue]').click();
-  await page.locator('.v060-world-panel [data-v060-continue]').click();
+  await continueGame(page);
+  await continueGame(page);
   await expect(page.locator('.v054-date-chip')).toContainText('19 JUN 2026');
 
   await page.locator('[data-v047-preseason-tab]').click();

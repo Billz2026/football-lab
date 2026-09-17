@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clickVisibleNewGame } from './helpers/current-ui.js';
 
 test.setTimeout(60000);
 
@@ -9,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('new career creates a named manager with experience-based reputation and respect', async ({ page }) => {
-  await page.locator('[data-action="new-game"]').first().click();
+  await clickVisibleNewGame(page);
   await expect(page.locator('[data-manager-setup-v064="identity"]')).toBeVisible();
 
   await page.locator('[data-mgr-first]').fill('Alex');

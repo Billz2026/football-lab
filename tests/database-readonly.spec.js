@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { exitCareer } from './helpers/current-ui.js';
 
 test.setTimeout(60000);
 
@@ -12,13 +13,12 @@ test('Football Database player profiles are read-only even after a career has ex
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
-  const exit = page.locator('[data-exit-career]').first();
-  if (await exit.isVisible()) await exit.click();
-  else await page.evaluate(() => document.querySelector('.career-app')?.classList.remove('is-open'));
+  await exitCareer(page);
 
-  await page.locator('[data-action="database"]').first().click();
+  await page.locator('[data-action="database"]:visible').first().click();
   await expect(page.locator('.database-browser')).toBeVisible();
-  await page.locator('.db-player-row').first().click();
+  await page.locator('.db-player-row:visible').first().click();
+  await expect(page.locator('#appModal')).toHaveClass(/is-open/);
   await expect(page.locator('#appModal .flm-profile')).toBeVisible();
   await expect(page.locator('.flm-readonly-badge')).toContainText('DATABASE VIEW · READ ONLY');
 

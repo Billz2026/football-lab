@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clickVisibleNewGame } from './helpers/current-ui.js';
 
 test.setTimeout(60000);
 
@@ -9,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('new manager appointment flows through fans and a three-question press conference', async ({ page }) => {
-  await page.locator('[data-action="new-game"]').first().click();
+  await clickVisibleNewGame(page);
   await page.locator('[data-mgr-first]').fill('Alex');
   await page.locator('[data-mgr-last]').fill('Morgan');
   await page.locator('[data-mgr-nationality]').selectOption({ label: 'England' });

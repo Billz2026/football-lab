@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { continueGame, openFirstSquadProfile } from './helpers/current-ui.js';
 
 test.setTimeout(60000);
 
@@ -26,15 +27,14 @@ test('career starts in June, gates transfers and releases fixtures on 19 June', 
   await expect(fixtures).toHaveClass(/v054-lock-nav/);
   await fixtures.click();
   await expect(page.getByRole('heading', { name: 'Fixtures not released yet' })).toBeVisible();
-  await expect(page.locator('.v054-locked')).toContainText('FRIDAY 19 JUNE 2026 · 10:00 BST');
+  await expect(page.locator('.v054-locked')).toContainText('19 JUN 2026 · 10:00 BST');
 
-  await page.locator('[data-v054-advance]').click();
+  await continueGame(page);
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
   await expect(transferGate).toHaveCount(0);
   await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
 
-  await expect(page.locator('[data-v054-advance]')).toBeVisible();
-  await page.locator('[data-v054-advance]').click();
+  await continueGame(page);
   await expect(page.locator('.v054-date-chip')).toContainText('19 JUN 2026');
   await expect(fixtures).not.toHaveClass(/v054-lock-nav/);
 
@@ -54,7 +54,7 @@ test('player profiles browse instantly with next previous and jump controls', as
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   await expect(page.locator('.v044-list')).toBeVisible();
 
-  await page.locator('.v044-name strong').first().click();
+  await openFirstSquadProfile(page);
   await expect(page.locator('#appModal')).toHaveClass(/is-open/);
   await expect(page.locator('.v054-browser')).toBeVisible();
   const firstName = await page.locator('#modalTitle').textContent();
