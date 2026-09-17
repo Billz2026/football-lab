@@ -49,31 +49,33 @@ test('career starts in June, gates transfers and releases fixtures on 19 June', 
   expect(saved.news.items.some(item => item.key === 'summer-window-opens')).toBeTruthy();
 });
 
-test('player profiles browse instantly with next previous and jump controls', async ({ page }) => {
+test('integrated player profiles browse instantly with previous and next controls', async ({ page }) => {
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
   await expect(page.locator('.v044-list')).toBeVisible();
 
   await openFirstSquadProfile(page);
-  await expect(page.locator('#appModal')).toHaveClass(/is-open/);
-  await expect(page.locator('.v054-browser')).toBeVisible();
-  const firstName = await page.locator('#modalTitle').textContent();
-  const squadCount = await page.locator('.v044-row').count();
-  await expect(page.locator('[data-v054-jump] option')).toHaveCount(squadCount);
+  const profile = page.locator('[data-flm-instant-profile]');
+  await expect(profile).toBeVisible();
+  await expect(page.locator('#appModal')).not.toHaveClass(/is-open/);
 
-  const next = page.locator('[data-v054-next]');
-  await expect(next).toBeEnabled();
+  const heading = profile.locator('.flm-ip-title h2');
+  const firstName = (await heading.textContent()) || '';
+  const previous = profile.getByRole('button', { name: /PREVIOUS/ });
+  const next = profile.getByRole('button', { name: /NEXT/ });
+  await expect(previous).toBeVisible();
+  await expect(next).toBeVisible();
+
   await next.click();
-  await expect(page.locator('#modalTitle')).not.toHaveText(firstName || '');
-  const secondName = await page.locator('#modalTitle').textContent();
+  await expect(heading).not.toHaveText(firstName);
+  const secondName = (await heading.textContent()) || '';
+  expect(secondName).not.toBe(firstName);
 
-  await page.locator('[data-v054-prev]').click();
-  await expect(page.locator('#modalTitle')).toHaveText(firstName || '');
+  await previous.click();
+  await expect(heading).toHaveText(firstName);
 
-  const jump = page.locator('[data-v054-jump]');
-  const values = await jump.locator('option').evaluateAll(options => options.map(option => option.value));
-  expect(values.length).toBeGreaterThan(2);
-  await jump.selectOption(values[2]);
-  await expect(page.locator('#modalTitle')).not.toHaveText(firstName || '');
-  expect(await page.locator('#modalTitle').textContent()).not.toBe(secondName);
+  await profile.getByRole('button', { name: 'TRANSFER', exact: true }).click();
+  await expect(profile.locator('[data-flm-profile-panel]')).toContainText('TRANSFER STATUS');
+  await profile.getByRole('button', { name: 'PROFILE', exact: true }).click();
+  await expect(profile.locator('[data-flm-profile-panel]')).toContainText('STATUS');
 });
