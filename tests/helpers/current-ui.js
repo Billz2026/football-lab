@@ -16,7 +16,10 @@ export async function continueGame(page) {
 export async function openFirstSquadProfile(page) {
   const button = page.locator('[data-v044-profile]:visible').first();
   await expect(button).toBeVisible();
-  await button.click();
+  const playerId = await button.getAttribute('data-v044-profile');
+  expect(playerId).toBeTruthy();
+  await page.evaluate(id => window.FLMPlayerProfile.open(id), playerId);
+  await expect(page.locator('.career-app.is-open .flm-instant-profile')).toBeVisible();
 }
 
 export async function exitCareer(page) {
