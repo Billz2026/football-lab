@@ -28,7 +28,8 @@ async function continueUntil(page, targetDate, maxSteps = 30) {
 test('Continue Game advances the career day by day and stops on June milestones', async ({ page }) => {
   await quickStart(page);
   await expect(page.locator('.v054-date-chip')).toContainText('5 JUN 2026');
-  await expect(page.locator('.v060-world-panel')).toContainText('Summer transfer window opens');
+  await expect(page.locator('[data-shell-continue]')).toContainText('15 JUNE');
+  await expect(page.locator('[data-shell-continue]')).toContainText('Summer transfer window opens');
 
   await continueGame(page);
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
