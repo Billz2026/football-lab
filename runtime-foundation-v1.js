@@ -15,6 +15,7 @@ import './career-news-ui-v0462-fix.js?v=0.4.6.2';
 import './career-preseason-ui-v047.js?v=0.4.10';
 import './career-preseason-ui-v0471-fix.js?v=0.4.7.1';
 import './career-tactics-v048.js?v=0.4.10';
+import './tactics-position-fit-v1.js?v=1.0.0';
 import './matchday-ux-v048.js?v=0.4.8';
 import './mobile-home-v049.js?v=0.4.13';
 import './career-season-v051.js?v=0.5.2';
