@@ -18,6 +18,7 @@ test('new manager appointment flows through fans and a three-question press conf
   await page.locator('[data-mgr-exp="none"]').click();
   await page.locator('[data-mgr-finish]').click();
   await page.locator('[data-start-club]').filter({ hasText: 'Arsenal' }).click();
+  await page.getByRole('button', { name: /TAKE CONTROL/i }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
   await expect(page.locator('[data-appointment-v066="announcement"]')).toBeVisible();
