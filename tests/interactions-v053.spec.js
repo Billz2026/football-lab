@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { continueGame } from './helpers/current-ui.js';
 
 test.setTimeout(60000);
 
@@ -13,16 +14,16 @@ test.beforeEach(async ({ page }) => {
 async function openTransferWindow(page) {
   if (await page.locator('[data-v050-transfer-tab]').count()) return;
   await page.getByRole('button', { name: 'Overview', exact: true }).click();
-  await page.locator('[data-v054-advance]').click();
+  await continueGame(page);
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
   await expect(page.locator('[data-v050-transfer-tab]')).toBeVisible();
 }
 
 test('V0.5.3 opens player profiles from career lists and exposes live value plus comparison data', async ({ page }) => {
   await page.getByRole('button', { name: 'Squad', exact: true }).click();
-  const squadName = page.locator('[data-v044-row] .v044-name strong').first();
-  const squadPlayerName = (await squadName.textContent()).trim().replace('★', '').trim();
-  await squadName.click();
+  const squadRow = page.locator('[data-v044-row]:visible').first();
+  const squadPlayerName = (await squadRow.locator('.v044-name strong').textContent()).trim().replace('★', '').trim();
+  await squadRow.locator('[data-v044-profile]').click();
 
   await expect(page.locator('#appModal')).toHaveClass(/is-open/);
   await expect(page.locator('#modalTitle')).toContainText(squadPlayerName.split(' ')[0]);

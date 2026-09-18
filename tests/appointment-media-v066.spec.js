@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clickVisibleNewGame } from './helpers/current-ui.js';
 
 test.setTimeout(60000);
 
@@ -9,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('new manager appointment flows through fans and a three-question press conference', async ({ page }) => {
-  await page.locator('[data-action="new-game"]').first().click();
+  await clickVisibleNewGame(page);
   await page.locator('[data-mgr-first]').fill('Alex');
   await page.locator('[data-mgr-last]').fill('Morgan');
   await page.locator('[data-mgr-nationality]').selectOption({ label: 'England' });
@@ -17,6 +18,7 @@ test('new manager appointment flows through fans and a three-question press conf
   await page.locator('[data-mgr-exp="none"]').click();
   await page.locator('[data-mgr-finish]').click();
   await page.locator('[data-start-club]').filter({ hasText: 'Arsenal' }).click();
+  await page.getByRole('button', { name: /TAKE CONTROL/i }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
   await expect(page.locator('[data-appointment-v066="announcement"]')).toBeVisible();

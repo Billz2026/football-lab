@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clickVisibleNewGame } from './helpers/current-ui.js';
 
 test.setTimeout(60000);
 
@@ -9,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('new career creates a named manager with experience-based reputation and respect', async ({ page }) => {
-  await page.locator('[data-action="new-game"]').first().click();
+  await clickVisibleNewGame(page);
   await expect(page.locator('[data-manager-setup-v064="identity"]')).toBeVisible();
 
   await page.locator('[data-mgr-first]').fill('Alex');
@@ -24,6 +25,7 @@ test('new career creates a named manager with experience-based reputation and re
 
   await expect(page.getByRole('heading', { name: 'CHOOSE YOUR CLUB' })).toBeVisible();
   await page.locator('[data-start-club]').filter({ hasText: 'Arsenal' }).click();
+  await page.getByRole('button', { name: /TAKE CONTROL/i }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
 
   await expect.poll(async () => page.evaluate(() => window.FLMManager?.activeCareer?.managerProfile?.name || '')).toBe('Alex Morgan');

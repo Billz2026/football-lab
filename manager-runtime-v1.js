@@ -7,8 +7,8 @@
  * progressively merged into canonical modules.
  */
 
-import './runtime-foundation-v1.js?v=1.0.1';
+import './runtime-foundation-v1.js?v=1.0.4';
 import './runtime-matchday-v1.js?v=1.0.0';
 import './runtime-match-centre-v1.js?v=2.0.0';
-import './runtime-career-integrity-v1.js?v=1.0.0';
+import './runtime-career-integrity-v1.js?v=1.0.1';
 import './runtime-commentary-v1.js?v=1.0.0';

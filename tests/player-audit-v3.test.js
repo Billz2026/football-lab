@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { applyManchesterAuditV2 } from '../player-audit-v2.js';
 import { applyPremierLeagueAuditV3 } from '../player-audit-v3.js';
+import { applyPremierLeagueAuditV4 } from '../player-audit-v4.js';
 
 const players = JSON.parse(await readFile(new URL('../data/current/players.json', import.meta.url), 'utf8'));
 const LIVERPOOL_ID = 'flm-club-api-football-40';
@@ -14,7 +15,8 @@ const ARSENAL_ID = 'flm-club-api-football-42';
 function auditedDb() {
   const db = { players: structuredClone(players), playerAudit: {} };
   applyManchesterAuditV2(db);
-  return applyPremierLeagueAuditV3(db);
+  applyPremierLeagueAuditV3(db);
+  return applyPremierLeagueAuditV4(db);
 }
 
 function atClub(db, clubId, pattern) {
@@ -53,7 +55,7 @@ test('Liverpool confirmed departures are not selectable at Liverpool', () => {
   }
 });
 
-test('Chelsea audit reflects post-window core and removes stale ownership through stacked audits', () => {
+test('Chelsea audit reflects post-window core and handles Caicedo provider surname expansion', () => {
   const db = auditedDb();
   const palmer = atClub(db, CHELSEA_ID, /Palmer/i);
   const caicedo = atClub(db, CHELSEA_ID, /Caicedo/i);
@@ -67,6 +69,10 @@ test('Chelsea audit reflects post-window core and removes stale ownership throug
   assert.ok(estevao, 'Estevao should be in the audited Chelsea squad');
   assert.equal(palmer.importanceScore, 100);
   assert.equal(caicedo.primaryPosition, 'DMC');
+  assert.deepEqual(caicedo.secondaryPositions, ['MC']);
+  assert.equal(caicedo.importanceScore, 100);
+  assert.equal(caicedo.squadImportance, 'cornerstone');
+  assert.equal(db.playerAudit.v4CaicedoIdentity?.status, 'corrected');
   assert.equal(rogers.primaryPosition, 'AMC');
   assert.equal(martinez.positionGroup, 'GK');
   assert.equal(estevao.primaryPosition, 'AMR');
