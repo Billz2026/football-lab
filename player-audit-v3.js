@@ -84,7 +84,7 @@ export const CHELSEA_AUDIT = [
   R(['Aaron Anselmino','Anselmino'], 'DC', 'DEF', 147, 178, 55, 'elite-prospect', 30_000_000),
 
   // Midfielders
-  R(['Moises Caicedo','Moisés Caicedo','Caicedo'], 'DMC', 'MID', 173, 179, 100, 'cornerstone', 125_000_000, { secondaryPositions:['MC'], marketTier:'world-icon' }),
+  R(['Moises Caicedo','Moisés Caicedo','Caicedo','Caicedo Corozo'], 'DMC', 'MID', 173, 179, 100, 'cornerstone', 125_000_000, { secondaryPositions:['MC'], marketTier:'world-icon' }),
   R(['Cole Palmer','Palmer'], 'AMC', 'MID', 178, 186, 100, 'global-superstar', 145_000_000, { secondaryPositions:['AMR'], marketTier:'world-icon' }),
   R(['Morgan Rogers','Rogers'], 'AMC', 'MID', 166, 175, 92, 'key-player', 90_000_000, { secondaryPositions:['AML','AMR'], forceClub:true, marketTier:'elite' }),
   R(['Romeo Lavia','Lavia'], 'DMC', 'MID', 156, 174, 73, 'rotation-first-team', 42_000_000, { secondaryPositions:['MC'] }),

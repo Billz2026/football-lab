@@ -143,7 +143,7 @@
 
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = './career-ui-polish-v2.css?v=2.0.0';
+  link.href = './career-ui-polish-v2.css?v=2.1.0';
   link.dataset.flmCareerUiPolish = '2.0.0';
   document.head.appendChild(link);
 
