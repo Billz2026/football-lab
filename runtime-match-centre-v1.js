@@ -7,3 +7,4 @@
  */
 
 import './match-centre-v5.js?v=5.0.0';
+import './match-centre-subs-action-v1.js?v=1.0.0';

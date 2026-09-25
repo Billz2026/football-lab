@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { continueGame } from './helpers/current-ui.js';
 
 test.setTimeout(70000);
 
@@ -8,7 +9,7 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
   await page.getByRole('button', { name: /QUICK START/ }).click();
   await expect(page.locator('.career-app')).toHaveClass(/is-open/);
-  await page.locator('.v060-world-panel [data-v060-continue]').click();
+  await continueGame(page);
   await expect(page.locator('.v054-date-chip')).toContainText('15 JUN 2026');
 });
 

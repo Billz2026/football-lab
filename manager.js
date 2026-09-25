@@ -7,7 +7,7 @@
  */
 
 import './player-name-normalizer-v1.js?v=1.0.0';
-import './manager-runtime-v1.js?v=1.1.1';
+import './manager-runtime-v1.js?v=1.1.5';
 import './game-economy-v1.js?v=1.0.0';
 import './club-reputation-v1.js?v=1.0.1';
 import './squad-number-registration-v2.js?v=2.0.0';

@@ -123,6 +123,15 @@ jobs:
           set -o pipefail
           npm run test:ci -- --reporter=line,html 2>&1 | tee playwright-output.txt
 
+      - name: Upload browser console log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-browser-log-${{ github.run_id }}
+          path: playwright-output.txt
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Upload validation diagnostics
         if: always()
         uses: actions/upload-artifact@v4
