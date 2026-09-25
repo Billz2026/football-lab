@@ -5598,8 +5598,8 @@
     "externalIds": {
       "apiFootball": 557462
     },
-    "name": "S. Lacey",
-    "firstName": "S.",
+    "name": "Shea Lacey",
+    "firstName": "Shea",
     "lastName": "Lacey",
     "dateOfBirth": null,
     "reportedAge": 18,
@@ -5673,13 +5673,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-25T10:13:46.600Z"
     },
     "isPlaceholder": false
   },
@@ -5780,8 +5782,8 @@
     "externalIds": {
       "apiFootball": 557460
     },
-    "name": "T. Fletcher",
-    "firstName": "T.",
+    "name": "Tyler Fletcher",
+    "firstName": "Tyler",
     "lastName": "Fletcher",
     "dateOfBirth": null,
     "reportedAge": 18,
@@ -5855,13 +5857,15 @@
     "seasonStats": [],
     "careerHistory": [],
     "dataQuality": {
-      "identitySource": "api-football-current-squad",
+      "identitySource": "api-football-players-profiles",
       "squadMembership": "current-seasonless-endpoint",
       "positionDetail": "broad-only",
       "biography": "not-loaded-free-tier",
       "attributes": "flm-low-confidence-positional-baseline",
       "ratingEngine": "FLM v1.1.1-compatible baseline; not current-season statistical evidence",
-      "confidence": "low"
+      "confidence": "low",
+      "fullNameEnriched": true,
+      "fullNameEnrichedAt": "2026-09-25T10:13:53.811Z"
     },
     "isPlaceholder": false
   },
