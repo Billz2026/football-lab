@@ -11,7 +11,6 @@
  */
 
 let allowSummaryCareerId = null;
-let allowSummaryUntil = 0;
 let suppressPlayerClickId = null;
 let suppressPlayerClickUntil = 0;
 
@@ -116,7 +115,7 @@ function summaryIsAllowed(career) {
   return Boolean(
     career?.id &&
     allowSummaryCareerId === career.id &&
-    Date.now() < allowSummaryUntil
+    !career.appointmentExperience?.dismissed
   );
 }
 
@@ -129,6 +128,7 @@ function enforceCompletedAppointment({ closeStale = true } = {}) {
   const visible = isCompletedSummaryVisible();
   const locked = hasAppointmentLock(career);
 
+  if (allowed) return true;
   if (!state.dismissed || !locked) saveAppointmentDismissal(career);
   if (visible && closeStale && !allowed) closeSharedModal();
   return true;
@@ -216,7 +216,7 @@ window.addEventListener('click', event => {
     if (career?.appointmentExperience?.completed) {
       saveAppointmentDismissal(career);
       allowSummaryCareerId = null;
-      allowSummaryUntil = 0;
+      closeAppointmentFrame();
     }
     return;
   }
@@ -228,7 +228,7 @@ window.addEventListener('click', event => {
     if (career?.appointmentExperience?.completed) {
       saveAppointmentDismissal(career);
       allowSummaryCareerId = null;
-      allowSummaryUntil = 0;
+      closeAppointmentFrame();
     }
   }
 }, true);
@@ -250,7 +250,7 @@ window.addEventListener('keydown', event => {
   if (career?.appointmentExperience?.completed) {
     saveAppointmentDismissal(career);
     allowSummaryCareerId = null;
-    allowSummaryUntil = 0;
+    closeAppointmentFrame();
   }
 }, true);
 
@@ -259,10 +259,9 @@ window.addEventListener('flm:appointment-complete', event => {
   if (!career?.appointmentExperience?.completed) return;
 
   allowSummaryCareerId = event.detail?.careerId || career.id;
-  // The completion screen only needs a very small grace period to render once.
-  // It must never be eligible to reopen during normal career navigation.
-  allowSummaryUntil = Date.now() + 1500;
-  saveAppointmentDismissal(career);
+  // Completing the questions is not dismissing the summary. Keep it available
+  // until ENTER CAREER, Escape, or an explicit close; returning saves are still
+  // handled by repairLoadedCareer and the persistent dismissal lock.
 });
 
 function repairLoadedCareer() {
@@ -305,7 +304,7 @@ const modalObserver = new MutationObserver(() => {
   if (closeGhostProfileModal()) return;
 
   const career = activeCareer();
-  if (!career?.appointmentExperience?.completed) return;
+  if (!career?.appointmentExperience?.completed || summaryIsAllowed(career)) return;
 
   saveAppointmentDismissal(career);
   if (isCompletedSummaryVisible() && !summaryIsAllowed(career)) {

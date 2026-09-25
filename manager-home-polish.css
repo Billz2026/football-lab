@@ -415,7 +415,17 @@ body.compact .menu-tile {
   }
 
   .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 7px;
+  }
+
+  .tile-new, .tile-quick, .tile-load,
+  .tile-database, .tile-fame, .tile-settings {
+    grid-column: auto;
+  }
+
+  .tile-quick, .tile-load {
+    min-height: 62px !important;
   }
 
   .menu-tile,
@@ -517,6 +527,10 @@ body.compact .menu-tile {
 
   .tile-new {
     min-height: 76px !important;
+  }
+
+  .tile-quick, .tile-load {
+    min-height: 58px !important;
   }
 
   .tile-new .tile-copy strong {
