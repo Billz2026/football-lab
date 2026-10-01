@@ -421,7 +421,7 @@ async function renderCareer() {
 
   element.querySelectorAll('[data-home-inbox-item]').forEach(control => control.addEventListener('click', () => {
     inboxSelectedId = control.dataset.homeInboxItem;
-    activeCareerTab = 'home';
+    activeCareerTab = 'overview';
     if (markNewsRead(activeCareer, inboxSelectedId) && settings.autosave) saveCareer();
     renderCareer();
   }));
