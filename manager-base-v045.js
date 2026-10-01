@@ -32,7 +32,7 @@ const settingsTemplate = document.getElementById('settingsTemplate');
 
 let databasePromise;
 let activeCareer;
-let activeCareerTab = 'overview';
+let activeCareerTab = 'home';
 let inboxFilter = 'All';
 let inboxSelectedId = null;
 
@@ -172,9 +172,123 @@ function shell() {
 }
 
 function navigation() {
-  return [['overview', 'Inbox'], ['squad', 'Squad'], ['tactics', 'Tactics'], ['matchday', 'Matchday'], ['table', 'Table']]
-    .map(([id, label]) => `<button type="button" class="career-nav-button ${activeCareerTab === id ? 'is-active' : ''}" data-career-tab="${id}"${id === 'overview' ? ' data-v046-news-tab aria-label="Overview"' : ''}>${label}</button>`)
+  return [['home', 'Home'], ['overview', 'Inbox'], ['squad', 'Squad'], ['tactics', 'Tactics'], ['matchday', 'Matchday'], ['table', 'Table']]
+    .map(([id, label]) => `<button type="button" class="career-nav-button ${activeCareerTab === id ? 'is-active' : ''}" data-career-tab="${id}"${id === 'overview' ? ' data-v046-news-tab aria-label="Inbox"' : ''}>${label}</button>`)
     .join('');
+}
+
+
+function ordinal(value) {
+  const number = Number(value) || 0;
+  const mod10 = number % 10;
+  const mod100 = number % 100;
+  if (mod10 === 1 && mod100 !== 11) return `${number}st`;
+  if (mod10 === 2 && mod100 !== 12) return `${number}nd`;
+  if (mod10 === 3 && mod100 !== 13) return `${number}rd`;
+  return `${number}th`;
+}
+
+function leaguePosition() {
+  const table = sortedTable(activeCareer.table || []);
+  const index = table.findIndex(row => row.clubId === activeCareer.clubId);
+  return { position: index >= 0 ? index + 1 : null, total: table.length };
+}
+
+function managerHomeView(db) {
+  const club = getClub(db, activeCareer.clubId);
+  const next = getNextFixture(activeCareer);
+  if (syncCareerNews(activeCareer, db) && settings.autosave) saveCareer();
+
+  const unread = getRelevantUnreadNewsCount(activeCareer, db);
+  const messages = getRelevantNewsItems(activeCareer, db, 'All').slice(0, 4);
+  const position = leaguePosition();
+  const lineup = validateLineup(activeCareer.lineupIds || [], db.players, activeCareer.clubId);
+  const preseason = activeCareer.preseason;
+  const friendlies = Array.isArray(preseason?.fixtures) ? preseason.fixtures : [];
+  const friendliesPlayed = friendlies.filter(item => item.played).length;
+  const seasonPhase = preseason && preseason.phase !== 'complete'
+    ? `PRE-SEASON · ${friendliesPlayed}/${friendlies.length || 5} FRIENDLIES`
+    : activeCareer.status === 'complete'
+      ? 'SEASON COMPLETE'
+      : `ROUND ${Math.min((activeCareer.roundIndex || 0) + 1, activeCareer.fixtures?.length || 0)}`;
+
+  const attention = [];
+  if (unread) attention.push({ tab: 'overview', title: `${unread} unread inbox message${unread === 1 ? '' : 's'}`, detail: 'Review club communications' });
+  if (!lineup.valid) attention.push({ tab: 'squad', title: 'Starting XI needs attention', detail: lineup.errors?.[0] || 'Select a valid team' });
+  if (preseason && preseason.phase !== 'complete') attention.push({ tab: 'overview', title: 'Pre-season programme active', detail: `${friendliesPlayed}/${friendlies.length || 5} friendlies completed` });
+  if (next) attention.push({ tab: 'matchday', title: 'Next fixture approaching', detail: `${clubName(db, next.homeClubId)} vs ${clubName(db, next.awayClubId)} · Round ${next.round}` });
+
+  return `
+    <div class="career-page-heading manager-home-heading">
+      <div>
+        <p class="eyebrow">MANAGER CENTRE · ${esc(club.name)}</p>
+        <h2>Home</h2>
+        <span class="career-inbox-subtitle">${esc(seasonPhase)} · ${esc(activeCareer.competitionName)}</span>
+      </div>
+      <button class="career-primary manager-home-open-match" type="button" data-career-tab="${next ? 'matchday' : 'table'}">
+        ${next ? 'OPEN MATCHDAY' : 'VIEW FINAL TABLE'}
+      </button>
+    </div>
+
+    <div class="manager-home-summary">
+      <button class="manager-home-card" type="button" data-career-tab="${next ? 'matchday' : 'table'}">
+        <small>NEXT MATCH</small>
+        <strong>${next ? `${esc(clubName(db, next.homeClubId))} vs ${esc(clubName(db, next.awayClubId))}` : 'SEASON COMPLETE'}</strong>
+        <span>${next ? `Round ${next.round}` : 'View final table'}</span>
+      </button>
+
+      <button class="manager-home-card" type="button" data-career-tab="table">
+        <small>LEAGUE POSITION</small>
+        <strong>${position.position ? ordinal(position.position) : '—'}</strong>
+        <span>${position.total ? `of ${position.total} clubs` : 'Table pending'}</span>
+      </button>
+
+      <button class="manager-home-card" type="button" data-career-tab="overview">
+        <small>INBOX</small>
+        <strong>${unread}</strong>
+        <span>${unread === 1 ? 'Unread message' : 'Unread messages'}</span>
+      </button>
+
+      <button class="manager-home-card" type="button" data-career-tab="squad">
+        <small>TEAM STATUS</small>
+        <strong>${lineup.valid ? 'READY' : 'ACTION'}</strong>
+        <span>${lineup.valid ? 'Starting XI valid' : 'Starting XI needs work'}</span>
+      </button>
+    </div>
+
+    <div class="manager-home-grid">
+      <section class="manager-home-panel">
+        <div class="manager-home-panel-head">
+          <div><small>CLUB COMMUNICATIONS</small><strong>INBOX</strong></div>
+          <button class="career-secondary" type="button" data-career-tab="overview">OPEN INBOX</button>
+        </div>
+        <div class="manager-home-message-list">
+          ${messages.length ? messages.map(item => `
+            <button type="button" class="manager-home-message ${!item.read ? 'is-unread' : ''}" data-home-inbox-item="${esc(item.id)}">
+              <span>${esc(item.dateLabel)}</span>
+              <strong>${esc(item.title)}</strong>
+              <small>${esc(item.category)} · ${esc(item.source)}</small>
+            </button>
+          `).join('') : '<div class="manager-home-empty"><strong>INBOX CLEAR</strong><span>New club messages will appear here.</span></div>'}
+        </div>
+      </section>
+
+      <section class="manager-home-panel manager-home-attention">
+        <div class="manager-home-panel-head">
+          <div><small>MANAGER TASKS</small><strong>ATTENTION REQUIRED</strong></div>
+        </div>
+        <div class="manager-home-attention-list">
+          ${attention.length ? attention.slice(0, 4).map(item => `
+            <button type="button" class="manager-home-attention-item" data-career-tab="${esc(item.tab)}">
+              <i aria-hidden="true"></i>
+              <span><strong>${esc(item.title)}</strong><small>${esc(item.detail)}</small></span>
+              <b aria-hidden="true">›</b>
+            </button>
+          `).join('') : '<div class="manager-home-empty"><strong>NO URGENT TASKS</strong><span>Your immediate management work is under control.</span></div>'}
+        </div>
+      </section>
+    </div>
+  `;
 }
 
 function overviewView(db) {
@@ -270,6 +384,7 @@ async function renderCareer() {
   const element = shell();
   const club = getClub(db, activeCareer.clubId);
   const views = {
+    home: () => managerHomeView(db),
     overview: () => overviewView(db),
     squad: () => squadView(db),
     tactics: tacticsView,
@@ -300,6 +415,13 @@ async function renderCareer() {
 
   element.querySelectorAll('[data-inbox-item]').forEach(control => control.addEventListener('click', () => {
     inboxSelectedId = control.dataset.inboxItem;
+    if (markNewsRead(activeCareer, inboxSelectedId) && settings.autosave) saveCareer();
+    renderCareer();
+  }));
+
+  element.querySelectorAll('[data-home-inbox-item]').forEach(control => control.addEventListener('click', () => {
+    inboxSelectedId = control.dataset.homeInboxItem;
+    activeCareerTab = 'home';
     if (markNewsRead(activeCareer, inboxSelectedId) && settings.autosave) saveCareer();
     renderCareer();
   }));
@@ -388,7 +510,7 @@ async function renderCareer() {
 async function beginCareer(clubId) {
   const db = await loadDatabase();
   activeCareer = createCareer({ clubId, clubs: playableClubs(db), players: db.players });
-  activeCareerTab = 'overview';
+  activeCareerTab = 'home';
   saveCareer();
   closeModal();
   await renderCareer();
@@ -482,7 +604,7 @@ async function showLoadGame() {
       copy: 'A playable career was found on this device.',
       body: notice(`${club.name} · ${activeCareer.season}`, `Round ${Math.min(activeCareer.roundIndex + 1, activeCareer.fixtures.length)} of ${activeCareer.fixtures.length}`),
       actions: [
-        { label: 'CONTINUE CAREER', primary: true, onClick: () => { closeModal(); activeCareerTab = 'overview'; renderCareer(); } },
+        { label: 'CONTINUE CAREER', primary: true, onClick: () => { closeModal(); activeCareerTab = 'home'; renderCareer(); } },
         { label: 'CLOSE', onClick: closeModal }
       ]
     });
