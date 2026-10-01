@@ -467,3 +467,27 @@ body::before {
   .menu-tile { min-height: 70px; }
   .tile-copy strong { font-size: 16px; }
 }
+
+
+/* Home entry flow v0.4 */
+.menu-tile[hidden] {
+  display: none !important;
+}
+
+.menu-tile.tile-load:not([hidden]) {
+  grid-column: 1 / -1;
+  border-color: rgba(69, 201, 107, .92);
+  background: rgba(12, 57, 39, .86);
+}
+
+.menu-tile.tile-load:not([hidden]):hover,
+.menu-tile.tile-load:not([hidden]):focus-visible {
+  border-color: #65e189;
+  background: rgba(18, 79, 53, .94);
+}
+
+@media (max-width: 780px) {
+  .menu-tile.tile-load:not([hidden]) {
+    grid-column: auto;
+  }
+}
