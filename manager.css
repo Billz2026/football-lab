@@ -474,20 +474,22 @@ body::before {
   display: none !important;
 }
 
+/* Match the main menu hierarchy: Continue sits beside Quick Start
+   rather than taking the full row. */
 .menu-tile.tile-load:not([hidden]) {
-  grid-column: 1 / -1;
-  border-color: rgba(69, 201, 107, .92);
-  background: rgba(12, 57, 39, .86);
+  grid-column: 4 / 6;
+  border-color: rgba(54, 118, 200, .80);
+  background: rgba(4, 22, 46, .88);
 }
 
 .menu-tile.tile-load:not([hidden]):hover,
 .menu-tile.tile-load:not([hidden]):focus-visible {
-  border-color: #65e189;
-  background: rgba(18, 79, 53, .94);
+  border-color: rgba(115, 177, 242, .96);
+  background: rgba(7, 31, 61, .90);
 }
 
-@media (max-width: 780px) {
+@media (max-width: 600px) {
   .menu-tile.tile-load:not([hidden]) {
-    grid-column: auto;
+    grid-column: 1;
   }
 }
