@@ -85,7 +85,7 @@ main {
 .menu-section {
   position: absolute;
   z-index: 6;
-  top: clamp(185px, 27vh, 270px);
+  top: clamp(200px, 30vh, 295px);
   left: 50%;
   width: min(1040px, calc(100% - 48px));
   max-width: none;
@@ -96,7 +96,7 @@ main {
 
 .section-heading {
   display: block;
-  margin: 0 0 30px;
+  margin: 0 0 22px;
   text-align: center;
 }
 
@@ -125,7 +125,7 @@ main {
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
   align-items: stretch;
 }
 
@@ -281,6 +281,19 @@ body.compact .menu-tile {
 .menu-tile:active {
   transform: translateY(0);
   background: rgba(8, 35, 68, .96) !important;
+}
+
+/* Keyboard focus must remain visible on top of the stadium photograph. */
+.menu-tile:focus-visible {
+  outline: 2px solid #b6ddff;
+  outline-offset: 3px;
+}
+
+/* Avoid pushing the menu below the fold on shorter desktop windows. */
+@media (min-width: 1001px) and (max-height: 700px) {
+  .menu-section {
+    top: clamp(145px, 24vh, 190px);
+  }
 }
 
 /* Remove the development/status footer for a cleaner title-screen finish. */
