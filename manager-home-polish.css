@@ -443,12 +443,23 @@ body.compact .menu-tile {
   }
 }
 
-/* Keep Quick Start directly centred below New Career when no save exists.
-   If a saved career exists, retain the balanced Quick Start / Continue row. */
+/* Keep Quick Start centred without a save; when a save exists,
+   override the old full-width Continue Career rule with a balanced two-tile row. */
 @media (min-width: 601px) {
   .menu-grid:has(.tile-load[hidden]) .tile-quick {
     grid-column: 2 / 6;
   }
+
+  .menu-grid > .menu-tile.tile-load:not([hidden]) {
+    grid-column: 4 / 6;
+    border-color: var(--flm-line);
+  }
+}
+
+/* Preserve the blue homepage palette rather than the legacy green save tile. */
+.menu-grid > .menu-tile.tile-load:not([hidden]):hover,
+.menu-grid > .menu-tile.tile-load:not([hidden]):focus-visible {
+  border-color: var(--flm-line-hover);
 }
 
 /* Folded phones and genuinely narrow screens collapse to one column. */
