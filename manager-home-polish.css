@@ -443,6 +443,14 @@ body.compact .menu-tile {
   }
 }
 
+/* Keep Quick Start directly centred below New Career when no save exists.
+   If a saved career exists, retain the balanced Quick Start / Continue row. */
+@media (min-width: 601px) {
+  .menu-grid:has(.tile-load[hidden]) .tile-quick {
+    grid-column: 2 / 6;
+  }
+}
+
 /* Folded phones and genuinely narrow screens collapse to one column. */
 @media (max-width: 600px) {
   .page-shell {
