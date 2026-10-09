@@ -565,6 +565,137 @@
   }
 }
 
+/* Club-selection visual parity with the locked navy homepage.
+   Retains the existing full-screen selection workflow and responsive grid. */
+.modal.club-picker-modal .eyebrow {
+  color: #a9c9e9;
+  font-size: 11px;
+  letter-spacing: .1em;
+}
+
+.modal.club-picker-modal .modal-card h2 {
+  font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: .035em;
+}
+
+.career-club-toolbar label,
+.career-club-selection small {
+  color: #a9c0da;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.career-club-toolbar input,
+.career-club-toolbar select {
+  min-height: 42px;
+  padding: 0 12px;
+  border-color: #386b9c;
+  font-size: 14px;
+}
+
+.career-club-toolbar input:focus,
+.career-club-toolbar select:focus {
+  border-color: #83b8ed;
+  box-shadow: 0 0 0 2px rgba(131, 184, 237, .22);
+}
+
+.career-club-selection {
+  min-height: 48px;
+  padding: 9px 12px;
+  border-color: #386b9c;
+  font-size: 12px;
+}
+
+.career-club-selection strong {
+  font-size: 15px;
+}
+
+.career-club-selection span {
+  color: #b9d9f9;
+  font-size: 12px;
+}
+
+.modal.club-picker-modal .career-club-grid button {
+  min-height: 76px;
+  border-color: #386b9c;
+  background: rgba(4, 22, 46, .9);
+}
+
+.modal.club-picker-modal .career-club-grid button > span {
+  color: #b6ddff;
+}
+
+.modal.club-picker-modal .career-club-grid strong {
+  font-size: 15px;
+}
+
+.modal.club-picker-modal .career-club-grid small {
+  color: #b5c8dc;
+  font-size: 12px;
+}
+
+.modal.club-picker-modal .career-club-grid em {
+  color: #a9c9e9;
+}
+
+.modal.club-picker-modal .career-club-grid button:hover,
+.modal.club-picker-modal .career-club-grid button:focus-visible {
+  border-color: #83b8ed;
+  background: #103b67;
+  box-shadow: inset 4px 0 #83b8ed;
+  transform: none;
+}
+
+.modal.club-picker-modal .career-club-grid button.is-selected {
+  border-color: #9ccfff;
+  background: #174573;
+  box-shadow: inset 4px 0 #9ccfff;
+}
+
+.modal.club-picker-modal .career-club-grid button.is-selected em {
+  color: #fff;
+}
+
+.modal.club-picker-modal .modal-close:hover,
+.modal.club-picker-modal .modal-close:focus-visible,
+.modal.club-picker-modal .modal-actions button:hover,
+.modal.club-picker-modal .modal-actions button:focus-visible {
+  border-color: #83b8ed;
+  color: #fff;
+}
+
+.modal.club-picker-modal .modal-actions .action-gold {
+  border-color: #83b8ed;
+  color: #fff;
+  background: #174573;
+}
+
+.modal.club-picker-modal .modal-actions .action-gold:hover,
+.modal.club-picker-modal .modal-actions .action-gold:focus-visible {
+  border-color: #b6ddff;
+  background: #215b91;
+}
+
+.modal.club-picker-modal .career-club-grid button:focus-visible,
+.modal.club-picker-modal .modal-actions button:focus-visible,
+.modal.club-picker-modal .modal-close:focus-visible {
+  outline: 2px solid #b6ddff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 620px) {
+  .career-club-toolbar input,
+  .career-club-toolbar select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .modal.club-picker-modal .career-club-grid button {
+    min-height: 76px;
+  }
+}
+
 /* Compact inbox hub */
 .career-inbox-heading { align-items: center; margin-bottom: 14px; }
 .career-inbox-heading h2 { font-size: clamp(30px, 3.2vw, 46px); }
